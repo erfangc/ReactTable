@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src=""></script>
+    <script src="bower_components/react/react.js"></script>
+    <script src="bower_components/react/JSXTransformer.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <style>
+        body {
+            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+            font-weight: 300;
+        }
+
+        div.page-nav {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+
+            background-color: #269abc;
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            min-height: 50px;
+            width: 100%;
+        }
+
+        div.content {
+            position: fixed;
+            width: 100%;
+            top: 100px;
+            left: 0;
+            margin: auto;
+        }
+
+        div.nav-item {
+            background-color: #269abc;
+            color: #fff;
+            padding: 15px;
+            margin: 5px;
+        }
+
+        div.nav-item.nav-link {
+            cursor: pointer;
+        }
+
+        div.nav-item.nav-link.active {
+            background-color: #00b3ee;
+        }
+
+        div.nav-item.nav-link:hover {
+            cursor: pointer;
+            background-color: #00b3ee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-nav">
+    <div class="nav-item nav-link active"><strong>Home</strong></div>
+    <div class="nav-item nav-link"><strong>Profile</strong></div>
+    <div class="nav-item nav-link"><strong>Help</strong></div>
+</div>
+
+<div class="content">
+    <div class="container" id="table">
+    </div>
+</div>
+<script src="build/CollapsableTable.js"></script>
+<script type="text/jsx">
+    $(function () {
+        var testArray = [
+            {sectorPath: ['parent2'], col1: "Parent 2", col2: 1},
+            {sectorPath: ['parent2'], col1: "Child 1 of Parent 2", col2: 1, isDetail: true},
+            {sectorPath: ['parent'], col1: "Parent", col2: 4, isDetail: false, collapsed: false},
+            {sectorPath: ['parent2'], col1: "Child 2 of Parent 2", col2: 1, isDetail: true},
+            {
+                sectorPath: ['parent', 'intermediate'],
+                col1: "Intermediate Child 1",
+                col2: 2,
+                isDetail: false,
+                collapsed: false
+            },
+            {sectorPath: ['parent', 'intermediate2'], col1: "Child 2.1", col2: 1, isDetail: true},
+            {sectorPath: ['parent', 'intermediate'], col1: "Child 1.2", col2: 1, isDetail: true},
+            {sectorPath: ['parent', 'intermediate'], col1: "Child 1.1", col2: 1, isDetail: true},
+            {
+                sectorPath: ['parent', 'intermediate2'],
+                col1: "Intermediate Child 2",
+                col2: 2,
+                isDetail: false,
+                collapsed: false
+            },
+
+            {sectorPath: ['parent', 'intermediate2'], col1: "Child 2.2", col2: 1, isDetail: true},
+            {
+                sectorPath: ['parent', 'intermediate2', 'intermediate2.1'],
+                col1: "Intermediate Child 2.1",
+                col2: 2,
+                isDetail: false,
+                collapsed: false
+            },
+            {sectorPath: ['parent', 'intermediate2', 'intermediate2.1'], col1: "Child 2.1.1", col2: 1, isDetail: true},
+            {sectorPath: ['parent', 'intermediate2', 'intermediate2.1'], col1: "Child 2.1.2", col2: 1, isDetail: true}
+        ];
+        var columnDefs = [{colTag:'col1',text:'Column 1'},{colTag:'col2',text:'Column 2', format: "number"}];
+        React.renderComponent(Table({data: testArray, columnDefs: columnDefs}), document.getElementById("table"));
+    });
+</script>
+</body>
+</html>
