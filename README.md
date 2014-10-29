@@ -44,6 +44,8 @@ The following properties are valid on objects inside of columnDefs
 
 ## Developing
 
+*You will need [node.js](http://nodejs.org/download/) installed on your development PC in order to use the tools below*
+
 You will first need to download and install [react-tools](http://facebook.github.io/react/docs/tooling-integration.html) by running:
 
     > npm install -g react-tools

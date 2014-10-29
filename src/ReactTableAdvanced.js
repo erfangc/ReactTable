@@ -1,23 +1,23 @@
 /** @jsx React.DOM */
 
+/**
+ * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
+ * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
+ * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
+ * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
+ * (i.e. some head subset of their sectorPath array match)
+ *
+ * @author Erfang Chen
+ */
+
 // TODO handle click events for summary rows
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
 // TODO lastly, pagination if at all possible ... I don't see how
+// TODO rethink selection per conversation with Chris
 
 var SECTOR_SEPARATOR = "#";
 
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
-}
 var Table = React.createClass({
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
@@ -79,14 +79,20 @@ var Table = React.createClass({
         var rows = unhiddenRows.map(function (row) {
             return <Row data={row} key={generateRowKey(row)} onSelectCallback={this.props.onSelectCallback} columnDefs={this.state.columnDefs} toggleHide={this.handleToggleHide}></Row>;
         }, this);
+
         var headers = buildHeaders(this);
+        var footer = buildFooter(this);
+
         return (
-            <table className="table table-condensed">
+            <div>
+                <table className="table table-condensed">
                 {headers}
-                <tbody>
+                    <tbody>
                     {rows}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+                {footer}
+            </div>
         );
     }
 });
@@ -106,7 +112,7 @@ var Row = React.createClass({
         });
     },
     render: function () {
-        var cells = [buildFirstCell(this.props)];
+        var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
@@ -121,24 +127,56 @@ var Row = React.createClass({
     }
 });
 
-/* Virtual DOM Builder helpers */
+var PageNavigator = React.createClass({
+    render: function () {
+        var self = this;
+        var cx = React.addons.classSet;
+        var prevClass = cx({
+            disabled: (this.props.activeItem == 1)
+        });
+        var nextClass = cx({
+            disabled: (this.props.activeItem == this.props.numPages)
+        });
 
-function buildHeaders(component) {
-    var headerColumns = component.state.columnDefs.map(function (columnDef) {
+        var items = this.props.items.map(function (item) {
+            return (
+                <li key={item} className={self.props.activeItem == item ? 'active' : ''}>
+                    <a href="#" onClick={self.props.handleClick.bind(null, item)}>{item}</a>
+                </li>
+            )
+        });
+        return (
+            <ul className="pagination pull-right">
+                <li className={prevClass}>
+                    <a href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                </li>
+                {items}
+                <li className={nextClass}>
+                    <a href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                </li>
+            </ul>
+        );
+    }
+});
+
+/* Virtual DOM builder helpers */
+
+function buildHeaders(table) {
+    var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
             <th style={styles} key={columnDef.colTag}>
-                <a className="btn-link" onClick={component.handleSort.bind(component, columnDef)}>{columnDef.text}</a>
-                <a className="btn-link" onClick={component.handleRemove.bind(component, columnDef)}>
+                <a className="btn-link" onClick={table.handleSort.bind(table, columnDef)}>{columnDef.text}</a>
+                <a className="btn-link" onClick={table.handleRemove.bind(table, columnDef)}>
                     <span className="pull-right glyphicon glyphicon-remove"></span>
                 </a>
             </th>
         );
     });
     headerColumns.push(<th style={{"text-align": "center"}}>
-        <a onClick={component.handleAdd}>
+        <a onClick={table.handleAdd}>
             <span className="glyphicon glyphicon-plus"/>
         </a>
     </th>)
@@ -149,7 +187,7 @@ function buildHeaders(component) {
     );
 }
 
-function buildFirstCell(props) {
+function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var result, firstColTag = columnDef.colTag;
 
@@ -179,7 +217,12 @@ function buildFirstCell(props) {
     return result;
 }
 
-/* Sector tree render utilities */
+function buildFooter(table) {
+    return null;
+    // TODO build footer/PageNavigator based on the table's configurations
+}
+
+/* Sector tree rendering utilities */
 
 function shouldHide(data, collapsedSectorPaths) {
     var result = false;
@@ -248,4 +291,16 @@ function prepareTableData(props) {
     var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
     data.sort(sorterFactory.call(this, sortOptions));
     return data;
+}
+
+function getInitiallyCollapsedSectorPaths(data) {
+    var result = {};
+    data.map(function (row) {
+        if (row.sectorPath && row.isDetail) {
+            var sectorPathKey = generateSectorKey(row.sectorPath);
+            if (!result[sectorPathKey])
+                result[sectorPathKey] = row.sectorPath;
+        }
+    });
+    return result;
 }
