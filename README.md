@@ -25,7 +25,8 @@ Option Name        |Type              |Description
 data               |[Array of Objects]|the raw data array (Required)
 columnDefs         |[Array of Objects]|column definitions on how to construct the headers of the table
 groupBy            |[Array of Objects]|columnDefs to dynamically group rows by
-afterColumnRemove  |[Function]        |callback to function to invoke after a column has been removed by the user
+afterColumnRemove  |[Function]        |callback function to invoke after a column has been removed by the user
+beforeColumnAdd    |[Function]        |callback function to invoke when the "+" button is clicked on the header
 
 ## Examples
 
