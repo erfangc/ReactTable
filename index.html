@@ -23,11 +23,11 @@ $(function () {
         {colTag: "last_name", text: "Last name"},
         {colTag: "email", text: "Email"},
         {colTag: "country", text: "Country"},
-        {colTag: "score", text: "Score", aggregationMethod: "AVERAGE", weightBy: {colTag: "weight_factor"}},
-        {colTag: "weight_factor", text: "Weight Factor", aggregationMethod: "SUM"}
+        {colTag: "score", format: "number", text: "Score", aggregationMethod: "AVERAGE", weightBy: {colTag: "weight_factor"}},
+        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     React.renderComponent(Table({
-        groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name"}],
+        groupBy: [{colTag: "country", text: "Country"}],
         data: testArray,
         columnDefs: columnDefs,
         beforeColumnAdd: function () {
