@@ -1,4 +1,14 @@
 /** @jsx React.DOM */
+// TODO handle click events for detail
+// TODO handle click events for summary rows
+// TODO handle the case when no grouping is needed
+// TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
+// TODO handle sorting - use the same philosophy as the original sorting routines
+// TODO formatting
+// TODO callback for adding a column
+// TODO handle remove a column
+// TODO collapse table by default to save space
+// TODO lastly, pagination if at all possible ... I don't see how
 var SECTOR_SEPARATOR = "#";
 var Row = React.createClass({
     render: function () {
@@ -7,7 +17,6 @@ var Row = React.createClass({
         var firstCellStyle = {
             "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
         };
-
         var cells = [];
         var firstCell;
         var firstColTag = this.props.columnDefs[0].colTag;
@@ -27,7 +36,7 @@ var Row = React.createClass({
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(<td style={style} key={this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
+            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
         }
         return (<tr>{cells}</tr>);
     }
@@ -51,7 +60,6 @@ var TableHeader = React.createClass({
         )
     }
 });
-
 var Table = React.createClass({
     getInitialState: function () {
         return {
@@ -69,14 +77,16 @@ var Table = React.createClass({
         });
     },
     render: function () {
-        this.props.data.sort(sorterFactory.call(this, defaultSectorSorter, defaultDetailSorter));
+        var data = this.props.data;
+        if (this.props.groupBy)
+            data = groupData(this.props.data, this.props.groupBy, this.props.columnDefs);
+        data.sort(sorterFactory.call(this, defaultSectorSorter, defaultDetailSorter));
         var unhiddenRows = [];
-        for (var i = 0; i < this.props.data.length; i++) {
-            var data = this.props.data[i];
-            if (!shouldHide(data, this.state.collapsedSectorPaths))
-                unhiddenRows.push(data);
+        for (var i = 0; i < data.length; i++) {
+            var row = data[i];
+            if (!shouldHide(row, this.state.collapsedSectorPaths))
+                unhiddenRows.push(row);
         }
-
         var rows = unhiddenRows.map(function (row) {
             return <Row data={row} key={generateRowKey(row)} columnDefs={this.props.columnDefs} toggleHide={this.handleToggleHide}></Row>;
         }, this);
@@ -129,7 +139,7 @@ function generateRowKey(row) {
     var key = generateSectorKey(row.sectorPath);
     for (var prop in row) {
         if (row.hasOwnProperty(prop)) {
-            key += row[prop];
+            key += prop + "=" + row[prop] + ";";
         }
     }
     return key;
