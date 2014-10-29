@@ -33,4 +33,19 @@ beforeColumnAdd    |[Function]        |callback function to invoke when the "+" 
     var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
     React.renderComponent(Table(options), document.getElementById("table"));
 
-    
+## Developing
+
+You will first need to download and install [react-tools](http://facebook.github.io/react/docs/tooling-integration.html) by running:
+
+    > npm install -g react-tools
+
+Each time you update source files, you should run the JSX compiler provided as part of react-tools via:
+
+    > jsx ./src ./build
+    // assuming your working directory is the project base directory
+
+Alternatively you can automatically perform this by using jsx --watch or setup a file watcher in Webstorm
+
+To compile to project run:
+
+    > grunt build
