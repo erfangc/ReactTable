@@ -28,7 +28,7 @@ $(function () {
         {colTag: "weight_factor", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     React.renderComponent(Table({
-        groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name", text: "Last name"}],
+//        groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name", text: "Last name"}],
         data: testArray,
         columnDefs: columnDefs
     }), document.getElementById("table"));

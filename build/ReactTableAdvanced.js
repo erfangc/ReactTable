@@ -10,29 +10,10 @@
 // TODO collapse table by default to save space
 // TODO lastly, pagination if at all possible ... I don't see how
 var SECTOR_SEPARATOR = "#";
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
-        // styling & identation
-        var identLevel = !this.props.data.isDetail ? (this.props.data.sectorPath.length - 1) : this.props.data.sectorPath.length;
-        var firstCellStyle = {
-            "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
-        };
-        var cells = [];
-        var firstCell;
-        var firstColTag = this.props.columnDefs[0].colTag;
-        if (this.props.data.isDetail) {
-            firstCell = React.DOM.td({style: firstCellStyle, key: this.props.data[firstColTag]}, this.props.data[firstColTag]);
-        } else {
-            firstCell =
-                (
-                    React.DOM.td({style: firstCellStyle, key: this.props.data[firstColTag]}, 
-                        React.DOM.a({onClick: this.props.toggleHide.bind(null, this.props.data), className: "btn-link"}, 
-                            React.DOM.strong(null, this.props.data[firstColTag])
-                        )
-                    )
-                );
-        }
-        cells.push(firstCell);
+        var cells = [buildFirstCell(this.props.data,this.props.columnDefs[0],this.props.toggleHide)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
@@ -111,6 +92,30 @@ function buildHeaders(props) {
     });
     return headerColumns;
 }
+
+function buildFirstCell(data, columnDef, toggleHide) {
+    // styling & identation
+    var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
+    var firstCellStyle = {
+        "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
+    };
+    var result;
+    var firstColTag = columnDef.colTag;
+    if (data.isDetail) {
+        result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
+    } else {
+        result =
+            (
+                React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, 
+                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.DOM.strong(null, data[firstColTag])
+                    )
+                )
+            );
+    }
+    return result;
+}
+
 /* Utility Functions */
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
@@ -160,6 +165,9 @@ function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     return result;
 }
 function generateSectorKey(sectorPath) {
+    if (!sectorPath)
+        return "";
+
     return sectorPath.join(SECTOR_SEPARATOR);
 }
 function defaultSectorSorter(a, b) {
