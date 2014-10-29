@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>An Example Using ReactTable</title>
+    <script src="../bower_components/react/react.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css"/>
+
+    <script src="../dist/react-table.min.js"></script>
+    <link rel="stylesheet" href="../src/ReactTable.css"/>
+</head>
+<body>
+<div class="container" id="table"></div>
+
+<script>
+$(function () {
+    var columnDefs = [
+        {colTag: "first_name", text: "First Name"},
+        {colTag: "last_name", text: "Last name"},
+        {colTag: "email", text: "Email"},
+        {colTag: "country", text: "Country"},
+        {colTag: "score", format: "number", text: "Score", aggregationMethod: "AVERAGE", weightBy: {colTag: "weight_factor"}},
+        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+    ];
+
+    $.get('sample_data.json').success(function (data) {
+        var testData = data;
+        React.renderComponent(Table({
+            groupBy: [{colTag: "last_name"},{colTag: "country"}],
+            data: testData,
+            columnDefs: columnDefs,
+            beforeColumnAdd: function () {
+                alert("beforeColumnAdd callback called!");
+            },
+            afterColumnRemove: function (a, b) {
+                alert("Hello There ... you tried to remove " + b.text);
+            }
+        }), document.getElementById("table"))
+    })
+})
+</script>
+
+</body>
+</html>

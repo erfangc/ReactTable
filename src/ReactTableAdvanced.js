@@ -199,6 +199,7 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
+
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     var result = false;
     // true if sectorPaths is a subsector of the collapsedSectorPaths
