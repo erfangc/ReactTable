@@ -1,4 +1,5 @@
 /** @jsx React.DOM */
+
 // TODO handle click events for detail
 // TODO handle click events for summary rows
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
@@ -8,45 +9,43 @@
 // TODO handle remove a column
 // TODO collapse table by default to save space
 // TODO lastly, pagination if at all possible ... I don't see how
+
 var SECTOR_SEPARATOR = "#";
 
-var Row = React.createClass({
-    render: function () {
-        var cells = [buildFirstCell(this.props)];
-        for (var i = 1; i < this.props.columnDefs.length; i++) {
-            var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
-        }
-        return (<tr>{cells}</tr>);
-    }
-});
-var TableHeader = React.createClass({
-    render: function () {
-        var self = this;
-        var headers = this.props.columnDefs.map(function (columnDef) {
-            return (
-                <th key={columnDef.colTag}>
-                    <a>{columnDef.text || toProper(columnDef.colTag)}</a>
-                </th>
-            )
-        });
-        return (
-            <thead>
-                <tr>
-                    {headers}
-                </tr>
-            </thead>
-        )
-    }
-});
 var Table = React.createClass({
     getInitialState: function () {
-        var data = prepareTableData.call(this,this.props);
+        var data = prepareTableData.call(this, this.props);
         return {
             data: data,
+            columnDefs: this.props.columnDefs,
             collapsedSectorPaths: {}
         };
+    },
+    handleSort: function (columnDefToSortBy) {
+        var data = this.state.data;
+        var sortOptions = {
+            sectorSorter: defaultSectorSorter,
+            detailSorter: getSortFunction(columnDefToSortBy),
+            sortDetailBy: columnDefToSortBy
+        };
+        data.sort(sorterFactory.call(this, sortOptions));
+        this.setState({
+            data: data
+        });
+    },
+    handleRemove: function (columnDefToRemove) {
+        var loc = this.state.columnDefs.indexOf(columnDefToRemove);
+        var newColumnDefs = [];
+        for (var i = 0; i < this.state.columnDefs.length; i++) {
+            if (i != loc)
+                newColumnDefs.push(this.state.columnDefs[i]);
+        }
+        this.setState({
+            columnDefs: newColumnDefs
+        });
+        // TODO pass copies of these variables to avoid unintentional perpetual binding
+        if (this.props.afterColumnRemove != null)
+            this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
     },
     handleToggleHide: function (summaryRow) {
         var sectorKey = generateSectorKey(summaryRow.sectorPath);
@@ -66,9 +65,9 @@ var Table = React.createClass({
                 unhiddenRows.push(row);
         }
         var rows = unhiddenRows.map(function (row) {
-            return <Row data={row} key={generateRowKey(row)} columnDefs={this.props.columnDefs} toggleHide={this.handleToggleHide}></Row>;
+            return <Row data={row} key={generateRowKey(row)} columnDefs={this.state.columnDefs} toggleHide={this.handleToggleHide}></Row>;
         }, this);
-        var headers = buildHeaders(this.props);
+        var headers = buildHeaders(this);
         return (
             <table className="table table-condensed">
                 {headers}
@@ -79,15 +78,42 @@ var Table = React.createClass({
         );
     }
 });
-/* Builder Functions */
-function buildHeaders(props) {
-    var headerColumns = props.columnDefs.map(function (columnDef) {
+
+var Row = React.createClass({
+    render: function () {
+        var cells = [buildFirstCell(this.props)];
+        for (var i = 1; i < this.props.columnDefs.length; i++) {
+            var columnDef = this.props.columnDefs[i];
+            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
+            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
+        }
+        return (<tr>{cells}</tr>);
+    }
+});
+
+/* Virtual DOM Builder helpers */
+
+function buildHeaders(component) {
+    var headerColumns = component.state.columnDefs.map(function (columnDef) {
         var styles = {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
-        return (<th style={styles} key={columnDef.colTag}>{columnDef.text}</th>);
+        return (
+
+            <th style={styles} key={columnDef.colTag}>
+                <a className="btn-link" onClick={component.handleSort.bind(component, columnDef)}>{columnDef.text}</a>
+                <a className="btn-link" onClick={component.handleRemove.bind(component, columnDef)}>
+                    <span className="pull-right glyphicon glyphicon-remove"></span>
+                </a>
+            </th>
+
+        );
     });
-    return headerColumns;
+    return (
+        <thead>
+            <tr>{headerColumns}</tr>
+        </thead>
+    );
 }
 
 function buildFirstCell(props) {
@@ -120,17 +146,8 @@ function buildFirstCell(props) {
     return result;
 }
 
-/* Utility Functions */
-function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
-    // lower length in SP means higher up on the chain
-    if (subSectorCandidate.length <= superSectorCandidate.length)
-        return false;
-    for (var i = 0; i < superSectorCandidate.length; i++) {
-        if (subSectorCandidate[i] != superSectorCandidate[i])
-            return false;
-    }
-    return true;
-}
+/* Sector tree render utilities */
+
 function shouldHide(data, collapsedSectorPaths) {
     var result = false;
     var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths);
@@ -142,17 +159,7 @@ function shouldHide(data, collapsedSectorPaths) {
         result = true;
     return result;
 }
-// @heavyUtil
-function generateRowKey(row) {
-    // row key = sectorPath + values of the row
-    var key = generateSectorKey(row.sectorPath);
-    for (var prop in row) {
-        if (row.hasOwnProperty(prop)) {
-            key += prop + "=" + row[prop] + ";";
-        }
-    }
-    return key;
-}
+
 /**
  * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
  * @param sectorPath [array] the sectorPath to perform comparison on
@@ -168,56 +175,44 @@ function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     }
     return result;
 }
+
+function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
+    // lower length in SP means higher up on the chain
+    if (subSectorCandidate.length <= superSectorCandidate.length)
+        return false;
+    for (var i = 0; i < superSectorCandidate.length; i++) {
+        if (subSectorCandidate[i] != superSectorCandidate[i])
+            return false;
+    }
+    return true;
+}
+
+/* Other utility functions */
+
+// @heavyUtil
+function generateRowKey(row) {
+    // row key = sectorPath + values of the row
+    var key = generateSectorKey(row.sectorPath);
+    for (var prop in row) {
+        if (row.hasOwnProperty(prop)) {
+            key += prop + "=" + row[prop] + ";";
+        }
+    }
+    return key;
+}
+
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
 
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-function defaultSectorSorter(a, b) {
-    return generateSectorKey(a.sectorPath).localeCompare(generateSectorKey(b.sectorPath));
-}
-function defaultDetailSorter(a, b) {
-    return generateRowKey(a).localeCompare(generateRowKey(b));
-}
-/**
- * Master sorter function that attempts to get the raw data array into the correct order
- * failing to sort the array into the correct order is disastrous for the table as rows are created
- * per the ordering in the main data array
- *
- * this function will attempt to sort the sectors accordingly (by using either a custom sector sorter or just comparing sector path keys)
- * and will delegate detail row sorting to a detail sorter function
- *
- * @param a
- * @param b
- */
-function sorterFactory(sectorSorter, detailSorter) {
-    return function (a, b) {
-        // compare sector
-        var result = 0;
-        result = sectorSorter.call(this, a, b);
 
-        // same sector therefore, summary > detail
-        if (result == 0) {
-            if (a.isDetail && !b.isDetail) {
-                result = 1;
-            } else if (b.isDetail && !a.isDetail) {
-                result = -1;
-            } else {
-                result = 0;
-            }
-            // both are detail rows ... use detail sorter or just return 0
-            if (result == 0) {
-                result = detailSorter.call(this, a, b);
-            }
-        }
-        return result;
-    }.bind(this);
-}
 function prepareTableData(props) {
     var data = props.data;
     if (props.groupBy)
         data = groupData(props.data, props.groupBy, props.columnDefs);
-    data.sort(sorterFactory.call(this, defaultSectorSorter, defaultDetailSorter));
+    var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+    data.sort(sorterFactory.call(this, sortOptions));
     return data;
 }
