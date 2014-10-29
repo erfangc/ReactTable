@@ -1,24 +1,31 @@
 /** @jsx React.DOM */
 
-// TODO handle click events for detail
 // TODO handle click events for summary rows
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
-// TODO handle sorting - use the same philosophy as the original sorting routines
 // TODO formatting
-// TODO callback for adding a column
-// TODO handle remove a column
-// TODO collapse table by default to save space
 // TODO lastly, pagination if at all possible ... I don't see how
 
 var SECTOR_SEPARATOR = "#";
 
+function getInitiallyCollapsedSectorPaths(data) {
+    var result = {};
+    data.map(function (row) {
+        if (row.sectorPath && row.isDetail) {
+            var sectorPathKey = generateSectorKey(row.sectorPath);
+            if (!result[sectorPathKey])
+                result[sectorPathKey] = row.sectorPath;
+        }
+    });
+    return result;
+}
 var Table = React.createClass({
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
+        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
         return {
             data: data,
             columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: {}
+            collapsedSectorPaths: collapsedSectorPaths
         };
     },
     handleSort: function (columnDefToSortBy) {
@@ -29,9 +36,14 @@ var Table = React.createClass({
             sortDetailBy: columnDefToSortBy
         };
         data.sort(sorterFactory.call(this, sortOptions));
+        columnDefToSortBy.asc = !columnDefToSortBy.asc;
         this.setState({
             data: data
         });
+    },
+    handleAdd: function () {
+        if (this.props.beforeColumnAdd)
+            this.props.beforeColumnAdd()
     },
     handleRemove: function (columnDefToRemove) {
         var loc = this.state.columnDefs.indexOf(columnDefToRemove);
@@ -65,7 +77,7 @@ var Table = React.createClass({
                 unhiddenRows.push(row);
         }
         var rows = unhiddenRows.map(function (row) {
-            return <Row data={row} key={generateRowKey(row)} columnDefs={this.state.columnDefs} toggleHide={this.handleToggleHide}></Row>;
+            return <Row data={row} key={generateRowKey(row)} onSelectCallback={this.props.onSelectCallback} columnDefs={this.state.columnDefs} toggleHide={this.handleToggleHide}></Row>;
         }, this);
         var headers = buildHeaders(this);
         return (
@@ -80,6 +92,19 @@ var Table = React.createClass({
 });
 
 var Row = React.createClass({
+    getInitialState: function () {
+        return {
+            isSelected: this.props.data.isSelected
+        }
+    },
+    handleClick: function () {
+        var isSelected = !this.state.isSelected;
+        if (this.props.onSelectCallback)
+            this.props.onSelectCallback.call(this, this.props.data);
+        this.setState({
+            isSelected: isSelected
+        });
+    },
     render: function () {
         var cells = [buildFirstCell(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
@@ -87,7 +112,12 @@ var Row = React.createClass({
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
             cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
         }
-        return (<tr>{cells}</tr>);
+        var styles = {
+            "cursor": this.props.data.isDetail ? "pointer" : "inherit",
+            "background-color": this.state.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "color": this.state.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+        };
+        return (<tr onClick={this.handleClick} style={styles}>{cells}</tr>);
     }
 });
 
@@ -99,16 +129,19 @@ function buildHeaders(component) {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
-
             <th style={styles} key={columnDef.colTag}>
                 <a className="btn-link" onClick={component.handleSort.bind(component, columnDef)}>{columnDef.text}</a>
                 <a className="btn-link" onClick={component.handleRemove.bind(component, columnDef)}>
                     <span className="pull-right glyphicon glyphicon-remove"></span>
                 </a>
             </th>
-
         );
     });
+    headerColumns.push(<th style={{"text-align": "center"}}>
+        <a onClick={component.handleAdd}>
+            <span className="glyphicon glyphicon-plus"/>
+        </a>
+    </th>)
     return (
         <thead>
             <tr>{headerColumns}</tr>
@@ -204,7 +237,6 @@ function generateRowKey(row) {
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
-
     return sectorPath.join(SECTOR_SEPARATOR);
 }
 
