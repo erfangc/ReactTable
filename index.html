@@ -6,7 +6,6 @@
     <script src=""></script>
     <script src="bower_components/react/react.js"></script>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/underscore/underscore-min.js"></script>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 </head>
@@ -28,7 +27,7 @@ $(function () {
         {colTag: "weight_factor", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     React.renderComponent(Table({
-//        groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name", text: "Last name"}],
+        groupBy: [{colTag:"country",text:"Country"},{colTag: "last_name", text: "Last name"}],
         data: testArray,
         columnDefs: columnDefs
     }), document.getElementById("table"));

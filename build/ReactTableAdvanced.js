@@ -1,7 +1,6 @@
 /** @jsx React.DOM */
 // TODO handle click events for detail
 // TODO handle click events for summary rows
-// TODO handle the case when no grouping is needed
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO handle sorting - use the same philosophy as the original sorting routines
 // TODO formatting
@@ -13,7 +12,7 @@ var SECTOR_SEPARATOR = "#";
 
 var Row = React.createClass({displayName: 'Row',
     render: function () {
-        var cells = [buildFirstCell(this.props.data,this.props.columnDefs[0],this.props.toggleHide)];
+        var cells = [buildFirstCell(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
@@ -43,7 +42,9 @@ var TableHeader = React.createClass({displayName: 'TableHeader',
 });
 var Table = React.createClass({displayName: 'Table',
     getInitialState: function () {
+        var data = prepareTableData.call(this,this.props);
         return {
+            data: data,
             collapsedSectorPaths: {}
         };
     },
@@ -58,13 +59,9 @@ var Table = React.createClass({displayName: 'Table',
         });
     },
     render: function () {
-        var data = this.props.data;
-        if (this.props.groupBy)
-            data = groupData(this.props.data, this.props.groupBy, this.props.columnDefs);
-        data.sort(sorterFactory.call(this, defaultSectorSorter, defaultDetailSorter));
         var unhiddenRows = [];
-        for (var i = 0; i < data.length; i++) {
-            var row = data[i];
+        for (var i = 0; i < this.state.data.length; i++) {
+            var row = this.state.data[i];
             if (!shouldHide(row, this.state.collapsedSectorPaths))
                 unhiddenRows.push(row);
         }
@@ -93,14 +90,21 @@ function buildHeaders(props) {
     return headerColumns;
 }
 
-function buildFirstCell(data, columnDef, toggleHide) {
-    // styling & identation
+function buildFirstCell(props) {
+    var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
+    var result, firstColTag = columnDef.colTag;
+
+    // if sectorPath is not availiable - return a normal cell
+    if (!data.sectorPath)
+        return React.DOM.td({key: data[firstColTag]}, data[firstColTag]);
+
+    // styling & ident
     var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
     var firstCellStyle = {
         "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
     };
-    var result;
-    var firstColTag = columnDef.colTag;
+
+
     if (data.isDetail) {
         result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
     } else {
@@ -209,4 +213,11 @@ function sorterFactory(sectorSorter, detailSorter) {
         }
         return result;
     }.bind(this);
+}
+function prepareTableData(props) {
+    var data = props.data;
+    if (props.groupBy)
+        data = groupData(props.data, props.groupBy, props.columnDefs);
+    data.sort(sorterFactory.call(this, defaultSectorSorter, defaultDetailSorter));
+    return data;
 }
