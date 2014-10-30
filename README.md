@@ -14,6 +14,10 @@ Capabilities Include:
 - Custom Cell Class Names
 - Custom Pagination (When Rows not Grouped)
 
+## Install
+
+    > bower install react-table
+
 ## Usage
 
     var options = { ... };
