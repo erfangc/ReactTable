@@ -14,10 +14,9 @@
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
 // TODO lastly, pagination if at all possible ... I don't see how
-// TODO rethink selection per conversation with Chris
+// TODO rethink selection as a array of row keys - allow user to specify row keys based off attributes in 'data'
 
 var SECTOR_SEPARATOR = "#";
-
 var Table = React.createClass({
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);

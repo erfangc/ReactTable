@@ -14,10 +14,9 @@
 // TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
 // TODO lastly, pagination if at all possible ... I don't see how
-// TODO rethink selection per conversation with Chris
+// TODO rethink selection as a array of row keys - allow user to specify row keys based off attributes in 'data'
 
 var SECTOR_SEPARATOR = "#";
-
 var Table = React.createClass({displayName: 'Table',
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
@@ -77,17 +76,17 @@ var Table = React.createClass({displayName: 'Table',
                 unhiddenRows.push(row);
         }
         var rows = unhiddenRows.map(function (row) {
-            return Row({data: row, key: generateRowKey(row), onSelectCallback: this.props.onSelectCallback, columnDefs: this.state.columnDefs, toggleHide: this.handleToggleHide});
+            return React.createElement(Row, {data: row, key: generateRowKey(row), onSelectCallback: this.props.onSelectCallback, columnDefs: this.state.columnDefs, toggleHide: this.handleToggleHide});
         }, this);
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this);
 
         return (
-            React.DOM.div(null, 
-                React.DOM.table({className: "table table-condensed"}, 
+            React.createElement("div", null, 
+                React.createElement("table", {className: "table table-condensed"}, 
                 headers, 
-                    React.DOM.tbody(null, 
+                    React.createElement("tbody", null, 
                     rows
                     )
                 ), 
@@ -116,14 +115,14 @@ var Row = React.createClass({displayName: 'Row',
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, this.props.data[columnDef.colTag]));
+            cells.push(React.createElement("td", {style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, this.props.data[columnDef.colTag]));
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
             "background-color": this.state.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
             "color": this.state.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.handleClick, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.handleClick, style: styles}, cells));
     }
 });
 
@@ -140,19 +139,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: "pagination pull-right"}, 
-                React.DOM.li({className: prevClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: "pagination pull-right"}, 
+                React.createElement("li", {className: prevClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -167,22 +166,22 @@ function buildHeaders(table) {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
-            React.DOM.th({style: styles, key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.DOM.span({className: "pull-right glyphicon glyphicon-remove"})
+            React.createElement("th", {style: styles, key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
+                React.createElement("a", {className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
+                    React.createElement("span", {className: "pull-right glyphicon glyphicon-remove"})
                 )
             )
         );
     });
-    headerColumns.push(React.DOM.th({style: {"text-align": "center"}}, 
-        React.DOM.a({onClick: table.handleAdd}, 
-            React.DOM.span({className: "glyphicon glyphicon-plus"})
+    headerColumns.push(React.createElement("th", {style: {"text-align": "center"}}, 
+        React.createElement("a", {onClick: table.handleAdd}, 
+            React.createElement("span", {className: "glyphicon glyphicon-plus"})
         )
     ))
     return (
-        React.DOM.thead(null, 
-            React.DOM.tr(null, headerColumns)
+        React.createElement("thead", null, 
+            React.createElement("tr", null, headerColumns)
         )
     );
 }
@@ -193,7 +192,7 @@ function buildFirstCellForRow(props) {
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: data[firstColTag]}, data[firstColTag]);
+        return React.createElement("td", {key: data[firstColTag]}, data[firstColTag]);
 
     // styling & ident
     var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
@@ -203,13 +202,13 @@ function buildFirstCellForRow(props) {
 
 
     if (data.isDetail) {
-        result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
+        result = React.createElement("td", {style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
     } else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                React.createElement("td", {style: firstCellStyle, key: data[firstColTag]}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
                     )
                 )
             );
