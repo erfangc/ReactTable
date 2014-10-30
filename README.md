@@ -28,6 +28,8 @@ columnDefs         |Array of Objects|column definitions on how to construct the 
 groupBy            |Array of Objects|columnDefs to dynamically group rows by
 afterColumnRemove  |Function        |callback function to invoke after a column has been removed by the user
 beforeColumnAdd    |Function        |callback function to invoke when the "+" button is clicked on the header
+selectedRows       |Array of Strings|row keys of initially selected rows, must be used with the 'rowKey' option
+rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 
 ### columnDefs Options
 The following properties are valid on objects inside of columnDefs

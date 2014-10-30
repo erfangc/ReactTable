@@ -11,76 +11,54 @@
  */
 
 // TODO handle click events for summary rows
-// TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
-// TODO lastly, pagination if at all possible ... I don't see how
-// TODO rethink selection as a array of row keys - allow user to specify row keys based off attributes in 'data'
 
 var SECTOR_SEPARATOR = "#";
-var Table = React.createClass({
+
+var ReactTable = React.createClass({
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
         var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
         return {
+            currentPage: 1,
             data: data,
             columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths
+            collapsedSectorPaths: collapsedSectorPaths,
+            selectedRows: selectedRows
         };
     },
-    handleSort: function (columnDefToSortBy) {
-        var data = this.state.data;
-        var sortOptions = {
-            sectorSorter: defaultSectorSorter,
-            detailSorter: getSortFunction(columnDefToSortBy),
-            sortDetailBy: columnDefToSortBy
-        };
-        data.sort(sorterFactory.call(this, sortOptions));
-        columnDefToSortBy.asc = !columnDefToSortBy.asc;
-        this.setState({
-            data: data
-        });
-    },
-    handleAdd: function () {
-        if (this.props.beforeColumnAdd)
-            this.props.beforeColumnAdd()
-    },
-    handleRemove: function (columnDefToRemove) {
-        var loc = this.state.columnDefs.indexOf(columnDefToRemove);
-        var newColumnDefs = [];
-        for (var i = 0; i < this.state.columnDefs.length; i++) {
-            if (i != loc)
-                newColumnDefs.push(this.state.columnDefs[i]);
-        }
-        this.setState({
-            columnDefs: newColumnDefs
-        });
-        // TODO pass copies of these variables to avoid unintentional perpetual binding
-        if (this.props.afterColumnRemove != null)
-            this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
-    },
-    handleToggleHide: function (summaryRow) {
-        var sectorKey = generateSectorKey(summaryRow.sectorPath);
-        if (this.state.collapsedSectorPaths[sectorKey] == null)
-            this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        else
-            delete this.state.collapsedSectorPaths[sectorKey];
-        this.setState({
-            collapsedSectorPaths: this.state.collapsedSectorPaths
-        });
-    },
+    handleSort: ReactTableHandleSort,
+    handleAdd: ReactTableHandleAdd,
+    handleRemove: ReactTableHandleRemove,
+    handleToggleHide: ReactTableHandleToggleHide,
+    handleRowSelect: ReactTableHandleRowSelect,
+    handlePageClick: ReactTableHandlePageClick,
     render: function () {
-        var unhiddenRows = [];
+        var uncollapsedRows = [];
+        // determine which rows are unhidden based on which sectors are collapsed
         for (var i = 0; i < this.state.data.length; i++) {
             var row = this.state.data[i];
             if (!shouldHide(row, this.state.collapsedSectorPaths))
-                unhiddenRows.push(row);
+                uncollapsedRows.push(row);
         }
-        var rows = unhiddenRows.map(function (row) {
-            return <Row data={row} key={generateRowKey(row)} onSelectCallback={this.props.onSelectCallback} columnDefs={this.state.columnDefs} toggleHide={this.handleToggleHide}></Row>;
+        // determine which unhidden rows to display on the current page
+        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
+        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+
+        var rows = rowsToDisplay.map(function (row) {
+            var rowKey = this.props.rowKey;
+            return (<Row
+                data={row}
+                key={generateRowKey(row, rowKey)}
+                isSelected={rowKey && this.state.selectedRows[row[rowKey]] ? true : false}
+                onSelect={this.handleRowSelect}
+                columnDefs={this.state.columnDefs}
+                toggleHide={this.handleToggleHide}/>);
         }, this);
 
         var headers = buildHeaders(this);
-        var footer = buildFooter(this);
+        var footer = buildFooter(this, paginationAttr);
 
         return (
             <div>
@@ -95,37 +73,22 @@ var Table = React.createClass({
         );
     }
 });
-
 var Row = React.createClass({
-    getInitialState: function () {
-        return {
-            isSelected: this.props.data.isSelected
-        }
-    },
-    handleClick: function () {
-        var isSelected = !this.state.isSelected;
-        if (this.props.onSelectCallback)
-            this.props.onSelectCallback.call(this, this.props.data);
-        this.setState({
-            isSelected: isSelected
-        });
-    },
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{this.props.data[columnDef.colTag]}</td>);
+            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{cellContent}</td>);
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.state.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
-            "color": this.state.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
-        return (<tr onClick={this.handleClick} style={styles}>{cells}</tr>);
+        return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} style={styles}>{cells}</tr>);
     }
 });
-
 var PageNavigator = React.createClass({
     render: function () {
         var self = this;
@@ -166,6 +129,7 @@ function buildHeaders(table) {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
+
             <th style={styles} key={columnDef.colTag}>
                 <a className="btn-link" onClick={table.handleSort.bind(table, columnDef)}>{columnDef.text}</a>
                 <a className="btn-link" onClick={table.handleRemove.bind(table, columnDef)}>
@@ -185,7 +149,6 @@ function buildHeaders(table) {
         </thead>
     );
 }
-
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var result, firstColTag = columnDef.colTag;
@@ -215,12 +178,37 @@ function buildFirstCellForRow(props) {
     }
     return result;
 }
-
-function buildFooter(table) {
-    return null;
-    // TODO build footer/PageNavigator based on the table's configurations
+function buildFooter(table, paginationAttr) {
+    var footer = table.props.columnDefs.length > 0 ?
+        (<PageNavigator
+            items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
+            activeItem={table.state.currentPage}
+            numPages={paginationAttr.pageEnd}
+            handleClick={table.handlePageClick}/>) : "";
+    return footer;
 }
 
+function getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
 /* Sector tree rendering utilities */
 
 function shouldHide(data, collapsedSectorPaths) {
@@ -241,7 +229,6 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
-
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     var result = false;
     // true if sectorPaths is a subsector of the collapsedSectorPaths
@@ -251,7 +238,6 @@ function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     }
     return result;
 }
-
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
     if (subSectorCandidate.length <= superSectorCandidate.length)
@@ -265,33 +251,46 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 
 /* Other utility functions */
 
-// @heavyUtil
-function generateRowKey(row) {
-    // row key = sectorPath + values of the row
-    var key = generateSectorKey(row.sectorPath);
-    for (var prop in row) {
-        if (row.hasOwnProperty(prop)) {
-            key += prop + "=" + row[prop] + ";";
+function generateRowKey(row, rowKey) {
+    var key;
+    if (rowKey)
+        key = row[rowKey];
+    else {
+        key = generateSectorKey(row.sectorPath);
+        for (var prop in row) {
+            if (row.hasOwnProperty(prop))
+                key += prop + "=" + row[prop] + ";";
         }
     }
     return key;
 }
-
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-
 function prepareTableData(props) {
-    var data = props.data;
-    if (props.groupBy)
-        data = groupData(props.data, props.groupBy, props.columnDefs);
-    var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-    data.sort(sorterFactory.call(this, sortOptions));
+    // make defensive copy of the data
+    // TODO maybe perform this step intelligently to improve performance
+    var data = deepCopyData(props.data);
+
+    if (props.groupBy) {
+        data = groupData(data, props.groupBy, props.columnDefs);
+        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+        data.sort(sorterFactory.call(this, sortOptions));
+    }
     return data;
 }
-
+function deepCopyData(data) {
+    return data.map(function (row) {
+        var copy = {};
+        for (var prop in row)
+            if (row.hasOwnProperty(prop))
+                copy[prop] = row[prop];
+        copy.isDetail = true;
+        return copy;
+    });
+}
 function getInitiallyCollapsedSectorPaths(data) {
     var result = {};
     data.map(function (row) {
@@ -302,4 +301,23 @@ function getInitiallyCollapsedSectorPaths(data) {
         }
     });
     return result;
+}
+function getInitiallySelectedRows(selectedRows) {
+    var result = {};
+    selectedRows = selectedRows || [];
+    for (var i = 0; i < selectedRows.length; i++)
+        result[selectedRows[i]] = 1;
+    return result;
+}
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    // TODO allocates less to the left when selected page approaches the end
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
 }

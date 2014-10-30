@@ -120,75 +120,39 @@ function aggregateColumn(bucketResult, columnDef) {
     return result;
 };/** @jsx React.DOM */
 
+/**
+ * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
+ * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
+ * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
+ * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
+ * (i.e. some head subset of their sectorPath array match)
+ *
+ * @author Erfang Chen
+ */
+
 // TODO handle click events for summary rows
-// TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
 // TODO lastly, pagination if at all possible ... I don't see how
 
 var SECTOR_SEPARATOR = "#";
 
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
-}
-var Table = React.createClass({displayName: 'Table',
+var ReactTable = React.createClass({displayName: 'ReactTable',
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
         var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
         return {
             data: data,
             columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths
+            collapsedSectorPaths: collapsedSectorPaths,
+            selectedRows: selectedRows
         };
     },
-    handleSort: function (columnDefToSortBy) {
-        var data = this.state.data;
-        var sortOptions = {
-            sectorSorter: defaultSectorSorter,
-            detailSorter: getSortFunction(columnDefToSortBy),
-            sortDetailBy: columnDefToSortBy
-        };
-        data.sort(sorterFactory.call(this, sortOptions));
-        columnDefToSortBy.asc = !columnDefToSortBy.asc;
-        this.setState({
-            data: data
-        });
-    },
-    handleAdd: function () {
-        if (this.props.beforeColumnAdd)
-            this.props.beforeColumnAdd()
-    },
-    handleRemove: function (columnDefToRemove) {
-        var loc = this.state.columnDefs.indexOf(columnDefToRemove);
-        var newColumnDefs = [];
-        for (var i = 0; i < this.state.columnDefs.length; i++) {
-            if (i != loc)
-                newColumnDefs.push(this.state.columnDefs[i]);
-        }
-        this.setState({
-            columnDefs: newColumnDefs
-        });
-        // TODO pass copies of these variables to avoid unintentional perpetual binding
-        if (this.props.afterColumnRemove != null)
-            this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
-    },
-    handleToggleHide: function (summaryRow) {
-        var sectorKey = generateSectorKey(summaryRow.sectorPath);
-        if (this.state.collapsedSectorPaths[sectorKey] == null)
-            this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        else
-            delete this.state.collapsedSectorPaths[sectorKey];
-        this.setState({
-            collapsedSectorPaths: this.state.collapsedSectorPaths
-        });
-    },
+    handleSort: ReactTableHandleSort,
+    handleAdd: ReactTableHandleAdd,
+    handleRemove: ReactTableHandleRemove,
+    handleToggleHide: ReactTableHandleToggleHide,
+    handleRowSelect: ReactTableHandleRowSelect,
     render: function () {
         var unhiddenRows = [];
         for (var i = 0; i < this.state.data.length; i++) {
@@ -197,68 +161,101 @@ var Table = React.createClass({displayName: 'Table',
                 unhiddenRows.push(row);
         }
         var rows = unhiddenRows.map(function (row) {
-            return Row({data: row, key: generateRowKey(row), onSelectCallback: this.props.onSelectCallback, columnDefs: this.state.columnDefs, toggleHide: this.handleToggleHide});
+            var rowKey = this.props.rowKey;
+            return (Row({
+                data: row, 
+                key: generateRowKey(row, rowKey), 
+                isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
+                onSelect: this.handleRowSelect, 
+                columnDefs: this.state.columnDefs, 
+                toggleHide: this.handleToggleHide}));
         }, this);
+
         var headers = buildHeaders(this);
+        var footer = buildFooter(this);
+
         return (
-            React.DOM.table({className: "table table-condensed"}, 
+            React.DOM.div(null, 
+                React.DOM.table({className: "table table-condensed"}, 
                 headers, 
-                React.DOM.tbody(null, 
+                    React.DOM.tbody(null, 
                     rows
-                )
+                    )
+                ), 
+                footer
             )
         );
     }
 });
 
 var Row = React.createClass({displayName: 'Row',
-    getInitialState: function () {
-        return {
-            isSelected: this.props.data.isSelected
-        }
-    },
-    handleClick: function () {
-        var isSelected = !this.state.isSelected;
-        if (this.props.onSelectCallback)
-            this.props.onSelectCallback.call(this, this.props.data);
-        this.setState({
-            isSelected: isSelected
-        });
-    },
     render: function () {
-        var cells = [buildFirstCell(this.props)];
+        var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, this.props.data[columnDef.colTag]));
+            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, cellContent));
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.state.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
-            "color": this.state.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.handleClick, style: styles}, cells));
+        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
     }
 });
 
-/* Virtual DOM Builder helpers */
+var PageNavigator = React.createClass({displayName: 'PageNavigator',
+    render: function () {
+        var self = this;
+        var cx = React.addons.classSet;
+        var prevClass = cx({
+            disabled: (this.props.activeItem == 1)
+        });
+        var nextClass = cx({
+            disabled: (this.props.activeItem == this.props.numPages)
+        });
 
-function buildHeaders(component) {
-    var headerColumns = component.state.columnDefs.map(function (columnDef) {
+        var items = this.props.items.map(function (item) {
+            return (
+                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                )
+            )
+        });
+        return (
+            React.DOM.ul({className: "pagination pull-right"}, 
+                React.DOM.li({className: prevClass}, 
+                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+                ), 
+                items, 
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                )
+            )
+        );
+    }
+});
+
+/* Virtual DOM builder helpers */
+
+function buildHeaders(table) {
+    var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
+
             React.DOM.th({style: styles, key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link", onClick: component.handleSort.bind(component, columnDef)}, columnDef.text), 
-                React.DOM.a({className: "btn-link", onClick: component.handleRemove.bind(component, columnDef)}, 
+                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
+                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
                     React.DOM.span({className: "pull-right glyphicon glyphicon-remove"})
                 )
             )
         );
     });
     headerColumns.push(React.DOM.th({style: {"text-align": "center"}}, 
-        React.DOM.a({onClick: component.handleAdd}, 
+        React.DOM.a({onClick: table.handleAdd}, 
             React.DOM.span({className: "glyphicon glyphicon-plus"})
         )
     ))
@@ -269,7 +266,7 @@ function buildHeaders(component) {
     );
 }
 
-function buildFirstCell(props) {
+function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var result, firstColTag = columnDef.colTag;
 
@@ -299,7 +296,12 @@ function buildFirstCell(props) {
     return result;
 }
 
-/* Sector tree render utilities */
+function buildFooter(table) {
+    return null;
+    // TODO build footer/PageNavigator based on the table's configurations
+}
+
+/* Sector tree rendering utilities */
 
 function shouldHide(data, collapsedSectorPaths) {
     var result = false;
@@ -319,6 +321,7 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
+
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     var result = false;
     // true if sectorPaths is a subsector of the collapsedSectorPaths
@@ -343,12 +346,15 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 /* Other utility functions */
 
 // @heavyUtil
-function generateRowKey(row) {
-    // row key = sectorPath + values of the row
-    var key = generateSectorKey(row.sectorPath);
-    for (var prop in row) {
-        if (row.hasOwnProperty(prop)) {
-            key += prop + "=" + row[prop] + ";";
+function generateRowKey(row, rowKey) {
+    var key;
+    if (rowKey)
+        key = row[rowKey];
+    else {
+        key = generateSectorKey(row.sectorPath);
+        for (var prop in row) {
+            if (row.hasOwnProperty(prop))
+                key += prop + "=" + row[prop] + ";";
         }
     }
     return key;
@@ -361,14 +367,106 @@ function generateSectorKey(sectorPath) {
 }
 
 function prepareTableData(props) {
-    var data = props.data;
-    if (props.groupBy)
-        data = groupData(props.data, props.groupBy, props.columnDefs);
-    var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-    data.sort(sorterFactory.call(this, sortOptions));
+    // make defensive copy of the data
+    // TODO maybe perform this step intelligently to improve performance
+    var data = deepCopyData(props.data);
+
+    if (props.groupBy) {
+        data = groupData(data, props.groupBy, props.columnDefs);
+        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+        data.sort(sorterFactory.call(this, sortOptions));
+    }
     return data;
 }
-;/**
+
+function deepCopyData(data) {
+    return data.map(function (row) {
+        var copy = {};
+        for (var prop in row)
+            if (row.hasOwnProperty(prop))
+                copy[prop] = row[prop];
+        copy.isDetail = true;
+        return copy;
+    });
+}
+
+function getInitiallyCollapsedSectorPaths(data) {
+    var result = {};
+    data.map(function (row) {
+        if (row.sectorPath && row.isDetail) {
+            var sectorPathKey = generateSectorKey(row.sectorPath);
+            if (!result[sectorPathKey])
+                result[sectorPathKey] = row.sectorPath;
+        }
+    });
+    return result;
+}
+
+function getInitiallySelectedRows(selectedRows) {
+    var result = {};
+    selectedRows = selectedRows || [];
+    for (var i = 0; i < selectedRows.length; i++)
+        result[selectedRows[i]] = 1;
+    return result;
+};function ReactTableHandleSort(columnDefToSortBy) {
+    var data = this.state.data;
+    var sortOptions = {
+        sectorSorter: defaultSectorSorter,
+        detailSorter: getSortFunction(columnDefToSortBy),
+        sortDetailBy: columnDefToSortBy
+    };
+    data.sort(sorterFactory.call(this, sortOptions));
+    columnDefToSortBy.asc = !columnDefToSortBy.asc;
+    this.setState({
+        data: data
+    });
+}
+
+function ReactTableHandleAdd() {
+    if (this.props.beforeColumnAdd)
+        this.props.beforeColumnAdd()
+}
+
+function ReactTableHandleRemove(columnDefToRemove) {
+    var loc = this.state.columnDefs.indexOf(columnDefToRemove);
+    var newColumnDefs = [];
+    for (var i = 0; i < this.state.columnDefs.length; i++) {
+        if (i != loc)
+            newColumnDefs.push(this.state.columnDefs[i]);
+    }
+    this.setState({
+        columnDefs: newColumnDefs
+    });
+    // TODO pass copies of these variables to avoid unintentional perpetual binding
+    if (this.props.afterColumnRemove != null)
+        this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
+}
+
+function ReactTableHandleToggleHide(summaryRow) {
+    var sectorKey = generateSectorKey(summaryRow.sectorPath);
+    if (this.state.collapsedSectorPaths[sectorKey] == null)
+        this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
+    else
+        delete this.state.collapsedSectorPaths[sectorKey];
+    this.setState({
+        collapsedSectorPaths: this.state.collapsedSectorPaths
+    });
+}
+
+function ReactTableHandleRowSelect(row) {
+    var rowKey = this.props.rowKey;
+    if (!rowKey || !row.isDetail)
+        return
+    if (this.props.onSelectCallback)
+        this.props.onSelectCallback.call(this, row);
+
+    var selectedRows = this.state.selectedRows;
+    if (!selectedRows[row[rowKey]])
+        selectedRows[row[rowKey]] = 1;
+    else
+        delete selectedRows[row[rowKey]];
+    this.setState({selectedRows: selectedRows});
+};/**
  * Master sorter wrapper function that attempts to get the raw data array into the correct order
  * failing to sort the array into the correct order is disastrous for the table as rows are created
  * per the ordering in the main data array

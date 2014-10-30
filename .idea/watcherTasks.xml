@@ -15,7 +15,7 @@
       </option>
       <option name="outputFromStdout" value="false" />
       <option name="passParentEnvs" value="true" />
-      <option name="program" value="$ProjectFileDir$/node_modules/.bin/jsx.cmd" />
+      <option name="program" value="C:/Users/echen/AppData/Roaming/npm/jsx.cmd" />
       <option name="scopeName" value="Project Files" />
       <option name="trackOnlyRoot" value="false" />
       <option name="workingDir" value="$ProjectFileDir$" />

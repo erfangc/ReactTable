@@ -11,82 +11,60 @@
  */
 
 // TODO handle click events for summary rows
-// TODO consider making defensive deep copy of the data - since we are modifying it (performance vs. correctness trade off)
 // TODO formatting
-// TODO lastly, pagination if at all possible ... I don't see how
-// TODO rethink selection as a array of row keys - allow user to specify row keys based off attributes in 'data'
 
 var SECTOR_SEPARATOR = "#";
-var Table = React.createClass({displayName: 'Table',
+
+var ReactTable = React.createClass({displayName: 'ReactTable',
     getInitialState: function () {
         var data = prepareTableData.call(this, this.props);
         var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
         return {
+            currentPage: 1,
             data: data,
             columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths
+            collapsedSectorPaths: collapsedSectorPaths,
+            selectedRows: selectedRows
         };
     },
-    handleSort: function (columnDefToSortBy) {
-        var data = this.state.data;
-        var sortOptions = {
-            sectorSorter: defaultSectorSorter,
-            detailSorter: getSortFunction(columnDefToSortBy),
-            sortDetailBy: columnDefToSortBy
-        };
-        data.sort(sorterFactory.call(this, sortOptions));
-        columnDefToSortBy.asc = !columnDefToSortBy.asc;
-        this.setState({
-            data: data
-        });
-    },
-    handleAdd: function () {
-        if (this.props.beforeColumnAdd)
-            this.props.beforeColumnAdd()
-    },
-    handleRemove: function (columnDefToRemove) {
-        var loc = this.state.columnDefs.indexOf(columnDefToRemove);
-        var newColumnDefs = [];
-        for (var i = 0; i < this.state.columnDefs.length; i++) {
-            if (i != loc)
-                newColumnDefs.push(this.state.columnDefs[i]);
-        }
-        this.setState({
-            columnDefs: newColumnDefs
-        });
-        // TODO pass copies of these variables to avoid unintentional perpetual binding
-        if (this.props.afterColumnRemove != null)
-            this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
-    },
-    handleToggleHide: function (summaryRow) {
-        var sectorKey = generateSectorKey(summaryRow.sectorPath);
-        if (this.state.collapsedSectorPaths[sectorKey] == null)
-            this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        else
-            delete this.state.collapsedSectorPaths[sectorKey];
-        this.setState({
-            collapsedSectorPaths: this.state.collapsedSectorPaths
-        });
-    },
+    handleSort: ReactTableHandleSort,
+    handleAdd: ReactTableHandleAdd,
+    handleRemove: ReactTableHandleRemove,
+    handleToggleHide: ReactTableHandleToggleHide,
+    handleRowSelect: ReactTableHandleRowSelect,
+    handlePageClick: ReactTableHandlePageClick,
     render: function () {
-        var unhiddenRows = [];
+        var uncollapsedRows = [];
+        // determine which rows are unhidden based on which sectors are collapsed
         for (var i = 0; i < this.state.data.length; i++) {
             var row = this.state.data[i];
             if (!shouldHide(row, this.state.collapsedSectorPaths))
-                unhiddenRows.push(row);
+                uncollapsedRows.push(row);
         }
-        var rows = unhiddenRows.map(function (row) {
-            return React.createElement(Row, {data: row, key: generateRowKey(row), onSelectCallback: this.props.onSelectCallback, columnDefs: this.state.columnDefs, toggleHide: this.handleToggleHide});
+        // determine which unhidden rows to display on the current page
+        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
+        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+
+        var rows = rowsToDisplay.map(function (row) {
+            var rowKey = this.props.rowKey;
+            return (Row({
+                data: row, 
+                key: generateRowKey(row, rowKey), 
+                isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
+                onSelect: this.handleRowSelect, 
+                columnDefs: this.state.columnDefs, 
+                toggleHide: this.handleToggleHide}));
         }, this);
 
         var headers = buildHeaders(this);
-        var footer = buildFooter(this);
+        var footer = buildFooter(this, paginationAttr);
 
         return (
-            React.createElement("div", null, 
-                React.createElement("table", {className: "table table-condensed"}, 
+            React.DOM.div(null, 
+                React.DOM.table({className: "table table-condensed"}, 
                 headers, 
-                    React.createElement("tbody", null, 
+                    React.DOM.tbody(null, 
                     rows
                     )
                 ), 
@@ -95,37 +73,22 @@ var Table = React.createClass({displayName: 'Table',
         );
     }
 });
-
 var Row = React.createClass({displayName: 'Row',
-    getInitialState: function () {
-        return {
-            isSelected: this.props.data.isSelected
-        }
-    },
-    handleClick: function () {
-        var isSelected = !this.state.isSelected;
-        if (this.props.onSelectCallback)
-            this.props.onSelectCallback.call(this, this.props.data);
-        this.setState({
-            isSelected: isSelected
-        });
-    },
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"};
-            cells.push(React.createElement("td", {style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, this.props.data[columnDef.colTag]));
+            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, cellContent));
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.state.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
-            "color": this.state.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
-        return (React.createElement("tr", {onClick: this.handleClick, style: styles}, cells));
+        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
     }
 });
-
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
     render: function () {
         var self = this;
@@ -139,19 +102,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.createElement("ul", {className: "pagination pull-right"}, 
-                React.createElement("li", {className: prevClass}, 
-                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.DOM.ul({className: "pagination pull-right"}, 
+                React.DOM.li({className: prevClass}, 
+                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -166,33 +129,33 @@ function buildHeaders(table) {
             "text-align": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
-            React.createElement("th", {style: styles, key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.createElement("a", {className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.createElement("span", {className: "pull-right glyphicon glyphicon-remove"})
+
+            React.DOM.th({style: styles, key: columnDef.colTag}, 
+                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
+                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
+                    React.DOM.span({className: "pull-right glyphicon glyphicon-remove"})
                 )
             )
         );
     });
-    headerColumns.push(React.createElement("th", {style: {"text-align": "center"}}, 
-        React.createElement("a", {onClick: table.handleAdd}, 
-            React.createElement("span", {className: "glyphicon glyphicon-plus"})
+    headerColumns.push(React.DOM.th({style: {"text-align": "center"}}, 
+        React.DOM.a({onClick: table.handleAdd}, 
+            React.DOM.span({className: "glyphicon glyphicon-plus"})
         )
     ))
     return (
-        React.createElement("thead", null, 
-            React.createElement("tr", null, headerColumns)
+        React.DOM.thead(null, 
+            React.DOM.tr(null, headerColumns)
         )
     );
 }
-
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var result, firstColTag = columnDef.colTag;
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return React.createElement("td", {key: data[firstColTag]}, data[firstColTag]);
+        return React.DOM.td({key: data[firstColTag]}, data[firstColTag]);
 
     // styling & ident
     var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
@@ -202,25 +165,50 @@ function buildFirstCellForRow(props) {
 
 
     if (data.isDetail) {
-        result = React.createElement("td", {style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
+        result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
     } else {
         result =
             (
-                React.createElement("td", {style: firstCellStyle, key: data[firstColTag]}, 
-                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.createElement("strong", null, data[firstColTag])
+                React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, 
+                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.DOM.strong(null, data[firstColTag])
                     )
                 )
             );
     }
     return result;
 }
-
-function buildFooter(table) {
-    return null;
-    // TODO build footer/PageNavigator based on the table's configurations
+function buildFooter(table, paginationAttr) {
+    var footer = table.props.columnDefs.length > 0 ?
+        (PageNavigator({
+            items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
+            activeItem: table.state.currentPage, 
+            numPages: paginationAttr.pageEnd, 
+            handleClick: table.handlePageClick})) : "";
+    return footer;
 }
 
+function getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
 /* Sector tree rendering utilities */
 
 function shouldHide(data, collapsedSectorPaths) {
@@ -241,7 +229,6 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
-
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     var result = false;
     // true if sectorPaths is a subsector of the collapsedSectorPaths
@@ -251,7 +238,6 @@ function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     }
     return result;
 }
-
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
     if (subSectorCandidate.length <= superSectorCandidate.length)
@@ -265,33 +251,46 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 
 /* Other utility functions */
 
-// @heavyUtil
-function generateRowKey(row) {
-    // row key = sectorPath + values of the row
-    var key = generateSectorKey(row.sectorPath);
-    for (var prop in row) {
-        if (row.hasOwnProperty(prop)) {
-            key += prop + "=" + row[prop] + ";";
+function generateRowKey(row, rowKey) {
+    var key;
+    if (rowKey)
+        key = row[rowKey];
+    else {
+        key = generateSectorKey(row.sectorPath);
+        for (var prop in row) {
+            if (row.hasOwnProperty(prop))
+                key += prop + "=" + row[prop] + ";";
         }
     }
     return key;
 }
-
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-
 function prepareTableData(props) {
-    var data = props.data;
-    if (props.groupBy)
-        data = groupData(props.data, props.groupBy, props.columnDefs);
-    var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-    data.sort(sorterFactory.call(this, sortOptions));
+    // make defensive copy of the data
+    // TODO maybe perform this step intelligently to improve performance
+    var data = deepCopyData(props.data);
+
+    if (props.groupBy) {
+        data = groupData(data, props.groupBy, props.columnDefs);
+        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+        data.sort(sorterFactory.call(this, sortOptions));
+    }
     return data;
 }
-
+function deepCopyData(data) {
+    return data.map(function (row) {
+        var copy = {};
+        for (var prop in row)
+            if (row.hasOwnProperty(prop))
+                copy[prop] = row[prop];
+        copy.isDetail = true;
+        return copy;
+    });
+}
 function getInitiallyCollapsedSectorPaths(data) {
     var result = {};
     data.map(function (row) {
@@ -302,4 +301,23 @@ function getInitiallyCollapsedSectorPaths(data) {
         }
     });
     return result;
+}
+function getInitiallySelectedRows(selectedRows) {
+    var result = {};
+    selectedRows = selectedRows || [];
+    for (var i = 0; i < selectedRows.length; i++)
+        result[selectedRows[i]] = 1;
+    return result;
+}
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    // TODO allocates less to the left when selected page approaches the end
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
 }
