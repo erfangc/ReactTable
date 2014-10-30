@@ -23,11 +23,11 @@ Capabilities Include:
 
 Option Name        |Type              |Description
 -------------------|------------------|------------
-data               |[Array of Objects]|the raw data array (Required)
-columnDefs         |[Array of Objects]|column definitions on how to construct the headers of the table
-groupBy            |[Array of Objects]|columnDefs to dynamically group rows by
-afterColumnRemove  |[Function]        |callback function to invoke after a column has been removed by the user
-beforeColumnAdd    |[Function]        |callback function to invoke when the "+" button is clicked on the header
+data               |Array of Objects|the raw data array (Required)
+columnDefs         |Array of Objects|column definitions on how to construct the headers of the table
+groupBy            |Array of Objects|columnDefs to dynamically group rows by
+afterColumnRemove  |Function        |callback function to invoke after a column has been removed by the user
+beforeColumnAdd    |Function        |callback function to invoke when the "+" button is clicked on the header
 
 ### columnDefs Options
 The following properties are valid on objects inside of columnDefs
