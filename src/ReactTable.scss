@@ -1,4 +1,4 @@
-$mainBackgroundColor: #6ab301;
+$mainBackgroundColor: #009941;
 $mainTextColor: #999;
 $contrastTextColor: #ffffff;
 .btn-link {
@@ -12,10 +12,6 @@ table {
   border-collapse: collapse;
   border: 1px solid #eee;
   border-bottom: 2px solid $mainBackgroundColor;
-  box-shadow: 0px 0px 20px rgba(0,0,0,0.10),
-  0px 10px 20px rgba(0,0,0,0.05),
-  0px 20px 20px rgba(0,0,0,0.05),
-  0px 30px 20px rgba(0,0,0,0.05);
   tr {
     &:hover {
       td {

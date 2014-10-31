@@ -27,7 +27,7 @@ var ReactTable = React.createClass({
         // determine which rows are unhidden based on which sectors are collapsed
         for (var i = 0; i < this.state.data.length; i++) {
             var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths))
+            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
                 uncollapsedRows.push(row);
         }
         // determine which unhidden rows to display on the current page
@@ -199,9 +199,9 @@ function getPageArithmetics(table, data) {
 }
 /* Sector tree rendering utilities */
 
-function shouldHide(data, collapsedSectorPaths) {
+function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths);
+    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
     var isSummaryRow = !data.isDetail;
     var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
     if (hasCollapsedAncestor)
@@ -217,13 +217,16 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
+function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
+    // TODO bottle necks performance in Chrome
     // true if sectorPaths is a subsector of the collapsedSectorPaths
-    for (var sectorPathKey in collapsedSectorPaths) {
-        if (collapsedSectorPaths.hasOwnProperty(sectorPathKey) && isSubSectorOf(sectorPath, collapsedSectorPaths[sectorPathKey]))
+    var max = collapsedSectorKeys.length;
+    for (var i = 0; i < max; i++) {
+        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
             result = true;
     }
+
     return result;
 }
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {

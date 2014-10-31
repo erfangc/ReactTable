@@ -5,19 +5,20 @@ $(function () {
         {colTag: "email", text: "Email"},
         {colTag: "country", text: "Country"},
         {
-            colTag: "score",
+            colTag: "price",
             format: "number",
-            text: "Score",
+            text: "Price",
             aggregationMethod: "AVERAGE",
             weightBy: {colTag: "weight_factor"}
         },
-        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"},
+        {colTag: "sector", text: "Sector"}
     ];
 
-    $.get('sample_data.json').success(function (data) {
+    $.get('large_sample_data.json').success(function (data) {
         var testData = data;
         var options = {
-            groupBy: [{colTag: "last_name"}, {colTag: "country"}],
+            groupBy: [{colTag: "sector"}, {colTag: "country"}],
             rowKey: 'id',
             data: testData,
             columnDefs: columnDefs,
