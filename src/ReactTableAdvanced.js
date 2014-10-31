@@ -66,13 +66,13 @@ var Row = React.createClass({
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
+            var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
             cells.push(<td style={style} key={columnDef.colTag}>{cellContent}</td>);
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#00b3ee" : "inherit",
-            "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#fff" : "inherit"
         };
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} style={styles}>{cells}</tr>);
     }
@@ -150,7 +150,7 @@ function buildFirstCellForRow(props) {
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
-        "paddingLeft": identLevel * 25 + "px", "borderRight": "1px #ddd solid"
+        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
     };
 
     if (data.isDetail) {
