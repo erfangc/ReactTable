@@ -1,37 +1,55 @@
+$mainBackgroundColor: #6ab301;
+$mainTextColor: #999;
+$contrastTextColor: #ffffff;
 .btn-link {
   text-decoration: none;
-  cursor: pointer; }
+  cursor: pointer;
+}
 
 table {
   font-family: 'Arial';
   margin: 10px auto;
   border-collapse: collapse;
   border: 1px solid #eee;
-  border-bottom: 2px solid #6ab301;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1), 0px 10px 20px rgba(0, 0, 0, 0.05), 0px 20px 20px rgba(0, 0, 0, 0.05), 0px 30px 20px rgba(0, 0, 0, 0.05); }
-  table tr:hover td {
-    color: #555; }
-  table th, table td {
-    color: #999;
+  border-bottom: 2px solid $mainBackgroundColor;
+  box-shadow: 0px 0px 20px rgba(0,0,0,0.10),
+  0px 10px 20px rgba(0,0,0,0.05),
+  0px 20px 20px rgba(0,0,0,0.05),
+  0px 30px 20px rgba(0,0,0,0.05);
+  tr {
+    &:hover {
+      td {
+        color: #555;
+      }
+    }
+  }
+  th, td {
+    color: $mainTextColor;
     border: 1px solid #eee;
     padding: 5px 15px;
-    border-collapse: collapse; }
-  table th {
-    background: #6ab301;
-    color: #ffffff;
+    border-collapse: collapse;
+  }
+  th {
+    background: $mainBackgroundColor;
+    color: $contrastTextColor;
     font-weight: lighter;
-    font-size: 12px; }
-    table th.last {
-      border-right: none; }
+    font-size: 12px;
+    &.last {
+      border-right: none;
+    }
+  }
+}
 
 .pagination {
   display: inline-block;
   padding-left: 0;
   margin: 20px 0;
-  border-radius: 4px; }
+  border-radius: 4px;
+}
 
 .pagination > li {
-  display: inline; }
+  display: inline;
+}
 
 .pagination > li > a,
 .pagination > li > span {
@@ -42,26 +60,30 @@ table {
   line-height: 1.42857143;
   text-decoration: none;
   border: 1px solid #ddd;
-  color: #999; }
+  color: $mainTextColor;
+}
 
 .pagination > li:first-child > a,
 .pagination > li:first-child > span {
   margin-left: 0;
   border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px; }
+  border-bottom-left-radius: 4px;
+}
 
 .pagination > li:last-child > a,
 .pagination > li:last-child > span {
   border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px; }
+  border-bottom-right-radius: 4px;
+}
 
 .pagination > li > a:hover,
 .pagination > li > span:hover,
 .pagination > li > a:focus,
 .pagination > li > span:focus {
-  color: #ffffff;
-  background-color: #6ab301;
-  border-color: #ddd; }
+  color: $contrastTextColor;
+  background-color: $mainBackgroundColor;
+  border-color: #ddd;
+}
 
 .pagination > .active > a,
 .pagination > .active > span,
@@ -70,10 +92,11 @@ table {
 .pagination > .active > a:focus,
 .pagination > .active > span:focus {
   z-index: 2;
-  color: #ffffff;
+  color: $contrastTextColor;
   cursor: default;
-  background-color: #6ab301;
-  border-color: #ffffff; }
+  background-color: $mainBackgroundColor;
+  border-color: #ffffff;
+}
 
 .pagination > .disabled > span,
 .pagination > .disabled > span:hover,
@@ -81,42 +104,48 @@ table {
 .pagination > .disabled > a,
 .pagination > .disabled > a:hover,
 .pagination > .disabled > a:focus {
-  color: #999;
+  color: $mainTextColor;
   background-color: #ffffff;
   cursor: not-allowed;
-  border-color: #ddd; }
+  border-color: #ddd;
+}
 
 .pagination-lg > li > a,
 .pagination-lg > li > span {
   padding: 10px 16px;
-  font-size: 18px; }
+  font-size: 18px;
+}
 
 .pagination-lg > li:first-child > a,
 .pagination-lg > li:first-child > span {
   border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px; }
+  border-bottom-left-radius: 6px;
+}
 
 .pagination-lg > li:last-child > a,
 .pagination-lg > li:last-child > span {
   border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px; }
+  border-bottom-right-radius: 6px;
+}
 
 .pagination-sm > li > a,
 .pagination-sm > li > span {
   padding: 5px 10px;
-  font-size: 12px; }
+  font-size: 12px;
+}
 
 .pagination-sm > li:first-child > a,
 .pagination-sm > li:first-child > span {
   border-top-left-radius: 3px;
-  border-bottom-left-radius: 3px; }
+  border-bottom-left-radius: 3px;
+}
 
 .pagination-sm > li:last-child > a,
 .pagination-sm > li:last-child > span {
   border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px; }
+  border-bottom-right-radius: 3px;
+}
 
 .pull-right {
-  float: right !important; }
-
-/*# sourceMappingURL=ReactTable.css.map */
+  float: right !important;
+}
