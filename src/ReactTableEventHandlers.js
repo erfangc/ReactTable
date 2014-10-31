@@ -1,20 +1,12 @@
 function ReactTabeGetInitialState() {
     var data = prepareTableData.call(this, this.props);
     var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorKeys = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            collapsedSectorKeys.push(key);
-
     var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
     return {
         currentPage: 1,
         data: data,
         columnDefs: this.props.columnDefs,
         collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: collapsedSectorKeys,
         selectedRows: selectedRows
     };
 }
@@ -55,17 +47,12 @@ function ReactTableHandleRemove(columnDefToRemove) {
 
 function ReactTableHandleToggleHide(summaryRow) {
     var sectorKey = generateSectorKey(summaryRow.sectorPath);
-    if (this.state.collapsedSectorPaths[sectorKey] == null) {
+    if (this.state.collapsedSectorPaths[sectorKey] == null)
         this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        this.state.collapsedSectorKeys.push(sectorKey);
-    }
-    else {
+    else
         delete this.state.collapsedSectorPaths[sectorKey];
-        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey),1);
-    }
     this.setState({
-        collapsedSectorPaths: this.state.collapsedSectorPaths,
-        collapsedSectorKeys: this.state.collapsedSectorKeys
+        collapsedSectorPaths: this.state.collapsedSectorPaths
     });
 }
 

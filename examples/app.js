@@ -3,11 +3,7 @@ $(function () {
         {colTag: "first_name", text: "First Name"},
         {colTag: "last_name", text: "Last name"},
         {colTag: "email", text: "Email"},
-        {colTag: "country", text: "Country",
-            sort: function (a,b) {
-                return a.country.localeCompare(b.country);
-            }
-        },
+        {colTag: "country", text: "Country"},
         {
             colTag: "score",
             format: "number",
@@ -21,7 +17,7 @@ $(function () {
     $.get('sample_data.json').success(function (data) {
         var testData = data;
         var options = {
-            groupBy: [{colTag: "last_name"}],
+            groupBy: [{colTag: "last_name"}, {colTag: "country"}],
             rowKey: 'id',
             data: testData,
             columnDefs: columnDefs,

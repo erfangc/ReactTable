@@ -66,11 +66,8 @@ function dateDetailSort(a, b) {
     return returnValue;
 }
 
-function getSortFunction(sortByColumnDef) {
-    var format = sortByColumnDef.format || "";
-    // if the user provided a custom sort function for the column, use that instead
-    if (sortByColumnDef.sort)
-        return sortByColumnDef.sort;
+function getSortFunction(sortBy) {
+    var format = sortBy.format || "";
     switch (format.toUpperCase()) {
         case "DATE":
             return dateDetailSort;

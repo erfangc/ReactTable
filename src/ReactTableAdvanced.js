@@ -27,7 +27,7 @@ var ReactTable = React.createClass({
         // determine which rows are unhidden based on which sectors are collapsed
         for (var i = 0; i < this.state.data.length; i++) {
             var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
+            if (!shouldHide(row, this.state.collapsedSectorPaths))
                 uncollapsedRows.push(row);
         }
         // determine which unhidden rows to display on the current page
@@ -50,7 +50,7 @@ var ReactTable = React.createClass({
 
         return (
             <div>
-                <table>
+                <table className="table table-condensed">
                 {headers}
                     <tbody>
                     {rows}
@@ -199,9 +199,9 @@ function getPageArithmetics(table, data) {
 }
 /* Sector tree rendering utilities */
 
-function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
+function shouldHide(data, collapsedSectorPaths) {
     var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
+    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths);
     var isSummaryRow = !data.isDetail;
     var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
     if (hasCollapsedAncestor)
@@ -217,16 +217,13 @@ function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
+function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
     var result = false;
-    // TODO bottle necks performance in Chrome
     // true if sectorPaths is a subsector of the collapsedSectorPaths
-    var max = collapsedSectorKeys.length;
-    for (var i = 0; i < max; i++) {
-        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
+    for (var sectorPathKey in collapsedSectorPaths) {
+        if (collapsedSectorPaths.hasOwnProperty(sectorPathKey) && isSubSectorOf(sectorPath, collapsedSectorPaths[sectorPathKey]))
             result = true;
     }
-
     return result;
 }
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
