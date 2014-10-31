@@ -49,7 +49,7 @@ The following properties are valid on objects inside of columnDefs
 ## Examples
 
     var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
-    React.renderComponent(Table(options), document.getElementById("table"));
+    React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 
 ## Developing
 
