@@ -12,7 +12,7 @@ Capabilities Include:
 - Row Grouping to Arbitrary Depth
 - Automatic Aggregation
 - Custom Cell Class Names
-- Custom Pagination (When Rows not Grouped)
+- Custom Pagination
 
 ## Install
 
@@ -49,7 +49,7 @@ The following properties are valid on objects inside of columnDefs
 ## Examples
 
     var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
-    React.renderComponent(Table(options), document.getElementById("table"));
+    React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 
 ## Developing
 
