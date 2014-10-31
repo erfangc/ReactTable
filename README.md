@@ -12,7 +12,7 @@ Capabilities Include:
 - Row Grouping to Arbitrary Depth
 - Automatic Aggregation
 - Custom Cell Class Names
-- Custom Pagination (When Rows not Grouped)
+- Custom Pagination
 
 ## Install
 
