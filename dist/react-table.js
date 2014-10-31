@@ -132,37 +132,31 @@ function aggregateColumn(bucketResult, columnDef) {
 
 // TODO handle click events for summary rows
 // TODO formatting
-// TODO lastly, pagination if at all possible ... I don't see how
-
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
-    getInitialState: function () {
-        var data = prepareTableData.call(this, this.props);
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
-        return {
-            data: data,
-            columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths,
-            selectedRows: selectedRows
-        };
-    },
+    getInitialState: ReactTabeGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleRowSelect: ReactTableHandleRowSelect,
+    handlePageClick: ReactTableHandlePageClick,
     render: function () {
-        var unhiddenRows = [];
+        var uncollapsedRows = [];
+        // determine which rows are unhidden based on which sectors are collapsed
         for (var i = 0; i < this.state.data.length; i++) {
             var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths))
-                unhiddenRows.push(row);
+            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
+                uncollapsedRows.push(row);
         }
-        var rows = unhiddenRows.map(function (row) {
+        // determine which unhidden rows to display on the current page
+        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
+        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+
+        var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 data: row, 
                 key: generateRowKey(row, rowKey), 
                 isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
@@ -172,13 +166,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         }, this);
 
         var headers = buildHeaders(this);
-        var footer = buildFooter(this);
+        var footer = buildFooter(this, paginationAttr);
 
         return (
-            React.DOM.div(null, 
-                React.DOM.table({className: "table table-condensed"}, 
+            React.createElement("div", null, 
+                React.createElement("table", {className: "table table-condensed"}, 
                 headers, 
-                    React.DOM.tbody(null, 
+                    React.createElement("tbody", null, 
                     rows
                     )
                 ), 
@@ -187,24 +181,22 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
-
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
-            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, cellContent));
+            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
+            var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
+            cells.push(React.createElement("td", {style: style, key: columnDef.colTag}, cellContent));
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
-            "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
+            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#fff" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
     }
 });
-
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
     render: function () {
         var self = this;
@@ -218,19 +210,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: "pagination pull-right"}, 
-                React.DOM.li({className: prevClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: "pagination pull-right"}, 
+                React.createElement("li", {className: prevClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -242,70 +234,94 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 function buildHeaders(table) {
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
-            "text-align": (columnDef.format == 'number') ? "right" : "left"
+            "textAlign": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
 
-            React.DOM.th({style: styles, key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.DOM.span({className: "pull-right glyphicon glyphicon-remove"})
+            React.createElement("th", {style: styles, key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
+                React.createElement("a", {className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
+                    React.createElement("span", null, 
+                        React.createElement("strong", null, "-")
+                    )
                 )
             )
         );
     });
-    headerColumns.push(React.DOM.th({style: {"text-align": "center"}}, 
-        React.DOM.a({onClick: table.handleAdd}, 
-            React.DOM.span({className: "glyphicon glyphicon-plus"})
+    headerColumns.push(React.createElement("th", {style: {"textAlign": "center"}}, 
+        React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+            React.createElement("strong", null, "+")
         )
-    ))
+    ));
     return (
-        React.DOM.thead(null, 
-            React.DOM.tr(null, headerColumns)
+        React.createElement("thead", null, 
+            React.createElement("tr", {key: "header"}, headerColumns)
         )
     );
 }
-
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var result, firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag;
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: data[firstColTag]}, data[firstColTag]);
+        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
 
     // styling & ident
-    var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
+    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
-        "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
+        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
     };
 
-
     if (data.isDetail) {
-        result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
+        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
     } else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
                     )
                 )
             );
     }
     return result;
 }
-
-function buildFooter(table) {
-    return null;
-    // TODO build footer/PageNavigator based on the table's configurations
+function buildFooter(table, paginationAttr) {
+    return table.props.columnDefs.length > 0 ?
+        (React.createElement(PageNavigator, {
+            items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
+            activeItem: table.state.currentPage, 
+            numPages: paginationAttr.pageEnd, 
+            handleClick: table.handlePageClick})) : null;
 }
 
+function getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
 /* Sector tree rendering utilities */
 
-function shouldHide(data, collapsedSectorPaths) {
+function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths);
+    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
     var isSummaryRow = !data.isDetail;
     var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
     if (hasCollapsedAncestor)
@@ -321,17 +337,18 @@ function shouldHide(data, collapsedSectorPaths) {
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
  * @returns {boolean}
  */
-
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths) {
+function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
+    // TODO bottle necks performance in Chrome
     // true if sectorPaths is a subsector of the collapsedSectorPaths
-    for (var sectorPathKey in collapsedSectorPaths) {
-        if (collapsedSectorPaths.hasOwnProperty(sectorPathKey) && isSubSectorOf(sectorPath, collapsedSectorPaths[sectorPathKey]))
+    var max = collapsedSectorKeys.length;
+    for (var i = 0; i < max; i++) {
+        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
             result = true;
     }
+
     return result;
 }
-
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
     if (subSectorCandidate.length <= superSectorCandidate.length)
@@ -345,7 +362,6 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 
 /* Other utility functions */
 
-// @heavyUtil
 function generateRowKey(row, rowKey) {
     var key;
     if (rowKey)
@@ -359,13 +375,11 @@ function generateRowKey(row, rowKey) {
     }
     return key;
 }
-
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-
 function prepareTableData(props) {
     // make defensive copy of the data
     // TODO maybe perform this step intelligently to improve performance
@@ -378,7 +392,6 @@ function prepareTableData(props) {
     }
     return data;
 }
-
 function deepCopyData(data) {
     return data.map(function (row) {
         var copy = {};
@@ -389,7 +402,6 @@ function deepCopyData(data) {
         return copy;
     });
 }
-
 function getInitiallyCollapsedSectorPaths(data) {
     var result = {};
     data.map(function (row) {
@@ -401,14 +413,46 @@ function getInitiallyCollapsedSectorPaths(data) {
     });
     return result;
 }
-
 function getInitiallySelectedRows(selectedRows) {
     var result = {};
     selectedRows = selectedRows || [];
     for (var i = 0; i < selectedRows.length; i++)
         result[selectedRows[i]] = 1;
     return result;
-};function ReactTableHandleSort(columnDefToSortBy) {
+}
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    // TODO allocates less to the left when selected page approaches the end
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+};function ReactTabeGetInitialState() {
+    var data = prepareTableData.call(this, this.props);
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+
+    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
+    var collapsedSectorKeys = [];
+    for (var key in collapsedSectorPaths)
+        if (collapsedSectorPaths.hasOwnProperty(key))
+            collapsedSectorKeys.push(key);
+
+    var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
+    return {
+        currentPage: 1,
+        data: data,
+        columnDefs: this.props.columnDefs,
+        collapsedSectorPaths: collapsedSectorPaths,
+        collapsedSectorKeys: collapsedSectorKeys,
+        selectedRows: selectedRows
+    };
+}
+
+function ReactTableHandleSort(columnDefToSortBy) {
     var data = this.state.data;
     var sortOptions = {
         sectorSorter: defaultSectorSorter,
@@ -444,12 +488,17 @@ function ReactTableHandleRemove(columnDefToRemove) {
 
 function ReactTableHandleToggleHide(summaryRow) {
     var sectorKey = generateSectorKey(summaryRow.sectorPath);
-    if (this.state.collapsedSectorPaths[sectorKey] == null)
+    if (this.state.collapsedSectorPaths[sectorKey] == null) {
         this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-    else
+        this.state.collapsedSectorKeys.push(sectorKey);
+    }
+    else {
         delete this.state.collapsedSectorPaths[sectorKey];
+        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey),1);
+    }
     this.setState({
-        collapsedSectorPaths: this.state.collapsedSectorPaths
+        collapsedSectorPaths: this.state.collapsedSectorPaths,
+        collapsedSectorKeys: this.state.collapsedSectorKeys
     });
 }
 
@@ -466,6 +515,16 @@ function ReactTableHandleRowSelect(row) {
     else
         delete selectedRows[row[rowKey]];
     this.setState({selectedRows: selectedRows});
+}
+
+function ReactTableHandlePageClick(page) {
+    var pageSize = this.props.pageSize || 10;
+    var maxPage = Math.ceil(this.state.data.length / pageSize);
+    if (page < 1 || page > maxPage)
+        return;
+    this.setState({
+        currentPage: page
+    });
 };/**
  * Master sorter wrapper function that attempts to get the raw data array into the correct order
  * failing to sort the array into the correct order is disastrous for the table as rows are created
