@@ -3,7 +3,7 @@
 
 HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
-(requires [react.js](https://github.com/facebook/react) and [bootstrap](https://github.com/twbs/bootstrap))
+*requires [react.js](https://github.com/facebook/react)*
 
 Capabilities Include:
 
@@ -15,6 +15,9 @@ Capabilities Include:
 - Custom Pagination (When Rows not Grouped)
 
 ## Install
+
+Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) as a dependecy.
+Note that **jQuery** is not necessary to use this project
 
     > bower install react-table
 
