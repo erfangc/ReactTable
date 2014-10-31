@@ -15,7 +15,7 @@
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
-    getInitialState: ReactTabeGetInitialState,
+    getInitialState: ReactTableGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
@@ -117,6 +117,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
+    console.log(table);
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
             "textAlign": "center"
@@ -124,11 +125,14 @@ function buildHeaders(table) {
         return (
 
             React.DOM.span({className: "rt-header-element", style: styles, key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.DOM.span(null, 
-                        React.DOM.strong(null, "-")
+                React.DOM.div({className: "rt-col-text btn-link", onClick: table.handleSort.bind(table, columnDef)}, 
+                    columnDef.text, 
+                    React.DOM.span({className: "sorting-carets"}, 
+                        !table.state.sorting || table.state.sorting.colTag != columnDef.colTag ? null : (table.state.sorting.asc ? buildSortingAscCaret() : buildSortingDescCaret())
                     )
+                ), 
+                React.DOM.div({className: "rt-delete-me", onClick: table.handleRemove.bind(table, columnDef)}, 
+                    React.DOM.strong({className: "rt-delete-icon"}, "X ")
                 )
             )
         );
@@ -139,7 +143,7 @@ function buildHeaders(table) {
         )
     ));
     return (
-        React.DOM.span({key: "header"}, headerColumns)
+        React.DOM.div({key: "header"}, headerColumns)
     );
 }
 function buildFirstCellForRow(props) {
@@ -177,6 +181,20 @@ function buildFooter(table, paginationAttr) {
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
             handleClick: table.handlePageClick})) : null;
+}
+
+function buildSortingAscCaret(){
+    return (
+        React.DOM.span({className: "dropup"}, 
+            React.DOM.span({className: "caret sort-asc"})
+        )
+    );
+}
+
+function buildSortingDescCaret(){
+    return (
+        React.DOM.span({className: "caret sort-desc"})
+    );
 }
 
 function getPageArithmetics(table, data) {
@@ -315,6 +333,8 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
+
+// TODO wean off jquery
 
 function adjustHeaders(){
     var counter = 0;

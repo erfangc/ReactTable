@@ -15,7 +15,7 @@
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({
-    getInitialState: ReactTabeGetInitialState,
+    getInitialState: ReactTableGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
@@ -117,6 +117,7 @@ var PageNavigator = React.createClass({
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
+    console.log(table);
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
             "textAlign": "center"
@@ -124,12 +125,15 @@ function buildHeaders(table) {
         return (
 
             <span className="rt-header-element" style={styles} key={columnDef.colTag}>
-                <a className="btn-link" onClick={table.handleSort.bind(table, columnDef)}>{columnDef.text}</a>
-                <a className="btn-link" onClick={table.handleRemove.bind(table, columnDef)}>
-                    <span>
-                        <strong>{"-"}</strong>
+                <div className="rt-col-text btn-link" onClick={table.handleSort.bind(table, columnDef)}>
+                    {columnDef.text}
+                    <span className="sorting-carets">
+                        {!table.state.sorting || table.state.sorting.colTag != columnDef.colTag ? null : (table.state.sorting.asc ? buildSortingAscCaret() : buildSortingDescCaret())}
                     </span>
-                </a>
+                </div>
+                <div className="rt-delete-me" onClick={table.handleRemove.bind(table, columnDef)}>
+                    <strong className="rt-delete-icon">X&nbsp;</strong>
+                </div>
             </span>
         );
     });
@@ -139,7 +143,7 @@ function buildHeaders(table) {
         </a>
     </span>);
     return (
-        <span key="header">{headerColumns}</span>
+        <div key="header">{headerColumns}</div>
     );
 }
 function buildFirstCellForRow(props) {
@@ -177,6 +181,20 @@ function buildFooter(table, paginationAttr) {
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
+}
+
+function buildSortingAscCaret(){
+    return (
+        <span className="dropup">
+            <span className="caret sort-asc"></span>
+        </span>
+    );
+}
+
+function buildSortingDescCaret(){
+    return (
+        <span className="caret sort-desc"></span>
+    );
 }
 
 function getPageArithmetics(table, data) {
@@ -315,6 +333,8 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
+
+// TODO wean off jquery
 
 function adjustHeaders(){
     var counter = 0;

@@ -1,4 +1,4 @@
-function ReactTabeGetInitialState() {
+function ReactTableGetInitialState() {
     var data = prepareTableData.call(this, this.props);
     var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
 
@@ -29,7 +29,8 @@ function ReactTableHandleSort(columnDefToSortBy) {
     data.sort(sorterFactory.call(this, sortOptions));
     columnDefToSortBy.asc = !columnDefToSortBy.asc;
     this.setState({
-        data: data
+        data: data,
+        sorting: columnDefToSortBy
     });
 }
 

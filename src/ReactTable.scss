@@ -1,11 +1,6 @@
 $mainBackgroundColor: #009941;
 $mainTextColor: #999;
 $contrastTextColor: #ffffff;
-.btn-link {
-  text-decoration: none;
-  cursor: pointer;
-}
-
 body {
   font-family: Tahoma, Arial, sans-serif;
 }
@@ -49,11 +44,40 @@ td{
   max-height: 150px;
 }
 
-.rt-headers, .rt-header-element {
-  display: inline-block;
+.rt-headers, .rt-header-element{
   background-color: #dbdbdb;
 }
 
+.rt-header-element{
+  padding:2px;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.rt-delete-me{
+  position: absolute;
+  z-index: 10;
+  right: 0;
+  top: -3px;
+  height: 100%;
+}
+
+.rt-col-text{
+  text-align: center;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+}
+
+.rt-delete-icon{
+  color: #BB4B30;
+  text-decoration: none;
+  cursor: pointer;
+}
 .pagination {
   display: inline-block;
   padding-left: 0;
