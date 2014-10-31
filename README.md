@@ -16,7 +16,8 @@ Capabilities Include:
 
 ## Install
 
-Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) as a dependecy
+Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) as a dependecy.
+Note that **jQuery** is not necessary to use this project
 
     > bower install react-table
 
