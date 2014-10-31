@@ -3,22 +3,25 @@ $(function () {
         {colTag: "first_name", text: "First Name"},
         {colTag: "last_name", text: "Last name"},
         {colTag: "email", text: "Email"},
-        {colTag: "country", text: "Country"},
+        {colTag: "country", text: "Country",
+            sort: function (a,b) {
+                return a.country.localeCompare(b.country);
+            }
+        },
         {
-            colTag: "price",
+            colTag: "score",
             format: "number",
-            text: "Price",
+            text: "Score",
             aggregationMethod: "AVERAGE",
             weightBy: {colTag: "weight_factor"}
         },
-        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"},
-        {colTag: "sector", text: "Sector"}
+        {colTag: "weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
 
-    $.get('large_sample_data.json').success(function (data) {
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         var options = {
-            groupBy: [{colTag: "sector"}, {colTag: "country"}],
+            groupBy: [{colTag: "last_name"}],
             rowKey: 'id',
             data: testData,
             columnDefs: columnDefs,
