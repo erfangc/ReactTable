@@ -6,34 +6,52 @@ $contrastTextColor: #ffffff;
   cursor: pointer;
 }
 
-table {
-  font-family: 'Arial';
-  margin: 10px auto;
+body {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+td{
+  padding: 5px;
+}
+
+.rt-table, .rt-headers{
+  border: 1px solid #dddddd;
+  width: 100%;
+  font-size: 11px;
+  background-color: transparent;
   border-collapse: collapse;
-  border: 1px solid #eee;
-  border-bottom: 2px solid $mainBackgroundColor;
-  tr {
-    &:hover {
-      td {
-        color: #555;
-      }
-    }
-  }
-  th, td {
-    color: $mainTextColor;
-    border: 1px solid #eee;
-    padding: 5px 15px;
-    border-collapse: collapse;
-  }
-  th {
-    background: $mainBackgroundColor;
-    color: $contrastTextColor;
-    font-weight: lighter;
-    font-size: 12px;
-    &.last {
-      border-right: none;
-    }
-  }
+  border-spacing: 0;
+}
+
+.rt-header-element, td{
+  min-width:5px;
+}
+
+.rt-table > thead > tr > th, .rt-header-element {
+  padding: 2px;
+  vertical-align: middle;
+  text-align: center;
+  background-color: #dbdbdb;
+}
+
+.rt-table > thead > tr > th,
+.rt-table > thead > tr > td,
+.rt-table > tbody > tr > th,
+.rt-table > tbody > tr > td,
+.rt-table > tfoot > tr > th,
+.rt-table > tfoot > tr > td,
+.rt-headers{
+  border: 1px solid #dddddd;
+}
+
+.rt-scrollable{
+  overflow-y: scroll;
+  max-height: 150px;
+}
+
+.rt-headers, .rt-header-element {
+  display: inline-block;
+  background-color: #dbdbdb;
 }
 
 .pagination {

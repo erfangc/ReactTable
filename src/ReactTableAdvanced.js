@@ -22,6 +22,8 @@ var ReactTable = React.createClass({
     handleToggleHide: ReactTableHandleToggleHide,
     handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
+    componentDidMount: adjustHeaders,
+    componentDidUpdate: adjustHeaders,
     render: function () {
         var uncollapsedRows = [];
         // determine which rows are unhidden based on which sectors are collapsed
@@ -47,15 +49,18 @@ var ReactTable = React.createClass({
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
-
         return (
-            <div>
-                <table>
-                {headers}
-                    <tbody>
-                    {rows}
-                    </tbody>
-                </table>
+            <div className="rt-table-container">
+                <div className="rt-headers">
+                    {headers}
+                </div>
+                <div className="rt-scrollable">
+                    <table className="rt-table">
+                        <tbody>
+                        {rows}
+                        </tbody>
+                    </table>
+                </div>
                 {footer}
             </div>
         );
@@ -114,29 +119,27 @@ var PageNavigator = React.createClass({
 function buildHeaders(table) {
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
-            "textAlign": (columnDef.format == 'number') ? "right" : "left"
+            "textAlign": "center"
         };
         return (
 
-            <th style={styles} key={columnDef.colTag}>
+            <span className="rt-header-element" style={styles} key={columnDef.colTag}>
                 <a className="btn-link" onClick={table.handleSort.bind(table, columnDef)}>{columnDef.text}</a>
                 <a className="btn-link" onClick={table.handleRemove.bind(table, columnDef)}>
                     <span>
                         <strong>{"-"}</strong>
                     </span>
                 </a>
-            </th>
+            </span>
         );
     });
-    headerColumns.push(<th style={{"textAlign": "center"}}>
+    headerColumns.push(<span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
         <a className="btn-link" onClick={table.handleAdd}>
             <strong>{"+"}</strong>
         </a>
-    </th>);
+    </span>);
     return (
-        <thead>
-            <tr key="header">{headerColumns}</tr>
-        </thead>
+        <span key="header">{headerColumns}</span>
     );
 }
 function buildFirstCellForRow(props) {
@@ -312,3 +315,21 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
+
+function adjustHeaders(){
+    var counter = 0;
+    var headerElems = $(".rt-header-element");
+    var padding = parseInt(headerElems.first().css("padding-left")) || 0;
+    padding += parseInt(headerElems.first().css("padding-right")) || 0;
+    headerElems.each(function(){
+        var width = $('.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        $(this).width(width);
+        counter++;
+    });
+}
+
+$(document).ready(function(){
+    $('.rt-scrollable').bind('scroll', function(){
+        $(".rt-headers").scrollLeft($(this).scrollLeft());
+    });
+});

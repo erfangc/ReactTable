@@ -20,8 +20,9 @@ $(function () {
 
     $.get('sample_data.json').success(function (data) {
         var testData = data;
+        var groupBy = [{colTag: "last_name"}, {colTag: "country"}];
         var options = {
-            groupBy: [{colTag: "last_name"}],
+            groupBy: groupBy,
             rowKey: 'id',
             data: testData,
             columnDefs: columnDefs,
@@ -35,6 +36,6 @@ $(function () {
                 alert("Hello There ... you tried to remove " + b.text);
             }
         };
-        React.render(React.createElement(ReactTable,options), document.getElementById("table"))
+        React.render(React.createElement(ReactTable,options), document.getElementById("table"));
     })
 })
