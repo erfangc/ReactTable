@@ -50,7 +50,7 @@ var ReactTable = React.createClass({
 
         return (
             <div>
-                <table className="table table-condensed">
+                <table>
                 {headers}
                     <tbody>
                     {rows}
