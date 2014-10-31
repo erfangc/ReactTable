@@ -7,8 +7,7 @@ table {
   margin: 10px auto;
   border-collapse: collapse;
   border: 1px solid #eee;
-  border-bottom: 2px solid #6ab301;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1), 0px 10px 20px rgba(0, 0, 0, 0.05), 0px 20px 20px rgba(0, 0, 0, 0.05), 0px 30px 20px rgba(0, 0, 0, 0.05); }
+  border-bottom: 2px solid #009941; }
   table tr:hover td {
     color: #555; }
   table th, table td {
@@ -17,7 +16,7 @@ table {
     padding: 5px 15px;
     border-collapse: collapse; }
   table th {
-    background: #6ab301;
+    background: #009941;
     color: #ffffff;
     font-weight: lighter;
     font-size: 12px; }
@@ -60,7 +59,7 @@ table {
 .pagination > li > a:focus,
 .pagination > li > span:focus {
   color: #ffffff;
-  background-color: #6ab301;
+  background-color: #009941;
   border-color: #ddd; }
 
 .pagination > .active > a,
@@ -72,7 +71,7 @@ table {
   z-index: 2;
   color: #ffffff;
   cursor: default;
-  background-color: #6ab301;
+  background-color: #009941;
   border-color: #ffffff; }
 
 .pagination > .disabled > span,
