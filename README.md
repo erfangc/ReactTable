@@ -3,7 +3,7 @@
 
 HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
-(requires [react.js](https://github.com/facebook/react) and [bootstrap](https://github.com/twbs/bootstrap))
+*requires [react.js](https://github.com/facebook/react)*
 
 Capabilities Include:
 
