@@ -1,3 +1,16 @@
+function ReactTabeGetInitialState() {
+    var data = prepareTableData.call(this, this.props);
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+    var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
+    return {
+        currentPage: 1,
+        data: data,
+        columnDefs: this.props.columnDefs,
+        collapsedSectorPaths: collapsedSectorPaths,
+        selectedRows: selectedRows
+    };
+}
+
 function ReactTableHandleSort(columnDefToSortBy) {
     var data = this.state.data;
     var sortOptions = {

@@ -12,22 +12,10 @@
 
 // TODO handle click events for summary rows
 // TODO formatting
-
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
-    getInitialState: function () {
-        var data = prepareTableData.call(this, this.props);
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
-        return {
-            currentPage: 1,
-            data: data,
-            columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths,
-            selectedRows: selectedRows
-        };
-    },
+    getInitialState: ReactTabeGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
@@ -48,7 +36,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 data: row, 
                 key: generateRowKey(row, rowKey), 
                 isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
@@ -61,10 +49,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         return (
-            React.DOM.div(null, 
-                React.DOM.table({className: "table table-condensed"}, 
+            React.createElement("div", null, 
+                React.createElement("table", {className: "table table-condensed"}, 
                 headers, 
-                    React.DOM.tbody(null, 
+                    React.createElement("tbody", null, 
                     rows
                     )
                 ), 
@@ -78,15 +66,15 @@ var Row = React.createClass({displayName: 'Row',
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
-            cells.push(React.DOM.td({style: style, key: columnDef.colTag + "=" + this.props.data[columnDef.colTag]}, cellContent));
+            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            cells.push(React.createElement("td", {style: style, key: columnDef.colTag}, cellContent));
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#00b3ee" : "inherit",
             "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
@@ -102,19 +90,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: "pagination pull-right"}, 
-                React.DOM.li({className: prevClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: "pagination pull-right"}, 
+                React.createElement("li", {className: prevClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -126,52 +114,53 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 function buildHeaders(table) {
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
-            "text-align": (columnDef.format == 'number') ? "right" : "left"
+            "textAlign": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
 
-            React.DOM.th({style: styles, key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.DOM.a({className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.DOM.span({className: "pull-right glyphicon glyphicon-remove"})
+            React.createElement("th", {style: styles, key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
+                React.createElement("a", {className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
+                    React.createElement("span", null, 
+                        React.createElement("strong", null, "-")
+                    )
                 )
             )
         );
     });
-    headerColumns.push(React.DOM.th({style: {"text-align": "center"}}, 
-        React.DOM.a({onClick: table.handleAdd}, 
-            React.DOM.span({className: "glyphicon glyphicon-plus"})
+    headerColumns.push(React.createElement("th", {style: {"textAlign": "center"}}, 
+        React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+            React.createElement("strong", null, "+")
         )
-    ))
+    ));
     return (
-        React.DOM.thead(null, 
-            React.DOM.tr(null, headerColumns)
+        React.createElement("thead", null, 
+            React.createElement("tr", {key: "header"}, headerColumns)
         )
     );
 }
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var result, firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag;
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: data[firstColTag]}, data[firstColTag]);
+        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
 
     // styling & ident
-    var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
+    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
-        "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
+        "paddingLeft": identLevel * 25 + "px", "borderRight": "1px #ddd solid"
     };
 
-
     if (data.isDetail) {
-        result = React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, data[firstColTag]);
+        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
     } else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: data[firstColTag]}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
                     )
                 )
             );
@@ -179,13 +168,12 @@ function buildFirstCellForRow(props) {
     return result;
 }
 function buildFooter(table, paginationAttr) {
-    var footer = table.props.columnDefs.length > 0 ?
-        (PageNavigator({
+    return table.props.columnDefs.length > 0 ?
+        (React.createElement(PageNavigator, {
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
-            handleClick: table.handlePageClick})) : "";
-    return footer;
+            handleClick: table.handlePageClick})) : null;
 }
 
 function getPageArithmetics(table, data) {

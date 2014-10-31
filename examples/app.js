@@ -31,6 +31,6 @@ $(function () {
                 alert("Hello There ... you tried to remove " + b.text);
             }
         };
-        React.renderComponent(ReactTable(options), document.getElementById("table"))
+        React.render(React.createElement(ReactTable,options), document.getElementById("table"))
     })
 })

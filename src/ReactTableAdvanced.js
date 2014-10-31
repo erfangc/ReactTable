@@ -12,22 +12,10 @@
 
 // TODO handle click events for summary rows
 // TODO formatting
-
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({
-    getInitialState: function () {
-        var data = prepareTableData.call(this, this.props);
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-        var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
-        return {
-            currentPage: 1,
-            data: data,
-            columnDefs: this.props.columnDefs,
-            collapsedSectorPaths: collapsedSectorPaths,
-            selectedRows: selectedRows
-        };
-    },
+    getInitialState: ReactTabeGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
@@ -78,12 +66,12 @@ var Row = React.createClass({
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"text-align": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
-            cells.push(<td style={style} key={columnDef.colTag + "=" + this.props.data[columnDef.colTag]}>{cellContent}</td>);
+            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"}, cellContent = this.props.data[columnDef.colTag];
+            cells.push(<td style={style} key={columnDef.colTag}>{cellContent}</td>);
         }
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "background-color": this.props.isSelected && this.props.data.isDetail ? "#999999" : "inherit",
+            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#00b3ee" : "inherit",
             "color": this.props.isSelected && this.props.data.isDetail ? "#ffffff" : "inherit"
         };
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} style={styles}>{cells}</tr>);
@@ -126,50 +114,51 @@ var PageNavigator = React.createClass({
 function buildHeaders(table) {
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
         var styles = {
-            "text-align": (columnDef.format == 'number') ? "right" : "left"
+            "textAlign": (columnDef.format == 'number') ? "right" : "left"
         };
         return (
 
             <th style={styles} key={columnDef.colTag}>
                 <a className="btn-link" onClick={table.handleSort.bind(table, columnDef)}>{columnDef.text}</a>
                 <a className="btn-link" onClick={table.handleRemove.bind(table, columnDef)}>
-                    <span className="pull-right glyphicon glyphicon-remove"></span>
+                    <span>
+                        <strong>{"-"}</strong>
+                    </span>
                 </a>
             </th>
         );
     });
-    headerColumns.push(<th style={{"text-align": "center"}}>
-        <a onClick={table.handleAdd}>
-            <span className="glyphicon glyphicon-plus"/>
+    headerColumns.push(<th style={{"textAlign": "center"}}>
+        <a className="btn-link" onClick={table.handleAdd}>
+            <strong>{"+"}</strong>
         </a>
-    </th>)
+    </th>);
     return (
         <thead>
-            <tr>{headerColumns}</tr>
+            <tr key="header">{headerColumns}</tr>
         </thead>
     );
 }
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var result, firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag;
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return <td key={data[firstColTag]}>{data[firstColTag]}</td>;
+        return <td key={firstColTag}>{data[firstColTag]}</td>;
 
     // styling & ident
-    var identLevel = !data.isDetail ? (data.sectorPath.length - 1) : data.sectorPath.length;
+    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
-        "padding-left": identLevel * 25 + "px", "border-right": "1px #ddd solid"
+        "paddingLeft": identLevel * 25 + "px", "borderRight": "1px #ddd solid"
     };
 
-
     if (data.isDetail) {
-        result = <td style={firstCellStyle} key={data[firstColTag]}>{data[firstColTag]}</td>;
+        var result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
     } else {
         result =
             (
-                <td style={firstCellStyle} key={data[firstColTag]}>
+                <td style={firstCellStyle} key={firstColTag}>
                     <a onClick={toggleHide.bind(null, data)} className="btn-link">
                         <strong>{data[firstColTag]}</strong>
                     </a>
@@ -179,13 +168,12 @@ function buildFirstCellForRow(props) {
     return result;
 }
 function buildFooter(table, paginationAttr) {
-    var footer = table.props.columnDefs.length > 0 ?
+    return table.props.columnDefs.length > 0 ?
         (<PageNavigator
             items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
-            handleClick={table.handlePageClick}/>) : "";
-    return footer;
+            handleClick={table.handlePageClick}/>) : null;
 }
 
 function getPageArithmetics(table, data) {
