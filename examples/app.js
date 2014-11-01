@@ -1,7 +1,7 @@
 $(function () {
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last name"},
+        {colTag: "last_name", text: "Last Name"},
         {colTag: "email", text: "Email"},
         {colTag: "country", text: "Country",
             sort: function (a,b) {
@@ -27,13 +27,13 @@ $(function () {
             data: testData,
             columnDefs: columnDefs,
             onSelectCallback: function (row) {
-                alert("id = " + row.id + " clicked");
+                console.log("id = " + row.id + " clicked");
             },
             beforeColumnAdd: function () {
-                alert("beforeColumnAdd callback called!");
+                console.log("beforeColumnAdd callback called!");
             },
             afterColumnRemove: function (a, b) {
-                alert("Hello There ... you tried to remove " + b.text);
+                console.log("Hello There ... you tried to remove " + b.text);
             }
         };
         React.render(React.createElement(ReactTable,options), document.getElementById("table"));

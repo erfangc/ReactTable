@@ -14,7 +14,7 @@
 // TODO formatting
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: 'ReactTable',
+var ReactTable = React.createClass({
     getInitialState: ReactTableGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
@@ -38,51 +38,54 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
-                data: row, 
-                key: generateRowKey(row, rowKey), 
-                isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
-                onSelect: this.handleRowSelect, 
-                columnDefs: this.state.columnDefs, 
-                toggleHide: this.handleToggleHide}));
+            return (<Row
+                data={row}
+                key={generateRowKey(row, rowKey)}
+                isSelected={rowKey && this.state.selectedRows[row[rowKey]] ? true : false}
+                onSelect={this.handleRowSelect}
+                columnDefs={this.state.columnDefs}
+                toggleHide={this.handleToggleHide}/>);
         }, this);
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
         return (
-            React.DOM.div({className: "rt-table-container"}, 
-                React.DOM.div({className: "rt-headers"}, 
-                    headers
-                ), 
-                React.DOM.div({className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
-                        rows
-                        )
-                    )
-                ), 
-                footer
-            )
+            <div className="rt-table-container">
+                <div className="rt-headers">
+                    {headers}
+                </div>
+                <div className="rt-scrollable">
+                    <table className="rt-table">
+                        <tbody>
+                        {rows}
+                        </tbody>
+                    </table>
+                </div>
+                {footer}
+            </div>
         );
     }
 });
-var Row = React.createClass({displayName: 'Row',
+var Row = React.createClass({
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
             var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
-            cells.push(React.DOM.td({style: style, key: columnDef.colTag}, cellContent));
+            cells.push(<td style={style} key={columnDef.colTag}>{cellContent}</td>);
         }
+        var cx = React.addons.classSet;
+        var classes = cx({
+            'selected': this.props.isSelected
+        });
         var styles = {
-            "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#fff" : "inherit"
+            "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
+        return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} className={classes} style={styles}>{cells}</tr>);
     }
 });
-var PageNavigator = React.createClass({displayName: 'PageNavigator',
+var PageNavigator = React.createClass({
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -95,21 +98,21 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
-                )
+                <li key={item} className={self.props.activeItem == item ? 'active' : ''}>
+                    <a href="#" onClick={self.props.handleClick.bind(null, item)}>{item}</a>
+                </li>
             )
         });
         return (
-            React.DOM.ul({className: "pagination pull-right"}, 
-                React.DOM.li({className: prevClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
-                ), 
-                items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
-                )
-            )
+            <ul className={prevClass} className="pagination pull-right">
+                <li>
+                    <a className={prevClass} href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                </li>
+                {items}
+                <li className={nextClass}>
+                    <a className={nextClass} href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                </li>
+            </ul>
         );
     }
 });
@@ -119,31 +122,27 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 function buildHeaders(table) {
     console.log(table);
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        var styles = {
-            "textAlign": "center"
-        };
         return (
 
-            React.DOM.span({className: "rt-header-element", style: styles, key: columnDef.colTag}, 
-                React.DOM.div({className: "rt-col-text btn-link", onClick: table.handleSort.bind(table, columnDef)}, 
-                    columnDef.text, 
-                    React.DOM.span({className: "sorting-carets"}, 
-                        !table.state.sorting || table.state.sorting.colTag != columnDef.colTag ? null : (table.state.sorting.asc ? buildSortingAscCaret() : buildSortingDescCaret())
-                    )
-                ), 
-                React.DOM.div({className: "rt-delete-me", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.DOM.strong({className: "rt-delete-icon"}, "X ")
-                )
-            )
+            <div className="rt-header-element" key={columnDef.colTag}>
+                <div>
+                    <a className="btn-link">{columnDef.text}</a>
+                </div>
+                <div className="rt-header-menu">
+                    <div onClick={table.handleSort.bind(table, columnDef, true)}>Sort Asc</div>
+                    <div onClick={table.handleSort.bind(table, columnDef, false)}>Sort Dsc</div>
+                    <div onClick={table.handleRemove.bind(table,columnDef)}>Remove Column</div>
+                </div>
+            </div>
         );
     });
-    headerColumns.push(React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-        React.DOM.a({className: "btn-link", onClick: table.handleAdd}, 
-            React.DOM.strong(null, "+")
-        )
-    ));
+    headerColumns.push(<span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+        <a className="btn-link" onClick={table.handleAdd}>
+            <strong>{"+"}</strong>
+        </a>
+    </span>);
     return (
-        React.DOM.div({key: "header"}, headerColumns)
+        <div key="header">{headerColumns}</div>
     );
 }
 function buildFirstCellForRow(props) {
@@ -152,7 +151,7 @@ function buildFirstCellForRow(props) {
 
     // if sectorPath is not availiable - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: firstColTag}, data[firstColTag]);
+        return <td key={firstColTag}>{data[firstColTag]}</td>;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -161,39 +160,39 @@ function buildFirstCellForRow(props) {
     };
 
     if (data.isDetail) {
-        var result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+        var result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
     } else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: firstColTag}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
-                    )
-                )
+                <td style={firstCellStyle} key={firstColTag}>
+                    <a onClick={toggleHide.bind(null, data)} className="btn-link">
+                        <strong>{data[firstColTag]}</strong>
+                    </a>
+                </td>
             );
     }
     return result;
 }
 function buildFooter(table, paginationAttr) {
     return table.props.columnDefs.length > 0 ?
-        (PageNavigator({
-            items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
-            activeItem: table.state.currentPage, 
-            numPages: paginationAttr.pageEnd, 
-            handleClick: table.handlePageClick})) : null;
+        (<PageNavigator
+            items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
+            activeItem={table.state.currentPage}
+            numPages={paginationAttr.pageEnd}
+            handleClick={table.handlePageClick}/>) : null;
 }
 
 function buildSortingAscCaret(){
     return (
-        React.DOM.span({className: "dropup"}, 
-            React.DOM.span({className: "caret sort-asc"})
-        )
+        <span className="dropup">
+            <span className="caret sort-asc"></span>
+        </span>
     );
 }
 
 function buildSortingDescCaret(){
     return (
-        React.DOM.span({className: "caret sort-desc"})
+        <span className="caret sort-desc"></span>
     );
 }
 
@@ -236,11 +235,11 @@ function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
  * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
  * @param sectorPath [array] the sectorPath to perform comparison on
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
+ * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
  * @returns {boolean}
  */
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
-    // TODO bottle necks performance in Chrome
     // true if sectorPaths is a subsector of the collapsedSectorPaths
     var max = collapsedSectorKeys.length;
     for (var i = 0; i < max; i++) {
@@ -327,7 +326,6 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // allocate to the left
     var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
     var rightAllocation = displayUnitsLeft - leftAllocation;
-    // TODO allocates less to the left when selected page approaches the end
     return {
         start: currentPage - leftAllocation - 1,
         end: currentPage + rightAllocation - 1

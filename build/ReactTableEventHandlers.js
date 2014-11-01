@@ -19,15 +19,15 @@ function ReactTableGetInitialState() {
     };
 }
 
-function ReactTableHandleSort(columnDefToSortBy) {
+function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var data = this.state.data;
     var sortOptions = {
         sectorSorter: defaultSectorSorter,
         detailSorter: getSortFunction(columnDefToSortBy),
-        sortDetailBy: columnDefToSortBy
+        sortDetailBy: columnDefToSortBy,
+        sortAsc: sortAsc
     };
     data.sort(sorterFactory.call(this, sortOptions));
-    columnDefToSortBy.asc = !columnDefToSortBy.asc;
     this.setState({
         data: data,
         sorting: columnDefToSortBy

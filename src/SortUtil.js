@@ -14,12 +14,12 @@ function sorterFactory(options) {
         detailSorter = options.detailSorter,
         sortSummaryBy = options.sortSummaryBy,
         sortDetailBy = options.sortDetailBy;
+    sortAsc = options.sortAsc;
 
     return function (a, b) {
         // compare sector
         var result = 0;
         result = sectorSorter.call(sortSummaryBy, a, b);
-
         // same sector therefore, summary > detail
         if (result == 0) {
             if (a.isDetail && !b.isDetail) {
@@ -32,6 +32,8 @@ function sorterFactory(options) {
             // both are detail rows ... use detail sorter or just return 0
             if (result == 0) {
                 result = detailSorter.call(sortDetailBy, a, b);
+                if (!sortAsc)
+                    result *= -1;
             }
         }
         return result;
@@ -71,8 +73,8 @@ function getSortFunction(sortByColumnDef) {
     // if the user provided a custom sort function for the column, use that instead
     if (sortByColumnDef.sort)
         return sortByColumnDef.sort;
-    switch (format.toUpperCase()) {
-        case "DATE":
+    switch (format) {
+        case "date":
             return dateDetailSort;
         default :
             return genericDetailSort;
