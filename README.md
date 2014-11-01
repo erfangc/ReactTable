@@ -44,7 +44,7 @@ rowKey             |String          |specifies the property in the data array th
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 
 ## Possible `columnDefs` Options
-The following properties are valid on `columnDef` objects, which are nested under the `columnDefs` parray given to the table options
+The following properties are valid on `columnDef` objects, which are nested under the `columnDefs` array passed to the main table options. These options control the appearance and behaviors of the associated columns.
 
 Column Option Name|Description
 -------|------------------
@@ -63,7 +63,9 @@ formatInstructions | a string that represents how you want cells to be formatted
 * alignment
 
 #### Example
-    { ..., formatInstructions: "multiplier: 100 unit:KG"}
+Please note you **cannot** have spaces in the format instruction values, since spaces are used as a separator
+
+    { ..., formatInstructions: "multiplier:100 unit:KG"}
 
 ## Developing
 
