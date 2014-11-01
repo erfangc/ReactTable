@@ -38,18 +38,32 @@ beforeColumnAdd    |Function        |callback function to invoke when the "+" bu
 selectedRows       |Array of Strings|row keys of initially selected rows, must be used with the 'rowKey' option
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 
-### columnDefs Options
-The following properties are valid on objects inside of columnDefs
-
-- colTag : column identifier
-- text   : display text in the table header
-- format : choose from 'number', 'date' or 'string'
-- sort   : custom callback function for sorting the column
-
-## Examples
+## Table Usage Example
 
     var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
+
+## Possible `columnDefs` Options
+The following properties are valid on objects inside of columnDefs
+
+Column Option Name|Description
+-------|------------------
+colTag | column identifier
+text   | display text in the table header
+format | choose from 'number', 'currency', 'date' or 'string'
+sort   | custom callback function for sorting the column
+cellClassCallback | custom callback for applying custom CSS classes to cells. should should return a object with class names set to true in an object. for example `{ green: true, special: true}`
+formatInstructions | a string that represents how you want cells to be formatted, options are
+
+## Valid `formatInstructions` Options
+
+* multiplier
+* roundTo
+* unit
+* alignment
+
+#### Example
+    { ..., formatInstructions: "multiplier: 100 unit:KG"}
 
 ## Developing
 
