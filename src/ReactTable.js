@@ -71,9 +71,17 @@ var Row = React.createClass({
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
-            var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
-            cells.push(<td style={style} key={columnDef.colTag}>{cellContent}</td>);
+            var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
+            var cx = React.addons.classSet;
+            var classes = cx(lookAndFeel.classes);
+            cells.push(
+                <td
+                    className={classes}
+                    style={lookAndFeel.styles}
+                    key={columnDef.colTag}>
+                    {lookAndFeel.value}
+                </td>
+            );
         }
         var cx = React.addons.classSet;
         var classes = cx({
@@ -105,7 +113,7 @@ var PageNavigator = React.createClass({
         });
         return (
             <ul className={prevClass} className="pagination pull-right">
-                <li>
+                <li className={nextClass}>
                     <a className={prevClass} href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
@@ -120,27 +128,33 @@ var PageNavigator = React.createClass({
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
-    console.log(table);
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        return (
+        var style = {
+            textAlign: getColumnAlignment(columnDef)
+        }
+        var menuStyle = {};
+        if (style.textAlign == 'right')
+            menuStyle.right = "0%";
+        else
+            menuStyle.left = "0%";
 
-            <div className="rt-header-element" key={columnDef.colTag}>
-                <div>
-                    <a className="btn-link">{columnDef.text}</a>
-                </div>
-                <div className="rt-header-menu">
+        return (
+            <div style={style} className="rt-header-element" key={columnDef.colTag}>
+                <a className="btn-link">{columnDef.text}</a>
+                <div style={menuStyle} className="rt-header-menu">
                     <div onClick={table.handleSort.bind(table, columnDef, true)}>Sort Asc</div>
                     <div onClick={table.handleSort.bind(table, columnDef, false)}>Sort Dsc</div>
-                    <div onClick={table.handleRemove.bind(table,columnDef)}>Remove Column</div>
+                    <div onClick={table.handleRemove.bind(table, columnDef)}>Remove Column</div>
                 </div>
             </div>
         );
     });
-    headerColumns.push(<span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-        <a className="btn-link" onClick={table.handleAdd}>
-            <strong>{"+"}</strong>
-        </a>
-    </span>);
+    headerColumns.push(
+        <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+            <a className="btn-link" onClick={table.handleAdd}>
+                <strong>{"+"}</strong>
+            </a>
+        </span>);
     return (
         <div key="header">{headerColumns}</div>
     );
@@ -180,20 +194,6 @@ function buildFooter(table, paginationAttr) {
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
-}
-
-function buildSortingAscCaret(){
-    return (
-        <span className="dropup">
-            <span className="caret sort-asc"></span>
-        </span>
-    );
-}
-
-function buildSortingDescCaret(){
-    return (
-        <span className="caret sort-desc"></span>
-    );
 }
 
 function getPageArithmetics(table, data) {
@@ -334,20 +334,20 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
 
 // TODO wean off jquery
 
-function adjustHeaders(){
+function adjustHeaders() {
     var counter = 0;
     var headerElems = $(".rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
-    headerElems.each(function(){
+    headerElems.each(function () {
         var width = $('.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
 }
 
-$(document).ready(function(){
-    $('.rt-scrollable').bind('scroll', function(){
+$(document).ready(function () {
+    $('.rt-scrollable').bind('scroll', function () {
         $(".rt-headers").scrollLeft($(this).scrollLeft());
     });
 });

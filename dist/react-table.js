@@ -1,4 +1,76 @@
+/** @jsx React.DOM */
+
+function buildLAFConfigObject(columnDef) {
+    var formatInstructions = columnDef.formatInstructions;
+    "use strict";
+    var result = {
+        multiplier: 1,
+        roundTo: 2,
+        unit: null,
+        alignment: getColumnAlignment(columnDef)
+    };
+    if (!formatInstructions)
+        return result;
+    var tokens = formatInstructions.split(/\s+/);
+    for (var i = 0; i < tokens.length; i++) {
+        var key = tokens[i].split(":", 2)[0];
+        result[key] = tokens[i].split(":", 2)[1];
+    }
+    return result;
+}
+
 /**
+ * Determines the style, classes and text formatting of cell content
+ * given a column configuartion object and a row of data
+ *
+ * @param columnDef
+ * @param row
+ * @returns { classes: {}, style: {}, value: {}}
+ */
+function buildCellLookAndFeel(columnDef, row) {
+    "use strict";
+    var results = {classes: {}, styles: {}, value: {}};
+    var value = row[columnDef.colTag];
+
+    columnDef.formatConfig = columnDef.formatConfig || buildLAFConfigObject(columnDef);
+    var formatConfig = columnDef.formatConfig;
+
+    // invoke cell class callback
+    if (columnDef.cellClassCallback)
+        results.classes = columnDef.cellClassCallback(row);
+
+    value = formatNumber(value, columnDef, formatConfig);
+
+    // unit
+    if (formatConfig.unit)
+        value = value + " " + formatConfig.unit;
+
+    // attach currency
+    if (columnDef.format == "currency")
+        value = "$" + value;
+
+    // determine alignment
+    results.styles.textAlign = formatConfig.alignment;
+
+    results.value = value;
+
+    return results;
+}
+
+function getColumnAlignment(columnDef) {
+    "use strict";
+    return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
+}
+
+function formatNumber(value, columnDef, formatConfig) {
+    if (!isNaN(value) && (columnDef.format == "number" || columnDef.format == "currency")) {
+        // multiplier
+        value *= formatConfig.multiplier;
+        // rounding
+        value = value.toFixed(formatConfig.roundTo);
+    }
+    return value;
+};/**
  * Client side aggregation engine to convert a flag data structure of array of objects
  * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
  *
@@ -135,13 +207,15 @@ function aggregateColumn(bucketResult, columnDef) {
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
-    getInitialState: ReactTabeGetInitialState,
+    getInitialState: ReactTableGetInitialState,
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
+    componentDidMount: adjustHeaders,
+    componentDidUpdate: adjustHeaders,
     render: function () {
         var uncollapsedRows = [];
         // determine which rows are unhidden based on which sectors are collapsed
@@ -167,13 +241,16 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
-
         return (
-            React.createElement("div", null, 
-                React.createElement("table", {className: "table table-condensed"}, 
-                headers, 
-                    React.createElement("tbody", null, 
-                    rows
+            React.createElement("div", {className: "rt-table-container"}, 
+                React.createElement("div", {className: "rt-headers"}, 
+                    headers
+                ), 
+                React.createElement("div", {className: "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
+                        rows
+                        )
                     )
                 ), 
                 footer
@@ -186,15 +263,26 @@ var Row = React.createClass({displayName: 'Row',
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
-            var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
-            cells.push(React.createElement("td", {style: style, key: columnDef.colTag}, cellContent));
+            var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
+            var cx = React.addons.classSet;
+            var classes = cx(lookAndFeel.classes);
+            cells.push(
+                React.createElement("td", {
+                    className: classes, 
+                    style: lookAndFeel.styles, 
+                    key: columnDef.colTag}, 
+                    lookAndFeel.value
+                )
+            );
         }
+        var cx = React.addons.classSet;
+        var classes = cx({
+            'selected': this.props.isSelected
+        });
         var styles = {
-            "cursor": this.props.data.isDetail ? "pointer" : "inherit",
-            "backgroundColor": this.props.isSelected && this.props.data.isDetail ? "#fff" : "inherit"
+            "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
@@ -216,13 +304,13 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
             )
         });
         return (
-            React.createElement("ul", {className: "pagination pull-right"}, 
-                React.createElement("li", {className: prevClass}, 
-                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
                 React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                    React.createElement("a", {className: nextClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -233,30 +321,34 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
 function buildHeaders(table) {
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        var styles = {
-            "textAlign": (columnDef.format == 'number') ? "right" : "left"
-        };
-        return (
+        var style = {
+            textAlign: getColumnAlignment(columnDef)
+        }
+        var menuStyle = {};
+        if (style.textAlign == 'right')
+            menuStyle.right = "0%";
+        else
+            menuStyle.left = "0%";
 
-            React.createElement("th", {style: styles, key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link", onClick: table.handleSort.bind(table, columnDef)}, columnDef.text), 
-                React.createElement("a", {className: "btn-link", onClick: table.handleRemove.bind(table, columnDef)}, 
-                    React.createElement("span", null, 
-                        React.createElement("strong", null, "-")
-                    )
+        return (
+            React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link"}, columnDef.text), 
+                React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
+                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
+                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                    React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
                 )
             )
         );
     });
-    headerColumns.push(React.createElement("th", {style: {"textAlign": "center"}}, 
-        React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
-            React.createElement("strong", null, "+")
-        )
-    ));
+    headerColumns.push(
+        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+                React.createElement("strong", null, "+")
+            )
+        ));
     return (
-        React.createElement("thead", null, 
-            React.createElement("tr", {key: "header"}, headerColumns)
-        )
+        React.createElement("div", {key: "header"}, headerColumns)
     );
 }
 function buildFirstCellForRow(props) {
@@ -335,11 +427,11 @@ function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
  * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
  * @param sectorPath [array] the sectorPath to perform comparison on
  * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
+ * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
  * @returns {boolean}
  */
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
     var result = false;
-    // TODO bottle necks performance in Chrome
     // true if sectorPaths is a subsector of the collapsedSectorPaths
     var max = collapsedSectorKeys.length;
     for (var i = 0; i < max; i++) {
@@ -426,12 +518,31 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // allocate to the left
     var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
     var rightAllocation = displayUnitsLeft - leftAllocation;
-    // TODO allocates less to the left when selected page approaches the end
     return {
         start: currentPage - leftAllocation - 1,
         end: currentPage + rightAllocation - 1
     }
-};function ReactTabeGetInitialState() {
+}
+
+// TODO wean off jquery
+
+function adjustHeaders() {
+    var counter = 0;
+    var headerElems = $(".rt-header-element");
+    var padding = parseInt(headerElems.first().css("padding-left")) || 0;
+    padding += parseInt(headerElems.first().css("padding-right")) || 0;
+    headerElems.each(function () {
+        var width = $('.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        $(this).width(width);
+        counter++;
+    });
+}
+
+$(document).ready(function () {
+    $('.rt-scrollable').bind('scroll', function () {
+        $(".rt-headers").scrollLeft($(this).scrollLeft());
+    });
+});;function ReactTableGetInitialState() {
     var data = prepareTableData.call(this, this.props);
     var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
 
@@ -452,17 +563,18 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     };
 }
 
-function ReactTableHandleSort(columnDefToSortBy) {
+function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var data = this.state.data;
     var sortOptions = {
         sectorSorter: defaultSectorSorter,
         detailSorter: getSortFunction(columnDefToSortBy),
-        sortDetailBy: columnDefToSortBy
+        sortDetailBy: columnDefToSortBy,
+        sortAsc: sortAsc
     };
     data.sort(sorterFactory.call(this, sortOptions));
-    columnDefToSortBy.asc = !columnDefToSortBy.asc;
     this.setState({
-        data: data
+        data: data,
+        sorting: columnDefToSortBy
     });
 }
 
@@ -541,12 +653,12 @@ function sorterFactory(options) {
         detailSorter = options.detailSorter,
         sortSummaryBy = options.sortSummaryBy,
         sortDetailBy = options.sortDetailBy;
+    sortAsc = options.sortAsc;
 
     return function (a, b) {
         // compare sector
         var result = 0;
         result = sectorSorter.call(sortSummaryBy, a, b);
-
         // same sector therefore, summary > detail
         if (result == 0) {
             if (a.isDetail && !b.isDetail) {
@@ -559,6 +671,8 @@ function sorterFactory(options) {
             // both are detail rows ... use detail sorter or just return 0
             if (result == 0) {
                 result = detailSorter.call(sortDetailBy, a, b);
+                if (!sortAsc)
+                    result *= -1;
             }
         }
         return result;
@@ -593,10 +707,13 @@ function dateDetailSort(a, b) {
     return returnValue;
 }
 
-function getSortFunction(sortBy) {
-    var format = sortBy.format || "";
-    switch (format.toUpperCase()) {
-        case "DATE":
+function getSortFunction(sortByColumnDef) {
+    var format = sortByColumnDef.format || "";
+    // if the user provided a custom sort function for the column, use that instead
+    if (sortByColumnDef.sort)
+        return sortByColumnDef.sort;
+    switch (format) {
+        case "date":
             return dateDetailSort;
         default :
             return genericDetailSort;

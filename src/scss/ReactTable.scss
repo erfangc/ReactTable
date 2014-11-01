@@ -7,6 +7,7 @@ a.btn-link {
 }
 
 .rt-table {
+  box-sizing: border-box;
   color: $text-color;
   width: 100%;
   font-family: $table-font-family;
@@ -20,6 +21,10 @@ a.btn-link {
 }
 
 tr.selected {
+  background-color: $darken-utility-color;
+}
+
+tr:hover {
   background-color: $utility-color;
 }
 
@@ -32,6 +37,7 @@ tr.selected {
 }
 
 .rt-header-element {
+  position: relative;
   @extend .rt-headers;
   min-width: 10px;
   padding: 2px;
@@ -44,6 +50,7 @@ tr.selected {
 .rt-header-menu {
   display: none;
   position: absolute;
+  top: 100%;
   text-shadow: none;
   color: $text-color;
   border-radius: 2px;

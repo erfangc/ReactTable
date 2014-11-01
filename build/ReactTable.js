@@ -71,9 +71,17 @@ var Row = React.createClass({displayName: 'Row',
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var style = {"textAlign": (columnDef.format == 'number') ? "right" : "left"};
-            var cellContent = columnDef.format != 'number' ? this.props.data[columnDef.colTag] : this.props.data[columnDef.colTag].toFixed(2);
-            cells.push(React.createElement("td", {style: style, key: columnDef.colTag}, cellContent));
+            var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
+            var cx = React.addons.classSet;
+            var classes = cx(lookAndFeel.classes);
+            cells.push(
+                React.createElement("td", {
+                    className: classes, 
+                    style: lookAndFeel.styles, 
+                    key: columnDef.colTag}, 
+                    lookAndFeel.value
+                )
+            );
         }
         var cx = React.addons.classSet;
         var classes = cx({
@@ -105,7 +113,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         });
         return (
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
-                React.createElement("li", null, 
+                React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
@@ -120,27 +128,33 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
-    console.log(table);
     var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        return (
+        var style = {
+            textAlign: getColumnAlignment(columnDef)
+        }
+        var menuStyle = {};
+        if (style.textAlign == 'right')
+            menuStyle.right = "0%";
+        else
+            menuStyle.left = "0%";
 
-            React.createElement("div", {className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("div", null, 
-                    React.createElement("a", {className: "btn-link"}, columnDef.text)
-                ), 
-                React.createElement("div", {className: "rt-header-menu"}, 
+        return (
+            React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link"}, columnDef.text), 
+                React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
-                    React.createElement("div", {onClick: table.handleRemove.bind(table,columnDef)}, "Remove Column")
+                    React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
                 )
             )
         );
     });
-    headerColumns.push(React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-        React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
-            React.createElement("strong", null, "+")
-        )
-    ));
+    headerColumns.push(
+        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+                React.createElement("strong", null, "+")
+            )
+        ));
     return (
         React.createElement("div", {key: "header"}, headerColumns)
     );
@@ -180,20 +194,6 @@ function buildFooter(table, paginationAttr) {
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
             handleClick: table.handlePageClick})) : null;
-}
-
-function buildSortingAscCaret(){
-    return (
-        React.createElement("span", {className: "dropup"}, 
-            React.createElement("span", {className: "caret sort-asc"})
-        )
-    );
-}
-
-function buildSortingDescCaret(){
-    return (
-        React.createElement("span", {className: "caret sort-desc"})
-    );
 }
 
 function getPageArithmetics(table, data) {
@@ -334,20 +334,20 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
 
 // TODO wean off jquery
 
-function adjustHeaders(){
+function adjustHeaders() {
     var counter = 0;
     var headerElems = $(".rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
-    headerElems.each(function(){
+    headerElems.each(function () {
         var width = $('.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
 }
 
-$(document).ready(function(){
-    $('.rt-scrollable').bind('scroll', function(){
+$(document).ready(function () {
+    $('.rt-scrollable').bind('scroll', function () {
         $(".rt-headers").scrollLeft($(this).scrollLeft());
     });
 });
