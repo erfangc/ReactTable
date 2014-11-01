@@ -22,7 +22,13 @@ var ReactTable = React.createClass({
     handleToggleHide: ReactTableHandleToggleHide,
     handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
-    componentDidMount: adjustHeaders,
+    componentDidMount: function () {
+        adjustHeaders.call(this);
+        window.addEventListener('resize', adjustHeaders);
+    },
+    componentWillUnmount: function() {
+        window.removeEventListener('resize', adjustHeaders);
+    },
     componentDidUpdate: adjustHeaders,
     render: function () {
         var uncollapsedRows = [];
