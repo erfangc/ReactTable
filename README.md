@@ -44,7 +44,7 @@ rowKey             |String          |specifies the property in the data array th
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 
 ## Possible `columnDefs` Options
-The following properties are valid on objects inside of columnDefs
+The following properties are valid on `columnDef` objects, which are nested under the `columnDefs` array given to the table options
 
 Column Option Name|Description
 -------|------------------
