@@ -67,5 +67,5 @@ a.disabled {
 
 .rt-scrollable {
   overflow-y: scroll;
-  max-height: 500px;
+  max-height: $max-height;
 }
