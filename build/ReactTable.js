@@ -346,17 +346,19 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
-
-// TODO wean off jquery
+/* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
+ the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
+ of all cells/headers
+ */
 
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $("#" + id + ">.rt-header-element");
+    var headerElems = $("#"+id+" .rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
     headerElems.each(function () {
-        var width = $('#' + id + '>.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        var width = $('#'+id+' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
