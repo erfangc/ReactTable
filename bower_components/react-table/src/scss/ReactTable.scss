@@ -1,0 +1,78 @@
+@import "Variables";
+@import "Pagination";
+
+a.btn-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rt-table {
+  box-sizing: border-box;
+  color: $text-color;
+  width: 100%;
+  font-family: $table-font-family;
+  font-size: 11px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  td {
+    border-bottom: 1px solid $utility-color;
+    padding: 5px;
+  }
+}
+
+tr.selected {
+  background-color: $darken-utility-color;
+}
+
+tr:hover {
+  background-color: $utility-color;
+}
+
+.rt-headers {
+  @extend .rt-table;
+  color: $contrast-text-color;
+  background-color: $main-bg-color;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.rt-header-element {
+  position: relative;
+  @extend .rt-headers;
+  min-width: 10px;
+  padding: 2px;
+  display: inline-block;
+  &:hover .rt-header-menu {
+    display: block;
+  }
+}
+
+.rt-header-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  text-shadow: none;
+  color: $text-color;
+  border-radius: 2px;
+  background-color: $utility-color;
+  div {
+    font-size: 9px;
+    cursor: pointer;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 1px;
+    &:hover {
+      background-color: $main-bg-color;
+      color: $contrast-text-color;
+    }
+  }
+}
+
+a.disabled {
+  pointer-events: none;
+}
+
+.rt-scrollable {
+  overflow-y: scroll;
+  max-height: $max-height;
+}

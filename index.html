@@ -1,221 +1,254 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
+<head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="ReactTable : High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and More Implemented using Facebook react.js">
+    <meta name="description"
+          content="ReactTable : High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and More Implemented using Facebook react.js">
 
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/react/react-with-addons.js"></script>
+
+    <script src="bower_components/react-table/dist/react-table.js"></script>
+    <link rel="stylesheet" href="bower_components/react-table/dist/react-table.css"/>
+
+    <script src="javascripts/main.js"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
     <title>ReactTable</title>
-  </head>
+</head>
 
-  <body>
+<body>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/erfangc/ReactTable">View on GitHub</a>
+<!-- HEADER -->
+<div id="header_wrap" class="outer">
+    <header class="inner">
+        <a id="forkme_banner" href="https://github.com/erfangc/ReactTable">View on GitHub</a>
 
-          <h1 id="project_title">ReactTable</h1>
-          <h2 id="project_tagline">High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and More Implemented using Facebook react.js</h2>
+        <h1 id="project_title">ReactTable</h1>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/erfangc/ReactTable/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/erfangc/ReactTable/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
+        <h2 id="project_tagline">High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and
+            More Implemented using Facebook react.js</h2>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+        <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/erfangc/ReactTable/zipball/master">Download this
+                project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/erfangc/ReactTable/tarball/master">Download this
+                project as a tar.gz file</a>
+        </section>
+    </header>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main_content_wrap" class="outer">
+    <section id="main_content" class="inner">
         <h1>
-<a name="reacttable" class="anchor" href="#reacttable"><span class="octicon octicon-link"></span></a>ReactTable</h1>
+            <a name="reacttable" class="anchor" href="#reacttable"><span class="octicon octicon-link"></span></a>ReactTable
+        </h1>
 
-<p>High Performance HTML Table with Row Grouping functionality Implemented using Facebook <a href="https://github.com/facebook/react">react.js</a></p>
+        <p>High Performance HTML Table with Row Grouping functionality Implemented using Facebook <a
+                href="https://github.com/facebook/react">react.js</a></p>
 
-<p><em>requires <a href="https://github.com/facebook/react">react.js</a></em></p>
+        <p><em>requires <a href="https://github.com/facebook/react">react.js</a></em></p>
 
-<p>Capabilities Include:</p>
+        <p>Capabilities Include:</p>
 
-<ul>
-<li>Add/Remove Columns</li>
-<li>Sorting/Custom Sorting</li>
-<li>Row Grouping to Arbitrary Depth</li>
-<li>Automatic Aggregation</li>
-<li>Custom Cell Class Names</li>
-<li>Custom Pagination</li>
-</ul>
+        <ul>
+            <li>Add/Remove Columns</li>
+            <li>Sorting/Custom Sorting</li>
+            <li>Row Grouping to Arbitrary Depth</li>
+            <li>Automatic Aggregation</li>
+            <li>Custom Cell Class Names</li>
+            <li>Custom Pagination</li>
+        </ul>
 
-<h2>
-<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
+        <h1>Example</h1>
+            <div id="table"></div>
+        <h2>
+            <a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
 
-<p>Run the following <code>bower</code> command, this will install <a href="https://github.com/facebook/react">react.js</a> as a dependecy.
-Note that <strong>jQuery</strong> is not necessary to use this project</p>
+        <p>Run the following <code>bower</code> command, this will install <a href="https://github.com/facebook/react">react.js</a>
+            as a dependecy.
+            Note that <strong>jQuery</strong> is not necessary to use this project</p>
 
 <pre><code>&gt; bower install react-table
 </code></pre>
 
-<h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+        <h2>
+            <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <pre><code>var options = { ... };
-React.renderComponent(Table(options), document.getElementById("table"));
+    React.renderComponent(Table(options), document.getElementById("table"));
 </code></pre>
 
-<h2>
-<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
+        <h2>
+            <a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
 
-<table>
-<thead>
-<tr>
-<th>Option Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>data</td>
-<td>Array of Objects</td>
-<td>the raw data array (Required)</td>
-</tr>
-<tr>
-<td>columnDefs</td>
-<td>Array of Objects</td>
-<td>column definitions on how to construct the headers of the table</td>
-</tr>
-<tr>
-<td>groupBy</td>
-<td>Array of Objects</td>
-<td>columnDefs to dynamically group rows by</td>
-</tr>
-<tr>
-<td>afterColumnRemove</td>
-<td>Function</td>
-<td>callback function to invoke after a column has been removed by the user</td>
-</tr>
-<tr>
-<td>beforeColumnAdd</td>
-<td>Function</td>
-<td>callback function to invoke when the "+" button is clicked on the header</td>
-</tr>
-<tr>
-<td>selectedRows</td>
-<td>Array of Strings</td>
-<td>row keys of initially selected rows, must be used with the 'rowKey' option</td>
-</tr>
-<tr>
-<td>rowKey</td>
-<td>String</td>
-<td>specifies the property in the data array that should be used as the unique identifier of the given row for example: <code>{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}</code>
-</td>
-</tr>
-</tbody>
-</table>
+        <table>
+            <thead>
+            <tr>
+                <th>Option Name</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>data</td>
+                <td>Array of Objects</td>
+                <td>the raw data array (Required)</td>
+            </tr>
+            <tr>
+                <td>columnDefs</td>
+                <td>Array of Objects</td>
+                <td>column definitions on how to construct the headers of the table</td>
+            </tr>
+            <tr>
+                <td>groupBy</td>
+                <td>Array of Objects</td>
+                <td>columnDefs to dynamically group rows by</td>
+            </tr>
+            <tr>
+                <td>afterColumnRemove</td>
+                <td>Function</td>
+                <td>callback function to invoke after a column has been removed by the user</td>
+            </tr>
+            <tr>
+                <td>beforeColumnAdd</td>
+                <td>Function</td>
+                <td>callback function to invoke when the "+" button is clicked on the header</td>
+            </tr>
+            <tr>
+                <td>selectedRows</td>
+                <td>Array of Strings</td>
+                <td>row keys of initially selected rows, must be used with the 'rowKey' option</td>
+            </tr>
+            <tr>
+                <td>rowKey</td>
+                <td>String</td>
+                <td>specifies the property in the data array that should be used as the unique identifier of the given
+                    row for example: <code>{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}</code>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-<h2>
-<a name="table-usage-example" class="anchor" href="#table-usage-example"><span class="octicon octicon-link"></span></a>Table Usage Example</h2>
+        <h2>
+            <a name="table-usage-example" class="anchor" href="#table-usage-example"><span
+                    class="octicon octicon-link"></span></a>Table Usage Example</h2>
 
-<pre><code>var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
-React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
+<pre><code>var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy:
+    [{colTag: "birth_city"}] };
+    React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 </code></pre>
 
-<h2>
-<a name="possible-columndefs-options" class="anchor" href="#possible-columndefs-options"><span class="octicon octicon-link"></span></a>Possible <code>columnDefs</code> Options</h2>
+        <h2>
+            <a name="possible-columndefs-options" class="anchor" href="#possible-columndefs-options"><span
+                    class="octicon octicon-link"></span></a>Possible <code>columnDefs</code> Options</h2>
 
-<p>The following properties are valid on <code>columnDef</code> objects, which are nested under the <code>columnDefs</code> array passed to the main table options. These options control the appearance and behaviors of the associated columns.</p>
+        <p>The following properties are valid on <code>columnDef</code> objects, which are nested under the <code>columnDefs</code>
+            array passed to the main table options. These options control the appearance and behaviors of the associated
+            columns.</p>
 
-<table>
-<thead>
-<tr>
-<th>Column Option Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>colTag</td>
-<td>column identifier</td>
-</tr>
-<tr>
-<td>text</td>
-<td>display text in the table header</td>
-</tr>
-<tr>
-<td>format</td>
-<td>choose from 'number', 'currency', 'date' or 'string'</td>
-</tr>
-<tr>
-<td>sort</td>
-<td>custom callback function for sorting the column</td>
-</tr>
-<tr>
-<td>cellClassCallback</td>
-<td>custom callback for applying custom CSS classes to cells. should should return a object with class names set to true in an object. for example <code>{ green: true, special: true}</code>
-</td>
-</tr>
-<tr>
-<td>formatInstructions</td>
-<td>a string that represents how you want cells to be formatted, options are</td>
-</tr>
-</tbody>
-</table>
+        <table>
+            <thead>
+            <tr>
+                <th>Column Option Name</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>colTag</td>
+                <td>column identifier</td>
+            </tr>
+            <tr>
+                <td>text</td>
+                <td>display text in the table header</td>
+            </tr>
+            <tr>
+                <td>format</td>
+                <td>choose from 'number', 'currency', 'date' or 'string'</td>
+            </tr>
+            <tr>
+                <td>sort</td>
+                <td>custom callback function for sorting the column</td>
+            </tr>
+            <tr>
+                <td>cellClassCallback</td>
+                <td>custom callback for applying custom CSS classes to cells. should should return a object with class
+                    names set to true in an object. for example <code>{ green: true, special: true}</code>
+                </td>
+            </tr>
+            <tr>
+                <td>formatInstructions</td>
+                <td>a string that represents how you want cells to be formatted, options are</td>
+            </tr>
+            </tbody>
+        </table>
 
-<h2>
-<a name="valid-formatinstructions-options" class="anchor" href="#valid-formatinstructions-options"><span class="octicon octicon-link"></span></a>Valid <code>formatInstructions</code> Options</h2>
+        <h2>
+            <a name="valid-formatinstructions-options" class="anchor" href="#valid-formatinstructions-options"><span
+                    class="octicon octicon-link"></span></a>Valid <code>formatInstructions</code> Options</h2>
 
-<ul>
-<li>multiplier - a number to multiply the cell content by</li>
-<li>roundTo - the number of digits to round to</li>
-<li>unit - text to attach to every cell in the column (such as m, KG, EUR)</li>
-<li>alignment - choose from center, left and right</li>
-</ul>
+        <ul>
+            <li>multiplier - a number to multiply the cell content by</li>
+            <li>roundTo - the number of digits to round to</li>
+            <li>unit - text to attach to every cell in the column (such as m, KG, EUR)</li>
+            <li>alignment - choose from center, left and right</li>
+        </ul>
 
-<h4>
-<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h4>
+        <h4>
+            <a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h4>
 
-<p>Please note you <strong>cannot</strong> have spaces in the format instruction values, since spaces are used as a separator</p>
+        <p>Please note you <strong>cannot</strong> have spaces in the format instruction values, since spaces are used
+            as a separator</p>
 
 <pre><code>{ ..., formatInstructions: "multiplier:100 unit:KG"}
 </code></pre>
 
-<h2>
-<a name="developing" class="anchor" href="#developing"><span class="octicon octicon-link"></span></a>Developing</h2>
+        <h2>
+            <a name="developing" class="anchor" href="#developing"><span class="octicon octicon-link"></span></a>Developing
+        </h2>
 
-<p><em>You will need <a href="http://nodejs.org/download/">node.js</a> installed on your development PC in order to use the tools below</em></p>
+        <p><em>You will need <a href="http://nodejs.org/download/">node.js</a> installed on your development PC in order
+            to use the tools below</em></p>
 
-<p>You will first need to download and install <a href="http://facebook.github.io/react/docs/tooling-integration.html">react-tools</a> by running:</p>
+        <p>You will first need to download and install <a
+                href="http://facebook.github.io/react/docs/tooling-integration.html">react-tools</a> by running:</p>
 
 <pre><code>&gt; npm install -g react-tools
 </code></pre>
 
-<p>Each time you update source files, you should run the JSX compiler provided as part of react-tools via:</p>
+        <p>Each time you update source files, you should run the JSX compiler provided as part of react-tools via:</p>
 
 <pre><code>&gt; jsx ./src ./build
-// assuming your working directory is the project base directory
+    // assuming your working directory is the project base directory
 </code></pre>
 
-<p>Alternatively you can automatically perform this by using <code>jsx --watch</code> or setup a file watcher in Webstorm. If you are setting up a file watcher in Webstorm, it may be best to install <code>react-tools</code> locally instead of globally, simply remove <code>-g</code> from the above <code>npm</code> command</p>
+        <p>Alternatively you can automatically perform this by using <code>jsx --watch</code> or setup a file watcher in
+            Webstorm. If you are setting up a file watcher in Webstorm, it may be best to install
+            <code>react-tools</code> locally instead of globally, simply remove <code>-g</code> from the above
+            <code>npm</code> command</p>
 
-<p>To compile the project run:</p>
+        <p>To compile the project run:</p>
 
 <pre><code>&gt; grunt build
 </code></pre>
-      </section>
-    </div>
+    </section>
+</div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
+<!-- FOOTER  -->
+<div id="footer_wrap" class="outer">
+    <footer class="inner">
         <p class="copyright">ReactTable maintained by <a href="https://github.com/erfangc">erfangc</a></p>
+
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+    </footer>
+</div>
 
-    
 
-  </body>
+</body>
 </html>
