@@ -22,11 +22,12 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleToggleHide: ReactTableHandleToggleHide,
     handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
+    handleSummaryRowSelect: ReactTableHandleSummaryRowSelect,
     componentDidMount: function () {
         adjustHeaders.call(this);
         window.addEventListener('resize', adjustHeaders.bind(this));
     },
-    componentWillUnmount: function() {
+    componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
@@ -57,9 +58,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
-                React.createElement("div", {className: "rt-headers"}, 
-                    headers
-                ), 
+                headers, 
                 React.createElement("div", {className: "rt-scrollable"}, 
                     React.createElement("table", {className: "rt-table"}, 
                         React.createElement("tbody", null, 
@@ -162,7 +161,7 @@ function buildHeaders(table) {
             )
         ));
     return (
-        React.createElement("div", {key: "header"}, headerColumns)
+        React.createElement("div", {key: "header", className: "rt-headers"}, headerColumns)
     );
 }
 function buildFirstCellForRow(props) {
@@ -267,7 +266,17 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 }
 
 /* Other utility functions */
-
+function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
+    "use strict";
+    var result = true, i = 0, loopSize = sectorPath1.length;
+    if (sectorPath1.length != sectorPath2.length)
+        result = false;
+    else
+        for (i = 0; i < loopSize; i++)
+            if (sectorPath1[i] != sectorPath2[i])
+                result = false;
+    return result
+}
 function generateRowKey(row, rowKey) {
     var key;
     if (rowKey)
@@ -338,19 +347,16 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-/* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
-the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
-of all cells/headers
- */
+// TODO wean off jquery
 
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $("#"+id+" .rt-header-element");
+    var headerElems = $("#" + id + ">.rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
     headerElems.each(function () {
-        var width = $('#'+id+' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        var width = $('#' + id + '>.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
@@ -363,7 +369,7 @@ $(document).ready(function () {
 });
 
 var idCounter = 0;
-function uniqueId (prefix) {
+function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };

@@ -60,6 +60,10 @@ $(function () {
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
+            },
+            onSummarySelectCallback: function (result) {
+                console.log(result.summaryRow);
+                console.log("Includes "+result.detailRows.length+" detail rows!");
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));

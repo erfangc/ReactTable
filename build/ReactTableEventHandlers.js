@@ -70,20 +70,39 @@ function ReactTableHandleToggleHide(summaryRow) {
         collapsedSectorKeys: this.state.collapsedSectorKeys
     });
 }
+function ReactTableHandleSummaryRowSelect(summaryRow) {
+    "use strict";
+    var result = {detailRows: [], summaryRow: summaryRow}, i = 0, dataSize = this.state.data.length, row = null;
+    for (i = 0; i < dataSize; i++) {
+        row = this.state.data[i];
+        if (row.isDetail &&
+            (isSubSectorOf(row.sectorPath, summaryRow.sectorPath) ||
+            sectorPathMatchesExactly(row.sectorPath, summaryRow.sectorPath))
+        )
+            result.detailRows.push(row);
+    }
+    if (this.props.onSummarySelectCallback)
+        this.props.onSummarySelectCallback(result);
+}
 
 function ReactTableHandleRowSelect(row) {
     var rowKey = this.props.rowKey;
-    if (!rowKey || !row.isDetail)
-        return
-    if (this.props.onSelectCallback)
-        this.props.onSelectCallback.call(this, row);
+    if (!row.isDetail) {
+        this.handleSummaryRowSelect(row);
+    }
+    else {
+        if (!rowKey)
+            return;
+        if (this.props.onSelectCallback)
+            this.props.onSelectCallback.call(this, row);
 
-    var selectedRows = this.state.selectedRows;
-    if (!selectedRows[row[rowKey]])
-        selectedRows[row[rowKey]] = 1;
-    else
-        delete selectedRows[row[rowKey]];
-    this.setState({selectedRows: selectedRows});
+        var selectedRows = this.state.selectedRows;
+        if (!selectedRows[row[rowKey]])
+            selectedRows[row[rowKey]] = 1;
+        else
+            delete selectedRows[row[rowKey]];
+        this.setState({selectedRows: selectedRows});
+    }
 }
 
 function ReactTableHandlePageClick(page) {
