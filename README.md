@@ -1,12 +1,12 @@
 # ReactTable
 **New Project - Not All Features Functional**
 
-HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
+High Performance HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
 *requires [react.js](https://github.com/facebook/react)*
 
 Capabilities Include:
-
+- Able to Handle Large Quantities of Data
 - Add/Remove Columns
 - Sorting/Custom Sorting
 - Row Grouping to Arbitrary Depth
