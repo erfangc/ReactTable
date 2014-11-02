@@ -64,6 +64,9 @@ a.btn-link {
 tr.selected {
   background-color: #e1e7eb; }
 
+tr.summary-selected {
+  background-color: #d1dbe1; }
+
 tr:hover {
   background-color: #f0f3f5; }
 

@@ -15,14 +15,16 @@
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
+
     getInitialState: ReactTableGetInitialState,
+
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
-    handleSummaryRowSelect: ReactTableHandleSummaryRowSelect,
+    handleRowSelect: ReactHandleRowSelect,
+
     componentDidMount: function () {
         adjustHeaders.call(this);
         window.addEventListener('resize', adjustHeaders.bind(this));
@@ -31,6 +33,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
+
     render: function () {
         var uncollapsedRows = [];
         // determine which rows are unhidden based on which sectors are collapsed
@@ -48,7 +51,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             return (React.createElement(Row, {
                 data: row, 
                 key: generateRowKey(row, rowKey), 
-                isSelected: rowKey && this.state.selectedRows[row[rowKey]] ? true : false, 
+                isSelected: isRowSelected.call(this, row), 
                 onSelect: this.handleRowSelect, 
                 columnDefs: this.state.columnDefs, 
                 toggleHide: this.handleToggleHide}));
@@ -70,6 +73,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             )
         );
     }
+
 });
 var Row = React.createClass({displayName: 'Row',
     render: function () {
@@ -90,7 +94,8 @@ var Row = React.createClass({displayName: 'Row',
         }
         var cx = React.addons.classSet;
         var classes = cx({
-            'selected': this.props.isSelected
+            'selected': this.props.isSelected && this.props.data.isDetail,
+            'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
@@ -168,7 +173,7 @@ function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag;
 
-    // if sectorPath is not availiable - return a normal cell
+    // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
         return React.createElement("td", {key: firstColTag}, data[firstColTag]);
 
@@ -328,13 +333,6 @@ function getInitiallyCollapsedSectorPaths(data) {
     });
     return result;
 }
-function getInitiallySelectedRows(selectedRows) {
-    var result = {};
-    selectedRows = selectedRows || [];
-    for (var i = 0; i < selectedRows.length; i++)
-        result[selectedRows[i]] = 1;
-    return result;
-}
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // total number to allocate
     var displayUnitsLeft = maxDisplayedPages;
@@ -346,19 +344,19 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
+
 /* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
  the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
  of all cells/headers
  */
-
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $("#"+id+" .rt-header-element");
+    var headerElems = $("#" + id + " .rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
     headerElems.each(function () {
-        var width = $('#'+id+' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });

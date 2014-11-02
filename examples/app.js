@@ -52,18 +52,18 @@ $(function () {
             rowKey: 'id',
             data: testData,
             columnDefs: columnDefs,
-            onSelectCallback: function (row) {
-                console.log("id = " + row.id + " clicked");
-            },
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
             },
-            onSummarySelectCallback: function (result) {
+            onSelectCallback: function (row, state) {
+                console.log("id = " + row.id + " clicked state:"+state);
+            },
+            onSummarySelectCallback: function (result, state) {
                 console.log(result.summaryRow);
-                console.log("Includes "+result.detailRows.length+" detail rows!");
+                console.log("Includes "+result.detailRows.length+" detail rows! state:"+state);
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));

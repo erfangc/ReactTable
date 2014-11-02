@@ -23,6 +23,9 @@ a.btn-link {
 tr.selected {
   background-color: $darken-utility-color;
 }
+tr.summary-selected {
+  background-color: $even-darker-utility-color;
+}
 
 tr:hover {
   background-color: $utility-color;
