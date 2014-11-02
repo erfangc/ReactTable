@@ -10,6 +10,7 @@ function ReactTableGetInitialState() {
 
     var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
     return {
+        uniqueId: uniqueId("table"),
         currentPage: 1,
         data: data,
         columnDefs: this.props.columnDefs,
@@ -62,7 +63,7 @@ function ReactTableHandleToggleHide(summaryRow) {
     }
     else {
         delete this.state.collapsedSectorPaths[sectorKey];
-        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey),1);
+        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey), 1);
     }
     this.setState({
         collapsedSectorPaths: this.state.collapsedSectorPaths,

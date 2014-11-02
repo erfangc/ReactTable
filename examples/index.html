@@ -6,6 +6,9 @@
     <script src="../bower_components/react/react-with-addons.js"></script>
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+        }
         td.green {
             font-weight: bold;
             background-color: darkseagreen;
@@ -17,19 +20,37 @@
             background-color: darkred;
             color: #ffffff;
         }
+        .demo-label {
+            font-weight: 500;
+            color: #ffffff;
+            background-image: linear-gradient(#646f7f, #4a5564);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #4a5564;
+            border-radius: 5px;
+            margin-bottom: 1px;
+        }
     </style>
 </head>
 <body>
+<div class="demo-label">
+    Table with 10K Rows and 2 Level Grouping
+</div>
 <div class="container" id="table"></div>
+<br/>
+<div class="demo-label">
+    No Grouping
+</div>
+<div class="container" id="table2"></div>
 
 <link rel="stylesheet" href="../src/scss/ReactTable.css"/>
 
-<script src="../dist/react-table.min.js"></script>
-<!--<script src="../build/ReactTableEventHandlers.js"></script>-->
-<!--<script src="../build/ReactTable.js"></script>-->
-<!--<script src="../build/DataAggregation.js"></script>-->
-<!--<script src="../build/SortUtil.js"></script>-->
-<!--<script src="../build/CellStyleBuilder.js"></script>-->
+<!--<script src="../dist/react-table.min.js"></script>-->
+<script src="../build/ReactTableEventHandlers.js"></script>
+<script src="../build/ReactTable.js"></script>
+<script src="../build/DataAggregation.js"></script>
+<script src="../build/SortUtil.js"></script>
+<script src="../build/CellStyleBuilder.js"></script>
 
 <script src="app.js"></script>
 

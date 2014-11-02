@@ -24,10 +24,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handlePageClick: ReactTableHandlePageClick,
     componentDidMount: function () {
         adjustHeaders.call(this);
-        window.addEventListener('resize', adjustHeaders);
+        window.addEventListener('resize', adjustHeaders.bind(this));
     },
     componentWillUnmount: function() {
-        window.removeEventListener('resize', adjustHeaders);
+        window.removeEventListener('resize', adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
     render: function () {
@@ -56,7 +56,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
         return (
-            React.createElement("div", {className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 React.createElement("div", {className: "rt-headers"}, 
                     headers
                 ), 
@@ -338,15 +338,19 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-// TODO wean off jquery
+/* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
+the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
+of all cells/headers
+ */
 
 function adjustHeaders() {
+    var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $(".rt-header-element");
+    var headerElems = $("#"+id+" .rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
     headerElems.each(function () {
-        var width = $('.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        var width = $('#'+id+' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
@@ -357,3 +361,9 @@ $(document).ready(function () {
         $(".rt-headers").scrollLeft($(this).scrollLeft());
     });
 });
+
+var idCounter = 0;
+function uniqueId (prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+};
