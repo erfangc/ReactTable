@@ -10,14 +10,18 @@ Capabilities Include:
 - Add/Remove Columns
 - Sorting/Custom Sorting
 - Row Grouping to Arbitrary Depth
-- Automatic Aggregation
+- Automatic/Custom Aggregation
 - Custom Cell Class Names
-- Custom Pagination
+- Pagination
+- Multiple Tables
+- Custom Formatting Callback
+- Drag & Drop Columns (Not Functional)
+- Drop a Column to Group (Not Functional)
 
 ## Install
 
 Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) as a dependecy.
-Note that **jQuery** is not necessary to use this project
+Note that **jQuery** is not necessary to use this project (v1.1.0 relies on jQuery, but we are trying to wean off the usage of external libraries in the future other than react.js)
 
     > bower install react-table
 
