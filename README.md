@@ -1,23 +1,27 @@
 # ReactTable
 **New Project - Not All Features Functional**
 
-HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
+High Performance HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
 *requires [react.js](https://github.com/facebook/react)*
 
 Capabilities Include:
-
+- Able to Handle Large Quantities of Data
 - Add/Remove Columns
 - Sorting/Custom Sorting
 - Row Grouping to Arbitrary Depth
-- Automatic Aggregation
+- Automatic/Custom Aggregation
 - Custom Cell Class Names
-- Custom Pagination
+- Pagination
+- Multiple Tables
+- Custom Formatting Callback
+- Drag & Drop Columns (Not Functional)
+- Drop a Column to Group (Not Functional)
 
 ## Install
 
 Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) as a dependecy.
-Note that **jQuery** is not necessary to use this project
+Note that **jQuery** is not necessary to use this project (v1.1.0 relies on jQuery for a few things, but in the future we are trying to wean off the use of external libraries)
 
     > bower install react-table
 
