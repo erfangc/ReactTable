@@ -10,8 +10,6 @@
  * @author Erfang Chen
  */
 
-// TODO handle click events for summary rows
-// TODO formatting
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({
