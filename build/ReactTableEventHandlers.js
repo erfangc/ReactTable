@@ -72,7 +72,8 @@ function ReactTableHandleToggleHide(summaryRow, event) {
     });
 }
 
-function ReactTableHandlePageClick(page) {
+function ReactTableHandlePageClick(page, event) {
+    event.preventDefault();
     var pageSize = this.props.pageSize || 10;
     var maxPage = Math.ceil(this.state.data.length / pageSize);
     if (page < 1 || page > maxPage)

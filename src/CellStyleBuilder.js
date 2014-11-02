@@ -51,7 +51,7 @@ function buildCellLookAndFeel(columnDef, row) {
 
     // determine alignment
     results.styles.textAlign = formatConfig.alignment;
-
+    results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
     return results;
