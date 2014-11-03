@@ -19,10 +19,10 @@ function groupData(data, groupBy, columnDefs) {
 
 /* Aggregation functions TODO implement all */
 function straightSumAggregation(options) {
-    var data = options.data, columnDef = options.columnDef;
-    var result = 0;
+    var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
     for (var i = 0; i < data.length; i++) {
-        result += data[i][columnDef.colTag]
+        temp = data[i][columnDef.colTag] || 0;
+        result +=  temp;
     }
     return result;
 }
@@ -39,9 +39,9 @@ function simpleAverage(options) {
 function weightedAverage(options) {
     var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
     var sumProduct = 0;
-    for (var i = 0; i < data.length; i++) {
-        sumProduct += data[i][columnDef.colTag] * data[i][weightBy.colTag];
-    }
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
     var weightSum = straightSumAggregation({data: data, columnDef: weightBy});
     // TODO does not protect against division by zero
     return sumProduct / weightSum;
