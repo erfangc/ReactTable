@@ -10,26 +10,28 @@
  * @author Erfang Chen
  */
 
-// TODO handle click events for summary rows
-// TODO formatting
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({
+
     getInitialState: ReactTableGetInitialState,
+
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleRowSelect: ReactTableHandleRowSelect,
     handlePageClick: ReactTableHandlePageClick,
+    handleRowSelect: ReactHandleRowSelect,
+
     componentDidMount: function () {
         adjustHeaders.call(this);
         window.addEventListener('resize', adjustHeaders.bind(this));
     },
-    componentWillUnmount: function() {
+    componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
+
     render: function () {
         var uncollapsedRows = [];
         // determine which rows are unhidden based on which sectors are collapsed
@@ -47,7 +49,7 @@ var ReactTable = React.createClass({
             return (<Row
                 data={row}
                 key={generateRowKey(row, rowKey)}
-                isSelected={rowKey && this.state.selectedRows[row[rowKey]] ? true : false}
+                isSelected={isRowSelected.call(this, row)}
                 onSelect={this.handleRowSelect}
                 columnDefs={this.state.columnDefs}
                 toggleHide={this.handleToggleHide}/>);
@@ -57,9 +59,7 @@ var ReactTable = React.createClass({
         var footer = buildFooter(this, paginationAttr);
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
-                <div className="rt-headers">
-                    {headers}
-                </div>
+                {headers}
                 <div className="rt-scrollable">
                     <table className="rt-table">
                         <tbody>
@@ -71,6 +71,7 @@ var ReactTable = React.createClass({
             </div>
         );
     }
+
 });
 var Row = React.createClass({
     render: function () {
@@ -91,7 +92,8 @@ var Row = React.createClass({
         }
         var cx = React.addons.classSet;
         var classes = cx({
-            'selected': this.props.isSelected
+            'selected': this.props.isSelected && this.props.data.isDetail,
+            'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
@@ -162,14 +164,14 @@ function buildHeaders(table) {
             </a>
         </span>);
     return (
-        <div key="header">{headerColumns}</div>
+        <div key="header" className="rt-headers">{headerColumns}</div>
     );
 }
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag;
 
-    // if sectorPath is not availiable - return a normal cell
+    // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
         return <td key={firstColTag}>{data[firstColTag]}</td>;
 
@@ -267,7 +269,17 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 }
 
 /* Other utility functions */
-
+function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
+    "use strict";
+    var result = true, i = 0, loopSize = sectorPath1.length;
+    if (sectorPath1.length != sectorPath2.length)
+        result = false;
+    else
+        for (i = 0; i < loopSize; i++)
+            if (sectorPath1[i] != sectorPath2[i])
+                result = false;
+    return result
+}
 function generateRowKey(row, rowKey) {
     var key;
     if (rowKey)
@@ -319,13 +331,6 @@ function getInitiallyCollapsedSectorPaths(data) {
     });
     return result;
 }
-function getInitiallySelectedRows(selectedRows) {
-    var result = {};
-    selectedRows = selectedRows || [];
-    for (var i = 0; i < selectedRows.length; i++)
-        result[selectedRows[i]] = 1;
-    return result;
-}
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // total number to allocate
     var displayUnitsLeft = maxDisplayedPages;
@@ -338,16 +343,18 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-// TODO wean off jquery
-
+/* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
+ the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
+ of all cells/headers
+ */
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $("#"+id+">.rt-header-element");
+    var headerElems = $("#" + id + " .rt-header-element");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
     headerElems.each(function () {
-        var width = $('#'+id+'>.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
         $(this).width(width);
         counter++;
     });
@@ -360,7 +367,7 @@ $(document).ready(function () {
 });
 
 var idCounter = 0;
-function uniqueId (prefix) {
+function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };

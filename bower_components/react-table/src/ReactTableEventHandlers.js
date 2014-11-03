@@ -55,7 +55,8 @@ function ReactTableHandleRemove(columnDefToRemove) {
         this.props.afterColumnRemove(newColumnDefs, columnDefToRemove);
 }
 
-function ReactTableHandleToggleHide(summaryRow) {
+function ReactTableHandleToggleHide(summaryRow, event) {
+    event.stopPropagation();
     var sectorKey = generateSectorKey(summaryRow.sectorPath);
     if (this.state.collapsedSectorPaths[sectorKey] == null) {
         this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
@@ -71,22 +72,8 @@ function ReactTableHandleToggleHide(summaryRow) {
     });
 }
 
-function ReactTableHandleRowSelect(row) {
-    var rowKey = this.props.rowKey;
-    if (!rowKey || !row.isDetail)
-        return
-    if (this.props.onSelectCallback)
-        this.props.onSelectCallback.call(this, row);
-
-    var selectedRows = this.state.selectedRows;
-    if (!selectedRows[row[rowKey]])
-        selectedRows[row[rowKey]] = 1;
-    else
-        delete selectedRows[row[rowKey]];
-    this.setState({selectedRows: selectedRows});
-}
-
-function ReactTableHandlePageClick(page) {
+function ReactTableHandlePageClick(page, event) {
+    event.preventDefault();
     var pageSize = this.props.pageSize || 10;
     var maxPage = Math.ceil(this.state.data.length / pageSize);
     if (page < 1 || page > maxPage)

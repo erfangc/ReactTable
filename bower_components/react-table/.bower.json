@@ -1,6 +1,6 @@
 {
   "name": "react-table",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage": "https://github.com/erfangc/ReactTable",
   "authors": [
     "erfangc <erfangc@gmail.com>"
@@ -22,16 +22,17 @@
     "tests"
   ],
   "dependencies": {
-    "react": "0.12.0"
+    "react": "0.12.0",
+    "jquery": "2.1.1"
   },
-  "_release": "1.1.1",
+  "_release": "1.1.2",
   "_resolution": {
     "type": "version",
-    "tag": "v1.1.1",
-    "commit": "b2d2874302b42812c8b24ec204ccf4109d6e87f9"
+    "tag": "v1.1.2",
+    "commit": "c7edbe54dd30cf05f5b51568a02babb2881525e0"
   },
-  "_source": "git://github.com/erfangc/ReactTable.git",
-  "_target": "~1.1.1",
+  "_source": "https://github.com/erfangc/ReactTable.git",
+  "_target": "~1.1.2",
   "_originalSource": "react-table",
   "_direct": true
 }
