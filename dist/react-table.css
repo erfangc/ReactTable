@@ -46,12 +46,14 @@
     cursor: not-allowed; }
 
 a.btn-link {
+  color: inherit;
   text-decoration: none;
   cursor: pointer; }
 
 .rt-table, .rt-headers, .rt-header-element {
   box-sizing: border-box;
   color: #4a5564;
+  background-color: #fff;
   width: 100%;
   font-family: Tahoma, Arial, sans-serif;
   font-size: 11px;
@@ -63,6 +65,9 @@ a.btn-link {
 
 tr.selected {
   background-color: #e1e7eb; }
+
+tr.summary-selected {
+  background-color: #d1dbe1; }
 
 tr:hover {
   background-color: #f0f3f5; }
