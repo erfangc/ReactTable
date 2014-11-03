@@ -23,6 +23,15 @@ var ReactTable = React.createClass({
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
 
+    addColumn: function (columnDef, data) {
+        this.state.columnDefs.push(columnDef);
+        this.setState({
+            columnDefs: this.state.columnDefs
+        });
+        if (data)
+            this.setState({data: data});
+    },
+
     componentDidMount: function () {
         adjustHeaders.call(this);
         window.addEventListener('resize', adjustHeaders.bind(this));
@@ -57,10 +66,15 @@ var ReactTable = React.createClass({
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
+
+        var containerStyle = {};
+            if( this.state.height && parseInt(this.state.height) > 0 ){
+            containerStyle.height = this.state.height;
+        }
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div className="rt-scrollable">
+                <div style={containerStyle} className="rt-scrollable">
                     <table className="rt-table">
                         <tbody>
                         {rows}

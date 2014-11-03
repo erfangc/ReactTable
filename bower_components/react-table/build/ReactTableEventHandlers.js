@@ -12,6 +12,7 @@ function ReactTableGetInitialState() {
     return {
         uniqueId: uniqueId("table"),
         currentPage: 1,
+        height: this.props.height,
         data: data,
         columnDefs: this.props.columnDefs,
         collapsedSectorPaths: collapsedSectorPaths,

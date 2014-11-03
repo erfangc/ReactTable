@@ -215,6 +215,15 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
 
+    addColumn: function (columnDef, data) {
+        this.state.columnDefs.push(columnDef);
+        this.setState({
+            columnDefs: this.state.columnDefs
+        });
+        if (data)
+            this.setState({data: data});
+    },
+
     componentDidMount: function () {
         adjustHeaders.call(this);
         window.addEventListener('resize', adjustHeaders.bind(this));
@@ -249,10 +258,15 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
+
+        var containerStyle = {};
+            if( this.state.height && parseInt(this.state.height) > 0 ){
+            containerStyle.height = this.state.height;
+        }
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.createElement("div", {className: "rt-scrollable"}, 
+                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
                     React.createElement("table", {className: "rt-table"}, 
                         React.createElement("tbody", null, 
                         rows
@@ -577,6 +591,7 @@ function uniqueId(prefix) {
     return {
         uniqueId: uniqueId("table"),
         currentPage: 1,
+        height: this.props.height,
         data: data,
         columnDefs: this.props.columnDefs,
         collapsedSectorPaths: collapsedSectorPaths,

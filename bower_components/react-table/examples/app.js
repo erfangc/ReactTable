@@ -24,7 +24,7 @@ $(function () {
             }
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
-        {colTag: "currency_used", text: "Currency Used"},
+        //{colTag: "currency_used", text: "Currency Used"},
         {colTag: "score_weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     var columnDefs2 = [
@@ -51,9 +51,11 @@ $(function () {
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
+            height: "300px",
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
+                addMe();
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
@@ -66,7 +68,11 @@ $(function () {
                 console.log("Includes "+result.detailRows.length+" detail rows! state:"+state);
             }
         };
-        React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+        var table1 = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+
+        function addMe(){
+            table1.addColumn({colTag: "currency_used", text: "Currency used"});
+        }
 
         // second table
         var options2 = {

@@ -1,15 +1,79 @@
 /* Table Declarations */
 /* Pagination Variables - Credit: Bootstrap */
+.rt-table-container {
+  box-sizing: border-box;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  /************* main table styling *************/
+  /************* table header styling *************/
+  /************* misc styling *************/ }
+  .rt-table-container .rt-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    color: #4a5564;
+    background-color: #fff; }
+    .rt-table-container .rt-table tr.selected {
+      background-color: #e1e7eb; }
+    .rt-table-container .rt-table tr.summary-selected {
+      background-color: #d1dbe1; }
+    .rt-table-container .rt-table tr:hover {
+      background-color: #f0f3f5; }
+    .rt-table-container .rt-table td {
+      border-bottom: 1px solid #f0f3f5;
+      padding: 5px; }
+  .rt-table-container > .rt-headers {
+    color: #fff;
+    background-color: #4a5564;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5); }
+    .rt-table-container > .rt-headers > .rt-header-element {
+      position: relative;
+      min-width: 10px;
+      padding: 2px;
+      display: inline-block;
+      /* header hover menu */
+      /* display header menu on hover */ }
+      .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        text-shadow: none;
+        color: #4a5564;
+        border-radius: 2px;
+        background-color: #f0f3f5;
+        /* menu items */ }
+        .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu div {
+          font-size: 9px;
+          cursor: pointer;
+          margin: 5px;
+          padding: 5px;
+          border-radius: 1px; }
+          .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu div:hover {
+            background-color: #4a5564;
+            color: #fff; }
+      .rt-table-container > .rt-headers > .rt-header-element:hover .rt-header-menu {
+        display: block; }
+  .rt-table-container a.btn-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer; }
+  .rt-table-container a.disabled {
+    pointer-events: none; }
+  .rt-table-container > .rt-scrollable {
+    overflow-y: scroll;
+    max-height: 750px; }
+
 /* Pagination */
-.pagination {
+.rt-table-container .pagination {
   display: inline-block;
   padding-left: 0;
   margin: 10px 0;
   font-size: 11px; }
-  .pagination > li {
+  .rt-table-container .pagination > li {
     display: inline; }
-    .pagination > li > a,
-    .pagination > li > span {
+    .rt-table-container .pagination > li > a,
+    .rt-table-container .pagination > li > span {
       position: relative;
       float: left;
       padding: 6px 12px;
@@ -19,96 +83,30 @@
       background-color: #fff;
       border: 1px solid #f0f3f5;
       margin-left: -1px; }
-  .pagination > li > a:hover, .pagination > li > a:focus,
-  .pagination > li > span:hover,
-  .pagination > li > span:focus {
+  .rt-table-container .pagination > li > a:hover, .rt-table-container .pagination > li > a:focus,
+  .rt-table-container .pagination > li > span:hover,
+  .rt-table-container .pagination > li > span:focus {
     color: #4a5564;
     background-color: #f0f3f5;
     border-color: #f0f3f5; }
-  .pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus,
-  .pagination > .active > span,
-  .pagination > .active > span:hover,
-  .pagination > .active > span:focus {
+  .rt-table-container .pagination > .active > a, .rt-table-container .pagination > .active > a:hover, .rt-table-container .pagination > .active > a:focus,
+  .rt-table-container .pagination > .active > span,
+  .rt-table-container .pagination > .active > span:hover,
+  .rt-table-container .pagination > .active > span:focus {
     z-index: 2;
     color: #fff;
     background-color: #4a5564;
     border-color: #f0f3f5;
     cursor: default; }
-  .pagination > .disabled > span,
-  .pagination > .disabled > span:hover,
-  .pagination > .disabled > span:focus,
-  .pagination > .disabled > a,
-  .pagination > .disabled > a:hover,
-  .pagination > .disabled > a:focus {
+  .rt-table-container .pagination > .disabled > span,
+  .rt-table-container .pagination > .disabled > span:hover,
+  .rt-table-container .pagination > .disabled > span:focus,
+  .rt-table-container .pagination > .disabled > a,
+  .rt-table-container .pagination > .disabled > a:hover,
+  .rt-table-container .pagination > .disabled > a:focus {
     color: #ddd;
     background-color: #fff;
     border-color: #f0f3f5;
     cursor: not-allowed; }
-
-a.btn-link {
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer; }
-
-.rt-table, .rt-headers, .rt-header-element {
-  box-sizing: border-box;
-  color: #4a5564;
-  background-color: #fff;
-  width: 100%;
-  font-family: Tahoma, Arial, sans-serif;
-  font-size: 11px;
-  border-collapse: collapse;
-  border-spacing: 0; }
-  .rt-table td, .rt-headers td, .rt-header-element td {
-    border-bottom: 1px solid #f0f3f5;
-    padding: 5px; }
-
-tr.selected {
-  background-color: #e1e7eb; }
-
-tr.summary-selected {
-  background-color: #d1dbe1; }
-
-tr:hover {
-  background-color: #f0f3f5; }
-
-.rt-headers, .rt-header-element {
-  color: #fff;
-  background-color: #4a5564;
-  font-weight: bold;
-  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5); }
-
-.rt-header-element {
-  position: relative;
-  min-width: 10px;
-  padding: 2px;
-  display: inline-block; }
-  .rt-header-element:hover .rt-header-menu {
-    display: block; }
-
-.rt-header-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  text-shadow: none;
-  color: #4a5564;
-  border-radius: 2px;
-  background-color: #f0f3f5; }
-  .rt-header-menu div {
-    font-size: 9px;
-    cursor: pointer;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 1px; }
-    .rt-header-menu div:hover {
-      background-color: #4a5564;
-      color: #fff; }
-
-a.disabled {
-  pointer-events: none; }
-
-.rt-scrollable {
-  overflow-y: scroll;
-  max-height: 750px; }
 
 /*# sourceMappingURL=ReactTable.css.map */
