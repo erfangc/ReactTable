@@ -39,8 +39,8 @@ columnDefs         |Array of Objects|column definitions on how to construct the 
 groupBy            |Array of Objects|columnDefs to dynamically group rows by
 afterColumnRemove  |Function        |callback function to invoke after a column has been removed by the user
 beforeColumnAdd    |Function        |callback function to invoke when the "+" button is clicked on the header
-onSelectCallback   |Function        |callback function to invoke when a detail row is selected. The selected row will be passed to the callback function as an argument
-onSummarySelectCallback|Function    |callback function to invoke when a summary row is selected. The selected row will be passed an object that contain two properties: `detailRows` which contains detail rows belonging to the given summary row plus the `summaryRow` itself
+onSelectCallback   |Function        |callback function to invoke when a detail row is selected. The selected row will be passed to the callback function as the first argument. The second argument passed will be a boolean representing the selection state of the row that was just clicked on
+onSummarySelectCallback|Function    |callback function to invoke when a summary row is selected. The selected row will be passed as the first argument to the callback as an object that contain two properties: `detailRows` which contains detail rows belonging to the given summary row plus the `summaryRow` itself. The second argument passed will be a boolean representing the selection state of the row that was just clicked on
 selectedRows       |Array of Strings|row keys of initially selected rows, must be used with the 'rowKey' option
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 
