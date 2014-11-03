@@ -311,7 +311,10 @@ function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
 }
 function generateRowKey(row, rowKey) {
     var key;
-    if (rowKey)
+    if (!row.isDetail) {
+        key = generateSectorKey(row.sectorPath);
+    }
+    else if (rowKey)
         key = row[rowKey];
     else {
         key = generateSectorKey(row.sectorPath);

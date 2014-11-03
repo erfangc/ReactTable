@@ -32,7 +32,7 @@ function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
-    columnDef.formatConfig = columnDef.formatConfig || buildLAFConfigObject(columnDef);
+    columnDef.formatConfig = buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
     // invoke cell class callback
