@@ -20,6 +20,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
+    handleGroupBy: ReacTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
 
@@ -68,7 +69,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-            if( this.state.height && parseInt(this.state.height) > 0 ){
+        if (this.state.height && parseInt(this.state.height) > 0) {
             containerStyle.height = this.state.height;
         }
         return (
@@ -166,6 +167,7 @@ function buildHeaders(table) {
                 React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                    React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
                     React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
                 )
             )

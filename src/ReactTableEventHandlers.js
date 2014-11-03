@@ -36,6 +36,25 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     });
 }
 
+function ReacTableHandleGroupBy (columnDef) {
+    var props = this.props;
+    props.groupBy = [columnDef];
+    var data = prepareTableData.call(this, props);
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+
+    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
+    var collapsedSectorKeys = [];
+    for (var key in collapsedSectorPaths)
+        if (collapsedSectorPaths.hasOwnProperty(key))
+            collapsedSectorKeys.push(key);
+
+    this.setState({
+        data: data,
+        collapsedSectorPaths: collapsedSectorPaths,
+        collapsedSectorKeys: collapsedSectorKeys
+    });
+}
+
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
         this.props.beforeColumnAdd()

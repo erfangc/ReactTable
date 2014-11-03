@@ -212,6 +212,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
+    handleGroupBy: ReacTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
 
@@ -260,7 +261,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-            if( this.state.height && parseInt(this.state.height) > 0 ){
+        if (this.state.height && parseInt(this.state.height) > 0) {
             containerStyle.height = this.state.height;
         }
         return (
@@ -358,6 +359,7 @@ function buildHeaders(table) {
                 React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
                     React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                    React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
                     React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
                 )
             )
@@ -612,6 +614,25 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     this.setState({
         data: data,
         sorting: columnDefToSortBy
+    });
+}
+
+function ReacTableHandleGroupBy (columnDef) {
+    var props = this.props;
+    props.groupBy = [columnDef];
+    var data = prepareTableData.call(this, props);
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+
+    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
+    var collapsedSectorKeys = [];
+    for (var key in collapsedSectorPaths)
+        if (collapsedSectorPaths.hasOwnProperty(key))
+            collapsedSectorKeys.push(key);
+
+    this.setState({
+        data: data,
+        collapsedSectorPaths: collapsedSectorPaths,
+        collapsedSectorKeys: collapsedSectorKeys
     });
 }
 
