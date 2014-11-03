@@ -151,17 +151,29 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
-    var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        var style = {
-            textAlign: getColumnAlignment(columnDef)
-        }
-        var menuStyle = {};
-        if (style.textAlign == 'right')
-            menuStyle.right = "0%";
-        else
-            menuStyle.left = "0%";
+    var columnDef = table.state.columnDefs[0], i = 1, style = {}, menuStyle = {};
+    // 1st column
+    var firstColumn = (
+        React.createElement("div", {style: {textAlign: "left"}, className: "rt-header-element", key: columnDef.colTag}, 
+            React.createElement("a", {className: "btn-link"}, columnDef.text), 
+            React.createElement("div", {style: {"left": "0%"}, className: "rt-header-menu"}, 
+                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
+                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Un-Summarize")
+            )
+        )
+    );
 
-        return (
+    // the rest
+    var headerColumns = [firstColumn];
+    for (i = 1; i < table.state.columnDefs.length; i++) {
+        columnDef = table.state.columnDefs[i];
+        style = {textAlign: getColumnAlignment(columnDef)};
+        menuStyle = {};
+        if (style.textAlign == 'right') menuStyle.right = "0%";
+        else menuStyle.left = "0%";
+        headerColumns.push(
             React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
                 React.createElement("a", {className: "btn-link"}, columnDef.text), 
                 React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
@@ -172,7 +184,8 @@ function buildHeaders(table) {
                 )
             )
         );
-    });
+    }
+    // the plus sign at the end
     headerColumns.push(
         React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
             React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 

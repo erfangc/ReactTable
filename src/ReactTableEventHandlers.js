@@ -38,7 +38,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 
 function ReacTableHandleGroupBy (columnDef) {
     var props = this.props;
-    props.groupBy = [columnDef];
+    props.groupBy = columnDef ? [columnDef] : null;
     var data = prepareTableData.call(this, props);
     var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
 

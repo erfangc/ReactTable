@@ -151,17 +151,29 @@ var PageNavigator = React.createClass({
 /* Virtual DOM builder helpers */
 
 function buildHeaders(table) {
-    var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        var style = {
-            textAlign: getColumnAlignment(columnDef)
-        }
-        var menuStyle = {};
-        if (style.textAlign == 'right')
-            menuStyle.right = "0%";
-        else
-            menuStyle.left = "0%";
+    var columnDef = table.state.columnDefs[0], i = 1, style = {}, menuStyle = {};
+    // 1st column
+    var firstColumn = (
+        <div style={{textAlign: "left"}} className="rt-header-element" key={columnDef.colTag}>
+            <a className="btn-link">{columnDef.text}</a>
+            <div style={{"left": "0%"}} className="rt-header-menu">
+                <div onClick={table.handleSort.bind(table, columnDef, true)}>Sort Asc</div>
+                <div onClick={table.handleSort.bind(table, columnDef, false)}>Sort Dsc</div>
+                <div onClick={table.handleGroupBy.bind(table, columnDef)}>Summarize</div>
+                <div onClick={table.handleGroupBy.bind(table, null)}>Un-Summarize</div>
+            </div>
+        </div>
+    );
 
-        return (
+    // the rest
+    var headerColumns = [firstColumn];
+    for (i = 1; i < table.state.columnDefs.length; i++) {
+        columnDef = table.state.columnDefs[i];
+        style = {textAlign: getColumnAlignment(columnDef)};
+        menuStyle = {};
+        if (style.textAlign == 'right') menuStyle.right = "0%";
+        else menuStyle.left = "0%";
+        headerColumns.push(
             <div style={style} className="rt-header-element" key={columnDef.colTag}>
                 <a className="btn-link">{columnDef.text}</a>
                 <div style={menuStyle} className="rt-header-menu">
@@ -172,7 +184,8 @@ function buildHeaders(table) {
                 </div>
             </div>
         );
-    });
+    }
+    // the plus sign at the end
     headerColumns.push(
         <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
             <a className="btn-link" onClick={table.handleAdd}>
