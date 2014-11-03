@@ -5,6 +5,8 @@ High Performance HTML Table with Group By functionality Implemented using Facebo
 
 *requires [react.js](https://github.com/facebook/react)*
 
+[See a Demo Here](http://erfangc.github.io/ReactTable/)
+
 Capabilities Include:
 - Able to Handle Large Quantities of Data
 - Add/Remove Columns
