@@ -1,6 +1,8 @@
 $(function () {
+    var $outputArea = $("#outputArea");
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
+        {colTag: "email", text: "Email"},
         {
             colTag: "test_score",
             format: "number",
@@ -27,19 +29,21 @@ $(function () {
             data: testData,
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
-                console.log("beforeColumnAdd callback called!");
+                $outputArea.text("beforeColumnAdd callback function called!");
             },
             afterColumnRemove: function (a, b) {
-                console.log("Hello There ... you tried to remove " + b.text);
+                $outputArea.text("you removed " + b.text);
             },
             onSelectCallback: function (row, state) {
-                console.log("id = " + row.id + " clicked state:"+state);
+                $outputArea.text("You clicked Row id = " + row.id + ", selection state:" + state);
             },
             onSummarySelectCallback: function (result, state) {
-                console.log(result.summaryRow);
-                console.log("Includes "+result.detailRows.length+" detail rows! state:"+state);
+                $outputArea.text("Summary Row "
+                + result.summaryRow.sectorPath[0] + (result.summaryRow.sectorPath[1] ? " -> "
+                + result.summaryRow.sectorPath[1] : "") + " includes "
+                + result.detailRows.length + " detail rows, selection state:" + state);
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));
     })
-})
+});

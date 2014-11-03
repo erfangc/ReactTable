@@ -5,7 +5,7 @@
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="description"
-          content="ReactTable : High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and More Implemented using Facebook react.js">
+          content="ReactTable : High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and More - Implemented using Facebook react.js">
 
 
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -29,8 +29,8 @@
 
         <h1 id="project_title">ReactTable</h1>
 
-        <h2 id="project_tagline">High Performance HTML Table with Row Grouping Functionality, Custom Cell Classes and
-            More Implemented using Facebook react.js</h2>
+        <h2 id="project_tagline">Performance HTML Table with <strong>Row Grouping</strong>, <strong>Aggregation</strong>,
+            <strong>Custom Cell Classes</strong> and More - Implemented using react.js</h2>
 
         <section id="downloads">
             <a class="zip_download_link" href="https://github.com/erfangc/ReactTable/zipball/master">Download this
@@ -48,12 +48,20 @@
             <a name="reacttable" class="anchor" href="#reacttable"><span class="octicon octicon-link"></span></a>ReactTable
         </h1>
 
-        <p>High Performance HTML Table with Row Grouping functionality Implemented using Facebook <a
-                href="https://github.com/facebook/react">react.js</a></p>
+        <p>Building upon the virtual DOM paradigm of react.js, this table widget seeks to address
+            the challenge with displaying large quantities of structured business data in a modern browser.
+
+        </p>
+
+        <p>In addition
+            to being highly scalable to large data sets, <strong>ReactTable</strong> features built-in support for
+            column
+            addition/removal and custom event handling such as row group selection.
+        </p>
 
         <p><em>requires <a href="https://github.com/facebook/react">react.js</a></em></p>
 
-        <p>Capabilities Include:</p>
+        <p><strong>Capabilities Include:</strong></p>
 
         <ul>
             <li>Add/Remove Columns</li>
@@ -64,8 +72,14 @@
             <li>Custom Pagination</li>
         </ul>
 
-        <h1>Example</h1>
-            <div id="table"></div>
+        <h1>Example </h1>
+
+        <h2>10K Rows with a Subset of Features Enabled</h2>
+        <p><strong>Features Enabled:</strong> Row Grouping, Custom Cell Classes,
+            Callbacks and Pagination</p>
+        <pre id="outputArea">Play with the Table!</pre>
+        <br/>
+        <div id="table"></div>
         <h2>
             <a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
 
@@ -209,34 +223,7 @@
 <pre><code>{ ..., formatInstructions: "multiplier:100 unit:KG"}
 </code></pre>
 
-        <h2>
-            <a name="developing" class="anchor" href="#developing"><span class="octicon octicon-link"></span></a>Developing
-        </h2>
 
-        <p><em>You will need <a href="http://nodejs.org/download/">node.js</a> installed on your development PC in order
-            to use the tools below</em></p>
-
-        <p>You will first need to download and install <a
-                href="http://facebook.github.io/react/docs/tooling-integration.html">react-tools</a> by running:</p>
-
-<pre><code>&gt; npm install -g react-tools
-</code></pre>
-
-        <p>Each time you update source files, you should run the JSX compiler provided as part of react-tools via:</p>
-
-<pre><code>&gt; jsx ./src ./build
-    // assuming your working directory is the project base directory
-</code></pre>
-
-        <p>Alternatively you can automatically perform this by using <code>jsx --watch</code> or setup a file watcher in
-            Webstorm. If you are setting up a file watcher in Webstorm, it may be best to install
-            <code>react-tools</code> locally instead of globally, simply remove <code>-g</code> from the above
-            <code>npm</code> command</p>
-
-        <p>To compile the project run:</p>
-
-<pre><code>&gt; grunt build
-</code></pre>
     </section>
 </div>
 

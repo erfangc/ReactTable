@@ -3,6 +3,25 @@ Slate Theme for GitHub Pages
 by Jason Costello, @jsncostello
 *******************************************************************************/
 
+/************************
+Custom Styles
+************************/
+td.green {
+  font-weight: bold;
+  background-color: darkseagreen;
+  color: #ffffff;
+}
+
+td.red {
+  font-weight: bold;
+  background-color: darkred;
+  color: #ffffff;
+}
+
+/************************
+End Custom Styles
+************************/
+
 @import url(pygment_trac.css);
 
 /*******************************************************************************

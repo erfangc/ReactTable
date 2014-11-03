@@ -2,138 +2,113 @@
 /* Pagination Variables - Credit: Bootstrap */
 /* Pagination */
 .pagination {
-    display: inline-block;
-    padding-left: 0;
-    margin: 10px 0;
-    font-size: 11px;
-}
-
-.pagination > li {
-    display: inline;
-}
-
-.pagination > li > a,
-.pagination > li > span {
-    position: relative;
-    float: left;
-    padding: 6px 12px;
-    line-height: 1.42857;
-    text-decoration: none;
-    color: #4a5564;
-    background-color: #fff;
-    border: 1px solid #f0f3f5;
-    margin-left: -1px;
-}
-
-.pagination > li > a:hover, .pagination > li > a:focus,
-.pagination > li > span:hover,
-.pagination > li > span:focus {
+  display: inline-block;
+  padding-left: 0;
+  margin: 10px 0;
+  font-size: 11px; }
+  .pagination > li {
+    display: inline; }
+    .pagination > li > a,
+    .pagination > li > span {
+      position: relative;
+      float: left;
+      padding: 6px 12px;
+      line-height: 1.42857;
+      text-decoration: none;
+      color: #4a5564;
+      background-color: #fff;
+      border: 1px solid #f0f3f5;
+      margin-left: -1px; }
+  .pagination > li > a:hover, .pagination > li > a:focus,
+  .pagination > li > span:hover,
+  .pagination > li > span:focus {
     color: #4a5564;
     background-color: #f0f3f5;
-    border-color: #f0f3f5;
-}
-
-.pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus,
-.pagination > .active > span,
-.pagination > .active > span:hover,
-.pagination > .active > span:focus {
+    border-color: #f0f3f5; }
+  .pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus,
+  .pagination > .active > span,
+  .pagination > .active > span:hover,
+  .pagination > .active > span:focus {
     z-index: 2;
     color: #fff;
     background-color: #4a5564;
     border-color: #f0f3f5;
-    cursor: default;
-}
-
-.pagination > .disabled > span,
-.pagination > .disabled > span:hover,
-.pagination > .disabled > span:focus,
-.pagination > .disabled > a,
-.pagination > .disabled > a:hover,
-.pagination > .disabled > a:focus {
+    cursor: default; }
+  .pagination > .disabled > span,
+  .pagination > .disabled > span:hover,
+  .pagination > .disabled > span:focus,
+  .pagination > .disabled > a,
+  .pagination > .disabled > a:hover,
+  .pagination > .disabled > a:focus {
     color: #ddd;
     background-color: #fff;
     border-color: #f0f3f5;
-    cursor: not-allowed;
-}
+    cursor: not-allowed; }
 
 a.btn-link {
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
-}
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer; }
 
 .rt-table, .rt-headers, .rt-header-element {
-    box-sizing: border-box;
-    color: #4a5564;
-    background-color: #ffffff;
-    width: 100%;
-    font-family: Tahoma, Arial, sans-serif;
-    font-size: 11px;
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-
-.rt-table td, .rt-headers td, .rt-header-element td {
+  box-sizing: border-box;
+  color: #4a5564;
+  background-color: #fff;
+  width: 100%;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  border-collapse: collapse;
+  border-spacing: 0; }
+  .rt-table td, .rt-headers td, .rt-header-element td {
     border-bottom: 1px solid #f0f3f5;
-    padding: 5px;
-}
+    padding: 5px; }
 
 tr.selected {
-    background-color: #e1e7eb;
-}
+  background-color: #e1e7eb; }
+
+tr.summary-selected {
+  background-color: #d1dbe1; }
 
 tr:hover {
-    background-color: #f0f3f5;
-}
+  background-color: #f0f3f5; }
 
 .rt-headers, .rt-header-element {
-    color: #fff;
-    background-color: #4a5564;
-    font-weight: bold;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-}
+  color: #fff;
+  background-color: #4a5564;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5); }
 
 .rt-header-element {
-    position: relative;
-    min-width: 10px;
-    padding: 2px;
-    display: inline-block;
-}
-
-.rt-header-element:hover .rt-header-menu {
-    display: block;
-}
+  position: relative;
+  min-width: 10px;
+  padding: 2px;
+  display: inline-block; }
+  .rt-header-element:hover .rt-header-menu {
+    display: block; }
 
 .rt-header-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    text-shadow: none;
-    color: #4a5564;
-    border-radius: 2px;
-    background-color: #f0f3f5;
-}
-
-.rt-header-menu div {
+  display: none;
+  position: absolute;
+  top: 100%;
+  text-shadow: none;
+  color: #4a5564;
+  border-radius: 2px;
+  background-color: #f0f3f5; }
+  .rt-header-menu div {
     font-size: 9px;
     cursor: pointer;
     margin: 5px;
     padding: 5px;
-    border-radius: 1px;
-}
-
-.rt-header-menu div:hover {
-    background-color: #4a5564;
-    color: #fff;
-}
+    border-radius: 1px; }
+    .rt-header-menu div:hover {
+      background-color: #4a5564;
+      color: #fff; }
 
 a.disabled {
-    pointer-events: none;
-}
+  pointer-events: none; }
 
 .rt-scrollable {
-    overflow-y: scroll;
-    max-height: 750px;
-}
+  overflow-y: scroll;
+  max-height: 750px; }
 
 /*# sourceMappingURL=ReactTable.css.map */
