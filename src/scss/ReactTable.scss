@@ -46,7 +46,7 @@
         border-radius: 2px;
         background-color: $utility-color;
         /* menu items */
-        div {
+        .menu-item {
           font-size: 9px;
           cursor: pointer;
           margin: 5px;
@@ -56,6 +56,22 @@
             background-color: $dark-bg-color;
             color: $contrast-text-color;
           }
+          // menu item input box
+          .menu-item-input {
+            display: none;
+            font-size: 10px;
+            text-shadow: none;
+            background-color: $utility-color;
+            color: $dark-bg-color;
+            > input, > label, >a {
+              margin: 10px;
+            }
+          }
+        }
+        .separator {
+          margin: 0 5px;
+          border-radius: 2px;
+          border: 1px solid $even-darker-utility-color;
         }
       }
       /* display header menu on hover */
