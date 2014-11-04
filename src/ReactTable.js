@@ -26,11 +26,17 @@ var ReactTable = React.createClass({
     handleCollapseAll: function () {
         var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
         this.setState({
+            currentPage: 1,
             collapsedSectorPaths: collapsedSectorPaths,
             collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
         });
     },
-
+    handleExpandAll: function () {
+        this.setState({
+            collapsedSectorPaths: {},
+            collapsedSectorKeys: []
+        })
+    },
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
         this.setState({
@@ -47,7 +53,7 @@ var ReactTable = React.createClass({
         window.addEventListener('resize', adjustHeaders.bind(this));
     },
     componentWillUnmount: function () {
-        window.removeEventListener('resize',adjustHeaders.bind(this));
+        window.removeEventListener('resize', adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
 
@@ -170,6 +176,7 @@ function buildHeaders(table) {
                 <div onClick={table.handleGroupBy.bind(table, columnDef)}>Summarize</div>
                 <div onClick={table.handleGroupBy.bind(table, null)}>Clear Summary</div>
                 <div onClick={table.handleCollapseAll.bind(table, null)}>Collapse All</div>
+                <div onClick={table.handleExpandAll.bind(table)}>Expand All</div>
             </div>
         </div>
     );

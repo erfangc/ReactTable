@@ -24,7 +24,6 @@ $(function () {
             }
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
-        //{colTag: "currency_used", text: "Currency Used"},
         {colTag: "score_weight_factor", format: "number", formatInstructions: "multiplier:1000 separator:true", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     var columnDefs2 = [
@@ -51,7 +50,7 @@ $(function () {
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
-            height: "300px",
+            height: "500px",
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
