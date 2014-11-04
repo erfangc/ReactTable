@@ -45,7 +45,12 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             state.data = deepCopyData(data);
         this.setState(state);
     },
-
+    replaceData: function(data){
+        var state = {};
+        if (data)
+            state.data = deepCopyData(data);
+        this.setState(state);
+    },
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
