@@ -81,6 +81,118 @@ function applyThousandSeparator(x) {
     return parts.join(".");
 }
 
+;/* Virtual DOM builder helpers */
+
+function buildMenu(options) {
+    var table = options.table,
+        columnDef = options.columnDef,
+        style = options.style,
+        isFirstColumn = options.isFirstColumn, menuStyle = {};
+
+    if (style.textAlign == 'right')
+        menuStyle.right = "0%";
+    else
+        menuStyle.left = "0%";
+
+    // TODO turn this into a React Component
+    var summarizeMenuItem = (
+        React.createElement("div", {style: {"position": "relative"}, className: "menu-item"}, 
+            React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
+            React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position":"absolute", "top" : "0%", "left": "100%"}}, 
+                React.createElement("label", null, "Enter Bucket(s)"), React.createElement("input", {placeholder: "ex: 1,10,15"}), React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef), className: "btn-link"}, "Ok")
+            )
+        )
+    );
+
+    var menuItems = [
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"),
+        summarizeMenuItem
+    ];
+
+    if (isFirstColumn) {
+        menuItems.push(React.createElement("div", {className: "separator"}));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(table)}, "Expand All"));
+    } else
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column"));
+
+    return (
+        React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
+            menuItems
+        )
+    );
+}
+
+function buildHeaders(table) {
+    var columnDef = table.state.columnDefs[0], i, style = {};
+    var firstColumn = (
+        React.createElement("div", {style: {textAlign: "left"}, className: "rt-header-element", key: columnDef.colTag}, 
+            React.createElement("a", {className: "btn-link"}, columnDef.text), 
+            buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
+        )
+    );
+    var headerColumns = [firstColumn];
+    for (i = 1; i < table.state.columnDefs.length; i++) {
+        columnDef = table.state.columnDefs[i];
+        style = {textAlign: getColumnAlignment(columnDef)};
+        headerColumns.push(
+            React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link"}, columnDef.text), 
+                buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
+            )
+        );
+    }
+    // the plus sign at the end
+    headerColumns.push(
+        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+                React.createElement("strong", null, "+")
+            )
+        ));
+    return (
+        React.createElement("div", {key: "header", className: "rt-headers"}, headerColumns)
+    );
+}
+
+function buildFirstCellForRow(props) {
+    var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
+    var firstColTag = columnDef.colTag;
+
+    // if sectorPath is not available - return a normal cell
+    if (!data.sectorPath)
+        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
+
+    // styling & ident
+    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
+    var firstCellStyle = {
+        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
+    };
+
+    if (data.isDetail) {
+        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+    } else {
+        result =
+            (
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
+                    )
+                )
+            );
+    }
+    return result;
+}
+
+function buildFooter(table, paginationAttr) {
+    return table.props.columnDefs.length > 0 ?
+        (React.createElement(PageNavigator, {
+            items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
+            activeItem: table.state.currentPage, 
+            numPages: paginationAttr.pageEnd, 
+            handleClick: table.handlePageClick})) : null;
+}
 ;/**
  * Client side aggregation engine to convert a flag data structure of array of objects
  * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
@@ -280,7 +392,7 @@ function resolveAggregationMethod(columnDef, groupBy) {
  *
  * @author Erfang Chen
  */
-
+var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
@@ -316,7 +428,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             state.data = deepCopyData(data);
         this.setState(state);
     },
-    replaceData: function(data){
+    replaceData: function (data) {
         var state = {};
         if (data)
             state.data = deepCopyData(data);
@@ -438,113 +550,6 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
     }
 });
 
-/* Virtual DOM builder helpers */
-
-function buildHeaders(table) {
-    var columnDef = table.state.columnDefs[0], i = 1, style = {}, menuStyle = {};
-    // 1st column
-    var firstColumn = (
-        React.createElement("div", {style: {textAlign: "left"}, className: "rt-header-element", key: columnDef.colTag}, 
-            React.createElement("a", {className: "btn-link"}, columnDef.text), 
-            React.createElement("div", {style: {"left": "0%"}, className: "rt-header-menu"}, 
-                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
-                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
-                React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"), 
-                React.createElement("div", {onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"), 
-                React.createElement("div", {onClick: table.handleExpandAll.bind(table)}, "Expand All")
-            )
-        )
-    );
-    // the rest
-    var headerColumns = [firstColumn];
-    for (i = 1; i < table.state.columnDefs.length; i++) {
-        columnDef = table.state.columnDefs[i];
-        style = {textAlign: getColumnAlignment(columnDef)};
-        menuStyle = {};
-        if (style.textAlign == 'right') menuStyle.right = "0%";
-        else menuStyle.left = "0%";
-        headerColumns.push(
-            React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link"}, columnDef.text), 
-                React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
-                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
-                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
-                    React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                    React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
-                )
-            )
-        );
-    }
-    // the plus sign at the end
-    headerColumns.push(
-        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-            React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
-                React.createElement("strong", null, "+")
-            )
-        ));
-    return (
-        React.createElement("div", {key: "header", className: "rt-headers"}, headerColumns)
-    );
-}
-function buildFirstCellForRow(props) {
-    var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
-
-    // if sectorPath is not available - return a normal cell
-    if (!data.sectorPath)
-        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
-
-    // styling & ident
-    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
-    var firstCellStyle = {
-        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
-    };
-
-    if (data.isDetail) {
-        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
-    } else {
-        result =
-            (
-                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
-                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.createElement("strong", null, data[firstColTag])
-                    )
-                )
-            );
-    }
-    return result;
-}
-function buildFooter(table, paginationAttr) {
-    return table.props.columnDefs.length > 0 ?
-        (React.createElement(PageNavigator, {
-            items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
-            activeItem: table.state.currentPage, 
-            numPages: paginationAttr.pageEnd, 
-            handleClick: table.handlePageClick})) : null;
-}
-
-function getPageArithmetics(table, data) {
-    var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
-
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
-
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
-    }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
-
-    return result;
-
-}
 /* Sector tree rendering utilities */
 
 function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
@@ -574,6 +579,7 @@ function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSector
     }
     return false;
 }
+
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
     if (subSectorCandidate.length <= superSectorCandidate.length)
@@ -597,6 +603,7 @@ function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
                 result = false;
     return result
 }
+
 function generateRowKey(row, rowKey) {
     var key;
     if (!row.isDetail) {
@@ -609,6 +616,7 @@ function generateRowKey(row, rowKey) {
     }
     return key;
 }
+
 function generateSectorKey(sectorPath) {
     if (!sectorPath)
         return "";
@@ -628,6 +636,7 @@ function deepCopyData(data) {
         return copy;
     });
 }
+
 function getInitiallyCollapsedSectorPaths(data) {
     var result = {};
     data.map(function (row) {
@@ -639,6 +648,7 @@ function getInitiallyCollapsedSectorPaths(data) {
     });
     return result;
 }
+
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // total number to allocate
     var displayUnitsLeft = maxDisplayedPages;
@@ -651,10 +661,6 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-/* TODO wean off jquery - instead of adjusting headers through DOM selection and manipulation
- the event listener should just re-render the table. the render func should figure out the appropriate width of the headers
- of all cells/headers
- */
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
@@ -668,17 +674,39 @@ function adjustHeaders() {
     });
 }
 
+function getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
+
+function uniqueId(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+};
+
 $(document).ready(function () {
     $('.rt-scrollable').bind('scroll', function () {
         $(".rt-headers").scrollLeft($(this).scrollLeft());
     });
 });
 
-var idCounter = 0;
-function uniqueId(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
-};
 ;function ReactTableGetInitialState() {
     var initialStates = prepareTableData.call(this, this.props);
     var selectedRows = getInitiallySelectedRows(this.props.selectedRows);

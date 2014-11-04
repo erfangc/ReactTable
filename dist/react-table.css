@@ -43,15 +43,27 @@
         border-radius: 2px;
         background-color: #f0f3f5;
         /* menu items */ }
-        .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu div {
+        .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item {
           font-size: 9px;
           cursor: pointer;
           margin: 5px;
           padding: 5px;
           border-radius: 1px; }
-          .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu div:hover {
+          .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item:hover {
             background-color: #4a5564;
             color: #fff; }
+          .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item .menu-item-input {
+            display: none;
+            font-size: 10px;
+            text-shadow: none;
+            background-color: #f0f3f5;
+            color: #4a5564; }
+            .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item .menu-item-input > a {
+              margin: 10px; }
+        .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .separator {
+          margin: 0 5px;
+          border-radius: 2px;
+          border: 1px solid #d1dbe1; }
       .rt-table-container > .rt-headers > .rt-header-element:hover .rt-header-menu {
         display: block; }
   .rt-table-container a.btn-link {
