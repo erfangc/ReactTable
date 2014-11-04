@@ -33,6 +33,7 @@ function ReacTableHandleGroupBy(columnDef) {
     var initialStates = prepareTableData.call(this, this.props);
     this.state.selectedRows.summaryRows = [];
     this.setState({
+        currentPage: 1,
         data: initialStates.data,
         selectedRows: this.state.selectedRows,
         collapsedSectorPaths: initialStates.collapsedSectorPaths,

@@ -41,11 +41,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
 
     componentDidMount: function () {
-        adjustHeaders.call(this);
+        setTimeout(function () {
+            adjustHeaders.call(this);
+        }.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
     },
     componentWillUnmount: function () {
-        window.removeEventListener('resize', adjustHeaders.bind(this));
+        window.removeEventListener('resize',adjustHeaders.bind(this));
     },
     componentDidUpdate: adjustHeaders,
 
