@@ -39,11 +39,11 @@ var ReactTable = React.createClass({
     },
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
-        this.setState({
-            columnDefs: this.state.columnDefs
-        });
+        var state = {};
+        state.columnDefs = this.state.columnDefs;
         if (data)
-            this.setState({data: data});
+            state.data = deepCopyData(data);
+        this.setState(state);
     },
 
     componentDidMount: function () {
