@@ -70,13 +70,14 @@ function formatNumber(value, columnDef, formatConfig) {
         value = value.toFixed(formatConfig.roundTo);
         // apply comma separator
         if (formatConfig.separator)
-            value = numberWithCommas(value);
+            value = applyThousandSeparator(value);
     }
     return value;
 }
 
-function numberWithCommas(x) {
+function applyThousandSeparator(x) {
     var parts = x.toString().split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
 }
+

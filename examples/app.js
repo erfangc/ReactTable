@@ -14,6 +14,7 @@ $(function () {
             format: "number",
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
+            groupByRange: [0,25,50,100],
             aggregationMethod: "AVERAGE",
             weightBy: {colTag: "score_weight_factor"},
             cellClassCallback: function (row) {
@@ -28,14 +29,16 @@ $(function () {
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last Name"},
+        {colTag: "last_name", text: "Last Name",aggregationMethod:"COUNT_DISTINCT" },
         {colTag: "email", text: "Email"},
         {
             colTag: "test_score",
             format: "number",
+            groupByRange: [0,10,25,30,50,100],
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
             aggregationMethod: "AVERAGE",
+            conditionalAggregationMethod: {"fruit_preference": "COUNT"},
             weightBy: {colTag: "score_weight_factor"}
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
@@ -50,7 +53,7 @@ $(function () {
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
-            height: "500px",
+            height: "300px",
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
