@@ -11,15 +11,7 @@ function buildMenu(options) {
     else
         menuStyle.left = "0%";
 
-    // TODO turn this into a React Component
-    var summarizeMenuItem = (
-        React.createElement("div", {style: {"position": "relative"}, className: "menu-item"}, 
-            React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-            React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position":"absolute", "top" : "0%", "left": "100%"}}, 
-                React.createElement("label", null, "Enter Bucket(s)"), React.createElement("input", {placeholder: "ex: 1,10,15"}), React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef), className: "btn-link"}, "Ok")
-            )
-        )
-    );
+    var summarizeMenuItem = React.createElement(SummarizeControl, {table: table, columnDef: columnDef});
 
     var menuItems = [
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),

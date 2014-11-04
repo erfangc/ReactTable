@@ -166,6 +166,35 @@ var PageNavigator = React.createClass({
         );
     }
 });
+var SummarizeControl = React.createClass({
+    getInitialState: function() {
+      return {
+          userInputBuckets: ""
+      }
+    },
+    handleChange: function(event) {
+        this.setState({userInputBuckets: event.target.value});
+    },
+    render: function () {
+        var table = this.props.table, columnDef = this.props.columnDef;
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+            (
+                <div className="menu-item-input" onHover style={{"position": "absolute", "top": "0%", "left": "100%"}}>
+                    <label>Enter Bucket(s)</label>
+                    <input onChange={this.handleChange} placeholder="ex: 1,10,15"/>
+                    <a onClick={table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets)} className="btn-link">Ok</a>
+                </div>
+            ) : null;
+        return (
+            <div
+                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef) : function(){} }
+                style={{"position": "relative"}} className="menu-item menu-item-hoverable">
+                <div>Summarize</div>
+                {subMenuAttachment}
+            </div>
+        );
+    }
+});
 
 /* Sector tree rendering utilities */
 

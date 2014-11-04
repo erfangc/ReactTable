@@ -28,7 +28,16 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     });
 }
 
-function ReacTableHandleGroupBy(columnDef) {
+function ReacTableHandleGroupBy(columnDef, buckets) {
+    var i = 0, stringBuckets = [], floatBuckets = [];
+    if (buckets && columnDef) {
+        stringBuckets = buckets.split(",");
+        for (i = 0; i < stringBuckets.length; i++)
+            if (!isNaN(parseFloat(stringBuckets[i])))
+                floatBuckets.push(parseFloat(stringBuckets[i]));
+        floatBuckets.sort();
+        columnDef.groupByRange = floatBuckets;
+    }
     this.props.groupBy = columnDef ? [columnDef] : null;
     var initialStates = prepareTableData.call(this, this.props);
     this.state.selectedRows.summaryRows = [];

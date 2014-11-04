@@ -166,6 +166,35 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
+    getInitialState: function() {
+      return {
+          userInputBuckets: ""
+      }
+    },
+    handleChange: function(event) {
+        this.setState({userInputBuckets: event.target.value});
+    },
+    render: function () {
+        var table = this.props.table, columnDef = this.props.columnDef;
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+            (
+                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
+                    React.createElement("label", null, "Enter Bucket(s)"), 
+                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                )
+            ) : null;
+        return (
+            React.createElement("div", {
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef) : function(){}, 
+                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+                React.createElement("div", null, "Summarize"), 
+                subMenuAttachment
+            )
+        );
+    }
+});
 
 /* Sector tree rendering utilities */
 

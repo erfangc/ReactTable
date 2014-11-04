@@ -56,8 +56,12 @@
             background-color: $dark-bg-color;
             color: $contrast-text-color;
           }
+          &.menu-item-hoverable:hover .menu-item-input {
+            display: block;
+          }
           // menu item input box
           .menu-item-input {
+            text-align: left;
             display: none;
             font-size: 10px;
             text-shadow: none;
