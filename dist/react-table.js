@@ -70,16 +70,17 @@ function formatNumber(value, columnDef, formatConfig) {
         value = value.toFixed(formatConfig.roundTo);
         // apply comma separator
         if (formatConfig.separator)
-            value = numberWithCommas(value);
+            value = applyThousandSeparator(value);
     }
     return value;
 }
 
-function numberWithCommas(x) {
+function applyThousandSeparator(x) {
     var parts = x.toString().split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
 }
+
 ;/**
  * Client side aggregation engine to convert a flag data structure of array of objects
  * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
@@ -90,21 +91,16 @@ function numberWithCommas(x) {
  * @constructor
  */
 function groupData(data, groupBy, columnDefs) {
-    // partition
     var bucketResults = buildDataBuckets(data, groupBy);
-
-    // aggregate
-    var aggregationResults = aggregateBuckets(bucketResults, columnDefs);
-
+    var aggregationResults = aggregateBuckets(bucketResults, columnDefs, groupBy);
     return aggregationResults.concat(data);
 }
 
-/* Aggregation functions TODO implement all */
 function straightSumAggregation(options) {
     var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
     for (var i = 0; i < data.length; i++) {
         temp = data[i][columnDef.colTag] || 0;
-        result +=  temp;
+        result += temp;
     }
     return result;
 }
@@ -115,7 +111,8 @@ function average(options) {
         return simpleAverage(options);
 }
 function simpleAverage(options) {
-    return straightSumAggregation(options) / options.data.length;
+    var sum = straightSumAggregation(options);
+    return options.data.length == 0 ? 0 : sum / options.data.length;
 }
 
 function weightedAverage(options) {
@@ -125,24 +122,64 @@ function weightedAverage(options) {
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
 
     var weightSum = straightSumAggregation({data: data, columnDef: weightBy});
-    // TODO does not protect against division by zero
-    return sumProduct / weightSum;
+    return weightSum == 0 ? 0 : sumProduct / weightSum;
 }
 
 function count(options) {
     var data = options.data, columnDef = options.columnDef;
+    var count = 0, i;
+    for (i = 0; i < options.data.length; i++)
+        if (data[i][columnDef.colTag])
+            count++;
+    return count;
 }
 
 function countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
+    var values = {}, i, prop;
+    for (i = 0; i < options.data.length; i++)
+        values[data[i][columnDef.colTag]] = 1;
+    var result = 0;
+    for (prop in values)
+        if (values.hasOwnProperty(prop))
+            result++;
+    return result == 1 ? data[0][columnDef.colTag] : result;
 }
 
 /* Helpers */
+/**
+ * find the right sector name for the current row for the given level of row grouping
+ * this method can take partition groupBy columns that are numeric in nature and bucket rows based on where they fall
+ * in the partition
+ * @param groupBy the column to group groupBy
+ * @param row the data row to determine the sector name for
+ */
+function getSectorName(row, groupBy) {
+    var result = "", i;
+    if (groupBy.format == "number" || groupBy.format == "currency") {
+        if (groupBy.groupByRange) {
+            for (i = 0; i < groupBy.groupByRange.length; i++) {
+                if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
+                    result = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    break;
+                }
+            }
+            if (!result)
+                result = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+        }
+        else {
+            result = groupBy.text;
+        }
+    } else {
+        result = row[groupBy.colTag];
+    }
+    return result;
+}
 function extractSectors(row, groupBy) {
     var results = [];
-    // TODO handle numerical data categorization
     for (var i = 0; i < groupBy.length; i++) {
-        results.push(row[groupBy[i].colTag]);
+        var sectorName = getSectorName(row, groupBy[i]);
+        results.push(sectorName);
     }
     return results;
 }
@@ -167,40 +204,72 @@ function buildDataBuckets(data, groupBy) {
  * @param bucketResults structures that look like: { key1: [{...},{...},...], ... }
  * @param columnDefs
  */
-function aggregateBuckets(bucketResults, columnDefs) {
+function aggregateBuckets(bucketResults, columnDefs, groupBy) {
     var result = [];
     for (var sectorKey in bucketResults) {
         if (bucketResults.hasOwnProperty(sectorKey)) {
-            var singleSectorResult = aggregateSector(bucketResults[sectorKey], columnDefs);
+            var singleSectorResult = aggregateSector(bucketResults[sectorKey], columnDefs, groupBy);
             result.push(singleSectorResult);
         }
     }
     return result;
 }
-function aggregateSector(bucketResult, columnDefs) {
+function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
     result.sectorPath = bucketResult.sectorPath;
     result[columnDefs[0].colTag] = bucketResult.sectorPath[bucketResult.sectorPath.length - 1];
     for (var i = 1; i < columnDefs.length; i++) {
-        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i]);
+        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], groupBy);
     }
     return result;
 }
-function aggregateColumn(bucketResult, columnDef) {
+function aggregateColumn(bucketResult, columnDef, groupBy) {
     var result;
-    switch (columnDef.aggregationMethod) {
-        case "SUM":
+    var aggregationMethod = resolveAggregationMethod(columnDef, groupBy);
+    switch (aggregationMethod) {
+        case "sum":
             result = straightSumAggregation({data: bucketResult.data, columnDef: columnDef});
             break;
-        case "AVERAGE":
+        case "average":
             result = average({data: bucketResult.data, columnDef: columnDef});
+            break;
+        case "count":
+            result = count({data: bucketResult.data, columnDef: columnDef});
+            break;
+        case "count_distinct":
+            result = countDistinct({data: bucketResult.data, columnDef: columnDef});
             break;
         default :
             result = "";
-        // TODO complete other aggregation techniques
     }
     return result;
-};/** @jsx React.DOM */
+}
+
+/**
+ * solves for the correct aggregation method given the current columnDef being aggregated
+ * and table settings. sophisticated aggregation methods (such as conditional aggregation) can be determined here
+ *
+ * conditional aggregation is the ability to switch up aggregation method based on the columnDef used in group by
+ * the columnDef property `conditionalAggregationMethod` takes the an object {key:value, key2: value2} where `key(s)`
+ * are the colTag and `value{s}` is the corresponding aggregation method to use when table groupBy is set to the colTag specified in the key
+ *
+ * @param columnDef
+ * @param groupBy
+ */
+function resolveAggregationMethod(columnDef, groupBy) {
+    var result = "";
+    if (columnDef.aggregationMethod) {
+        result = columnDef.aggregationMethod;
+    }
+    // resolve conditional aggregation method
+    if (columnDef.conditionalAggregationMethod && groupBy && groupBy.length == 1) {
+        var groupByColTag = groupBy[0].colTag;
+        if (columnDef.conditionalAggregationMethod[groupByColTag])
+            result = columnDef.conditionalAggregationMethod[groupByColTag];
+    }
+    return result.toLowerCase();
+}
+;/** @jsx React.DOM */
 
 /**
  * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
@@ -278,7 +347,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 data: row, 
                 key: generateRowKey(row, rowKey), 
                 isSelected: isRowSelected.call(this, row), 
@@ -295,11 +364,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             containerStyle.height = this.state.height;
         }
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
+                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
                         rows
                         )
                     )
@@ -318,7 +387,7 @@ var Row = React.createClass({displayName: 'Row',
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
@@ -334,7 +403,7 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
@@ -350,19 +419,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -375,15 +444,15 @@ function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i = 1, style = {}, menuStyle = {};
     // 1st column
     var firstColumn = (
-        React.DOM.div({style: {textAlign: "left"}, className: "rt-header-element", key: columnDef.colTag}, 
-            React.DOM.a({className: "btn-link"}, columnDef.text), 
-            React.DOM.div({style: {"left": "0%"}, className: "rt-header-menu"}, 
-                React.DOM.div({onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
-                React.DOM.div({onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
-                React.DOM.div({onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                React.DOM.div({onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"), 
-                React.DOM.div({onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"), 
-                React.DOM.div({onClick: table.handleExpandAll.bind(table)}, "Expand All")
+        React.createElement("div", {style: {textAlign: "left"}, className: "rt-header-element", key: columnDef.colTag}, 
+            React.createElement("a", {className: "btn-link"}, columnDef.text), 
+            React.createElement("div", {style: {"left": "0%"}, className: "rt-header-menu"}, 
+                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
+                React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"), 
+                React.createElement("div", {onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"), 
+                React.createElement("div", {onClick: table.handleExpandAll.bind(table)}, "Expand All")
             )
         )
     );
@@ -396,26 +465,26 @@ function buildHeaders(table) {
         if (style.textAlign == 'right') menuStyle.right = "0%";
         else menuStyle.left = "0%";
         headerColumns.push(
-            React.DOM.div({style: style, className: "rt-header-element", key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link"}, columnDef.text), 
-                React.DOM.div({style: menuStyle, className: "rt-header-menu"}, 
-                    React.DOM.div({onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
-                    React.DOM.div({onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
-                    React.DOM.div({onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                    React.DOM.div({onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
+            React.createElement("div", {style: style, className: "rt-header-element", key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link"}, columnDef.text), 
+                React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
+                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
+                    React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
+                    React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
+                    React.createElement("div", {onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column")
                 )
             )
         );
     }
     // the plus sign at the end
     headerColumns.push(
-        React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-            React.DOM.a({className: "btn-link", onClick: table.handleAdd}, 
-                React.DOM.strong(null, "+")
+        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.createElement("a", {className: "btn-link", onClick: table.handleAdd}, 
+                React.createElement("strong", null, "+")
             )
         ));
     return (
-        React.DOM.div({key: "header", className: "rt-headers"}, headerColumns)
+        React.createElement("div", {key: "header", className: "rt-headers"}, headerColumns)
     );
 }
 function buildFirstCellForRow(props) {
@@ -424,7 +493,7 @@ function buildFirstCellForRow(props) {
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: firstColTag}, data[firstColTag]);
+        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -433,13 +502,13 @@ function buildFirstCellForRow(props) {
     };
 
     if (data.isDetail) {
-        var result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
     } else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: firstColTag}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
                     )
                 )
             );
@@ -448,7 +517,7 @@ function buildFirstCellForRow(props) {
 }
 function buildFooter(table, paginationAttr) {
     return table.props.columnDefs.length > 0 ?
-        (PageNavigator({
+        (React.createElement(PageNavigator, {
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
