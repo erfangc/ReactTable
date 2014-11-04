@@ -32,7 +32,7 @@ function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
-    columnDef.formatConfig = buildLAFConfigObject(columnDef);
+    columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
     // invoke cell class callback
@@ -68,6 +68,15 @@ function formatNumber(value, columnDef, formatConfig) {
         value *= formatConfig.multiplier;
         // rounding
         value = value.toFixed(formatConfig.roundTo);
+        // apply comma separator
+        if (formatConfig.separator)
+            value = numberWithCommas(value);
     }
     return value;
+}
+
+function numberWithCommas(x) {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
 }

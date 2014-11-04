@@ -23,6 +23,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleGroupBy: ReacTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
+    handleCollapseAll: function () {
+        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
+        this.setState({
+            collapsedSectorPaths: collapsedSectorPaths,
+            collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
+        });
+    },
 
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
@@ -86,7 +93,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             )
         );
     }
-
 });
 var Row = React.createClass({displayName: 'Row',
     render: function () {
@@ -160,11 +166,11 @@ function buildHeaders(table) {
                 React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
                 React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
                 React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Un-Summarize")
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"), 
+                React.createElement("div", {onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All")
             )
         )
     );
-
     // the rest
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
@@ -276,15 +282,12 @@ function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
  * @returns {boolean}
  */
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    // true if sectorPaths is a subsector of the collapsedSectorPaths
     var max = collapsedSectorKeys.length;
     for (var i = 0; i < max; i++) {
         if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            result = true;
+            return true;
     }
-
-    return result;
+    return false;
 }
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
@@ -317,11 +320,7 @@ function generateRowKey(row, rowKey) {
     else if (rowKey)
         key = row[rowKey];
     else {
-        key = generateSectorKey(row.sectorPath);
-        for (var prop in row) {
-            if (row.hasOwnProperty(prop))
-                key += prop + "=" + row[prop] + ";";
-        }
+        key = row.rowCount;
     }
     return key;
 }
@@ -330,25 +329,17 @@ function generateSectorKey(sectorPath) {
         return "";
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-function prepareTableData(props) {
-    // make defensive copy of the data
-    // TODO maybe perform this step intelligently to improve performance
-    var data = deepCopyData(props.data);
 
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    return data;
-}
 function deepCopyData(data) {
+    var rowCount = 0;
     return data.map(function (row) {
         var copy = {};
         for (var prop in row)
             if (row.hasOwnProperty(prop))
                 copy[prop] = row[prop];
         copy.isDetail = true;
+        copy.rowCount = rowCount;
+        rowCount++;
         return copy;
     });
 }

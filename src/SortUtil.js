@@ -45,7 +45,7 @@ function defaultSectorSorter(a, b) {
 }
 
 function defaultDetailSorter(a, b) {
-    return generateRowKey(a).localeCompare(generateRowKey(b));
+    return a.rowCount - b.rowCount;
 }
 
 /* Detail sorters - used when user tries to sort the columns after table has been rendered */

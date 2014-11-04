@@ -25,7 +25,7 @@ $(function () {
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
         //{colTag: "currency_used", text: "Currency Used"},
-        {colTag: "score_weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+        {colTag: "score_weight_factor", format: "number", formatInstructions: "multiplier:1000 separator:true", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},
@@ -40,7 +40,7 @@ $(function () {
             weightBy: {colTag: "score_weight_factor"}
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
-        {colTag: "score_weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+        {colTag: "score_weight_factor", format: "currency", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
 
     $.get('sample_data.json').success(function (data) {

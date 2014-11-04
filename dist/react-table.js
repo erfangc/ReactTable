@@ -32,7 +32,7 @@ function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
-    columnDef.formatConfig = buildLAFConfigObject(columnDef);
+    columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
     // invoke cell class callback
@@ -68,9 +68,19 @@ function formatNumber(value, columnDef, formatConfig) {
         value *= formatConfig.multiplier;
         // rounding
         value = value.toFixed(formatConfig.roundTo);
+        // apply comma separator
+        if (formatConfig.separator)
+            value = numberWithCommas(value);
     }
     return value;
-};/**
+}
+
+function numberWithCommas(x) {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+;/**
  * Client side aggregation engine to convert a flag data structure of array of objects
  * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
  *
@@ -215,6 +225,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleGroupBy: ReacTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
     handleRowSelect: ReactHandleRowSelect,
+    handleCollapseAll: function () {
+        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
+        this.setState({
+            collapsedSectorPaths: collapsedSectorPaths,
+            collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
+        });
+    },
 
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
@@ -278,7 +295,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             )
         );
     }
-
 });
 var Row = React.createClass({displayName: 'Row',
     render: function () {
@@ -352,11 +368,11 @@ function buildHeaders(table) {
                 React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"), 
                 React.createElement("div", {onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"), 
                 React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Un-Summarize")
+                React.createElement("div", {onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"), 
+                React.createElement("div", {onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All")
             )
         )
     );
-
     // the rest
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
@@ -468,15 +484,12 @@ function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
  * @returns {boolean}
  */
 function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    // true if sectorPaths is a subsector of the collapsedSectorPaths
     var max = collapsedSectorKeys.length;
     for (var i = 0; i < max; i++) {
         if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            result = true;
+            return true;
     }
-
-    return result;
+    return false;
 }
 function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
     // lower length in SP means higher up on the chain
@@ -509,11 +522,7 @@ function generateRowKey(row, rowKey) {
     else if (rowKey)
         key = row[rowKey];
     else {
-        key = generateSectorKey(row.sectorPath);
-        for (var prop in row) {
-            if (row.hasOwnProperty(prop))
-                key += prop + "=" + row[prop] + ";";
-        }
+        key = row.rowCount;
     }
     return key;
 }
@@ -522,25 +531,17 @@ function generateSectorKey(sectorPath) {
         return "";
     return sectorPath.join(SECTOR_SEPARATOR);
 }
-function prepareTableData(props) {
-    // make defensive copy of the data
-    // TODO maybe perform this step intelligently to improve performance
-    var data = deepCopyData(props.data);
 
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    return data;
-}
 function deepCopyData(data) {
+    var rowCount = 0;
     return data.map(function (row) {
         var copy = {};
         for (var prop in row)
             if (row.hasOwnProperty(prop))
                 copy[prop] = row[prop];
         copy.isDetail = true;
+        copy.rowCount = rowCount;
+        rowCount++;
         return copy;
     });
 }
@@ -596,24 +597,16 @@ function uniqueId(prefix) {
     return prefix ? prefix + id : id;
 };
 ;function ReactTableGetInitialState() {
-    var data = prepareTableData.call(this, this.props);
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorKeys = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            collapsedSectorKeys.push(key);
-
+    var initialStates = prepareTableData.call(this, this.props);
     var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
     return {
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        data: data,
+        data: initialStates.data,
         columnDefs: this.props.columnDefs,
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: collapsedSectorKeys,
+        collapsedSectorPaths: initialStates.collapsedSectorPaths,
+        collapsedSectorKeys: initialStates.collapsedSectorKeys,
         selectedRows: selectedRows
     };
 }
@@ -633,22 +626,15 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     });
 }
 
-function ReacTableHandleGroupBy (columnDef) {
-    var props = this.props;
-    props.groupBy = columnDef ? [columnDef] : null;
-    var data = prepareTableData.call(this, props);
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorKeys = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            collapsedSectorKeys.push(key);
-
+function ReacTableHandleGroupBy(columnDef) {
+    this.props.groupBy = columnDef ? [columnDef] : null;
+    var initialStates = prepareTableData.call(this, this.props);
+    this.state.selectedRows.summaryRows = [];
     this.setState({
-        data: data,
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: collapsedSectorKeys
+        data: initialStates.data,
+        selectedRows: this.state.selectedRows,
+        collapsedSectorPaths: initialStates.collapsedSectorPaths,
+        collapsedSectorKeys: initialStates.collapsedSectorKeys
     });
 }
 
@@ -698,7 +684,35 @@ function ReactTableHandlePageClick(page, event) {
     this.setState({
         currentPage: page
     });
-};/* Main Event Handler */
+}
+
+/* Helpers */
+function extractSectorPathKeys(collapsedSectorPaths) {
+    "use strict";
+    var results = [];
+    for (var key in collapsedSectorPaths)
+        if (collapsedSectorPaths.hasOwnProperty(key))
+            results.push(key);
+    return results;
+}
+
+function prepareTableData(props) {
+    // make defensive copy of the data - surprisingly not a huge performance hit
+    var data = deepCopyData(props.data);
+    if (props.groupBy) {
+        data = groupData(data, props.groupBy, props.columnDefs);
+        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+        data.sort(sorterFactory.call(this, sortOptions));
+    }
+    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+    return {
+        collapsedSectorPaths: collapsedSectorPaths,
+        collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
+        data: data
+    };
+}
+;/* Main Event Handler */
 function ReactHandleRowSelect(row) {
     "use strict";
     var selectionSubType = null,
@@ -821,7 +835,7 @@ function defaultSectorSorter(a, b) {
 }
 
 function defaultDetailSorter(a, b) {
-    return generateRowKey(a).localeCompare(generateRowKey(b));
+    return a.rowCount - b.rowCount;
 }
 
 /* Detail sorters - used when user tries to sort the columns after table has been rendered */

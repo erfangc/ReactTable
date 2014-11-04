@@ -1,22 +1,14 @@
 function ReactTableGetInitialState() {
-    var data = prepareTableData.call(this, this.props);
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorKeys = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            collapsedSectorKeys.push(key);
-
+    var initialStates = prepareTableData.call(this, this.props);
     var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
     return {
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        data: data,
+        data: initialStates.data,
         columnDefs: this.props.columnDefs,
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: collapsedSectorKeys,
+        collapsedSectorPaths: initialStates.collapsedSectorPaths,
+        collapsedSectorKeys: initialStates.collapsedSectorKeys,
         selectedRows: selectedRows
     };
 }
@@ -36,22 +28,15 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     });
 }
 
-function ReacTableHandleGroupBy (columnDef) {
-    var props = this.props;
-    props.groupBy = columnDef ? [columnDef] : null;
-    var data = prepareTableData.call(this, props);
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorKeys = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            collapsedSectorKeys.push(key);
-
+function ReacTableHandleGroupBy(columnDef) {
+    this.props.groupBy = columnDef ? [columnDef] : null;
+    var initialStates = prepareTableData.call(this, this.props);
+    this.state.selectedRows.summaryRows = [];
     this.setState({
-        data: data,
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: collapsedSectorKeys
+        data: initialStates.data,
+        selectedRows: this.state.selectedRows,
+        collapsedSectorPaths: initialStates.collapsedSectorPaths,
+        collapsedSectorKeys: initialStates.collapsedSectorKeys
     });
 }
 
@@ -101,4 +86,31 @@ function ReactTableHandlePageClick(page, event) {
     this.setState({
         currentPage: page
     });
+}
+
+/* Helpers */
+function extractSectorPathKeys(collapsedSectorPaths) {
+    "use strict";
+    var results = [];
+    for (var key in collapsedSectorPaths)
+        if (collapsedSectorPaths.hasOwnProperty(key))
+            results.push(key);
+    return results;
+}
+
+function prepareTableData(props) {
+    // make defensive copy of the data - surprisingly not a huge performance hit
+    var data = deepCopyData(props.data);
+    if (props.groupBy) {
+        data = groupData(data, props.groupBy, props.columnDefs);
+        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
+        data.sort(sorterFactory.call(this, sortOptions));
+    }
+    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
+    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
+    return {
+        collapsedSectorPaths: collapsedSectorPaths,
+        collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
+        data: data
+    };
 }

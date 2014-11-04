@@ -69,6 +69,7 @@ formatInstructions | a string that represents how you want cells to be formatted
 * roundTo - the number of digits to round to
 * unit - text to attach to every cell in the column (such as m, KG, EUR)
 * alignment - choose from center, left and right
+* separator - set to `true` to turn on comma separator for large numbers
 
 #### Example
 Please note you **cannot** have spaces in the format instruction values, since spaces are used as a separator
