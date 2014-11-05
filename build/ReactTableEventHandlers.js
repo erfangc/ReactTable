@@ -30,7 +30,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 
 function ReacTableHandleGroupBy(columnDef, buckets) {
     var i = 0, stringBuckets = [], floatBuckets = [];
-    if (buckets && columnDef) {
+    if (buckets && buckets != "" && columnDef) {
         stringBuckets = buckets.split(",");
         for (i = 0; i < stringBuckets.length; i++)
             if (!isNaN(parseFloat(stringBuckets[i])))

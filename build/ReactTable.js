@@ -187,7 +187,7 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef) : function(){}, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function(){}, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment

@@ -562,7 +562,7 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef) : function(){}, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function(){}, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
@@ -760,7 +760,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 
 function ReacTableHandleGroupBy(columnDef, buckets) {
     var i = 0, stringBuckets = [], floatBuckets = [];
-    if (buckets && columnDef) {
+    if (buckets && buckets != "" && columnDef) {
         stringBuckets = buckets.split(",");
         for (i = 0; i < stringBuckets.length; i++)
             if (!isNaN(parseFloat(stringBuckets[i])))
