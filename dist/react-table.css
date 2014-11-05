@@ -52,7 +52,10 @@
           .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item:hover {
             background-color: #4a5564;
             color: #fff; }
+          .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item.menu-item-hoverable:hover .menu-item-input {
+            display: block; }
           .rt-table-container > .rt-headers > .rt-header-element > .rt-header-menu .menu-item .menu-item-input {
+            text-align: left;
             display: none;
             font-size: 10px;
             text-shadow: none;

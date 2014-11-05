@@ -94,15 +94,7 @@ function buildMenu(options) {
     else
         menuStyle.left = "0%";
 
-    // TODO turn this into a React Component
-    var summarizeMenuItem = (
-        React.createElement("div", {style: {"position": "relative"}, className: "menu-item"}, 
-            React.createElement("div", {onClick: table.handleGroupBy.bind(table, columnDef)}, "Summarize"), 
-            React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position":"absolute", "top" : "0%", "left": "100%"}}, 
-                React.createElement("label", null, "Enter Bucket(s)"), React.createElement("input", {placeholder: "ex: 1,10,15"}), React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef), className: "btn-link"}, "Ok")
-            )
-        )
-    );
+    var summarizeMenuItem = React.createElement(SummarizeControl, {table: table, columnDef: columnDef});
 
     var menuItems = [
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),
@@ -549,6 +541,35 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
+    getInitialState: function() {
+      return {
+          userInputBuckets: ""
+      }
+    },
+    handleChange: function(event) {
+        this.setState({userInputBuckets: event.target.value});
+    },
+    render: function () {
+        var table = this.props.table, columnDef = this.props.columnDef;
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+            (
+                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
+                    React.createElement("label", null, "Enter Bucket(s)"), 
+                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                )
+            ) : null;
+        return (
+            React.createElement("div", {
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef) : function(){}, 
+                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+                React.createElement("div", null, "Summarize"), 
+                subMenuAttachment
+            )
+        );
+    }
+});
 
 /* Sector tree rendering utilities */
 
@@ -737,7 +758,16 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     });
 }
 
-function ReacTableHandleGroupBy(columnDef) {
+function ReacTableHandleGroupBy(columnDef, buckets) {
+    var i = 0, stringBuckets = [], floatBuckets = [];
+    if (buckets && columnDef) {
+        stringBuckets = buckets.split(",");
+        for (i = 0; i < stringBuckets.length; i++)
+            if (!isNaN(parseFloat(stringBuckets[i])))
+                floatBuckets.push(parseFloat(stringBuckets[i]));
+        floatBuckets.sort();
+        columnDef.groupByRange = floatBuckets;
+    }
     this.props.groupBy = columnDef ? [columnDef] : null;
     var initialStates = prepareTableData.call(this, this.props);
     this.state.selectedRows.summaryRows = [];
