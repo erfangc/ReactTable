@@ -35,7 +35,9 @@ function ReacTableHandleGroupBy(columnDef, buckets) {
         for (i = 0; i < stringBuckets.length; i++)
             if (!isNaN(parseFloat(stringBuckets[i])))
                 floatBuckets.push(parseFloat(stringBuckets[i]));
-        floatBuckets.sort();
+        floatBuckets.sort(function (a, b) {
+            return a - b;
+        });
         columnDef.groupByRange = floatBuckets;
     }
     this.props.groupBy = columnDef ? [columnDef] : null;

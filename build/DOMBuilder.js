@@ -1,5 +1,13 @@
 /* Virtual DOM builder helpers */
 
+function buildCustomMenuItems(table, columnDef) {
+    var menuItems = [];
+    if (columnDef.customMenuItems) {
+        menuItems.push(React.createElement("div", {className: "separator"}), columnDef.customMenuItems(table,columnDef));
+    }
+    return menuItems;
+}
+
 function buildMenu(options) {
     var table = options.table,
         columnDef = options.columnDef,
@@ -12,6 +20,9 @@ function buildMenu(options) {
         menuStyle.left = "0%";
 
     var summarizeMenuItem = React.createElement(SummarizeControl, {table: table, columnDef: columnDef});
+
+    // construct user custom menu items
+    var customMenuItems = buildCustomMenuItems(table, columnDef);
 
     var menuItems = [
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),
@@ -26,7 +37,7 @@ function buildMenu(options) {
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(table)}, "Expand All"));
     } else
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column"));
-
+    menuItems.push(customMenuItems);
     return (
         React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
             menuItems
