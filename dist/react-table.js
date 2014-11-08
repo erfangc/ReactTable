@@ -433,8 +433,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
     replaceData: function (data) {
         var state = {};
-        if (data)
+        if (data) {
             state.data = deepCopyData(data);
+            this.props.data = data;
+        }
         this.setState(state);
     },
     componentDidMount: function () {
@@ -553,12 +555,12 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
     }
 });
 var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
-    getInitialState: function() {
-      return {
-          userInputBuckets: ""
-      }
+    getInitialState: function () {
+        return {
+            userInputBuckets: ""
+        }
     },
-    handleChange: function(event) {
+    handleChange: function (event) {
         this.setState({userInputBuckets: event.target.value});
     },
     render: function () {
@@ -573,7 +575,8 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function(){}, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function () {
+                }, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
