@@ -464,9 +464,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             $(headerContainer).hover(function(){
                 var headerPosition = $(headerContainer).position();
                 var headerWidth = $(headerContainer).width();
-                console.log(headerWidth);
-                console.log(headerPosition);
-                console.log($(headerContainer).find(".rt-header-menu"));
                 if( headerPosition.left ){
                     $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
                 }
