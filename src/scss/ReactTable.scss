@@ -23,64 +23,82 @@
     td {
       border-bottom: 1px solid $utility-color;
       padding: 5px;
+      min-width: 100px;
+      border-right: 1px solid #f9f2f4;
     }
   }
+  .rt-scrollable{
+    overflow-x: auto;
+  }
   /************* table header styling *************/
-  > .rt-headers {
-    color: $contrast-text-color;
-    background-color: $dark-bg-color;
-    font-weight: bold;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-    > .rt-header-element {
-      position: relative;
-      min-width: 10px;
-      padding: 2px;
-      display: inline-block;
-      /* header hover menu */
-      > .rt-header-menu {
-        display: none;
-        position: absolute;
-        top: 100%;
-        text-shadow: none;
-        color: $text-color;
-        border-radius: 2px;
-        background-color: $utility-color;
-        /* menu items */
-        .menu-item {
-          font-size: 9px;
-          cursor: pointer;
-          margin: 5px;
-          padding: 5px;
-          border-radius: 1px;
-          &:hover {
-            background-color: $dark-bg-color;
-            color: $contrast-text-color;
-          }
-          &.menu-item-hoverable:hover .menu-item-input {
-            display: block;
-          }
-          // menu item input box
-          .menu-item-input {
-            text-align: left;
-            display: none;
-            font-size: 10px;
-            text-shadow: none;
-            background-color: $utility-color;
-            color: $dark-bg-color;
-            > input, > label, >a {
-              margin: 10px;
+  > .rt-headers-grand-container {
+    position: relative;
+    > .rt-headers {
+      color: $contrast-text-color;
+      background-color: $dark-bg-color;
+      font-weight: bold;
+      text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+
+      > .rt-headers-container {
+        display: inline-block;
+        border-right: 1px solid #f9f2f4;
+        > .rt-info-header {
+          min-width: 100px;
+        }
+        > .rt-header-element {
+          min-width: 10px;
+          padding-left: 5px;
+          padding-right: 5px;
+          padding-bottom: 2px;
+          padding-top: 2px;
+        }
+        /* display header menu on hover */
+        &:hover .rt-header-menu {
+          display: block;
+        }
+        /* header hover menu */
+        > .rt-header-menu {
+          display: none;
+          position: absolute;
+          text-shadow: none;
+          color: $text-color;
+          border-radius: 2px;
+          background-color: $utility-color;
+          max-width: 110px;
+          /* menu items */
+          .menu-item {
+            font-size: 9px;
+            cursor: pointer;
+            margin: 5px;
+            padding: 5px;
+            border-radius: 1px;
+            &:hover {
+              background-color: $dark-bg-color;
+              color: $contrast-text-color;
+            }
+            &.menu-item-hoverable:hover .menu-item-input {
+              display: block;
+            }
+            // menu item input box
+            .menu-item-input {
+              text-align: left;
+              display: none;
+              font-size: 10px;
+              text-shadow: none;
+              background-color: $utility-color;
+              color: $dark-bg-color;
+              > input, > label, > a {
+                margin: 10px;
+              }
             }
           }
+          .separator {
+            margin: 0 5px;
+            border-radius: 2px;
+            border: 1px solid $even-darker-utility-color;
+          }
         }
-        .separator {
-          margin: 0 5px;
-          border-radius: 2px;
-          border: 1px solid $even-darker-utility-color;
-        }
-      }
-      /* display header menu on hover */
-      &:hover .rt-header-menu {
-        display: block;
       }
     }
   }
@@ -97,6 +115,11 @@
     overflow-y: scroll;
     max-height: $max-height;
   }
+}
+
+.rt-plus-sign{
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 @import "Pagination";

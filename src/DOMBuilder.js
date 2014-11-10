@@ -1,3 +1,4 @@
+/** @jsx React.DOM */
 /* Virtual DOM builder helpers */
 
 function buildCustomMenuItems(table, columnDef) {
@@ -48,18 +49,22 @@ function buildMenu(options) {
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        <div style={{textAlign: "left"}} className="rt-header-element" key={columnDef.colTag}>
-            <a className="btn-link">{columnDef.text}</a>
+        <div className="rt-headers-container">
+            <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
+                <a className="btn-link">{columnDef.text}</a>
+            </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
     );
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
-        style = {textAlign: getColumnAlignment(columnDef)};
+        style = {textAlign: "center"};
         headerColumns.push(
-            <div style={style} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link">{columnDef.text}</a>
+            <div className="rt-headers-container">
+                <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
+                    <a className="btn-link">{columnDef.text}</a>
+                </div>
                 {buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
             </div>
         );
@@ -67,12 +72,16 @@ function buildHeaders(table) {
     // the plus sign at the end
     headerColumns.push(
         <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-            <a className="btn-link" onClick={table.handleAdd}>
+            <a className="btn-link rt-plus-sign" onClick={table.handleAdd}>
                 <strong>{"+"}</strong>
             </a>
         </span>);
     return (
-        <div key="header" className="rt-headers">{headerColumns}</div>
+        <div className="rt-headers-grand-container">
+            <div key="header" className="rt-headers">
+                {headerColumns}
+            </div>
+        </div>
     );
 }
 
@@ -87,7 +96,7 @@ function buildFirstCellForRow(props) {
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
-        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
+        "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
     if (data.isDetail) {

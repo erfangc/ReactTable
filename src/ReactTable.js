@@ -57,7 +57,30 @@ var ReactTable = React.createClass({
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this));
+        document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
+        var jqNode = $(this.getDOMNode());
+        jqNode.find(".rt-scrollable").bind('scroll', function () {
+            jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            jqNode.find(".rt-headers").css({'overflow': 'hidden'});
+        });
+        jqNode.find(".rt-headers-container").each(function(index){
+            var headerContainer = this;
+            $(headerContainer).hover(function(){
+                var headerPosition = $(headerContainer).position();
+                var headerWidth = $(headerContainer).width();
+                console.log(headerWidth);
+                console.log(headerPosition);
+                console.log($(headerContainer).find(".rt-header-menu"));
+                if( headerPosition.left ){
+                    $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
+                }
+                if( headerPosition.right ){
+                    $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
+                }
+                $(headerContainer).find(".rt-header-menu").width(headerWidth);
+            });
+        });
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -313,11 +336,15 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
-    var headerElems = $("#" + id + " .rt-header-element");
+    var headerElems = $("#" + id + " .rt-headers-container");
     var padding = parseInt(headerElems.first().css("padding-left")) || 0;
     padding += parseInt(headerElems.first().css("padding-right")) || 0;
+    padding += parseInt(headerElems.first().css("border-right")) || 0;
     headerElems.each(function () {
         var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
+        if( counter == 0 ){
+            width += 1;
+        }
         $(this).width(width);
         counter++;
     });
@@ -350,9 +377,9 @@ function uniqueId(prefix) {
     return prefix ? prefix + id : id;
 };
 
-$(document).ready(function () {
-    $('.rt-scrollable').bind('scroll', function () {
-        $(".rt-headers").scrollLeft($(this).scrollLeft());
-    });
-});
+//$(document).ready(function () {
+//    $('.rt-scrollable').bind('scroll', function () {
+//        $(".rt-headers").scrollLeft($(this).scrollLeft());
+//    });
+//});
 
