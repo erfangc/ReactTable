@@ -334,12 +334,9 @@ function adjustHeaders() {
     var id = this.state.uniqueId;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
-    var padding = parseInt(headerElems.first().css("padding-left")) || 0;
-    padding += parseInt(headerElems.first().css("padding-right")) || 0;
-    padding += parseInt(headerElems.first().css("border-right")) || 0;
     headerElems.each(function () {
-        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
-        if( counter == 0 ){
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+        if( counter == 0 && parseInt(headerElems.first().css("border-right")) == 1 ){
             width += 1;
         }
         $(this).width(width);

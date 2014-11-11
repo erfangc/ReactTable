@@ -39,6 +39,7 @@
       font-weight: bold;
       text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
       white-space: nowrap;
+      -ms-overflow-style: none;
 
       > .rt-headers-container {
         display: inline-block;
