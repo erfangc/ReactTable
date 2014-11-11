@@ -373,10 +373,3 @@ function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };
-
-//$(document).ready(function () {
-//    $('.rt-scrollable').bind('scroll', function () {
-//        $(".rt-headers").scrollLeft($(this).scrollLeft());
-//    });
-//});
-

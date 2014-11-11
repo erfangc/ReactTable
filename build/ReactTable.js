@@ -98,7 +98,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 data: row, 
                 key: generateRowKey(row, rowKey), 
                 isSelected: isRowSelected.call(this, row), 
@@ -115,11 +115,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             containerStyle.height = this.state.height;
         }
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
+                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
                         rows
                         )
                     )
@@ -138,7 +138,7 @@ var Row = React.createClass({displayName: 'Row',
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
@@ -154,7 +154,7 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
@@ -170,19 +170,19 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, href: "#", onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -201,18 +201,18 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.DOM.div({className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
-                    React.DOM.label(null, "Enter Bucket(s)"), 
-                    React.DOM.input({onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.DOM.a({onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
+                    React.createElement("label", null, "Enter Bucket(s)"), 
+                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.DOM.div({
+            React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function () {
                 }, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.DOM.div(null, "Summarize"), 
+                React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
             )
         );
