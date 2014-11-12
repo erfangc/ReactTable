@@ -52,7 +52,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         this.setState({
             currentPage: 1,
             data: initialStates.data,
-            selectedRows: this.state.selectedRows,
             collapsedSectorPaths: initialStates.collapsedSectorPaths,
             collapsedSectorKeys: initialStates.collapsedSectorKeys
         });
