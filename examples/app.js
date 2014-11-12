@@ -36,6 +36,11 @@ $(function () {
             text: "Weight Factor",
             aggregationMethod: "SUM"
         }
+        //,
+        //{
+        //    colTag: "abcd",
+        //    text: "This is a really really long header name wow look how long this is"
+        //}
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},

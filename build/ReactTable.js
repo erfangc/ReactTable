@@ -64,26 +64,15 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
             jqNode.find(".rt-headers").css({'overflow': 'hidden'});
         });
-        jqNode.find(".rt-headers-container").each(function(index){
-            var headerContainer = this;
-            $(headerContainer).hover(function(){
-                var headerPosition = $(headerContainer).position();
-                var headerWidth = $(headerContainer).width();
-                if( headerPosition.left ){
-                    $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
-                }
-                if( headerPosition.right ){
-                    $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
-                }
-                $(headerContainer).find(".rt-header-menu").width(headerWidth);
-            });
-        });
+        bindHeadersToMenu(jqNode);
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
-    componentDidUpdate: adjustHeaders,
-
+    componentDidUpdate: function(){
+        adjustHeaders.call(this);
+        bindHeadersToMenu($(this.getDOMNode()));
+    },
     render: function () {
         var uncollapsedRows = [];
         // determine which rows are unhidden based on which sectors are collapsed
@@ -366,14 +355,22 @@ function getPageArithmetics(table, data) {
 
 }
 
+function bindHeadersToMenu(node){
+    node.find(".rt-headers-container").each(function(){
+        var headerContainer = this;
+        $(headerContainer).hover(function(){
+            var headerPosition = $(headerContainer).position();
+            if( headerPosition.left ){
+                $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
+            }
+            if( headerPosition.right ){
+                $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
+            }
+        });
+    });
+}
+
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };
-
-//$(document).ready(function () {
-//    $('.rt-scrollable').bind('scroll', function () {
-//        $(".rt-headers").scrollLeft($(this).scrollLeft());
-//    });
-//});
-
