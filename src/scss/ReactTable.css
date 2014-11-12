@@ -23,7 +23,8 @@
       border-bottom: 1px solid #f0f3f5;
       padding: 5px;
       min-width: 100px;
-      border-right: 1px solid #f9f2f4; }
+      border-right: 1px solid #f9f2f4;
+      white-space: nowrap; }
   .rt-table-container .rt-scrollable {
     overflow-x: auto; }
   .rt-table-container > .rt-headers-grand-container {
@@ -33,7 +34,10 @@
       background-color: #4a5564;
       font-weight: bold;
       text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-      white-space: nowrap; }
+      white-space: nowrap;
+      overflow: hidden;
+      -ms-overflow-style: none;
+      /* Solves "blinking scrollbar" issues in IE */ }
       .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container {
         display: inline-block;
         border-right: 1px solid #f9f2f4;

@@ -14,6 +14,10 @@ $(function () {
             }
         },
         {
+            colTag: "superlong",
+            text: "This is a super super long column header name - trust me"
+        },
+        {
             colTag: "test_score",
             format: "number",
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
@@ -36,6 +40,11 @@ $(function () {
             text: "Weight Factor",
             aggregationMethod: "SUM"
         }
+        //,
+        //{
+        //    colTag: "abcd",
+        //    text: "This is a really really long header name wow look how long this is"
+        //}
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},
