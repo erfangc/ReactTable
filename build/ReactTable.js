@@ -321,16 +321,29 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
 
 function adjustHeaders() {
     var id = this.state.uniqueId;
+    var adjustedWideHeaders = false;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
+    var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
+    padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
     headerElems.each(function () {
+        var currentHeader = $(this);
         var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
         if( counter == 0 && parseInt(headerElems.first().css("border-right")) == 1 ){
             width += 1;
         }
-        $(this).width(width);
+        var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
+        if( headerTextWidthWithPadding > currentHeader.width() ){
+            $(this).width(headerTextWidthWithPadding);
+            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            adjustedWideHeaders = true;
+        }
+        currentHeader.width(width);
         counter++;
     });
+    if( adjustedWideHeaders ){
+        adjustHeaders.call(this);
+    }
 }
 
 function getPageArithmetics(table, data) {

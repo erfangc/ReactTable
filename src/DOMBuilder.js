@@ -51,7 +51,7 @@ function buildHeaders(table) {
     var firstColumn = (
         <div className="rt-headers-container">
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link">{columnDef.text}</a>
+                <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
             </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
@@ -63,7 +63,7 @@ function buildHeaders(table) {
         headerColumns.push(
             <div className="rt-headers-container">
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a className="btn-link">{columnDef.text}</a>
+                    <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
                 </div>
                 {buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
             </div>
