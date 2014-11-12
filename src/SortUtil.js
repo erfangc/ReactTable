@@ -50,7 +50,7 @@ function defaultDetailSorter(a, b) {
 
 /* Detail sorters - used when user tries to sort the columns after table has been rendered */
 
-function genericDetailSort(a, b) {
+function genericValueBasedSorter(a, b) {
     var returnValue = 0;
     if (a[this.colTag] < b[this.colTag])
         returnValue = -1;
@@ -77,6 +77,6 @@ function getSortFunction(sortByColumnDef) {
         case "date":
             return dateDetailSort;
         default :
-            return genericDetailSort;
+            return genericValueBasedSorter;
     }
 }

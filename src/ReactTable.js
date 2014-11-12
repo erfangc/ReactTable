@@ -46,12 +46,16 @@ var ReactTable = React.createClass({
         this.setState(state);
     },
     replaceData: function (data) {
-        var state = {};
-        if (data) {
-            state.data = deepCopyData(data);
-            this.props.data = data;
-        }
-        this.setState(state);
+        this.props.data = data;
+        var initialStates = prepareTableData.call(this, this.props);
+        this.state.selectedRows.summaryRows = [];
+        this.setState({
+            currentPage: 1,
+            data: initialStates.data,
+            selectedRows: this.state.selectedRows,
+            collapsedSectorPaths: initialStates.collapsedSectorPaths,
+            collapsedSectorKeys: initialStates.collapsedSectorKeys
+        });
     },
     componentDidMount: function () {
         setTimeout(function () {
@@ -252,6 +256,9 @@ function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
 /* Other utility functions */
 function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
     "use strict";
+    // if no sector path present in both - they are equal
+    if (!sectorPath1 && !sectorPath2)
+        return true;
     var result = true, i = 0, loopSize = sectorPath1.length;
     if (sectorPath1.length != sectorPath2.length)
         result = false;

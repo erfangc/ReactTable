@@ -17,6 +17,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var data = this.state.data;
     var sortOptions = {
         sectorSorter: defaultSectorSorter,
+        sortSummaryBy: columnDefToSortBy,
         detailSorter: getSortFunction(columnDefToSortBy),
         sortDetailBy: columnDefToSortBy,
         sortAsc: sortAsc
@@ -29,16 +30,8 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 }
 
 function ReacTableHandleGroupBy(columnDef, buckets) {
-    var i = 0, stringBuckets = [], floatBuckets = [];
     if (buckets && buckets != "" && columnDef) {
-        stringBuckets = buckets.split(",");
-        for (i = 0; i < stringBuckets.length; i++)
-            if (!isNaN(parseFloat(stringBuckets[i])))
-                floatBuckets.push(parseFloat(stringBuckets[i]));
-        floatBuckets.sort(function (a, b) {
-            return a - b;
-        });
-        columnDef.groupByRange = floatBuckets;
+        columnDef.groupByRange = createFloatBuckets(buckets);
     }
     this.props.groupBy = columnDef ? [columnDef] : null;
     var initialStates = prepareTableData.call(this, this.props);
@@ -125,4 +118,15 @@ function prepareTableData(props) {
         collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
         data: data
     };
+}
+
+function createFloatBuckets(buckets) {
+    var i = 0, stringBuckets, floatBuckets = [];
+    stringBuckets = buckets.split(",");
+    for (i = 0; i < stringBuckets.length; i++)
+         var floatBucket = parseFloat(stringBuckets[i]);
+    if (!isNaN(floatBucket))
+        floatBuckets.push(floatBucket);
+    floatBuckets.sort();
+    return floatBuckets;
 }
