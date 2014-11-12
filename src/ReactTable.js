@@ -333,7 +333,7 @@ function adjustHeaders() {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if( headerTextWidthWithPadding > currentHeader.width() ){
+        if( currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1 ){
             $(this).width(headerTextWidthWithPadding);
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedWideHeaders = true;
