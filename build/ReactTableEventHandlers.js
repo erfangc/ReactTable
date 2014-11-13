@@ -11,19 +11,7 @@ function ReactTableGetInitialState() {
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    this.state.rootNode.sortChildren(function (a,b) {
-        var aVal = a[columnDefToSortBy.colTag], bVal = b[columnDefToSortBy.colTag];
-        if (!isNaN(aVal) && !isNaN(bVal)) {
-            return aVal - bVal;
-        } else {
-            if (a[this.colTag] < b[this.colTag])
-                return -1;
-            else if (a[this.colTag] > b[this.colTag])
-                return 1;
-            else
-                return 0;
-        }
-    }, true);
+    this.state.rootNode.sortChildren(getSortFunction(columnDefToSortBy).bind(columnDefToSortBy), true, sortAsc);
     this.setState({rootNode: this.state.rootNode});
 }
 
@@ -65,10 +53,6 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page, event) {
     event.preventDefault();
-    var pageSize = this.props.pageSize || 10;
-    var maxPage = Math.ceil(this.state.data.length / pageSize);
-    if (page < 1 || page > maxPage)
-        return;
     this.setState({
         currentPage: page
     });

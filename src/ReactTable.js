@@ -1,6 +1,13 @@
 /** @jsx React.DOM */
 
 /**
+ * High Level TODOs
+ * TODO handle selection and callback
+ * TODO handle programmtic selection
+ * TODO add sortIndex to custom numerical buckets so they sort correctly
+ */
+
+/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
@@ -11,22 +18,34 @@ var SECTOR_SEPARATOR = "#";
 var ReactTable = React.createClass({
 
     getInitialState: ReactTableGetInitialState,
+
+    /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
+
+    handleSelect: function (selectedRow) {
+        // TODO discuss/implement best way to handle selection
+    },
+    handleSummarySelect: function (selectedRow) {
+        // TODO discuss/implement best way to handle summary selection
+    },
     handleCollapseAll: function () {
         var rootNode = this.state.rootNode;
         rootNode.collapseImmediateChildren();
-        this.setState({rootNode: rootNode});
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
     handleExpandAll: function () {
         var rootNode = this.state.rootNode;
         rootNode.expandRecursively();
-        this.setState({rootNode: rootNode});
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
+    /* -------------------------------------------------- */
+
+    /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
         if (data) {
@@ -43,6 +62,8 @@ var ReactTable = React.createClass({
             currentPage: 1
         });
     },
+    /* ----------------------------------------- */
+
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
@@ -82,9 +103,9 @@ var ReactTable = React.createClass({
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0) {
+        if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
-        }
+
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}

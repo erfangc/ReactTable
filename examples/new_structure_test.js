@@ -12,7 +12,7 @@ $(function () {
             colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
         }
     ];
-    $.get('small_data.json').success(function (data) {
+    $.get('large_data_30k.json').success(function (data) {
         var testData = data;
         var options = {
             rowKey: 'id',

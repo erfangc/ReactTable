@@ -59,19 +59,33 @@ TreeNode.prototype.getSectorPath = function () {
     return result;
 }
 
-TreeNode.prototype.sortChildren = function (sortFn, recursive) {
+TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
+    var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        return sortFn.call(this, aRow, bRow);
+        // if the child.rowData contain sortIndices - sort those
+        if (_hasSortIndex(aRow, bRow))
+            return aRow.sortIndex - bRow.sortIndex;
+        return multiplier * sortFn(aRow, bRow);
     });
     // sort ultimate children if there are no children
     if (this.children.length == 0) {
         this.ultimateChildren.sort(function (a, b) {
-            return sortFn.call(this, a, b);
+            return multiplier * sortFn(a, b);
         });
     }
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren(sortFn, recursive);
+            this.children[i].sortChildren(sortFn, recursive, sortAsc);
     }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _hasSortIndex(aRow,bRow) {
+    return (aRow.sortIndex != null && bRow.sortIndex != null && !isNaN(aRow.sortIndex) && !isNaN(aRow.sortIndex))
 }
