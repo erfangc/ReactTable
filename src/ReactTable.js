@@ -45,6 +45,10 @@ var ReactTable = React.createClass({
     },
     /* -------------------------------------------------- */
 
+    selectRow: function (rowKey) {
+        // TODO implement programmatic selection of rows
+    },
+
     /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
@@ -70,12 +74,12 @@ var ReactTable = React.createClass({
         }.bind(this));
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
-        var jqNode = $(this.getDOMNode());
-        jqNode.find(".rt-scrollable").bind('scroll', function () {
-            jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
-            jqNode.find(".rt-headers").css({'overflow': 'hidden'});
+        var $node = $(this.getDOMNode());
+        $node.find(".rt-scrollable").bind('scroll', function () {
+            $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
-        bindHeadersToMenu(jqNode);
+        bindHeadersToMenu($node);
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -85,7 +89,11 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var rasterizedData = rasterizeTree(this.state.rootNode, this.props.columnDefs[0]);
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
 
         var paginationAttr = getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);

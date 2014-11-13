@@ -1,12 +1,22 @@
+function getInitialSelections(selectedRows) {
+    var results = {};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results[selectedRows[i]] = 1;
+    }
+    return results;
+}
 function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
+    var selectedDetailRows = getInitialSelections(this.props.selectedRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        columnDefs: this.props.columnDefs
+        columnDefs: this.props.columnDefs,
+        selectedDetailRows: selectedDetailRows
     };
 }
 
