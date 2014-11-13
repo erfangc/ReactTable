@@ -1,3 +1,4 @@
+# *WARNING - Do Not Make Major Changes to the Core src Files as Version is being Written on another Branch. Period merge with master will occur, but your changes will most likely just be ignored ... sorry * 
 # ReactTable
 **New Project - Not All Features Functional**
 
