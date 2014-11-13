@@ -1,18 +1,96 @@
 function ReactTableGetInitialState() {
-    var initialStates = prepareTableData.call(this, this.props);
-    var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
+    var rootNode = createTree(this.props);
+    // TODO put this in render
+    var data = rasterizeTree(rootNode, this.props.columnDefs[0]);
     return {
+        // the holy grail of table state - describes structure of the data contained within the table
+        rootNode: rootNode,
+
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        data: initialStates.data,
-        columnDefs: this.props.columnDefs,
-        collapsedSectorPaths: initialStates.collapsedSectorPaths,
-        collapsedSectorKeys: initialStates.collapsedSectorKeys,
-        selectedRows: selectedRows
+        columnDefs: this.props.columnDefs
     };
 }
 
+/**
+ * Converts the table state from a tree format to a array of rows for rendering
+ * @param rootNode
+ * @return {Array}
+ */
+function rasterizeTree(node, firstColumn) {
+    var flatData = [], intermediateResult, i, j;
+    node.rowData.sectorPath = node.getSectorPath();
+    node.rowData[firstColumn.colTag] = node.sectorTitle;
+    if (node.parent != null) {
+        flatData.push(node.rowData);
+    }
+    if (node.children.length > 0) {
+        for (i = 0; i < node.children.length; i++) {
+            intermediateResult = rasterizeTree(node.children[i], firstColumn);
+            for (j = 0; j < intermediateResult.length; j++)
+                flatData.push(intermediateResult[j]);
+        }
+    } else {
+        // attach ultimate children - b/c this is a detail row
+        for (i = 0; i < node.ultimateChildren.length; i++) {
+            var detailRow = node.ultimateChildren[i];
+            detailRow.sectorPath = node.rowData.sectorPath;
+            detailRow.isDetail = true;
+            flatData.push(detailRow);
+        }
+    }
+    return flatData;
+}
+
+// --------------New Functions -----------------------
+
+/**
+ * Transform the current props into a tree structure representing the complex state
+ * @param tableProps
+ * @return the root Node element of the tree with aggregation
+ */
+function createTree(tableProps) {
+    var rootNode = buildTreeSkeleton(tableProps);
+    recursivelyAggregateNodes(rootNode, tableProps);
+    return rootNode;
+}
+
+/**
+ * Creates the data tree backed by props.data and grouped columns specified in groupBy
+ * @param tableProps
+ * @return {Node} the root node
+ */
+function buildTreeSkeleton(tableProps) {
+    var rootNode = new Node("Root", null), rawData = tableProps.data, i;
+    for (i = 0; i < rawData.length; i++) {
+        rootNode.appendRow(rawData[i]);
+        populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
+    }
+    return rootNode
+}
+
+function populateChildNodesForRow(rootNode, row, groupBy) {
+    var i, currentNode = rootNode;
+    for (i = 0; i < groupBy.length; i++) {
+        var sectorName = getSectorName(row, groupBy[i]);
+        currentNode = currentNode.appendRowToChildren(sectorName, row);
+    }
+}
+
+function recursivelyAggregateNodes(node, tableProps) {
+    // aggregate the current node
+    node.rowData = aggregateSector(node.ultimateChildren, tableProps.columnDefs, tableProps.groupBy);
+
+    // for each child - aggregate those as well
+    if (node.children.length > 0) {
+        for (var i = 0; i < node.children.length; i++) {
+            recursivelyAggregateNodes(node.children[i], tableProps);
+        }
+    }
+}
+
+// --------------------------------------------------------
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var data = this.state.data;
     var sortOptions = {
@@ -94,32 +172,6 @@ function ReactTableHandlePageClick(page, event) {
 }
 
 /* Helpers */
-function extractSectorPathKeys(collapsedSectorPaths) {
-    "use strict";
-    var results = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            results.push(key);
-    return results;
-}
-
-function prepareTableData(props) {
-    // make defensive copy of the data - surprisingly not a huge performance hit
-    var data = deepCopyData(props.data);
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-    return {
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
-        data: data
-    };
-}
-
 function createFloatBuckets(buckets) {
     var i = 0, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");

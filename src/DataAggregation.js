@@ -1,18 +1,3 @@
-/**
- * Client side aggregation engine to convert a flag data structure of array of objects
- * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
- *
- * @param data
- * @param columnDefs
- * @param groupBy array of objects with attributes that specify how to group the data
- * @constructor
- */
-function groupData(data, groupBy, columnDefs) {
-    var bucketResults = buildDataBuckets(data, groupBy);
-    var aggregationResults = aggregateBuckets(bucketResults, columnDefs, groupBy);
-    return aggregationResults.concat(data);
-}
-
 function straightSumAggregation(options) {
     var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
     for (var i = 0; i < data.length; i++) {
@@ -92,49 +77,9 @@ function getSectorName(row, groupBy) {
     }
     return result;
 }
-function extractSectors(row, groupBy) {
-    var results = [];
-    for (var i = 0; i < groupBy.length; i++) {
-        var sectorName = getSectorName(row, groupBy[i]);
-        results.push(sectorName);
-    }
-    return results;
-}
 
-function buildDataBuckets(data, groupBy) {
-    var results = {};
-    for (var i = 0; i < data.length; i++) {
-        var sectorPath = extractSectors(data[i], groupBy);
-        data[i].sectorPath = sectorPath;
-        data[i].isDetail = true;
-        for (var j = 0; j < sectorPath.length; j++) {
-            var subSectorPath = sectorPath.slice(0, j + 1);
-            var subSectorKey = generateSectorKey(subSectorPath);
-            if (!results[subSectorKey])
-                results[subSectorKey] = {data: [], sectorPath: subSectorPath};
-            results[subSectorKey].data.push(data[i]);
-        }
-    }
-    return results;
-}
-/**
- * @param bucketResults structures that look like: { key1: [{...},{...},...], ... }
- * @param columnDefs
- */
-function aggregateBuckets(bucketResults, columnDefs, groupBy) {
-    var result = [];
-    for (var sectorKey in bucketResults) {
-        if (bucketResults.hasOwnProperty(sectorKey)) {
-            var singleSectorResult = aggregateSector(bucketResults[sectorKey], columnDefs, groupBy);
-            result.push(singleSectorResult);
-        }
-    }
-    return result;
-}
 function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
-    result.sectorPath = bucketResult.sectorPath;
-    result[columnDefs[0].colTag] = bucketResult.sectorPath[bucketResult.sectorPath.length - 1];
     for (var i = 1; i < columnDefs.length; i++) {
         result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], groupBy);
     }
@@ -145,16 +90,16 @@ function aggregateColumn(bucketResult, columnDef, groupBy) {
     var aggregationMethod = resolveAggregationMethod(columnDef, groupBy);
     switch (aggregationMethod) {
         case "sum":
-            result = straightSumAggregation({data: bucketResult.data, columnDef: columnDef});
+            result = straightSumAggregation({data: bucketResult, columnDef: columnDef});
             break;
         case "average":
-            result = average({data: bucketResult.data, columnDef: columnDef});
+            result = average({data: bucketResult, columnDef: columnDef});
             break;
         case "count":
-            result = count({data: bucketResult.data, columnDef: columnDef});
+            result = count({data: bucketResult, columnDef: columnDef});
             break;
         case "count_distinct":
-            result = countDistinct({data: bucketResult.data, columnDef: columnDef});
+            result = countDistinct({data: bucketResult, columnDef: columnDef});
             break;
         default :
             result = "";

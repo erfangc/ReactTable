@@ -6,5 +6,6 @@
 {"id":6,"first_name":"Gloria","last_name":"Walker","email":"gwalker5@ifeng.com","country":"Costa Rica","number":8.5},
 {"id":7,"first_name":"Theresa","last_name":"Jacobs","email":"tjacobs6@blog.com","country":"Indonesia","number":6.4},
 {"id":8,"first_name":"Angela","last_name":"Murphy","email":"amurphy7@newsvine.com","country":"China","number":7.4},
-{"id":9,"first_name":"Cynthia","last_name":"Freeman","email":"cfreeman8@wp.com","country":"Sweden","number":4.1},
+{"id":9,"first_name":"Cynthia","last_name":"Freeman","email":"cfreeman8@wp.com","country":"Sweden","number":4.0},
+  {"id":11,"first_name":"Moo","last_name":"Freeman","email":"mfreeman8@wp.com","country":"Sweden","number":6.0},
 {"id":10,"first_name":"Katherine","last_name":"Bennett","email":"kbennett9@intel.com","country":"China","number":9.8}]

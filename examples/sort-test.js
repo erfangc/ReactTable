@@ -9,7 +9,7 @@ $(function () {
             colTag: "country", text: "Country"
         },
         {
-            colTag: "number", text: "Number", format: 'number'
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
         }
     ];
     $.get('small_data.json').success(function (data) {
@@ -17,6 +17,7 @@ $(function () {
         var options = {
             rowKey: 'id',
             data: testData,
+            groupBy: [{colTag:"country"},{colTag:"last_name"}],
             height: "500px",
             columnDefs: columnDefs,
             beforeColumnAdd: function () {

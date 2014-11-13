@@ -212,63 +212,6 @@ var SummarizeControl = React.createClass({
     }
 });
 
-/* Sector tree rendering utilities */
-
-function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
-    var isSummaryRow = !data.isDetail;
-    var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
-    if (hasCollapsedAncestor)
-        result = true;
-    else if (immediateSectorCollapsed && !isSummaryRow)
-        result = true;
-    return result;
-}
-
-/**
- * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
- * @param sectorPath [array] the sectorPath to perform comparison on
- * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
- * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
- * @returns {boolean}
- */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var max = collapsedSectorKeys.length;
-    for (var i = 0; i < max; i++) {
-        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            return true;
-    }
-    return false;
-}
-
-function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
-    // lower length in SP means higher up on the chain
-    if (subSectorCandidate.length <= superSectorCandidate.length)
-        return false;
-    for (var i = 0; i < superSectorCandidate.length; i++) {
-        if (subSectorCandidate[i] != superSectorCandidate[i])
-            return false;
-    }
-    return true;
-}
-
-/* Other utility functions */
-function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
-    "use strict";
-    // if no sector path present in both - they are equal
-    if (!sectorPath1 && !sectorPath2)
-        return true;
-    var result = true, i = 0, loopSize = sectorPath1.length;
-    if (sectorPath1.length != sectorPath2.length)
-        result = false;
-    else
-        for (i = 0; i < loopSize; i++)
-            if (sectorPath1[i] != sectorPath2[i])
-                result = false;
-    return result
-}
-
 function generateRowKey(row, rowKey) {
     var key;
     if (!row.isDetail) {
@@ -280,12 +223,6 @@ function generateRowKey(row, rowKey) {
         key = row.rowCount;
     }
     return key;
-}
-
-function generateSectorKey(sectorPath) {
-    if (!sectorPath)
-        return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
 }
 
 function deepCopyData(data) {
@@ -300,18 +237,6 @@ function deepCopyData(data) {
         rowCount++;
         return copy;
     });
-}
-
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
 }
 
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
