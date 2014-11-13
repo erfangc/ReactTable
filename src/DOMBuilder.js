@@ -26,18 +26,18 @@ function buildMenu(options) {
     var customMenuItems = buildCustomMenuItems(table, columnDef);
 
     var menuItems = [
-        <div className="menu-item" onClick={table.handleSort.bind(table, columnDef, true)}>Sort Asc</div>,
-        <div className="menu-item" onClick={table.handleSort.bind(table, columnDef, false)}>Sort Dsc</div>,
+        <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
+        <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
         summarizeMenuItem
     ];
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        menuItems.push(<div className="menu-item" onClick={table.handleGroupBy.bind(table, null)}>Clear Summary</div>);
-        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(table, null)}>Collapse All</div>);
-        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(table)}>Expand All</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
     } else
-        menuItems.push(<div className="menu-item" onClick={table.handleRemove.bind(table, columnDef)}>Remove Column</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>);
     menuItems.push(customMenuItems);
     return (
         <div style={menuStyle} className="rt-header-menu">

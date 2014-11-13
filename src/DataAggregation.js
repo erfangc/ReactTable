@@ -1,54 +1,3 @@
-function straightSumAggregation(options) {
-    var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
-    for (var i = 0; i < data.length; i++) {
-        temp = data[i][columnDef.colTag] || 0;
-        result += temp;
-    }
-    return result;
-}
-function average(options) {
-    if (options.columnDef.weightBy)
-        return weightedAverage(options);
-    else
-        return simpleAverage(options);
-}
-function simpleAverage(options) {
-    var sum = straightSumAggregation(options);
-    return options.data.length == 0 ? 0 : sum / options.data.length;
-}
-
-function weightedAverage(options) {
-    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
-    var sumProduct = 0;
-    for (var i = 0; i < data.length; i++)
-        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
-
-    var weightSum = straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
-}
-
-function count(options) {
-    var data = options.data, columnDef = options.columnDef;
-    var count = 0, i;
-    for (i = 0; i < options.data.length; i++)
-        if (data[i][columnDef.colTag])
-            count++;
-    return count;
-}
-
-function countDistinct(options) {
-    var data = options.data, columnDef = options.columnDef;
-    var values = {}, i, prop;
-    for (i = 0; i < options.data.length; i++)
-        values[data[i][columnDef.colTag]] = 1;
-    var result = 0;
-    for (prop in values)
-        if (values.hasOwnProperty(prop))
-            result++;
-    return result == 1 ? data[0][columnDef.colTag] : result;
-}
-
-/* Helpers */
 /**
  * find the right sector name for the current row for the given level of row grouping
  * this method can take partition groupBy columns that are numeric in nature and bucket rows based on where they fall
@@ -81,31 +30,16 @@ function getSectorName(row, groupBy) {
 function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
     for (var i = 1; i < columnDefs.length; i++) {
-        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], groupBy);
+        result[columnDefs[i].colTag] = _aggregateColumn(bucketResult, columnDefs[i], groupBy);
     }
     return result;
 }
-function aggregateColumn(bucketResult, columnDef, groupBy) {
-    var result;
-    var aggregationMethod = resolveAggregationMethod(columnDef, groupBy);
-    switch (aggregationMethod) {
-        case "sum":
-            result = straightSumAggregation({data: bucketResult, columnDef: columnDef});
-            break;
-        case "average":
-            result = average({data: bucketResult, columnDef: columnDef});
-            break;
-        case "count":
-            result = count({data: bucketResult, columnDef: columnDef});
-            break;
-        case "count_distinct":
-            result = countDistinct({data: bucketResult, columnDef: columnDef});
-            break;
-        default :
-            result = "";
-    }
-    return result;
-}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
 
 /**
  * solves for the correct aggregation method given the current columnDef being aggregated
@@ -118,7 +52,7 @@ function aggregateColumn(bucketResult, columnDef, groupBy) {
  * @param columnDef
  * @param groupBy
  */
-function resolveAggregationMethod(columnDef, groupBy) {
+function _resolveAggregationMethod(columnDef, groupBy) {
     var result = "";
     if (columnDef.aggregationMethod) {
         result = columnDef.aggregationMethod;
@@ -130,4 +64,76 @@ function resolveAggregationMethod(columnDef, groupBy) {
             result = columnDef.conditionalAggregationMethod[groupByColTag];
     }
     return result.toLowerCase();
+}
+
+function _aggregateColumn(bucketResult, columnDef, groupBy) {
+    var result;
+    var aggregationMethod = _resolveAggregationMethod(columnDef, groupBy);
+    switch (aggregationMethod) {
+        case "sum":
+            result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});
+            break;
+        case "_average":
+            result = _average({data: bucketResult, columnDef: columnDef});
+            break;
+        case "count":
+            result = _count({data: bucketResult, columnDef: columnDef});
+            break;
+        case "count_distinct":
+            result = _countDistinct({data: bucketResult, columnDef: columnDef});
+            break;
+        default :
+            result = "";
+    }
+    return result;
+}
+
+function _straightSumAggregation(options) {
+    var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
+    for (var i = 0; i < data.length; i++) {
+        temp = data[i][columnDef.colTag] || 0;
+        result += temp;
+    }
+    return result;
+}
+function _average(options) {
+    if (options.columnDef.weightBy)
+        return _weightedAverage(options);
+    else
+        return _simpleAverage(options);
+}
+function _simpleAverage(options) {
+    var sum = _straightSumAggregation(options);
+    return options.data.length == 0 ? 0 : sum / options.data.length;
+}
+
+function _weightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var sumProduct = 0;
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
+    var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
+    return weightSum == 0 ? 0 : sumProduct / weightSum;
+}
+
+function _count(options) {
+    var data = options.data, columnDef = options.columnDef;
+    var count = 0, i;
+    for (i = 0; i < options.data.length; i++)
+        if (data[i][columnDef.colTag])
+            count++;
+    return count;
+}
+
+function _countDistinct(options) {
+    var data = options.data, columnDef = options.columnDef;
+    var values = {}, i, prop;
+    for (i = 0; i < options.data.length; i++)
+        values[data[i][columnDef.colTag]] = 1;
+    var result = 0;
+    for (prop in values)
+        if (values.hasOwnProperty(prop))
+            result++;
+    return result == 1 ? data[0][columnDef.colTag] : result;
 }

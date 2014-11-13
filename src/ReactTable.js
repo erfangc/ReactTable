@@ -1,12 +1,8 @@
 /** @jsx React.DOM */
 
 /**
- * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
- * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
- * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
- * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
- * (i.e. some head subset of their sectorPath array match)
- *
+ * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
+ * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
@@ -15,46 +11,36 @@ var SECTOR_SEPARATOR = "#";
 var ReactTable = React.createClass({
 
     getInitialState: ReactTableGetInitialState,
-
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleGroupBy: ReacTableHandleGroupBy,
+    handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
-    handleRowSelect: ReactHandleRowSelect,
     handleCollapseAll: function () {
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
-        this.setState({
-            currentPage: 1,
-            collapsedSectorPaths: collapsedSectorPaths,
-            collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
-        });
+        var rootNode = this.state.rootNode;
+        rootNode.collapseImmediateChildren();
+        this.setState({rootNode: rootNode});
     },
     handleExpandAll: function () {
-        this.setState({
-            collapsedSectorPaths: {},
-            collapsedSectorKeys: []
-        })
+        var rootNode = this.state.rootNode;
+        rootNode.expandRecursively();
+        this.setState({rootNode: rootNode});
     },
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
-        var state = {};
-        state.columnDefs = this.state.columnDefs;
-        if (data)
-            state.data = deepCopyData(data);
-        this.setState(state);
+        if (data) {
+            this.props.data = data;
+            this.state.rootNode = createTree(this.props);
+        }
+        this.setState({rootNode: this.state.rootNode});
     },
     replaceData: function (data) {
         this.props.data = data;
-        var initialStates = prepareTableData.call(this, this.props);
-        this.state.selectedRows.summaryRows = [];
+        var rootNode = createTree(this.props);
         this.setState({
-            currentPage: 1,
-            data: initialStates.data,
-            selectedRows: this.state.selectedRows,
-            collapsedSectorPaths: initialStates.collapsedSectorPaths,
-            collapsedSectorKeys: initialStates.collapsedSectorKeys
+            rootNode: rootNode,
+            currentPage: 1
         });
     },
     componentDidMount: function () {
@@ -73,29 +59,21 @@ var ReactTable = React.createClass({
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
-    componentDidUpdate: function(){
+    componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var uncollapsedRows = [];
-        // determine which rows are unhidden based on which sectors are collapsed
-        for (var i = 0; i < this.state.data.length; i++) {
-            var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
-                uncollapsedRows.push(row);
-        }
-        // determine which unhidden rows to display on the current page
-        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
-        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+        var rasterizedData = rasterizeTree(this.state.rootNode, this.props.columnDefs[0]);
+
+        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (<Row
                 data={row}
                 key={generateRowKey(row, rowKey)}
-                isSelected={isRowSelected.call(this, row)}
-                onSelect={this.handleRowSelect}
                 columnDefs={this.state.columnDefs}
                 toggleHide={this.handleToggleHide}/>);
         }, this);
@@ -147,7 +125,7 @@ var Row = React.createClass({
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} className={classes} style={styles}>{cells}</tr>);
+        return (<tr className={classes} style={styles}>{cells}</tr>);
     }
 });
 var PageNavigator = React.createClass({
@@ -197,12 +175,12 @@ var SummarizeControl = React.createClass({
                 <div className="menu-item-input" onHover style={{"position": "absolute", "top": "0%", "left": "100%"}}>
                     <label>Enter Bucket(s)</label>
                     <input onChange={this.handleChange} placeholder="ex: 1,10,15"/>
-                    <a onClick={table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets)} className="btn-link">Ok</a>
+                    <a onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)} className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
             <div
-                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function () {
+                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
                 } }
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>Summarize</div>
@@ -211,6 +189,18 @@ var SummarizeControl = React.createClass({
         );
     }
 });
+
+/*
+ * ----------------------------------------------------------------------
+ * Public Helpers / Utilities
+ * ----------------------------------------------------------------------
+ */
+
+function generateSectorKey(sectorPath) {
+    if (sectorPath == null)
+        return "";
+    return sectorPath.join(SECTOR_SEPARATOR);
+}
 
 function generateRowKey(row, rowKey) {
     var key;
@@ -223,20 +213,6 @@ function generateRowKey(row, rowKey) {
         key = row.rowCount;
     }
     return key;
-}
-
-function deepCopyData(data) {
-    var rowCount = 0;
-    return data.map(function (row) {
-        var copy = {};
-        for (var prop in row)
-            if (row.hasOwnProperty(prop))
-                copy[prop] = row[prop];
-        copy.isDetail = true;
-        copy.rowCount = rowCount;
-        rowCount++;
-        return copy;
-    });
 }
 
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
@@ -261,11 +237,11 @@ function adjustHeaders() {
     headerElems.each(function () {
         var currentHeader = $(this);
         var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-        if( counter == 0 && parseInt(headerElems.first().css("border-right")) == 1 ){
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if( currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1 ){
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             $(this).width(headerTextWidthWithPadding);
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedWideHeaders = true;
@@ -273,7 +249,7 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
-    if( adjustedWideHeaders ){
+    if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
 }
@@ -300,15 +276,15 @@ function getPageArithmetics(table, data) {
 
 }
 
-function bindHeadersToMenu(node){
-    node.find(".rt-headers-container").each(function(){
+function bindHeadersToMenu(node) {
+    node.find(".rt-headers-container").each(function () {
         var headerContainer = this;
-        $(headerContainer).hover(function(){
+        $(headerContainer).hover(function () {
             var headerPosition = $(headerContainer).position();
-            if( headerPosition.left ){
+            if (headerPosition.left) {
                 $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
             }
-            if( headerPosition.right ){
+            if (headerPosition.right) {
                 $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
             }
         });

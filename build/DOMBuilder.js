@@ -26,18 +26,18 @@ function buildMenu(options) {
     var customMenuItems = buildCustomMenuItems(table, columnDef);
 
     var menuItems = [
-        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),
-        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"),
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc"),
         summarizeMenuItem
     ];
 
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(table)}, "Expand All"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
     } else
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column"));
     menuItems.push(customMenuItems);
     return (
         React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 

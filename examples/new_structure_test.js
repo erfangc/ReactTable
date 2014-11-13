@@ -9,7 +9,7 @@ $(function () {
             colTag: "country", text: "Country"
         },
         {
-            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
         }
     ];
     $.get('small_data.json').success(function (data) {
