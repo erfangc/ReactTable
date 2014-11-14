@@ -213,25 +213,26 @@ function buildFooter(table, paginationAttr) {
  * @param row the data row to determine the sector name for
  */
 function getSectorName(row, groupBy) {
-    var result = "", i;
+    var sectorName = "", sortIndex = null, i;
     if (groupBy.format == "number" || groupBy.format == "currency") {
         if (groupBy.groupByRange) {
             for (i = 0; i < groupBy.groupByRange.length; i++) {
                 if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                    result = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sortIndex = i;
                     break;
                 }
             }
-            if (!result)
-                result = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            if (!sectorName)
+                sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
         }
         else {
-            result = groupBy.text;
+            sectorName = groupBy.text;
         }
     } else {
-        result = row[groupBy.colTag];
+        sectorName = row[groupBy.colTag];
     }
-    return result;
+    return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {
@@ -346,6 +347,11 @@ function _countDistinct(options) {
 };/** @jsx React.DOM */
 
 /**
+ * High Level TODOs
+ * TODO add sortIndex to custom numerical buckets so they sort correctly
+ */
+
+/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
@@ -353,25 +359,67 @@ function _countDistinct(options) {
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
+
+    /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
+    handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
         var rootNode = this.state.rootNode;
         rootNode.collapseImmediateChildren();
-        this.setState({rootNode: rootNode});
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
     handleExpandAll: function () {
         var rootNode = this.state.rootNode;
         rootNode.expandRecursively();
-        this.setState({rootNode: rootNode});
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
+    /* -------------------------------------------------- */
+
+    toggleSelectDetailRow: function (key) {
+        var selectedDetailRows = this.state.selectedDetailRows, state;
+        if (selectedDetailRows[key] != null) {
+            delete selectedDetailRows[key];
+            state = false;
+        }
+        else {
+            selectedDetailRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedDetailRows
+        });
+        return state;
+    },
+    toggleSelectSummaryRow: function (key) {
+        var selectedSummaryRows = this.state.selectedSummaryRows, state;
+        if (selectedSummaryRows[key] != null) {
+            delete selectedSummaryRows[key];
+            state = false;
+        } else {
+            selectedSummaryRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedSummaryRows
+        });
+        return state;
+    },
+
+    /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
         if (data) {
@@ -388,18 +436,20 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1
         });
     },
+    /* ----------------------------------------- */
+
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this));
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
-        var jqNode = $(this.getDOMNode());
-        jqNode.find(".rt-scrollable").bind('scroll', function () {
-            jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
-            jqNode.find(".rt-headers").css({'overflow': 'hidden'});
+        var $node = $(this.getDOMNode());
+        $node.find(".rt-scrollable").bind('scroll', function () {
+            $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
-        bindHeadersToMenu(jqNode);
+        bindHeadersToMenu($node);
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -409,7 +459,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var rasterizedData = rasterizeTree(this.state.rootNode, this.props.columnDefs[0]);
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
 
         var paginationAttr = getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
@@ -418,6 +472,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
+                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
                 columnDefs: this.state.columnDefs, 
                 toggleHide: this.handleToggleHide}));
@@ -427,9 +483,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0) {
+        if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
-        }
+
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
@@ -445,6 +501,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -470,7 +527,7 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.createElement("tr", {className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
@@ -534,6 +591,12 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         );
     }
 });
+
+/*
+ * ----------------------------------------------------------------------
+ * Public Helpers / Utilities
+ * ----------------------------------------------------------------------
+ */
 
 function generateSectorKey(sectorPath) {
     if (sectorPath == null)
@@ -633,38 +696,55 @@ function bindHeadersToMenu(node) {
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};;function ReactTableGetInitialState() {
+};;function getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows:{},selectedSummaryRows:{}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
+}
+
+function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
+    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        columnDefs: this.props.columnDefs
+        columnDefs: this.props.columnDefs,
+        selectedDetailRows: selections.selectedDetailRows,
+        selectedSummaryRows: selections.selectedSummaryRows
     };
 }
 
+function ReactTableHandleSelect(selectedRow) {
+    var rowKey = this.props.rowKey, state;
+    if (rowKey == null)
+        return;
+    if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
+        state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+        this.props.onSelectCallback(selectedRow,state);
+    } else {
+        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+        this.props.onSummarySelectCallback(selectedRow,state);
+    }
+}
+
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    this.state.rootNode.sortChildren(function (a,b) {
-        var aVal = a[columnDefToSortBy.colTag], bVal = b[columnDefToSortBy.colTag];
-        if (!isNaN(aVal) && !isNaN(bVal)) {
-            return aVal - bVal;
-        } else {
-            if (a[this.colTag] < b[this.colTag])
-                return -1;
-            else if (a[this.colTag] > b[this.colTag])
-                return 1;
-            else
-                return 0;
-        }
-    }, true);
+    this.state.rootNode.sortChildren(getSortFunction(columnDefToSortBy).bind(columnDefToSortBy), true, sortAsc);
     this.setState({rootNode: this.state.rootNode});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
     if (buckets && buckets != "" && columnDef)
-        columnDef.groupByRange = createFloatBuckets(buckets);
+        columnDef.groupByRange = _createFloatBuckets(buckets);
     this.props.groupBy = columnDef ? [columnDef] : null;
     var rootNode = createTree(this.props);
     this.setState({
@@ -700,17 +780,17 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page, event) {
     event.preventDefault();
-    var pageSize = this.props.pageSize || 10;
-    var maxPage = Math.ceil(this.state.data.length / pageSize);
-    if (page < 1 || page > maxPage)
-        return;
     this.setState({
         currentPage: page
     });
 }
 
-/* Helpers */
-function createFloatBuckets(buckets) {
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+function _createFloatBuckets(buckets) {
     var i, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");
     for (i = 0; i < stringBuckets.length; i++) {
@@ -722,7 +802,33 @@ function createFloatBuckets(buckets) {
         return a - b;
     });
     return floatBuckets;
-};/**
+};function genericValueBasedSorter(a, b) {
+    var returnValue = 0;
+    if (a[this.colTag] < b[this.colTag])
+        returnValue = -1;
+    else if (a[this.colTag] > b[this.colTag])
+        returnValue = 1;
+    return returnValue;
+}
+
+function dateDetailSort(a, b) {
+    var returnValue = new Date(a[this.colTag]) - new Date(b[this.colTag]);
+    return returnValue;
+}
+
+function getSortFunction(sortByColumnDef) {
+    var format = sortByColumnDef.format || "";
+    // if the user provided a custom sort function for the column, use that instead
+    if (sortByColumnDef.sort)
+        return sortByColumnDef.sort;
+    switch (format) {
+        case "date":
+            return dateDetailSort;
+        default :
+            return genericValueBasedSorter;
+    }
+}
+;/**
  * Transform the current props into a tree structure representing the complex state
  * @param tableProps
  * @return the root TreeNode element of the tree with aggregation
@@ -775,10 +881,11 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
     if (groupBy == null || groupBy.length == 0)
         return;
     for (i = 0; i < groupBy.length; i++) {
-        var sectorName = getSectorName(row, groupBy[i]);
-        currentNode = currentNode.appendRowToChildren(sectorName, row);
+        var result = getSectorName(row, groupBy[i]);
+        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
     }
-};/**
+};// TODO consider if this sortIndex property thing is the best way to sort
+/**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
  * @constructor
@@ -791,6 +898,7 @@ function TreeNode(sectorTitle, parent) {
     this.children = [];
     this.ultimateChildren = [];
     this.collapsed = false;
+    this.sortIndex = null;
     // private members - TODO use closure to hide this
     this._childrenSectorNameMap = {};
 }
@@ -819,10 +927,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @param childRow
  * @returns the child TreeNode that the data was appended to
  */
-TreeNode.prototype.appendRowToChildren = function (childSectorName, childRow) {
+TreeNode.prototype.appendRowToChildren = function (options) {
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
+        child.sortIndex = sortIndex;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -839,37 +949,49 @@ TreeNode.prototype.getSectorPath = function () {
     return result;
 }
 
-TreeNode.prototype.sortChildren = function (sortFn, recursive) {
+TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
+    var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        return sortFn.call(this, aRow, bRow);
+        // if the child.rowData contain sortIndices - sort those
+        if (_hasSortIndex(a, b))
+            return a.sortIndex - b.sortIndex;
+        return multiplier * sortFn(aRow, bRow);
     });
     // sort ultimate children if there are no children
     if (this.children.length == 0) {
         this.ultimateChildren.sort(function (a, b) {
-            return sortFn.call(this, a, b);
+            return multiplier * sortFn(a, b);
         });
     }
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren(sortFn, recursive);
+            this.children[i].sortChildren(sortFn, recursive, sortAsc);
     }
 }
-;/**
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _hasSortIndex(a,b) {
+    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
+};/**
  * Converts the table state from a tree format to a array of rows for rendering
  * @param rootNode
  * @return {Array}
  */
-function rasterizeTree(node, firstColumn) {
-    var flatData = [];
+function rasterizeTree(options) {
+    var node = options.node, firstColumn = options.firstColumn;
 
     node = _decorateRowData(node, firstColumn);
-
-    flatData.push(node.rowData);
+    var flatData = [node.rowData];
 
     if (!node.collapsed) {
         if (node.children.length > 0)
-            _rasterizeChildren(node, flatData, firstColumn);
+            _rasterizeChildren(flatData, options);
         else
             _rasterizeDetailRows(node, flatData);
     }
@@ -883,10 +1005,11 @@ function rasterizeTree(node, firstColumn) {
  * ----------------------------------------------------------------------
  */
 
-function _rasterizeChildren(node, flatData, firstColumn) {
+function _rasterizeChildren(flatData, options) {
+    var node = options.node, firstColumn = options.firstColumn;
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
-        intermediateResult = rasterizeTree(node.children[i], firstColumn);
+        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++)
             flatData.push(intermediateResult[j]);
     }
