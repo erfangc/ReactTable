@@ -1,23 +1,42 @@
-function getInitialSelections(selectedRows) {
-    var results = {};
+function getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows:{},selectedSummaryRows:{}};
     if (selectedRows != null) {
         for (var i = 0; i < selectedRows.length; i++)
-            results[selectedRows[i]] = 1;
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
     }
     return results;
 }
+
 function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
-    var selectedDetailRows = getInitialSelections(this.props.selectedRows);
+    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
         columnDefs: this.props.columnDefs,
-        selectedDetailRows: selectedDetailRows
+        selectedDetailRows: selections.selectedDetailRows,
+        selectedSummaryRows: selections.selectedSummaryRows
     };
+}
+
+function ReactTableHandleSelect(selectedRow) {
+    var rowKey = this.props.rowKey, state;
+    if (rowKey == null)
+        return;
+    if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
+        state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+        this.props.onSelectCallback(selectedRow,state);
+    } else {
+        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+        this.props.onSummarySelectCallback(selectedRow,state);
+    }
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {

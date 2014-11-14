@@ -4,19 +4,16 @@
  * @return {Array}
  */
 function rasterizeTree(options) {
-    var node = options.node, firstColumn = options.firstColumn, selectedDetailRows = options.selectedDetailRows;
-
-    var flatData = [];
+    var node = options.node, firstColumn = options.firstColumn;
 
     node = _decorateRowData(node, firstColumn);
-
-    flatData.push(node.rowData);
+    var flatData = [node.rowData];
 
     if (!node.collapsed) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options);
         else
-            _rasterizeDetailRows(node, flatData, selectedDetailRows);
+            _rasterizeDetailRows(node, flatData);
     }
 
     return flatData;
@@ -32,18 +29,17 @@ function _rasterizeChildren(flatData, options) {
     var node = options.node, firstColumn = options.firstColumn;
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
-        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn, selectedDetailRows: options.selectedDetailRows});
+        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++)
             flatData.push(intermediateResult[j]);
     }
 }
 
-function _rasterizeDetailRows(node, flatData, selectedDetailRows) {
+function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
         detailRow.sectorPath = node.rowData.sectorPath;
         detailRow.isDetail = true;
-        // TODO trigger selection attr
         flatData.push(detailRow);
     }
 }

@@ -2,8 +2,6 @@
 
 /**
  * High Level TODOs
- * TODO handle selection and callback
- * TODO handle programmtic selection
  * TODO add sortIndex to custom numerical buckets so they sort correctly
  */
 
@@ -14,6 +12,12 @@
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
+
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
@@ -27,12 +31,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
 
-    handleSelect: function (selectedRow) {
-        // TODO discuss/implement best way to handle selection
-    },
-    handleSummarySelect: function (selectedRow) {
-        // TODO discuss/implement best way to handle summary selection
-    },
+    handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
         var rootNode = this.state.rootNode;
         rootNode.collapseImmediateChildren();
@@ -45,8 +44,34 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
     /* -------------------------------------------------- */
 
-    selectRow: function (rowKey) {
-        // TODO implement programmatic selection of rows
+    toggleSelectDetailRow: function (key) {
+        var selectedDetailRows = this.state.selectedDetailRows, state;
+        if (selectedDetailRows[key] != null) {
+            delete selectedDetailRows[key];
+            state = false;
+        }
+        else {
+            selectedDetailRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedDetailRows
+        });
+        return state;
+    },
+    toggleSelectSummaryRow: function (key) {
+        var selectedSummaryRows = this.state.selectedSummaryRows, state;
+        if (selectedSummaryRows[key] != null) {
+            delete selectedSummaryRows[key];
+            state = false;
+        } else {
+            selectedSummaryRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedSummaryRows
+        });
+        return state;
     },
 
     /* --- Called from outside the component --- */
@@ -102,6 +127,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
+                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
                 columnDefs: this.state.columnDefs, 
                 toggleHide: this.handleToggleHide}));
@@ -129,6 +156,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -154,7 +182,7 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.createElement("tr", {className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',

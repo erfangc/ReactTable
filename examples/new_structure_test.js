@@ -6,10 +6,10 @@ $(function () {
         },
         {colTag: "email", text: "Email"},
         {
-            colTag: "country", text: "Country"
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
         },
         {
-            colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
+            colTag: "country", text: "Country"
         }
     ];
     $.get('large_data_30k.json').success(function (data) {
@@ -29,9 +29,9 @@ $(function () {
             onSelectCallback: function (row, state) {
                 console.log("id = " + row.id + " clicked state:" + state);
             },
-            onSummarySelectCallback: function (result, state) {
-                console.log(result.summaryRow);
-                console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
+            onSummarySelectCallback: function (selectedRow, state) {
+                console.log("selectedRow = "+generateSectorKey(selectedRow.sectorPath));
+                console.log("Has Ultimate Children: "+selectedRow.treeNode.ultimateChildren.length);
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));
