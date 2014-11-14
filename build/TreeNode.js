@@ -1,3 +1,4 @@
+// TODO consider if this sortIndex property thing is the best way to sort
 /**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
@@ -11,6 +12,7 @@ function TreeNode(sectorTitle, parent) {
     this.children = [];
     this.ultimateChildren = [];
     this.collapsed = false;
+    this.sortIndex = null;
     // private members - TODO use closure to hide this
     this._childrenSectorNameMap = {};
 }
@@ -39,10 +41,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @param childRow
  * @returns the child TreeNode that the data was appended to
  */
-TreeNode.prototype.appendRowToChildren = function (childSectorName, childRow) {
+TreeNode.prototype.appendRowToChildren = function (options) {
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
+        child.sortIndex = sortIndex;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -64,8 +68,8 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
         // if the child.rowData contain sortIndices - sort those
-        if (_hasSortIndex(aRow, bRow))
-            return aRow.sortIndex - bRow.sortIndex;
+        if (_hasSortIndex(a, b))
+            return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
     // sort ultimate children if there are no children
@@ -86,6 +90,6 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(aRow,bRow) {
-    return (aRow.sortIndex != null && bRow.sortIndex != null && !isNaN(aRow.sortIndex) && !isNaN(aRow.sortIndex))
+function _hasSortIndex(a,b) {
+    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
 }

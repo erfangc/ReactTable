@@ -51,7 +51,7 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
     if (groupBy == null || groupBy.length == 0)
         return;
     for (i = 0; i < groupBy.length; i++) {
-        var sectorName = getSectorName(row, groupBy[i]);
-        currentNode = currentNode.appendRowToChildren(sectorName, row);
+        var result = getSectorName(row, groupBy[i]);
+        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
     }
 }

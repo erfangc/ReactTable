@@ -6,25 +6,26 @@
  * @param row the data row to determine the sector name for
  */
 function getSectorName(row, groupBy) {
-    var result = "", i;
+    var sectorName = "", sortIndex = null, i;
     if (groupBy.format == "number" || groupBy.format == "currency") {
         if (groupBy.groupByRange) {
             for (i = 0; i < groupBy.groupByRange.length; i++) {
                 if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                    result = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sortIndex = i;
                     break;
                 }
             }
-            if (!result)
-                result = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            if (!sectorName)
+                sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
         }
         else {
-            result = groupBy.text;
+            sectorName = groupBy.text;
         }
     } else {
-        result = row[groupBy.colTag];
+        sectorName = row[groupBy.colTag];
     }
-    return result;
+    return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {

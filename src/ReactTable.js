@@ -30,7 +30,6 @@ var ReactTable = React.createClass({
     handleToggleHide: ReactTableHandleToggleHide,
     handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
-
     handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
         var rootNode = this.state.rootNode;
