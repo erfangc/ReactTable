@@ -5,7 +5,7 @@ High Performance HTML Table with Group By functionality Implemented using Facebo
 *requires [react.js](https://github.com/facebook/react)*
 
 ####Note:
-master -> is now on tracking the unreleased version 2 of ReactTable. This version represents the data as a tree instead of a 2D array. There are many benefits. See `legacy-version-1` branch for the old code
+`master` is now on tracking the unreleased version 2 of ReactTable. This version represents the data as a tree instead of a 2D array. There are many benefits. See `legacy-version-1` branch for the old code
 
 [See a Demo Here](http://erfangc.github.io/ReactTable/)
 
@@ -84,7 +84,7 @@ You will need [node.js](http://nodejs.org/download/) installed on your developme
 
 You will first need to download and install [react-tools](http://facebook.github.io/react/docs/tooling-integration.html) by running:
 
-    > npm install -g react-tools
+    > npm install react-tools
 
 Each time you update source files, you should run the JSX compiler provided as part of react-tools via:
 
