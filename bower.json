@@ -1,0 +1,27 @@
+{
+  "name": "ReactTable Demo",
+  "version": "1.1.2",
+  "homepage": "https://github.com/erfangc/ReactTable",
+  "authors": [
+    "erfangc <erfangc@gmail.com>"
+  ],
+  "description": "Demo Page for ReactTable",
+  "main": "index.html",
+  "keywords": [
+    "demo",
+    "reacttable"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "react": "~0.12.0",
+    "react-table": "~1.1.3"
+  }
+}
