@@ -213,33 +213,20 @@ function buildFooter(table, paginationAttr) {
  * @param row the data row to determine the sector name for
  */
 function getSectorName(row, groupBy) {
-    var sectorName = "", sortIndex = null, i;
+    var sectorName = "", sortIndex = null;
     if (groupBy.format == "number" || groupBy.format == "currency") {
-        if (groupBy.groupByRange) {
-            for (i = 0; i < groupBy.groupByRange.length; i++) {
-                if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                    sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
-                    sortIndex = i;
-                    break;
-                }
-            }
-            if (!sectorName)
-                sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
-        }
-        else {
-            sectorName = groupBy.text;
-        }
-    } else {
+        var result = _resolveNumericSectorName(groupBy, row);
+        sectorName = result.sectorName;
+        sortIndex = result.sortIndex;
+    } else
         sectorName = row[groupBy.colTag];
-    }
     return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
-    for (var i = 1; i < columnDefs.length; i++) {
+    for (var i = 1; i < columnDefs.length; i++)
         result[columnDefs[i].colTag] = _aggregateColumn(bucketResult, columnDefs[i], groupBy);
-    }
     return result;
 }
 
@@ -248,6 +235,26 @@ function aggregateSector(bucketResult, columnDefs, groupBy) {
  * Helpers
  * ----------------------------------------------------------------------
  */
+
+function _resolveNumericSectorName(groupBy, row) {
+    var sectorName = "", sortIndex = "";
+    if (groupBy.groupByRange) {
+        for (var i = 0; i < groupBy.groupByRange.length; i++) {
+            if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
+                sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                sortIndex = i;
+                break;
+            }
+        }
+        if (!sectorName) {
+            sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            sortIndex = i + 1;
+        }
+    }
+    else
+        sectorName = groupBy.text;
+    return {sectorName: sectorName, sortIndex: sortIndex};
+}
 
 /**
  * solves for the correct aggregation method given the current columnDef being aggregated
@@ -344,6 +351,52 @@ function _countDistinct(options) {
         if (values.hasOwnProperty(prop))
             result++;
     return result == 1 ? data[0][columnDef.colTag] : result;
+};/**
+ * No Pun Intended
+ * @constructor
+ */
+function Node(sectorTitle, parent) {
+    this.sectorTitle = sectorTitle;
+    this.parent = parent;
+    this.rowData = null;
+    this.children = [];
+    this.ultimateChildren = [];
+
+    this._childrenSectorNameMap = {};
+}
+
+Node.prototype.appendRow = function (row) {
+    this.ultimateChildren.push(row);
+}
+
+/**
+ * Appends the given row into the ultimateChildren of the specified child node of the current node
+ * @param childSectorName
+ * @param childRow
+ * @returns the child Node that the data was appended to
+ */
+Node.prototype.appendRowToChildren = function (childSectorName, childRow) {
+    // create a new child node if one by the current sector name does not exist
+    if (this._childrenSectorNameMap[childSectorName] == null) {
+        var child = new Node(childSectorName, this);
+        this.children.push(child);
+        this._childrenSectorNameMap[childSectorName] = child;
+    }
+    this._childrenSectorNameMap[childSectorName].appendRow(childRow);
+    return this._childrenSectorNameMap[childSectorName];
+}
+
+Node.prototype.getSectorPath = function () {
+    var result = [this.sectorTitle], prevParent = this.parent;
+    while (prevParent != null) {
+        result.unshift(prevParent.sectorTitle);
+        prevParent = prevParent.parent;
+    }
+    return result;
+}
+
+Node.prototype.sortChildren = function (sortFn) {
+    "use strict";
 };/** @jsx React.DOM */
 
 /**
@@ -697,7 +750,7 @@ function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };;function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows:{},selectedSummaryRows:{}};
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
     if (selectedRows != null) {
         for (var i = 0; i < selectedRows.length; i++)
             results.selectedDetailRows[selectedRows[i]] = 1;
@@ -730,27 +783,42 @@ function ReactTableHandleSelect(selectedRow) {
         return;
     if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
         state = this.toggleSelectDetailRow(selectedRow[rowKey]);
-        this.props.onSelectCallback(selectedRow,state);
+        this.props.onSelectCallback(selectedRow, state);
     } else {
         state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
-        this.props.onSummarySelectCallback(selectedRow,state);
+        this.props.onSummarySelectCallback(selectedRow, state);
     }
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    this.state.rootNode.sortChildren(getSortFunction(columnDefToSortBy).bind(columnDefToSortBy), true, sortAsc);
+    this.state.rootNode.sortChildren({
+        sortFn: getSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
+        recursive: true,
+        sortAsc: sortAsc
+    });
     this.setState({rootNode: this.state.rootNode});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
-    if (buckets && buckets != "" && columnDef)
+
+    if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
     this.props.groupBy = columnDef ? [columnDef] : null;
+
     var rootNode = createTree(this.props);
+    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
+        rootNode.sortChildren({
+            sortFn: null,
+            recursive: false,
+            sortAsc: false,
+            sortByIndex: true
+        });
+
     this.setState({
         rootNode: rootNode,
         currentPage: 1
     });
+
 }
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
@@ -791,16 +859,16 @@ function ReactTableHandlePageClick(page, event) {
  * ----------------------------------------------------------------------
  */
 function _createFloatBuckets(buckets) {
-    var i, stringBuckets, floatBuckets = [];
+    var i = 0, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");
     for (i = 0; i < stringBuckets.length; i++) {
         var floatBucket = parseFloat(stringBuckets[i]);
         if (!isNaN(floatBucket))
             floatBuckets.push(floatBucket);
+        floatBuckets.sort(function (a,b) {
+            return a - b;
+        });
     }
-    floatBuckets.sort(function (a, b) {
-        return a - b;
-    });
     return floatBuckets;
 };function genericValueBasedSorter(a, b) {
     var returnValue = 0;
@@ -864,9 +932,8 @@ function recursivelyAggregateNodes(node, tableProps) {
 
     // for each child - aggregate those as well
     if (node.children.length > 0) {
-        for (var i = 0; i < node.children.length; i++) {
+        for (var i = 0; i < node.children.length; i++)
             recursivelyAggregateNodes(node.children[i], tableProps);
-        }
     }
 }
 
@@ -897,7 +964,7 @@ function TreeNode(sectorTitle, parent) {
     this.rowData = null;
     this.children = [];
     this.ultimateChildren = [];
-    this.collapsed = false;
+    this.collapsed = this.parent != null ? true : false;
     this.sortIndex = null;
     // private members - TODO use closure to hide this
     this._childrenSectorNameMap = {};
@@ -949,12 +1016,15 @@ TreeNode.prototype.getSectorPath = function () {
     return result;
 }
 
-TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
+TreeNode.prototype.sortChildren = function (options) {
+    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc,
+        sortByIndex = options.sortByIndex;
+
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
         // if the child.rowData contain sortIndices - sort those
-        if (_hasSortIndex(a, b))
+        if (sortByIndex == true && _hasSortIndex(a, b))
             return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
@@ -966,7 +1036,10 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
     }
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren(sortFn, recursive, sortAsc);
+            this.children[i].sortChildren({
+                sortFn: sortFn, recursive: recursive,
+                sortAsc: sortAsc, sortByIndex: sortByIndex
+            });
     }
 }
 
@@ -976,7 +1049,7 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(a,b) {
+function _hasSortIndex(a, b) {
     return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
 };/**
  * Converts the table state from a tree format to a array of rows for rendering
