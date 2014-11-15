@@ -1,4 +1,3 @@
-// TODO consider if this sortIndex property thing is the best way to sort
 /**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
