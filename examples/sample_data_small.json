@@ -25,5 +25,6 @@
   {"id":25,"first_name":"Mark","last_name":"Black","email":"mblacko@google.com.au","nationality":"Ukraine","test_score":18.95,"score_weight_factor":0.55,"fruit_preference":"Peach","currency_used":"UAH","web_site":"dailymail.co.uk"},
   {"id":26,"first_name":"Diane","last_name":"Rogers","email":"drogersp@unesco.org","nationality":"Indonesia","test_score":52.75,"score_weight_factor":0.88,"fruit_preference":"Apple","currency_used":"IDR","web_site":"unblog.fr"},
   {"id":27,"first_name":"Cynthia","last_name":"Rodriguez","email":"crodriguezq@apache.org","nationality":"United States","test_score":12.85,"score_weight_factor":0.62,"fruit_preference":"Peach","currency_used":"USD","web_site":"thetimes.co.uk"},
-  {"id":28,"first_name":"Heather","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"}
+  {"id":28,"first_name":"Heather","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"},
+  {"id":29,"first_name":"Boya","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"},
 ]

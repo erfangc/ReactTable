@@ -109,18 +109,18 @@ function buildMenu(options) {
     var customMenuItems = buildCustomMenuItems(table, columnDef);
 
     var menuItems = [
-        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, true)}, "Sort Asc"),
-        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(table, columnDef, false)}, "Sort Dsc"),
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
+        React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc"),
         summarizeMenuItem
     ];
 
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(table, null)}, "Clear Summary"));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(table, null)}, "Collapse All"));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(table)}, "Expand All"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
     } else
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(table, columnDef)}, "Remove Column"));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column"));
     menuItems.push(customMenuItems);
     return (
         React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
@@ -206,72 +206,6 @@ function buildFooter(table, paginationAttr) {
             handleClick: table.handlePageClick})) : null;
 }
 ;/**
- * Client side aggregation engine to convert a flag data structure of array of objects
- * into a structured array by computing aggregated values specified by the columns specified 'groupBy'
- *
- * @param data
- * @param columnDefs
- * @param groupBy array of objects with attributes that specify how to group the data
- * @constructor
- */
-function groupData(data, groupBy, columnDefs) {
-    var bucketResults = buildDataBuckets(data, groupBy);
-    var aggregationResults = aggregateBuckets(bucketResults, columnDefs, groupBy);
-    return aggregationResults.concat(data);
-}
-
-function straightSumAggregation(options) {
-    var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
-    for (var i = 0; i < data.length; i++) {
-        temp = data[i][columnDef.colTag] || 0;
-        result += temp;
-    }
-    return result;
-}
-function average(options) {
-    if (options.columnDef.weightBy)
-        return weightedAverage(options);
-    else
-        return simpleAverage(options);
-}
-function simpleAverage(options) {
-    var sum = straightSumAggregation(options);
-    return options.data.length == 0 ? 0 : sum / options.data.length;
-}
-
-function weightedAverage(options) {
-    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
-    var sumProduct = 0;
-    for (var i = 0; i < data.length; i++)
-        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
-
-    var weightSum = straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
-}
-
-function count(options) {
-    var data = options.data, columnDef = options.columnDef;
-    var count = 0, i;
-    for (i = 0; i < options.data.length; i++)
-        if (data[i][columnDef.colTag])
-            count++;
-    return count;
-}
-
-function countDistinct(options) {
-    var data = options.data, columnDef = options.columnDef;
-    var values = {}, i, prop;
-    for (i = 0; i < options.data.length; i++)
-        values[data[i][columnDef.colTag]] = 1;
-    var result = 0;
-    for (prop in values)
-        if (values.hasOwnProperty(prop))
-            result++;
-    return result == 1 ? data[0][columnDef.colTag] : result;
-}
-
-/* Helpers */
-/**
  * find the right sector name for the current row for the given level of row grouping
  * this method can take partition groupBy columns that are numeric in nature and bucket rows based on where they fall
  * in the partition
@@ -279,95 +213,41 @@ function countDistinct(options) {
  * @param row the data row to determine the sector name for
  */
 function getSectorName(row, groupBy) {
-    var result = "", i;
+    var sectorName = "", sortIndex = null, i;
     if (groupBy.format == "number" || groupBy.format == "currency") {
         if (groupBy.groupByRange) {
             for (i = 0; i < groupBy.groupByRange.length; i++) {
                 if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                    result = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                    sortIndex = i;
                     break;
                 }
             }
-            if (!result)
-                result = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            if (!sectorName)
+                sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
         }
         else {
-            result = groupBy.text;
+            sectorName = groupBy.text;
         }
     } else {
-        result = row[groupBy.colTag];
+        sectorName = row[groupBy.colTag];
     }
-    return result;
-}
-function extractSectors(row, groupBy) {
-    var results = [];
-    for (var i = 0; i < groupBy.length; i++) {
-        var sectorName = getSectorName(row, groupBy[i]);
-        results.push(sectorName);
-    }
-    return results;
+    return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
-function buildDataBuckets(data, groupBy) {
-    var results = {};
-    for (var i = 0; i < data.length; i++) {
-        var sectorPath = extractSectors(data[i], groupBy);
-        data[i].sectorPath = sectorPath;
-        data[i].isDetail = true;
-        for (var j = 0; j < sectorPath.length; j++) {
-            var subSectorPath = sectorPath.slice(0, j + 1);
-            var subSectorKey = generateSectorKey(subSectorPath);
-            if (!results[subSectorKey])
-                results[subSectorKey] = {data: [], sectorPath: subSectorPath};
-            results[subSectorKey].data.push(data[i]);
-        }
-    }
-    return results;
-}
-/**
- * @param bucketResults structures that look like: { key1: [{...},{...},...], ... }
- * @param columnDefs
- */
-function aggregateBuckets(bucketResults, columnDefs, groupBy) {
-    var result = [];
-    for (var sectorKey in bucketResults) {
-        if (bucketResults.hasOwnProperty(sectorKey)) {
-            var singleSectorResult = aggregateSector(bucketResults[sectorKey], columnDefs, groupBy);
-            result.push(singleSectorResult);
-        }
-    }
-    return result;
-}
 function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
-    result.sectorPath = bucketResult.sectorPath;
-    result[columnDefs[0].colTag] = bucketResult.sectorPath[bucketResult.sectorPath.length - 1];
     for (var i = 1; i < columnDefs.length; i++) {
-        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], groupBy);
+        result[columnDefs[i].colTag] = _aggregateColumn(bucketResult, columnDefs[i], groupBy);
     }
     return result;
 }
-function aggregateColumn(bucketResult, columnDef, groupBy) {
-    var result;
-    var aggregationMethod = resolveAggregationMethod(columnDef, groupBy);
-    switch (aggregationMethod) {
-        case "sum":
-            result = straightSumAggregation({data: bucketResult.data, columnDef: columnDef});
-            break;
-        case "average":
-            result = average({data: bucketResult.data, columnDef: columnDef});
-            break;
-        case "count":
-            result = count({data: bucketResult.data, columnDef: columnDef});
-            break;
-        case "count_distinct":
-            result = countDistinct({data: bucketResult.data, columnDef: columnDef});
-            break;
-        default :
-            result = "";
-    }
-    return result;
-}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
 
 /**
  * solves for the correct aggregation method given the current columnDef being aggregated
@@ -380,7 +260,7 @@ function aggregateColumn(bucketResult, columnDef, groupBy) {
  * @param columnDef
  * @param groupBy
  */
-function resolveAggregationMethod(columnDef, groupBy) {
+function _resolveAggregationMethod(columnDef, groupBy) {
     var result = "";
     if (columnDef.aggregationMethod) {
         result = columnDef.aggregationMethod;
@@ -393,104 +273,208 @@ function resolveAggregationMethod(columnDef, groupBy) {
     }
     return result.toLowerCase();
 }
-;/** @jsx React.DOM */
+
+function _aggregateColumn(bucketResult, columnDef, groupBy) {
+    var result;
+    var aggregationMethod = _resolveAggregationMethod(columnDef, groupBy);
+    switch (aggregationMethod) {
+        case "sum":
+            result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});
+            break;
+        case "_average":
+            result = _average({data: bucketResult, columnDef: columnDef});
+            break;
+        case "count":
+            result = _count({data: bucketResult, columnDef: columnDef});
+            break;
+        case "count_distinct":
+            result = _countDistinct({data: bucketResult, columnDef: columnDef});
+            break;
+        default :
+            result = "";
+    }
+    return result;
+}
+
+function _straightSumAggregation(options) {
+    var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
+    for (var i = 0; i < data.length; i++) {
+        temp = data[i][columnDef.colTag] || 0;
+        result += temp;
+    }
+    return result;
+}
+function _average(options) {
+    if (options.columnDef.weightBy)
+        return _weightedAverage(options);
+    else
+        return _simpleAverage(options);
+}
+function _simpleAverage(options) {
+    var sum = _straightSumAggregation(options);
+    return options.data.length == 0 ? 0 : sum / options.data.length;
+}
+
+function _weightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var sumProduct = 0;
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
+    var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
+    return weightSum == 0 ? 0 : sumProduct / weightSum;
+}
+
+function _count(options) {
+    var data = options.data, columnDef = options.columnDef;
+    var count = 0, i;
+    for (i = 0; i < options.data.length; i++)
+        if (data[i][columnDef.colTag])
+            count++;
+    return count;
+}
+
+function _countDistinct(options) {
+    var data = options.data, columnDef = options.columnDef;
+    var values = {}, i, prop;
+    for (i = 0; i < options.data.length; i++)
+        values[data[i][columnDef.colTag]] = 1;
+    var result = 0;
+    for (prop in values)
+        if (values.hasOwnProperty(prop))
+            result++;
+    return result == 1 ? data[0][columnDef.colTag] : result;
+};/** @jsx React.DOM */
 
 /**
- * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
- * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
- * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
- * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
- * (i.e. some head subset of their sectorPath array match)
- *
+ * High Level TODOs
+ * TODO add sortIndex to custom numerical buckets so they sort correctly
+ */
+
+/**
+ * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
+ * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
 
+    /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleGroupBy: ReacTableHandleGroupBy,
+    handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
-    handleRowSelect: ReactHandleRowSelect,
+    handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
-        this.setState({
-            currentPage: 1,
-            collapsedSectorPaths: collapsedSectorPaths,
-            collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
-        });
+        var rootNode = this.state.rootNode;
+        rootNode.collapseImmediateChildren();
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
     handleExpandAll: function () {
-        this.setState({
-            collapsedSectorPaths: {},
-            collapsedSectorKeys: []
-        })
+        var rootNode = this.state.rootNode;
+        rootNode.expandRecursively();
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
+    /* -------------------------------------------------- */
+
+    toggleSelectDetailRow: function (key) {
+        var selectedDetailRows = this.state.selectedDetailRows, state;
+        if (selectedDetailRows[key] != null) {
+            delete selectedDetailRows[key];
+            state = false;
+        }
+        else {
+            selectedDetailRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedDetailRows
+        });
+        return state;
+    },
+    toggleSelectSummaryRow: function (key) {
+        var selectedSummaryRows = this.state.selectedSummaryRows, state;
+        if (selectedSummaryRows[key] != null) {
+            delete selectedSummaryRows[key];
+            state = false;
+        } else {
+            selectedSummaryRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedSummaryRows
+        });
+        return state;
+    },
+
+    /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
-        var state = {};
-        state.columnDefs = this.state.columnDefs;
-        if (data)
-            state.data = deepCopyData(data);
-        this.setState(state);
+        if (data) {
+            this.props.data = data;
+            this.state.rootNode = createTree(this.props);
+        }
+        this.setState({rootNode: this.state.rootNode});
     },
     replaceData: function (data) {
         this.props.data = data;
-        var initialStates = prepareTableData.call(this, this.props);
-        this.state.selectedRows.summaryRows = [];
+        var rootNode = createTree(this.props);
         this.setState({
-            currentPage: 1,
-            data: initialStates.data,
-            selectedRows: this.state.selectedRows,
-            collapsedSectorPaths: initialStates.collapsedSectorPaths,
-            collapsedSectorKeys: initialStates.collapsedSectorKeys
+            rootNode: rootNode,
+            currentPage: 1
         });
     },
+    /* ----------------------------------------- */
+
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this));
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
-        var jqNode = $(this.getDOMNode());
-        jqNode.find(".rt-scrollable").bind('scroll', function () {
-            jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
-            jqNode.find(".rt-headers").css({'overflow': 'hidden'});
+        var $node = $(this.getDOMNode());
+        $node.find(".rt-scrollable").bind('scroll', function () {
+            $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
-        bindHeadersToMenu(jqNode);
+        bindHeadersToMenu($node);
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
-    componentDidUpdate: function(){
+    componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var uncollapsedRows = [];
-        // determine which rows are unhidden based on which sectors are collapsed
-        for (var i = 0; i < this.state.data.length; i++) {
-            var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
-                uncollapsedRows.push(row);
-        }
-        // determine which unhidden rows to display on the current page
-        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
-        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
+
+        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
+                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
-                isSelected: isRowSelected.call(this, row), 
-                onSelect: this.handleRowSelect, 
                 columnDefs: this.state.columnDefs, 
                 toggleHide: this.handleToggleHide}));
         }, this);
@@ -499,9 +483,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0) {
+        if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
-        }
+
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
@@ -517,6 +501,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -592,12 +577,12 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
                 React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
                     React.createElement("label", null, "Enter Bucket(s)"), 
                     React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function () {
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
                 }, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
@@ -607,61 +592,16 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     }
 });
 
-/* Sector tree rendering utilities */
-
-function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
-    var isSummaryRow = !data.isDetail;
-    var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
-    if (hasCollapsedAncestor)
-        result = true;
-    else if (immediateSectorCollapsed && !isSummaryRow)
-        result = true;
-    return result;
-}
-
-/**
- * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
- * @param sectorPath [array] the sectorPath to perform comparison on
- * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
- * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
- * @returns {boolean}
+/*
+ * ----------------------------------------------------------------------
+ * Public Helpers / Utilities
+ * ----------------------------------------------------------------------
  */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var max = collapsedSectorKeys.length;
-    for (var i = 0; i < max; i++) {
-        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            return true;
-    }
-    return false;
-}
 
-function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
-    // lower length in SP means higher up on the chain
-    if (subSectorCandidate.length <= superSectorCandidate.length)
-        return false;
-    for (var i = 0; i < superSectorCandidate.length; i++) {
-        if (subSectorCandidate[i] != superSectorCandidate[i])
-            return false;
-    }
-    return true;
-}
-
-/* Other utility functions */
-function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
-    "use strict";
-    // if no sector path present in both - they are equal
-    if (!sectorPath1 && !sectorPath2)
-        return true;
-    var result = true, i = 0, loopSize = sectorPath1.length;
-    if (sectorPath1.length != sectorPath2.length)
-        result = false;
-    else
-        for (i = 0; i < loopSize; i++)
-            if (sectorPath1[i] != sectorPath2[i])
-                result = false;
-    return result
+function generateSectorKey(sectorPath) {
+    if (sectorPath == null)
+        return "";
+    return sectorPath.join(SECTOR_SEPARATOR);
 }
 
 function generateRowKey(row, rowKey) {
@@ -675,38 +615,6 @@ function generateRowKey(row, rowKey) {
         key = row.rowCount;
     }
     return key;
-}
-
-function generateSectorKey(sectorPath) {
-    if (!sectorPath)
-        return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
-}
-
-function deepCopyData(data) {
-    var rowCount = 0;
-    return data.map(function (row) {
-        var copy = {};
-        for (var prop in row)
-            if (row.hasOwnProperty(prop))
-                copy[prop] = row[prop];
-        copy.isDetail = true;
-        copy.rowCount = rowCount;
-        rowCount++;
-        return copy;
-    });
-}
-
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
 }
 
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
@@ -731,11 +639,11 @@ function adjustHeaders() {
     headerElems.each(function () {
         var currentHeader = $(this);
         var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-        if( counter == 0 && parseInt(headerElems.first().css("border-right")) == 1 ){
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if( currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1 ){
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             $(this).width(headerTextWidthWithPadding);
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedWideHeaders = true;
@@ -743,7 +651,7 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
-    if( adjustedWideHeaders ){
+    if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
 }
@@ -770,15 +678,15 @@ function getPageArithmetics(table, data) {
 
 }
 
-function bindHeadersToMenu(node){
-    node.find(".rt-headers-container").each(function(){
+function bindHeadersToMenu(node) {
+    node.find(".rt-headers-container").each(function () {
         var headerContainer = this;
-        $(headerContainer).hover(function(){
+        $(headerContainer).hover(function () {
             var headerPosition = $(headerContainer).position();
-            if( headerPosition.left ){
+            if (headerPosition.left) {
                 $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
             }
-            if( headerPosition.right ){
+            if (headerPosition.right) {
                 $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
             }
         });
@@ -788,56 +696,65 @@ function bindHeadersToMenu(node){
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};;function ReactTableGetInitialState() {
-    var initialStates = prepareTableData.call(this, this.props);
-    var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
+};;function getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows:{},selectedSummaryRows:{}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
+}
+
+function ReactTableGetInitialState() {
+    // the holy grail of table state - describes structure of the data contained within the table
+    var rootNode = createTree(this.props);
+    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
+        rootNode: rootNode,
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        data: initialStates.data,
         columnDefs: this.props.columnDefs,
-        collapsedSectorPaths: initialStates.collapsedSectorPaths,
-        collapsedSectorKeys: initialStates.collapsedSectorKeys,
-        selectedRows: selectedRows
+        selectedDetailRows: selections.selectedDetailRows,
+        selectedSummaryRows: selections.selectedSummaryRows
     };
+}
+
+function ReactTableHandleSelect(selectedRow) {
+    var rowKey = this.props.rowKey, state;
+    if (rowKey == null)
+        return;
+    if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
+        state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+        this.props.onSelectCallback(selectedRow,state);
+    } else {
+        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+        this.props.onSummarySelectCallback(selectedRow,state);
+    }
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    var data = this.state.data;
-    var sortOptions = {
-        sectorSorter: defaultSectorSorter,
-        sortSummaryBy: columnDefToSortBy,
-        detailSorter: getSortFunction(columnDefToSortBy),
-        sortDetailBy: columnDefToSortBy,
-        sortAsc: sortAsc
-    };
-    data.sort(sorterFactory.call(this, sortOptions));
-    this.setState({
-        data: data,
-        sorting: columnDefToSortBy
-    });
+    this.state.rootNode.sortChildren(getSortFunction(columnDefToSortBy).bind(columnDefToSortBy), true, sortAsc);
+    this.setState({rootNode: this.state.rootNode});
 }
 
-function ReacTableHandleGroupBy(columnDef, buckets) {
-    if (buckets && buckets != "" && columnDef) {
-        columnDef.groupByRange = createFloatBuckets(buckets);
-    }
+function ReactTableHandleGroupBy(columnDef, buckets) {
+    if (buckets && buckets != "" && columnDef)
+        columnDef.groupByRange = _createFloatBuckets(buckets);
     this.props.groupBy = columnDef ? [columnDef] : null;
-    var initialStates = prepareTableData.call(this, this.props);
-    this.state.selectedRows.summaryRows = [];
+    var rootNode = createTree(this.props);
     this.setState({
-        currentPage: 1,
-        data: initialStates.data,
-        selectedRows: this.state.selectedRows,
-        collapsedSectorPaths: initialStates.collapsedSectorPaths,
-        collapsedSectorKeys: initialStates.collapsedSectorKeys
+        rootNode: rootNode,
+        currentPage: 1
     });
 }
-
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd()
+        this.props.beforeColumnAdd();
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -857,211 +774,45 @@ function ReactTableHandleRemove(columnDefToRemove) {
 
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
-    var sectorKey = generateSectorKey(summaryRow.sectorPath);
-    if (this.state.collapsedSectorPaths[sectorKey] == null) {
-        this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        this.state.collapsedSectorKeys.push(sectorKey);
-    }
-    else {
-        delete this.state.collapsedSectorPaths[sectorKey];
-        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey), 1);
-    }
-    this.setState({
-        collapsedSectorPaths: this.state.collapsedSectorPaths,
-        collapsedSectorKeys: this.state.collapsedSectorKeys
-    });
+    summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
+    this.setState({rootNode: this.state.rootNode});
 }
 
 function ReactTableHandlePageClick(page, event) {
     event.preventDefault();
-    var pageSize = this.props.pageSize || 10;
-    var maxPage = Math.ceil(this.state.data.length / pageSize);
-    if (page < 1 || page > maxPage)
-        return;
     this.setState({
         currentPage: page
     });
 }
 
-/* Helpers */
-function extractSectorPathKeys(collapsedSectorPaths) {
-    "use strict";
-    var results = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            results.push(key);
-    return results;
-}
-
-function prepareTableData(props) {
-    // make defensive copy of the data - surprisingly not a huge performance hit
-    var data = deepCopyData(props.data);
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-    return {
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
-        data: data
-    };
-}
-
-function createFloatBuckets(buckets) {
-    var i = 0, stringBuckets, floatBuckets = [];
-    stringBuckets = buckets.split(",");
-    for (i = 0; i < stringBuckets.length; i++)
-         var floatBucket = parseFloat(stringBuckets[i]);
-    if (!isNaN(floatBucket))
-        floatBuckets.push(floatBucket);
-    floatBuckets.sort();
-    return floatBuckets;
-};/* Main Event Handler */
-function ReactHandleRowSelect(row) {
-    "use strict";
-    var selectionSubType = null,
-        selectionKey = null,
-        becameSelected = false,
-        callbackProcessingDelegate = null;
-
-    if (row.isDetail) {
-        selectionSubType = 'detailRows';
-        selectionKey = generateRowKey(row, this.props.rowKey);
-        callbackProcessingDelegate = processDetailRowSelect;
-    } else {
-        selectionSubType = 'summaryRows';
-        selectionKey = generateSectorKey(row.sectorPath);
-        callbackProcessingDelegate = processSummaryRowSelect;
-    }
-
-    if (isRowSelected.call(this, row))
-        delete this.state.selectedRows[selectionSubType][selectionKey];
-    else {
-        this.state.selectedRows[selectionSubType][selectionKey] = 1;
-        becameSelected = true;
-    }
-
-    // invoke callback processing logic
-    callbackProcessingDelegate.call(this, row, becameSelected);
-    this.setState({
-        selectedRows: this.state.selectedRows
-    });
-}
-
-/* Helper Functions */
-function processSummaryRowSelect(summaryRow, selectionState) {
-    "use strict";
-    var result = {detailRows: [], summaryRow: summaryRow}, i = 0, dataSize = this.state.data.length, row = null;
-    for (i = 0; i < dataSize; i++) {
-        row = this.state.data[i];
-        if (row.isDetail &&
-            (isSubSectorOf(row.sectorPath, summaryRow.sectorPath) ||
-            sectorPathMatchesExactly(row.sectorPath, summaryRow.sectorPath))
-        )
-            result.detailRows.push(row);
-    }
-    if (this.props.onSummarySelectCallback)
-        this.props.onSummarySelectCallback.call(this, result, selectionState);
-}
-
-function processDetailRowSelect(row, selectionState) {
-    "use strict";
-    var rowKey = this.props.rowKey;
-    if (!rowKey)
-        return;
-    if (this.props.onSelectCallback)
-        this.props.onSelectCallback.call(this, row, selectionState);
-}
-
-function getInitiallySelectedRows(selectedRowKeys) {
-    var result = {detailRows: {}, summaryRows: {}};
-    selectedRowKeys = selectedRowKeys || [];
-    for (var i = 0; i < selectedRowKeys.length; i++)
-        result.detailRows[selectedRowKeys[i]] = 1;
-    return result;
-}
-
-function isRowSelected(row) {
-    var result = false, sectorPathKey = null, rowKey = null;
-    if (row.isDetail) {
-        rowKey = generateRowKey(row, this.props.rowKey);
-        result = (this.state.selectedRows.detailRows[rowKey] != null);
-    } else {
-        sectorPathKey = generateSectorKey(row.sectorPath);
-        result = (this.state.selectedRows.summaryRows[sectorPathKey] != null);
-    }
-    return result;
-}
-;/**
- * Master sorter wrapper function that attempts to get the raw data array into the correct order
- * failing to sort the array into the correct order is disastrous for the table as rows are created
- * per the ordering in the main data array
- *
- * this function will attempt to sort the sectors accordingly (by using either a custom sector sorter or just comparing sector path keys)
- * and will delegate detail row sorting to a detail sorter function
- *
- * @param a
- * @param b
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
  */
-function sorterFactory(options) {
-    var sectorSorter = options.sectorSorter,
-        detailSorter = options.detailSorter,
-        sortSummaryBy = options.sortSummaryBy,
-        sortDetailBy = options.sortDetailBy;
-    sortAsc = options.sortAsc;
-
-    return function (a, b) {
-        // compare sector
-        var result = 0;
-        result = sectorSorter.call(sortSummaryBy, a, b);
-        // same sector therefore, summary > detail
-        if (result == 0) {
-            if (a.isDetail && !b.isDetail) {
-                result = 1;
-            } else if (b.isDetail && !a.isDetail) {
-                result = -1;
-            } else {
-                result = 0;
-            }
-            // both are detail rows ... use detail sorter or just return 0
-            if (result == 0) {
-                result = detailSorter.call(sortDetailBy, a, b);
-                if (!sortAsc)
-                    result *= -1;
-            }
-        }
-        return result;
-    }.bind(this);
-}
-
-function defaultSectorSorter(a, b) {
-    return generateSectorKey(a.sectorPath).localeCompare(generateSectorKey(b.sectorPath));
-}
-
-function defaultDetailSorter(a, b) {
-    return a.rowCount - b.rowCount;
-}
-
-/* Detail sorters - used when user tries to sort the columns after table has been rendered */
-
-function genericValueBasedSorter(a, b) {
+function _createFloatBuckets(buckets) {
+    var i, stringBuckets, floatBuckets = [];
+    stringBuckets = buckets.split(",");
+    for (i = 0; i < stringBuckets.length; i++) {
+        var floatBucket = parseFloat(stringBuckets[i]);
+        if (!isNaN(floatBucket))
+            floatBuckets.push(floatBucket);
+    }
+    floatBuckets.sort(function (a, b) {
+        return a - b;
+    });
+    return floatBuckets;
+};function genericValueBasedSorter(a, b) {
     var returnValue = 0;
     if (a[this.colTag] < b[this.colTag])
         returnValue = -1;
     else if (a[this.colTag] > b[this.colTag])
         returnValue = 1;
-    if (this.asc)
-        returnValue *= -1;
     return returnValue;
 }
 
 function dateDetailSort(a, b) {
     var returnValue = new Date(a[this.colTag]) - new Date(b[this.colTag]);
-    if (this.asc)
-        returnValue *= -1;
     return returnValue;
 }
 
@@ -1076,4 +827,210 @@ function getSortFunction(sortByColumnDef) {
         default :
             return genericValueBasedSorter;
     }
+}
+;/**
+ * Transform the current props into a tree structure representing the complex state
+ * @param tableProps
+ * @return the root TreeNode element of the tree with aggregation
+ */
+function createTree(tableProps) {
+    var rootNode = buildTreeSkeleton(tableProps);
+    recursivelyAggregateNodes(rootNode, tableProps);
+    return rootNode;
+}
+
+/**
+ * Creates the data tree backed by props.data and grouped columns specified in groupBy
+ * @param tableProps
+ * @return {TreeNode} the root node
+ */
+function buildTreeSkeleton(tableProps) {
+    var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
+    for (i = 0; i < rawData.length; i++) {
+        rootNode.appendRow(rawData[i]);
+        _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
+    }
+    return rootNode
+}
+
+/**
+ * Populate an existing skeleton (represented by the root node) with summary level data
+ * @param node
+ * @param tableProps
+ */
+function recursivelyAggregateNodes(node, tableProps) {
+    // aggregate the current node
+    node.rowData = aggregateSector(node.ultimateChildren, tableProps.columnDefs, tableProps.groupBy);
+
+    // for each child - aggregate those as well
+    if (node.children.length > 0) {
+        for (var i = 0; i < node.children.length; i++) {
+            recursivelyAggregateNodes(node.children[i], tableProps);
+        }
+    }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _populateChildNodesForRow(rootNode, row, groupBy) {
+    var i, currentNode = rootNode;
+    if (groupBy == null || groupBy.length == 0)
+        return;
+    for (i = 0; i < groupBy.length; i++) {
+        var result = getSectorName(row, groupBy[i]);
+        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
+    }
+};// TODO consider if this sortIndex property thing is the best way to sort
+/**
+ * Represents a grouping of table rows with references to children that are also grouping
+ * of rows
+ * @constructor
+ */
+function TreeNode(sectorTitle, parent) {
+    // accessible properties
+    this.sectorTitle = sectorTitle;
+    this.parent = parent;
+    this.rowData = null;
+    this.children = [];
+    this.ultimateChildren = [];
+    this.collapsed = false;
+    this.sortIndex = null;
+    // private members - TODO use closure to hide this
+    this._childrenSectorNameMap = {};
+}
+
+TreeNode.prototype.appendRow = function (row) {
+    this.ultimateChildren.push(row);
+}
+
+TreeNode.prototype.collapseImmediateChildren = function () {
+    var i;
+    for (i = 0; i < this.children.length; i++)
+        this.children[i].collapsed = true;
+}
+
+TreeNode.prototype.expandRecursively = function () {
+    var i;
+    for (i = 0; i < this.children.length; i++) {
+        this.children[i].collapsed = false;
+        this.children[i].expandRecursively();
+    }
+}
+
+/**
+ * Appends the given row into the ultimateChildren of the specified child node of the current node
+ * @param childSectorName
+ * @param childRow
+ * @returns the child TreeNode that the data was appended to
+ */
+TreeNode.prototype.appendRowToChildren = function (options) {
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
+    // create a new child node if one by the current sector name does not exist
+    if (this._childrenSectorNameMap[childSectorName] == null) {
+        var child = new TreeNode(childSectorName, this);
+        child.sortIndex = sortIndex;
+        this.children.push(child);
+        this._childrenSectorNameMap[childSectorName] = child;
+    }
+    this._childrenSectorNameMap[childSectorName].appendRow(childRow);
+    return this._childrenSectorNameMap[childSectorName];
+}
+
+TreeNode.prototype.getSectorPath = function () {
+    var result = [this.sectorTitle], prevParent = this.parent;
+    while (prevParent != null) {
+        result.unshift(prevParent.sectorTitle);
+        prevParent = prevParent.parent;
+    }
+    return result;
+}
+
+TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
+    var multiplier = sortAsc == true ? 1 : -1;
+    this.children.sort(function (a, b) {
+        var aRow = a.rowData, bRow = b.rowData;
+        // if the child.rowData contain sortIndices - sort those
+        if (_hasSortIndex(a, b))
+            return a.sortIndex - b.sortIndex;
+        return multiplier * sortFn(aRow, bRow);
+    });
+    // sort ultimate children if there are no children
+    if (this.children.length == 0) {
+        this.ultimateChildren.sort(function (a, b) {
+            return multiplier * sortFn(a, b);
+        });
+    }
+    if (recursive) {
+        for (var i = 0; i < this.children.length; i++)
+            this.children[i].sortChildren(sortFn, recursive, sortAsc);
+    }
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _hasSortIndex(a,b) {
+    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
+};/**
+ * Converts the table state from a tree format to a array of rows for rendering
+ * @param rootNode
+ * @return {Array}
+ */
+function rasterizeTree(options) {
+    var node = options.node, firstColumn = options.firstColumn;
+
+    node = _decorateRowData(node, firstColumn);
+    var flatData = [node.rowData];
+
+    if (!node.collapsed) {
+        if (node.children.length > 0)
+            _rasterizeChildren(flatData, options);
+        else
+            _rasterizeDetailRows(node, flatData);
+    }
+
+    return flatData;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _rasterizeChildren(flatData, options) {
+    var node = options.node, firstColumn = options.firstColumn;
+    var i, j, intermediateResult;
+    for (i = 0; i < node.children.length; i++) {
+        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
+        for (j = 0; j < intermediateResult.length; j++)
+            flatData.push(intermediateResult[j]);
+    }
+}
+
+function _rasterizeDetailRows(node, flatData) {
+    for (var i = 0; i < node.ultimateChildren.length; i++) {
+        var detailRow = node.ultimateChildren[i];
+        detailRow.sectorPath = node.rowData.sectorPath;
+        detailRow.isDetail = true;
+        flatData.push(detailRow);
+    }
+}
+
+/**
+ * enhances the `rowData` attribute of the give node with info
+ * that will be useful for rendering/interactivity such as sectorPath
+ */
+function _decorateRowData(node, firstColumn) {
+    node.rowData.sectorPath = node.getSectorPath();
+    node.rowData[firstColumn.colTag] = node.sectorTitle;
+    node.rowData.treeNode = node;
+    return node;
 }

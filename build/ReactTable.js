@@ -1,100 +1,134 @@
 /** @jsx React.DOM */
 
 /**
- * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
- * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
- * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
- * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
- * (i.e. some head subset of their sectorPath array match)
- *
+ * High Level TODOs
+ * TODO add sortIndex to custom numerical buckets so they sort correctly
+ */
+
+/**
+ * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
+ * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
 
+    /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleGroupBy: ReacTableHandleGroupBy,
+    handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
-    handleRowSelect: ReactHandleRowSelect,
+    handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
-        var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(this.state.data);
-        this.setState({
-            currentPage: 1,
-            collapsedSectorPaths: collapsedSectorPaths,
-            collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths)
-        });
+        var rootNode = this.state.rootNode;
+        rootNode.collapseImmediateChildren();
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
     handleExpandAll: function () {
-        this.setState({
-            collapsedSectorPaths: {},
-            collapsedSectorKeys: []
-        })
+        var rootNode = this.state.rootNode;
+        rootNode.expandRecursively();
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
+    /* -------------------------------------------------- */
+
+    toggleSelectDetailRow: function (key) {
+        var selectedDetailRows = this.state.selectedDetailRows, state;
+        if (selectedDetailRows[key] != null) {
+            delete selectedDetailRows[key];
+            state = false;
+        }
+        else {
+            selectedDetailRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedDetailRows
+        });
+        return state;
+    },
+    toggleSelectSummaryRow: function (key) {
+        var selectedSummaryRows = this.state.selectedSummaryRows, state;
+        if (selectedSummaryRows[key] != null) {
+            delete selectedSummaryRows[key];
+            state = false;
+        } else {
+            selectedSummaryRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedSummaryRows
+        });
+        return state;
+    },
+
+    /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         this.state.columnDefs.push(columnDef);
-        var state = {};
-        state.columnDefs = this.state.columnDefs;
-        if (data)
-            state.data = deepCopyData(data);
-        this.setState(state);
+        if (data) {
+            this.props.data = data;
+            this.state.rootNode = createTree(this.props);
+        }
+        this.setState({rootNode: this.state.rootNode});
     },
     replaceData: function (data) {
         this.props.data = data;
-        var initialStates = prepareTableData.call(this, this.props);
-        this.state.selectedRows.summaryRows = [];
+        var rootNode = createTree(this.props);
         this.setState({
-            currentPage: 1,
-            data: initialStates.data,
-            collapsedSectorPaths: initialStates.collapsedSectorPaths,
-            collapsedSectorKeys: initialStates.collapsedSectorKeys
+            rootNode: rootNode,
+            currentPage: 1
         });
     },
+    /* ----------------------------------------- */
+
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this));
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
-        var jqNode = $(this.getDOMNode());
-        jqNode.find(".rt-scrollable").bind('scroll', function () {
-            jqNode.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
-            jqNode.find(".rt-headers").css({'overflow': 'hidden'});
+        var $node = $(this.getDOMNode());
+        $node.find(".rt-scrollable").bind('scroll', function () {
+            $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
-        bindHeadersToMenu(jqNode);
+        bindHeadersToMenu($node);
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
-    componentDidUpdate: function(){
+    componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var uncollapsedRows = [];
-        // determine which rows are unhidden based on which sectors are collapsed
-        for (var i = 0; i < this.state.data.length; i++) {
-            var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
-                uncollapsedRows.push(row);
-        }
-        // determine which unhidden rows to display on the current page
-        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
-        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
+
+        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
+                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
-                isSelected: isRowSelected.call(this, row), 
-                onSelect: this.handleRowSelect, 
                 columnDefs: this.state.columnDefs, 
                 toggleHide: this.handleToggleHide}));
         }, this);
@@ -103,9 +137,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0) {
+        if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
-        }
+
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
@@ -121,6 +155,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -196,12 +231,12 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
                 React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
                     React.createElement("label", null, "Enter Bucket(s)"), 
                     React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(table, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(table, columnDef, null) : function () {
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
                 }, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
@@ -211,61 +246,16 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     }
 });
 
-/* Sector tree rendering utilities */
-
-function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
-    var isSummaryRow = !data.isDetail;
-    var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
-    if (hasCollapsedAncestor)
-        result = true;
-    else if (immediateSectorCollapsed && !isSummaryRow)
-        result = true;
-    return result;
-}
-
-/**
- * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
- * @param sectorPath [array] the sectorPath to perform comparison on
- * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
- * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
- * @returns {boolean}
+/*
+ * ----------------------------------------------------------------------
+ * Public Helpers / Utilities
+ * ----------------------------------------------------------------------
  */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var max = collapsedSectorKeys.length;
-    for (var i = 0; i < max; i++) {
-        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            return true;
-    }
-    return false;
-}
 
-function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
-    // lower length in SP means higher up on the chain
-    if (subSectorCandidate.length <= superSectorCandidate.length)
-        return false;
-    for (var i = 0; i < superSectorCandidate.length; i++) {
-        if (subSectorCandidate[i] != superSectorCandidate[i])
-            return false;
-    }
-    return true;
-}
-
-/* Other utility functions */
-function sectorPathMatchesExactly(sectorPath1, sectorPath2) {
-    "use strict";
-    // if no sector path present in both - they are equal
-    if (!sectorPath1 && !sectorPath2)
-        return true;
-    var result = true, i = 0, loopSize = sectorPath1.length;
-    if (sectorPath1.length != sectorPath2.length)
-        result = false;
-    else
-        for (i = 0; i < loopSize; i++)
-            if (sectorPath1[i] != sectorPath2[i])
-                result = false;
-    return result
+function generateSectorKey(sectorPath) {
+    if (sectorPath == null)
+        return "";
+    return sectorPath.join(SECTOR_SEPARATOR);
 }
 
 function generateRowKey(row, rowKey) {
@@ -279,38 +269,6 @@ function generateRowKey(row, rowKey) {
         key = row.rowCount;
     }
     return key;
-}
-
-function generateSectorKey(sectorPath) {
-    if (!sectorPath)
-        return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
-}
-
-function deepCopyData(data) {
-    var rowCount = 0;
-    return data.map(function (row) {
-        var copy = {};
-        for (var prop in row)
-            if (row.hasOwnProperty(prop))
-                copy[prop] = row[prop];
-        copy.isDetail = true;
-        copy.rowCount = rowCount;
-        rowCount++;
-        return copy;
-    });
-}
-
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
 }
 
 function computePageDisplayRange(currentPage, maxDisplayedPages) {
@@ -335,11 +293,11 @@ function adjustHeaders() {
     headerElems.each(function () {
         var currentHeader = $(this);
         var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-        if( counter == 0 && parseInt(headerElems.first().css("border-right")) == 1 ){
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if( currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1 ){
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             $(this).width(headerTextWidthWithPadding);
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedWideHeaders = true;
@@ -347,7 +305,7 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
-    if( adjustedWideHeaders ){
+    if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
 }
@@ -374,15 +332,15 @@ function getPageArithmetics(table, data) {
 
 }
 
-function bindHeadersToMenu(node){
-    node.find(".rt-headers-container").each(function(){
+function bindHeadersToMenu(node) {
+    node.find(".rt-headers-container").each(function () {
         var headerContainer = this;
-        $(headerContainer).hover(function(){
+        $(headerContainer).hover(function () {
             var headerPosition = $(headerContainer).position();
-            if( headerPosition.left ){
+            if (headerPosition.left) {
                 $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
             }
-            if( headerPosition.right ){
+            if (headerPosition.right) {
                 $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
             }
         });

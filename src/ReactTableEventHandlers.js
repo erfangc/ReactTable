@@ -1,53 +1,77 @@
+function getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
+}
+
 function ReactTableGetInitialState() {
-    var initialStates = prepareTableData.call(this, this.props);
-    var selectedRows = getInitiallySelectedRows(this.props.selectedRows);
+    // the holy grail of table state - describes structure of the data contained within the table
+    var rootNode = createTree(this.props);
+    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
+        rootNode: rootNode,
         uniqueId: uniqueId("table"),
         currentPage: 1,
         height: this.props.height,
-        data: initialStates.data,
         columnDefs: this.props.columnDefs,
-        collapsedSectorPaths: initialStates.collapsedSectorPaths,
-        collapsedSectorKeys: initialStates.collapsedSectorKeys,
-        selectedRows: selectedRows
+        selectedDetailRows: selections.selectedDetailRows,
+        selectedSummaryRows: selections.selectedSummaryRows
     };
+}
+
+function ReactTableHandleSelect(selectedRow) {
+    var rowKey = this.props.rowKey, state;
+    if (rowKey == null)
+        return;
+    if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
+        state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+        this.props.onSelectCallback(selectedRow, state);
+    } else {
+        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+        this.props.onSummarySelectCallback(selectedRow, state);
+    }
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    var data = this.state.data;
-    var sortOptions = {
-        sectorSorter: defaultSectorSorter,
-        sortSummaryBy: columnDefToSortBy,
-        detailSorter: getSortFunction(columnDefToSortBy),
-        sortDetailBy: columnDefToSortBy,
+    this.state.rootNode.sortChildren({
+        sortFn: getSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
+        recursive: true,
         sortAsc: sortAsc
-    };
-    data.sort(sorterFactory.call(this, sortOptions));
-    this.setState({
-        data: data,
-        sorting: columnDefToSortBy
     });
+    this.setState({rootNode: this.state.rootNode});
 }
 
-function ReacTableHandleGroupBy(columnDef, buckets) {
-    if (buckets && buckets != "" && columnDef) {
-        columnDef.groupByRange = createFloatBuckets(buckets);
-    }
+function ReactTableHandleGroupBy(columnDef, buckets) {
+
+    if (buckets != null && buckets != "" && columnDef)
+        columnDef.groupByRange = _createFloatBuckets(buckets);
     this.props.groupBy = columnDef ? [columnDef] : null;
-    var initialStates = prepareTableData.call(this, this.props);
-    this.state.selectedRows.summaryRows = [];
-    this.setState({
-        currentPage: 1,
-        data: initialStates.data,
-        selectedRows: this.state.selectedRows,
-        collapsedSectorPaths: initialStates.collapsedSectorPaths,
-        collapsedSectorKeys: initialStates.collapsedSectorKeys
-    });
-}
 
+    var rootNode = createTree(this.props);
+    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
+        rootNode.sortChildren({
+            sortFn: null,
+            recursive: false,
+            sortAsc: false,
+            sortByIndex: true
+        });
+
+    this.setState({
+        rootNode: rootNode,
+        currentPage: 1
+    });
+
+}
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd()
+        this.props.beforeColumnAdd();
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -67,69 +91,29 @@ function ReactTableHandleRemove(columnDefToRemove) {
 
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
-    var sectorKey = generateSectorKey(summaryRow.sectorPath);
-    if (this.state.collapsedSectorPaths[sectorKey] == null) {
-        this.state.collapsedSectorPaths[sectorKey] = summaryRow.sectorPath;
-        this.state.collapsedSectorKeys.push(sectorKey);
-    }
-    else {
-        delete this.state.collapsedSectorPaths[sectorKey];
-        this.state.collapsedSectorKeys.splice(this.state.collapsedSectorKeys.indexOf(sectorKey), 1);
-    }
-    this.setState({
-        collapsedSectorPaths: this.state.collapsedSectorPaths,
-        collapsedSectorKeys: this.state.collapsedSectorKeys
-    });
+    summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
+    this.setState({rootNode: this.state.rootNode});
 }
 
 function ReactTableHandlePageClick(page, event) {
     event.preventDefault();
-    var pageSize = this.props.pageSize || 10;
-    var maxPage = Math.ceil(this.state.data.length / pageSize);
-    if (page < 1 || page > maxPage)
-        return;
     this.setState({
         currentPage: page
     });
 }
 
-/* Helpers */
-function extractSectorPathKeys(collapsedSectorPaths) {
-    "use strict";
-    var results = [];
-    for (var key in collapsedSectorPaths)
-        if (collapsedSectorPaths.hasOwnProperty(key))
-            results.push(key);
-    return results;
-}
-
-function prepareTableData(props) {
-    // make defensive copy of the data - surprisingly not a huge performance hit
-    var data = deepCopyData(props.data);
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    // optimization code for sector path key retrieval so we do not need for (var in collect) syntax for each row
-    var collapsedSectorPaths = getInitiallyCollapsedSectorPaths(data);
-    return {
-        collapsedSectorPaths: collapsedSectorPaths,
-        collapsedSectorKeys: extractSectorPathKeys(collapsedSectorPaths),
-        data: data
-    };
-}
-
-function createFloatBuckets(buckets) {
-    var i = 0, stringBuckets, floatBuckets = [];
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+function _createFloatBuckets(buckets) {
+    var i, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");
-    for (i = 0; i < stringBuckets.length; i++) {
-        var floatBucket = parseFloat(stringBuckets[i]);
-        if (!isNaN(floatBucket))
-            floatBuckets.push(floatBucket);
-        floatBuckets.sort(function (a,b) {
-            return a - b;
-        });
-    }
+    for (i = 0; i < stringBuckets.length; i++)
+         var floatBucket = parseFloat(stringBuckets[i]);
+    if (!isNaN(floatBucket))
+        floatBuckets.push(floatBucket);
+    floatBuckets.sort();
     return floatBuckets;
 }
