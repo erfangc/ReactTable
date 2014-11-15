@@ -108,12 +108,15 @@ function ReactTableHandlePageClick(page, event) {
  * ----------------------------------------------------------------------
  */
 function _createFloatBuckets(buckets) {
-    var i, stringBuckets, floatBuckets = [];
+    var i = 0, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");
-    for (i = 0; i < stringBuckets.length; i++)
-         var floatBucket = parseFloat(stringBuckets[i]);
-    if (!isNaN(floatBucket))
-        floatBuckets.push(floatBucket);
-    floatBuckets.sort();
+    for (i = 0; i < stringBuckets.length; i++) {
+        var floatBucket = parseFloat(stringBuckets[i]);
+        if (!isNaN(floatBucket))
+            floatBuckets.push(floatBucket);
+        floatBuckets.sort(function (a,b) {
+            return a - b;
+        });
+    }
     return floatBuckets;
 }
