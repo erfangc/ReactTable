@@ -1,5 +1,4 @@
 # ReactTable
-**New Project - Not All Features Functional**
 
 High Performance HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
@@ -46,9 +45,10 @@ selectedRows       |Array of Strings|row keys of initially selected rows, must b
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 
 ## Table Usage Example
-
-    var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
+```
+var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
+```
 
 ## Possible `columnDefs` Options
 The following properties are valid on `columnDef` objects, which are nested under the `columnDefs` array passed to the main table options. These options control the appearance and behaviors of the associated columns.
@@ -76,6 +76,9 @@ Please note you **cannot** have spaces in the format instruction values, since s
     { ..., formatInstructions: "multiplier:100 unit:KG"}
 
 ## Developing
+
+    Note:
+    master -> is now on the unreleased version 2 of the product. This version represents the data as a tree instead of a 2D array. There are many benefits. See legacy-version-1 branch for the old code
 
 *You will need [node.js](http://nodejs.org/download/) installed on your development PC in order to use the tools below*
 
