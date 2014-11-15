@@ -4,6 +4,9 @@ High Performance HTML Table with Group By functionality Implemented using Facebo
 
 *requires [react.js](https://github.com/facebook/react)*
 
+####Note:
+master -> is now on tracking the unreleased version 2 of ReactTable. This version represents the data as a tree instead of a 2D array. There are many benefits. See `legacy-version-1` branch for the old code
+
 [See a Demo Here](http://erfangc.github.io/ReactTable/)
 
 Capabilities Include:
@@ -77,10 +80,7 @@ Please note you **cannot** have spaces in the format instruction values, since s
 
 ## Developing
 
-    Note:
-    master -> is now on the unreleased version 2 of the product. This version represents the data as a tree instead of a 2D array. There are many benefits. See legacy-version-1 branch for the old code
-
-*You will need [node.js](http://nodejs.org/download/) installed on your development PC in order to use the tools below*
+You will need [node.js](http://nodejs.org/download/) installed on your development PC in order to use the tools below
 
 You will first need to download and install [react-tools](http://facebook.github.io/react/docs/tooling-integration.html) by running:
 
