@@ -288,7 +288,7 @@ function _aggregateColumn(bucketResult, columnDef, groupBy) {
         case "sum":
             result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});
             break;
-        case "_average":
+        case "average":
             result = _average({data: bucketResult, columnDef: columnDef});
             break;
         case "count":

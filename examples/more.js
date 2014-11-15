@@ -6,7 +6,7 @@ $(function () {
         },
         {colTag: "email", text: "Email"},
         {
-            colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
         },
         {
             colTag: "country", text: "Country"
