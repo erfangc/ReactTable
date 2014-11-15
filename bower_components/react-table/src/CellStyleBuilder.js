@@ -32,7 +32,7 @@ function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
-    columnDef.formatConfig = columnDef.formatConfig || buildLAFConfigObject(columnDef);
+    columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
     // invoke cell class callback
@@ -51,7 +51,7 @@ function buildCellLookAndFeel(columnDef, row) {
 
     // determine alignment
     results.styles.textAlign = formatConfig.alignment;
-
+    results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
     return results;
@@ -68,6 +68,16 @@ function formatNumber(value, columnDef, formatConfig) {
         value *= formatConfig.multiplier;
         // rounding
         value = value.toFixed(formatConfig.roundTo);
+        // apply comma separator
+        if (formatConfig.separator)
+            value = applyThousandSeparator(value);
     }
     return value;
 }
+
+function applyThousandSeparator(x) {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+

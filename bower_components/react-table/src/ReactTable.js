@@ -1,66 +1,149 @@
 /** @jsx React.DOM */
 
 /**
- * The code for displaying/rendering data in a tabular format should be self-explanatory. What is worth noting is how
- * row grouping is handled. The approach involves identifying similar rows through the use of an array of strings called
- * 'sectorPath'. Rows with the same/similar sectorPath(s) are considered to be related. If two rows have the same sectorPath array
- * they belong to the same exact row group. If two rows partially share sectorPath are considered to share the same tree
- * (i.e. some head subset of their sectorPath array match)
- *
- * @author Erfang Chen
+ * High Level TODOs
+ * TODO add sortIndex to custom numerical buckets so they sort correctly
  */
 
-// TODO handle click events for summary rows
-// TODO formatting
+/**
+ * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
+ * and can refer to children 'sectors'
+ * @author Erfang Chen
+ */
+var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
 var ReactTable = React.createClass({
+
     getInitialState: ReactTableGetInitialState,
+
+    /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleRowSelect: ReactTableHandleRowSelect,
+    handleGroupBy: ReactTableHandleGroupBy,
     handlePageClick: ReactTableHandlePageClick,
-    componentDidMount: function () {
-        adjustHeaders.call(this);
-        window.addEventListener('resize', adjustHeaders.bind(this));
+    handleSelect: ReactTableHandleSelect,
+    handleCollapseAll: function () {
+        var rootNode = this.state.rootNode;
+        rootNode.collapseImmediateChildren();
+        this.setState({rootNode: rootNode, currentPage: 1});
     },
-    componentWillUnmount: function() {
+    handleExpandAll: function () {
+        var rootNode = this.state.rootNode;
+        rootNode.expandRecursively();
+        this.setState({rootNode: rootNode, currentPage: 1});
+    },
+    /* -------------------------------------------------- */
+
+    toggleSelectDetailRow: function (key) {
+        var selectedDetailRows = this.state.selectedDetailRows, state;
+        if (selectedDetailRows[key] != null) {
+            delete selectedDetailRows[key];
+            state = false;
+        }
+        else {
+            selectedDetailRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedDetailRows
+        });
+        return state;
+    },
+    toggleSelectSummaryRow: function (key) {
+        var selectedSummaryRows = this.state.selectedSummaryRows, state;
+        if (selectedSummaryRows[key] != null) {
+            delete selectedSummaryRows[key];
+            state = false;
+        } else {
+            selectedSummaryRows[key] = 1;
+            state = true;
+        }
+        this.setState({
+            selectedDetailRows: selectedSummaryRows
+        });
+        return state;
+    },
+
+    /* --- Called from outside the component --- */
+    addColumn: function (columnDef, data) {
+        this.state.columnDefs.push(columnDef);
+        if (data) {
+            this.props.data = data;
+            this.state.rootNode = createTree(this.props);
+        }
+        this.setState({rootNode: this.state.rootNode});
+    },
+    replaceData: function (data) {
+        this.props.data = data;
+        var rootNode = createTree(this.props);
+        this.setState({
+            rootNode: rootNode,
+            currentPage: 1
+        });
+    },
+    /* ----------------------------------------- */
+
+    componentDidMount: function () {
+        setTimeout(function () {
+            adjustHeaders.call(this);
+        }.bind(this));
+        document.addEventListener('click', adjustHeaders.bind(this));
+        window.addEventListener('resize', adjustHeaders.bind(this));
+        var $node = $(this.getDOMNode());
+        $node.find(".rt-scrollable").bind('scroll', function () {
+            $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-headers").css({'overflow': 'hidden'});
+        });
+        bindHeadersToMenu($node);
+    },
+    componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
     },
-    componentDidUpdate: adjustHeaders,
+    componentDidUpdate: function () {
+        adjustHeaders.call(this);
+        bindHeadersToMenu($(this.getDOMNode()));
+    },
     render: function () {
-        var uncollapsedRows = [];
-        // determine which rows are unhidden based on which sectors are collapsed
-        for (var i = 0; i < this.state.data.length; i++) {
-            var row = this.state.data[i];
-            if (!shouldHide(row, this.state.collapsedSectorPaths, this.state.collapsedSectorKeys))
-                uncollapsedRows.push(row);
-        }
-        // determine which unhidden rows to display on the current page
-        var paginationAttr = getPageArithmetics(this, uncollapsedRows);
-        var rowsToDisplay = uncollapsedRows.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
+
+        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (<Row
                 data={row}
+                isSelected={isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
+                onSelect={this.handleSelect}
                 key={generateRowKey(row, rowKey)}
-                isSelected={rowKey && this.state.selectedRows[row[rowKey]] ? true : false}
-                onSelect={this.handleRowSelect}
                 columnDefs={this.state.columnDefs}
                 toggleHide={this.handleToggleHide}/>);
         }, this);
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
+
+        var containerStyle = {};
+        if (this.state.height && parseInt(this.state.height) > 0)
+            containerStyle.height = this.state.height;
+
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
-                <div className="rt-headers">
-                    {headers}
-                </div>
-                <div className="rt-scrollable">
+                {headers}
+                <div style={containerStyle} className="rt-scrollable">
                     <table className="rt-table">
                         <tbody>
                         {rows}
@@ -72,6 +155,7 @@ var ReactTable = React.createClass({
         );
     }
 });
+
 var Row = React.createClass({
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -91,7 +175,8 @@ var Row = React.createClass({
         }
         var cx = React.addons.classSet;
         var classes = cx({
-            'selected': this.props.isSelected
+            'selected': this.props.isSelected && this.props.data.isDetail,
+            'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
@@ -130,76 +215,99 @@ var PageNavigator = React.createClass({
         );
     }
 });
-
-/* Virtual DOM builder helpers */
-
-function buildHeaders(table) {
-    var headerColumns = table.state.columnDefs.map(function (columnDef) {
-        var style = {
-            textAlign: getColumnAlignment(columnDef)
+var SummarizeControl = React.createClass({
+    getInitialState: function () {
+        return {
+            userInputBuckets: ""
         }
-        var menuStyle = {};
-        if (style.textAlign == 'right')
-            menuStyle.right = "0%";
-        else
-            menuStyle.left = "0%";
-
-        return (
-            <div style={style} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link">{columnDef.text}</a>
-                <div style={menuStyle} className="rt-header-menu">
-                    <div onClick={table.handleSort.bind(table, columnDef, true)}>Sort Asc</div>
-                    <div onClick={table.handleSort.bind(table, columnDef, false)}>Sort Dsc</div>
-                    <div onClick={table.handleRemove.bind(table, columnDef)}>Remove Column</div>
+    },
+    handleChange: function (event) {
+        this.setState({userInputBuckets: event.target.value});
+    },
+    render: function () {
+        var table = this.props.table, columnDef = this.props.columnDef;
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+            (
+                <div className="menu-item-input" onHover style={{"position": "absolute", "top": "0%", "left": "100%"}}>
+                    <label>Enter Bucket(s)</label>
+                    <input onChange={this.handleChange} placeholder="ex: 1,10,15"/>
+                    <a onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)} className="btn-link">Ok</a>
                 </div>
+            ) : null;
+        return (
+            <div
+                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
+                } }
+                style={{"position": "relative"}} className="menu-item menu-item-hoverable">
+                <div>Summarize</div>
+                {subMenuAttachment}
             </div>
         );
-    });
-    headerColumns.push(
-        <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-            <a className="btn-link" onClick={table.handleAdd}>
-                <strong>{"+"}</strong>
-            </a>
-        </span>);
-    return (
-        <div key="header">{headerColumns}</div>
-    );
-}
-function buildFirstCellForRow(props) {
-    var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
-
-    // if sectorPath is not availiable - return a normal cell
-    if (!data.sectorPath)
-        return <td key={firstColTag}>{data[firstColTag]}</td>;
-
-    // styling & ident
-    var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
-    var firstCellStyle = {
-        "paddingLeft": (10 + identLevel * 25) + "px", "borderRight": "1px #ddd solid"
-    };
-
-    if (data.isDetail) {
-        var result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
-    } else {
-        result =
-            (
-                <td style={firstCellStyle} key={firstColTag}>
-                    <a onClick={toggleHide.bind(null, data)} className="btn-link">
-                        <strong>{data[firstColTag]}</strong>
-                    </a>
-                </td>
-            );
     }
-    return result;
+});
+
+/*
+ * ----------------------------------------------------------------------
+ * Public Helpers / Utilities
+ * ----------------------------------------------------------------------
+ */
+
+function generateSectorKey(sectorPath) {
+    if (sectorPath == null)
+        return "";
+    return sectorPath.join(SECTOR_SEPARATOR);
 }
-function buildFooter(table, paginationAttr) {
-    return table.props.columnDefs.length > 0 ?
-        (<PageNavigator
-            items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
-            activeItem={table.state.currentPage}
-            numPages={paginationAttr.pageEnd}
-            handleClick={table.handlePageClick}/>) : null;
+
+function generateRowKey(row, rowKey) {
+    var key;
+    if (!row.isDetail) {
+        key = generateSectorKey(row.sectorPath);
+    }
+    else if (rowKey)
+        key = row[rowKey];
+    else {
+        key = row.rowCount;
+    }
+    return key;
+}
+
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+}
+
+function adjustHeaders() {
+    var id = this.state.uniqueId;
+    var adjustedWideHeaders = false;
+    var counter = 0;
+    var headerElems = $("#" + id + " .rt-headers-container");
+    var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
+    padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+    headerElems.each(function () {
+        var currentHeader = $(this);
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
+            width += 1;
+        }
+        var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            $(this).width(headerTextWidthWithPadding);
+            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            adjustedWideHeaders = true;
+        }
+        currentHeader.width(width);
+        counter++;
+    });
+    if (adjustedWideHeaders) {
+        adjustHeaders.call(this);
+    }
 }
 
 function getPageArithmetics(table, data) {
@@ -223,144 +331,23 @@ function getPageArithmetics(table, data) {
     return result;
 
 }
-/* Sector tree rendering utilities */
 
-function shouldHide(data, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    var hasCollapsedAncestor = areAncestorsCollapsed(data.sectorPath, collapsedSectorPaths, collapsedSectorKeys);
-    var isSummaryRow = !data.isDetail;
-    var immediateSectorCollapsed = (collapsedSectorPaths[generateSectorKey(data.sectorPath)] != null);
-    if (hasCollapsedAncestor)
-        result = true;
-    else if (immediateSectorCollapsed && !isSummaryRow)
-        result = true;
-    return result;
-}
-
-/**
- * Compares sector path passed to all collapsed sectors to determine if one of the collapsed sectors is the given sector's ancestor
- * @param sectorPath [array] the sectorPath to perform comparison on
- * @param collapsedSectorPaths a map (object) where properties are string representation of the sectorPath considered to be collapsed
- * @param collapsedSectorKeys the array of properties (keys) for the above param - used to improve performance
- * @returns {boolean}
- */
-function areAncestorsCollapsed(sectorPath, collapsedSectorPaths, collapsedSectorKeys) {
-    var result = false;
-    // true if sectorPaths is a subsector of the collapsedSectorPaths
-    var max = collapsedSectorKeys.length;
-    for (var i = 0; i < max; i++) {
-        if (isSubSectorOf(sectorPath, collapsedSectorPaths[collapsedSectorKeys[i]]))
-            result = true;
-    }
-
-    return result;
-}
-function isSubSectorOf(subSectorCandidate, superSectorCandidate) {
-    // lower length in SP means higher up on the chain
-    if (subSectorCandidate.length <= superSectorCandidate.length)
-        return false;
-    for (var i = 0; i < superSectorCandidate.length; i++) {
-        if (subSectorCandidate[i] != superSectorCandidate[i])
-            return false;
-    }
-    return true;
-}
-
-/* Other utility functions */
-
-function generateRowKey(row, rowKey) {
-    var key;
-    if (rowKey)
-        key = row[rowKey];
-    else {
-        key = generateSectorKey(row.sectorPath);
-        for (var prop in row) {
-            if (row.hasOwnProperty(prop))
-                key += prop + "=" + row[prop] + ";";
-        }
-    }
-    return key;
-}
-function generateSectorKey(sectorPath) {
-    if (!sectorPath)
-        return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
-}
-function prepareTableData(props) {
-    // make defensive copy of the data
-    // TODO maybe perform this step intelligently to improve performance
-    var data = deepCopyData(props.data);
-
-    if (props.groupBy) {
-        data = groupData(data, props.groupBy, props.columnDefs);
-        var sortOptions = {sectorSorter: defaultSectorSorter, detailSorter: defaultDetailSorter};
-        data.sort(sorterFactory.call(this, sortOptions));
-    }
-    return data;
-}
-function deepCopyData(data) {
-    return data.map(function (row) {
-        var copy = {};
-        for (var prop in row)
-            if (row.hasOwnProperty(prop))
-                copy[prop] = row[prop];
-        copy.isDetail = true;
-        return copy;
-    });
-}
-function getInitiallyCollapsedSectorPaths(data) {
-    var result = {};
-    data.map(function (row) {
-        if (row.sectorPath && row.isDetail) {
-            var sectorPathKey = generateSectorKey(row.sectorPath);
-            if (!result[sectorPathKey])
-                result[sectorPathKey] = row.sectorPath;
-        }
-    });
-    return result;
-}
-function getInitiallySelectedRows(selectedRows) {
-    var result = {};
-    selectedRows = selectedRows || [];
-    for (var i = 0; i < selectedRows.length; i++)
-        result[selectedRows[i]] = 1;
-    return result;
-}
-function computePageDisplayRange(currentPage, maxDisplayedPages) {
-    // total number to allocate
-    var displayUnitsLeft = maxDisplayedPages;
-    // allocate to the left
-    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
-    var rightAllocation = displayUnitsLeft - leftAllocation;
-    return {
-        start: currentPage - leftAllocation - 1,
-        end: currentPage + rightAllocation - 1
-    }
-}
-
-// TODO wean off jquery
-
-function adjustHeaders() {
-    var id = this.state.uniqueId;
-    var counter = 0;
-    var headerElems = $("#"+id+">.rt-header-element");
-    var padding = parseInt(headerElems.first().css("padding-left")) || 0;
-    padding += parseInt(headerElems.first().css("padding-right")) || 0;
-    headerElems.each(function () {
-        var width = $('#'+id+'>.rt-table tr:first td:eq(' + counter + ')').outerWidth() - padding;
-        $(this).width(width);
-        counter++;
+function bindHeadersToMenu(node) {
+    node.find(".rt-headers-container").each(function () {
+        var headerContainer = this;
+        $(headerContainer).hover(function () {
+            var headerPosition = $(headerContainer).position();
+            if (headerPosition.left) {
+                $(headerContainer).find(".rt-header-menu").css("left", headerPosition.left + "px");
+            }
+            if (headerPosition.right) {
+                $(headerContainer).find(".rt-header-menu").css("right", headerPosition.right + "px");
+            }
+        });
     });
 }
 
-$(document).ready(function () {
-    $('.rt-scrollable').bind('scroll', function () {
-        $(".rt-headers").scrollLeft($(this).scrollLeft());
-    });
-});
-
-var idCounter = 0;
-function uniqueId (prefix) {
+function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };

@@ -8,7 +8,7 @@ $(function () {
             format: "number",
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
-            aggregationMethod: "AVERAGE",
+            aggregationMethod: "_average",
             weightBy: {colTag: "score_weight_factor"},
             cellClassCallback: function (row) {
                 var classes = {green: false, red: false};
@@ -38,10 +38,10 @@ $(function () {
                 $outputArea.text("You clicked Row id = " + row.id + ", selection state:" + state);
             },
             onSummarySelectCallback: function (result, state) {
-                $outputArea.text("Summary Row "
-                + result.summaryRow.sectorPath[0] + (result.summaryRow.sectorPath[1] ? " -> "
-                + result.summaryRow.sectorPath[1] : "") + " includes "
-                + result.detailRows.length + " detail rows, selection state:" + state);
+                $outputArea.text("Summary Row = "
+                + generateSectorKey(result.sectorPath)
+                + " Has " + result.treeNode.ultimateChildren.length
+                + " Ultimate Children");
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));

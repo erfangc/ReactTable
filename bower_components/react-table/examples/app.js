@@ -1,7 +1,11 @@
 $(function () {
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last Name"},
+        {
+            colTag: "last_name", text: "Last Name", customMenuItems: function (table, columnDef) {
+            return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
+        }
+        },
         {colTag: "email", text: "Email"},
         {
             colTag: "nationality", text: "Nationality",
@@ -10,10 +14,15 @@ $(function () {
             }
         },
         {
+            colTag: "superlong",
+            text: "This is a super super long column header name - trust me"
+        },
+        {
             colTag: "test_score",
             format: "number",
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
+            groupByRange: [0, 25, 50, 100],
             aggregationMethod: "AVERAGE",
             weightBy: {colTag: "score_weight_factor"},
             cellClassCallback: function (row) {
@@ -24,23 +33,35 @@ $(function () {
             }
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
-        {colTag: "currency_used", text: "Currency Used"},
-        {colTag: "score_weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+        {
+            colTag: "score_weight_factor",
+            format: "number",
+            formatInstructions: "multiplier:1000 separator:true",
+            text: "Weight Factor",
+            aggregationMethod: "SUM"
+        }
+        //,
+        //{
+        //    colTag: "abcd",
+        //    text: "This is a really really long header name wow look how long this is"
+        //}
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last Name"},
+        {colTag: "last_name", text: "Last Name", aggregationMethod: "COUNT_DISTINCT"},
         {colTag: "email", text: "Email"},
         {
             colTag: "test_score",
             format: "number",
+            groupByRange: [0, 10, 25, 30, 50, 100],
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
             aggregationMethod: "AVERAGE",
+            conditionalAggregationMethod: {"fruit_preference": "COUNT"},
             weightBy: {colTag: "score_weight_factor"}
         },
         {colTag: "fruit_preference", text: "Fruit Preference"},
-        {colTag: "score_weight_factor", format: "number", text: "Weight Factor", aggregationMethod: "SUM"}
+        {colTag: "score_weight_factor", format: "currency", text: "Weight Factor", aggregationMethod: "SUM"}
     ];
 
     $.get('sample_data.json').success(function (data) {
@@ -51,18 +72,28 @@ $(function () {
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
+            height: "300px",
             columnDefs: columnDefs,
-            onSelectCallback: function (row) {
-                console.log("id = " + row.id + " clicked");
-            },
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
+                addMe();
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
+            },
+            onSelectCallback: function (row, state) {
+                console.log("id = " + row.id + " clicked state:" + state);
+            },
+            onSummarySelectCallback: function (result, state) {
+                console.log(result.summaryRow);
+                console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
-        React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+        var table1 = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+
+        function addMe() {
+            table1.addColumn({colTag: "currency_used", text: "Currency used"});
+        }
 
         // second table
         var options2 = {
