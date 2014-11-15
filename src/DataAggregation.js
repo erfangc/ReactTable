@@ -6,33 +6,20 @@
  * @param row the data row to determine the sector name for
  */
 function getSectorName(row, groupBy) {
-    var sectorName = "", sortIndex = null, i;
+    var sectorName = "", sortIndex = null;
     if (groupBy.format == "number" || groupBy.format == "currency") {
-        if (groupBy.groupByRange) {
-            for (i = 0; i < groupBy.groupByRange.length; i++) {
-                if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                    sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
-                    sortIndex = i;
-                    break;
-                }
-            }
-            if (!sectorName)
-                sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
-        }
-        else {
-            sectorName = groupBy.text;
-        }
-    } else {
+        var result = _resolveNumericSectorName(groupBy, row);
+        sectorName = result.sectorName;
+        sortIndex = result.sortIndex;
+    } else
         sectorName = row[groupBy.colTag];
-    }
     return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {
     var result = {};
-    for (var i = 1; i < columnDefs.length; i++) {
+    for (var i = 1; i < columnDefs.length; i++)
         result[columnDefs[i].colTag] = _aggregateColumn(bucketResult, columnDefs[i], groupBy);
-    }
     return result;
 }
 
@@ -41,6 +28,26 @@ function aggregateSector(bucketResult, columnDefs, groupBy) {
  * Helpers
  * ----------------------------------------------------------------------
  */
+
+function _resolveNumericSectorName(groupBy, row) {
+    var sectorName = "", sortIndex = "";
+    if (groupBy.groupByRange) {
+        for (var i = 0; i < groupBy.groupByRange.length; i++) {
+            if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
+                sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+                sortIndex = i;
+                break;
+            }
+        }
+        if (!sectorName) {
+            sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            sortIndex = i + 1;
+        }
+    }
+    else
+        sectorName = groupBy.text;
+    return {sectorName: sectorName, sortIndex: sortIndex};
+}
 
 /**
  * solves for the correct aggregation method given the current columnDef being aggregated

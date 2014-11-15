@@ -34,9 +34,8 @@ function recursivelyAggregateNodes(node, tableProps) {
 
     // for each child - aggregate those as well
     if (node.children.length > 0) {
-        for (var i = 0; i < node.children.length; i++) {
+        for (var i = 0; i < node.children.length; i++)
             recursivelyAggregateNodes(node.children[i], tableProps);
-        }
     }
 }
 

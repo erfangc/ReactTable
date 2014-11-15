@@ -11,7 +11,7 @@ function TreeNode(sectorTitle, parent) {
     this.rowData = null;
     this.children = [];
     this.ultimateChildren = [];
-    this.collapsed = false;
+    this.collapsed = this.parent != null ? true : false;
     this.sortIndex = null;
     // private members - TODO use closure to hide this
     this._childrenSectorNameMap = {};
@@ -63,12 +63,15 @@ TreeNode.prototype.getSectorPath = function () {
     return result;
 }
 
-TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
+TreeNode.prototype.sortChildren = function (options) {
+    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc,
+        sortByIndex = options.sortByIndex;
+
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
         // if the child.rowData contain sortIndices - sort those
-        if (_hasSortIndex(a, b))
+        if (sortByIndex == true && _hasSortIndex(a, b))
             return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
@@ -80,7 +83,10 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
     }
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren(sortFn, recursive, sortAsc);
+            this.children[i].sortChildren({
+                sortFn: sortFn, recursive: recursive,
+                sortAsc: sortAsc, sortByIndex: sortByIndex
+            });
     }
 }
 
@@ -90,6 +96,6 @@ TreeNode.prototype.sortChildren = function (sortFn, recursive, sortAsc) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(a,b) {
+function _hasSortIndex(a, b) {
     return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
 }

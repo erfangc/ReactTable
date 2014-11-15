@@ -1,5 +1,5 @@
 function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows:{},selectedSummaryRows:{}};
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
     if (selectedRows != null) {
         for (var i = 0; i < selectedRows.length; i++)
             results.selectedDetailRows[selectedRows[i]] = 1;
@@ -32,27 +32,42 @@ function ReactTableHandleSelect(selectedRow) {
         return;
     if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
         state = this.toggleSelectDetailRow(selectedRow[rowKey]);
-        this.props.onSelectCallback(selectedRow,state);
+        this.props.onSelectCallback(selectedRow, state);
     } else {
         state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
-        this.props.onSummarySelectCallback(selectedRow,state);
+        this.props.onSummarySelectCallback(selectedRow, state);
     }
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    this.state.rootNode.sortChildren(getSortFunction(columnDefToSortBy).bind(columnDefToSortBy), true, sortAsc);
+    this.state.rootNode.sortChildren({
+        sortFn: getSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
+        recursive: true,
+        sortAsc: sortAsc
+    });
     this.setState({rootNode: this.state.rootNode});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
-    if (buckets && buckets != "" && columnDef)
+
+    if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
     this.props.groupBy = columnDef ? [columnDef] : null;
+
     var rootNode = createTree(this.props);
+    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
+        rootNode.sortChildren({
+            sortFn: null,
+            recursive: false,
+            sortAsc: false,
+            sortByIndex: true
+        });
+
     this.setState({
         rootNode: rootNode,
         currentPage: 1
     });
+
 }
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
