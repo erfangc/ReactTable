@@ -4,7 +4,7 @@ $(function () {
         {
             colTag: "last_name", text: "Last Name"
         },
-        {colTag: "email", text: "Email"},
+        {colTag: "email", text: "Email", aggregationMethod: "count"},
         {
             colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
         },

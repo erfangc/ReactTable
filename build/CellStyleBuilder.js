@@ -19,6 +19,14 @@ function buildLAFConfigObject(columnDef) {
     return result;
 }
 
+function _computeCellAlignment(alignment, row, columnDef) {
+    // force right alignment for summary level numbers
+    if (!row.isDetail && !isNaN(row[columnDef.colTag]))
+        return "right";
+
+    // default alignment
+    return alignment;
+}
 /**
  * Determines the style, classes and text formatting of cell content
  * given a column configuartion object and a row of data
@@ -50,7 +58,7 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = formatConfig.alignment;
+    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment,row,columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
