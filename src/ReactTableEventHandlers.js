@@ -95,8 +95,7 @@ function ReactTableHandleToggleHide(summaryRow, event) {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandlePageClick(page, event) {
-    event.preventDefault();
+function ReactTableHandlePageClick(page) {
     this.setState({
         currentPage: page
     });

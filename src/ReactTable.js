@@ -185,6 +185,11 @@ var Row = React.createClass({
     }
 });
 var PageNavigator = React.createClass({
+    handleClick: function (index, event) {
+        event.preventDefault();
+        if (index <= this.props.numPages && index >= 1)
+            this.props.handleClick(index);
+    },
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -198,7 +203,7 @@ var PageNavigator = React.createClass({
         var items = this.props.items.map(function (item) {
             return (
                 <li key={item} className={self.props.activeItem == item ? 'active' : ''}>
-                    <a href="#" onClick={self.props.handleClick.bind(null, item)}>{item}</a>
+                    <a href="#" onClick={self.handleClick.bind(null, item)}>{item}</a>
                 </li>
             )
         });

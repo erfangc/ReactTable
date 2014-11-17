@@ -185,6 +185,11 @@ var Row = React.createClass({displayName: 'Row',
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
+    handleClick: function (index, event) {
+        event.preventDefault();
+        if (index <= this.props.numPages && index >= 1)
+            this.props.handleClick(index);
+    },
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -198,7 +203,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         var items = this.props.items.map(function (item) {
             return (
                 React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                    React.createElement("a", {href: "#", onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
