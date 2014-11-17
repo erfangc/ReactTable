@@ -538,6 +538,11 @@ var Row = React.createClass({displayName: 'Row',
     }
 });
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
+    handleClick: function (index, event) {
+        event.preventDefault();
+        if (index <= this.props.numPages && index >= 1)
+            this.props.handleClick(index);
+    },
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -551,7 +556,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         var items = this.props.items.map(function (item) {
             return (
                 React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                    React.createElement("a", {href: "#", onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
@@ -800,8 +805,7 @@ function ReactTableHandleToggleHide(summaryRow, event) {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandlePageClick(page, event) {
-    event.preventDefault();
+function ReactTableHandlePageClick(page) {
     this.setState({
         currentPage: page
     });
@@ -905,8 +909,7 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
         var result = getSectorName(row, groupBy[i]);
         currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
     }
-};// TODO consider if this sortIndex property thing is the best way to sort
-/**
+};/**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
  * @constructor
