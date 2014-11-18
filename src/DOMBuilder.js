@@ -51,7 +51,7 @@ function buildHeaders(table) {
     var firstColumn = (
         <div className="rt-headers-container">
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
+                <a className="btn-link rt-header-anchor-text">{table.state.firstColumnLabel.join("/")}</a>
             </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>

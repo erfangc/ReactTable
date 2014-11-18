@@ -51,7 +51,7 @@ function buildHeaders(table) {
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )

@@ -134,7 +134,7 @@ function buildHeaders(table) {
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
@@ -508,7 +508,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
-
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -582,20 +581,29 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     handleChange: function (event) {
         this.setState({userInputBuckets: event.target.value});
     },
+    handleKeyPress: function (event) {
+        if (event.charCode == 13) {
+            event.preventDefault();
+            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+        }
+    },
+    handleClick: function (event) {
+        var $node = $(this.getDOMNode());
+        $node.children(".menu-item-input").children("input").focus();
+    },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
-                    React.createElement("label", null, "Enter Bucket(s)"), 
-                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
-                }, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
@@ -725,6 +733,7 @@ function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    var firstColumnLabel = _construct1StColumnLabel(this);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -732,7 +741,8 @@ function ReactTableGetInitialState() {
         height: this.props.height,
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
-        selectedSummaryRows: selections.selectedSummaryRows
+        selectedSummaryRows: selections.selectedSummaryRows,
+        firstColumnLabel: firstColumnLabel
     };
 }
 
@@ -762,12 +772,16 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
 
     if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
-    this.props.groupBy = columnDef ? [columnDef] : null;
+    if (columnDef != null) {
+        this.props.groupBy = this.props.groupBy || [];
+        this.props.groupBy.push(columnDef);
+    } else
+        this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
     if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
         rootNode.sortChildren({
-            sortFn: null,
+            sortFn: function () {},
             recursive: false,
             sortAsc: false,
             sortByIndex: true
@@ -775,7 +789,8 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
 
     this.setState({
         rootNode: rootNode,
-        currentPage: 1
+        currentPage: 1,
+        firstColumnLabel: _construct1StColumnLabel(this)
     });
 
 }
@@ -828,6 +843,16 @@ function _createFloatBuckets(buckets) {
         });
     }
     return floatBuckets;
+}
+
+function _construct1StColumnLabel(table) {
+    var result = [];
+    if (table.props.groupBy) {
+        for (var i = 0; i < table.props.groupBy.length; i++)
+            result.push(table.props.groupBy[i].text);
+    }
+    result.push(table.props.columnDefs[0].text);
+    return result;
 };function genericValueBasedSorter(a, b) {
     var returnValue = 0;
     if (a[this.colTag] < b[this.colTag])

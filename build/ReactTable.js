@@ -155,7 +155,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
-
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -229,20 +228,29 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     handleChange: function (event) {
         this.setState({userInputBuckets: event.target.value});
     },
+    handleKeyPress: function (event) {
+        if (event.charCode == 13) {
+            event.preventDefault();
+            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+        }
+    },
+    handleClick: function (event) {
+        var $node = $(this.getDOMNode());
+        $node.children(".menu-item-input").children("input").focus();
+    },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
-                    React.createElement("label", null, "Enter Bucket(s)"), 
-                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
-                }, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
