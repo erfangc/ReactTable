@@ -6,10 +6,10 @@ $(function () {
         },
         {colTag: "email", text: "Email"},
         {
-            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
+            colTag: "country", text: "Country"
         },
         {
-            colTag: "country", text: "Country"
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
         }
     ];
     $.get('large_data_30k.json').success(function (data) {
@@ -17,7 +17,7 @@ $(function () {
         var options = {
             rowKey: 'id',
             data: testData,
-            groupBy: [{colTag:"country"},{colTag:"last_name"}],
+            groupBy: [{colTag:"country", text: "Country"},{colTag:"last_name", text: "Last Name"}],
             height: "500px",
             columnDefs: columnDefs,
             beforeColumnAdd: function () {

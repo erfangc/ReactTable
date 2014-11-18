@@ -9866,7 +9866,7 @@ if ("production" !== "development") {
 ReactElement.createElement = function(type, config, children) {
   var propName;
 
-  // Reserved names are extracted
+  // Reserved names are _construct1StColumnLabel
   var props = {};
 
   var key = null;

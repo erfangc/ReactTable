@@ -15,6 +15,7 @@ function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    var firstColumnLabel = _construct1StColumnLabel(this);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -22,7 +23,8 @@ function ReactTableGetInitialState() {
         height: this.props.height,
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
-        selectedSummaryRows: selections.selectedSummaryRows
+        selectedSummaryRows: selections.selectedSummaryRows,
+        firstColumnLabel: firstColumnLabel
     };
 }
 
@@ -52,12 +54,16 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
 
     if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
-    this.props.groupBy = columnDef ? [columnDef] : null;
+    if (columnDef != null) {
+        this.props.groupBy = this.props.groupBy || [];
+        this.props.groupBy.push(columnDef);
+    } else
+        this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
     if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
         rootNode.sortChildren({
-            sortFn: null,
+            sortFn: function () {},
             recursive: false,
             sortAsc: false,
             sortByIndex: true
@@ -65,7 +71,8 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
 
     this.setState({
         rootNode: rootNode,
-        currentPage: 1
+        currentPage: 1,
+        firstColumnLabel: _construct1StColumnLabel(this)
     });
 
 }
@@ -118,4 +125,14 @@ function _createFloatBuckets(buckets) {
         });
     }
     return floatBuckets;
+}
+
+function _construct1StColumnLabel(table) {
+    var result = [];
+    if (table.props.groupBy) {
+        for (var i = 0; i < table.props.groupBy.length; i++)
+            result.push(table.props.groupBy[i].text);
+    }
+    result.push(table.props.columnDefs[0].text);
+    return result;
 }
