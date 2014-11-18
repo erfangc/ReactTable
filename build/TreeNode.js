@@ -12,7 +12,7 @@ function TreeNode(sectorTitle, parent) {
     this.ultimateChildren = [];
     this.collapsed = this.parent != null ? true : false;
     this.sortIndex = null;
-    // private members - TODO use closure to hide this
+    // private members
     this._childrenSectorNameMap = {};
 }
 
@@ -21,9 +21,22 @@ TreeNode.prototype.appendRow = function (row) {
 }
 
 TreeNode.prototype.collapseImmediateChildren = function () {
-    var i;
-    for (i = 0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
         this.children[i].collapsed = true;
+}
+
+TreeNode.prototype.foldSubTree = function () {
+    for (var i = 0; i < this.children.length; i++) {
+        if (!this.children[i].hasChild())
+            this.children[i].collapsed = true;
+        else
+            this.children[i].collapsed = false;
+        this.children[i].foldSubTree();
+    }
+}
+
+TreeNode.prototype.hasChild = function () {
+    return (this.children.length > 0);
 }
 
 TreeNode.prototype.expandRecursively = function () {
@@ -63,30 +76,34 @@ TreeNode.prototype.getSectorPath = function () {
 }
 
 TreeNode.prototype.sortChildren = function (options) {
-    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc,
-        sortByIndex = options.sortByIndex;
+    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc;
 
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        // if the child.rowData contain sortIndices - sort those
-        if (sortByIndex == true && _hasSortIndex(a, b))
-            return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
-    // sort ultimate children if there are no children
-    if (this.children.length == 0) {
-        this.ultimateChildren.sort(function (a, b) {
-            return multiplier * sortFn(a, b);
-        });
-    }
+    if (!this.hasChild())
+        this.ultimateChildren.sort(function (a, b) { return multiplier * sortFn(a, b); });
+
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({
-                sortFn: sortFn, recursive: recursive,
-                sortAsc: sortAsc, sortByIndex: sortByIndex
-            });
+            this.children[i].sortChildren({ sortFn: sortFn, recursive: recursive, sortAsc: sortAsc });
     }
+}
+
+TreeNode.prototype.sortRecursivelyBySortIndex = function () {
+    // test if children have sortIndex - if not skip sorting children
+    if (this.hasChild() && _hasSortIndex(this.children[0])) {
+        this.children.sort(function (a,b) {
+            if ( _hasSortIndex(a) && _hasSortIndex(b))
+                return a.sortIndex - b.sortIndex;
+            return 0;
+        });
+    }
+    // sort children's children
+    for (var i = 0; i < this.children.length; i++)
+        this.children[i].sortRecursivelyBySortIndex();
 }
 
 /*
@@ -95,6 +112,6 @@ TreeNode.prototype.sortChildren = function (options) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(a, b) {
-    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
+function _hasSortIndex(node) {
+    return (node != null && node.sortIndex != null && !isNaN(node.sortIndex))
 }

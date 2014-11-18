@@ -13,12 +13,6 @@
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
-    if (rowKey == null)
-        return;
-    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
-}
-
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
@@ -74,7 +68,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
 
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
+    addColumn: function(columnDef, data) {
+        if (_columnExists(this.state.columnDefs,columnDef))
+            return;
         this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -119,14 +115,14 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var paginationAttr = _getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
-                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
                 columnDefs: this.state.columnDefs, 
@@ -155,6 +151,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -183,6 +180,7 @@ var Row = React.createClass({displayName: 'Row',
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
+
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
     handleClick: function (index, event) {
         event.preventDefault();
@@ -219,6 +217,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+
 var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
@@ -284,18 +283,6 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function computePageDisplayRange(currentPage, maxDisplayedPages) {
-    // total number to allocate
-    var displayUnitsLeft = maxDisplayedPages;
-    // allocate to the left
-    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
-    var rightAllocation = displayUnitsLeft - leftAllocation;
-    return {
-        start: currentPage - leftAllocation - 1,
-        end: currentPage + rightAllocation - 1
-    }
-}
-
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var adjustedWideHeaders = false;
@@ -323,28 +310,6 @@ function adjustHeaders() {
     }
 }
 
-function getPageArithmetics(table, data) {
-    var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
-
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
-
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
-    }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
-
-    return result;
-
-}
-
 function bindHeadersToMenu(node) {
     node.find(".rt-headers-container").each(function () {
         var headerContainer = this;
@@ -364,3 +329,57 @@ function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
+function _columnExists(columnDefs, columnDef) {
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].colTag == columnDef.colTag)
+            return true;
+    }
+    return false;
+}
+
+function _getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
+
+function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+}

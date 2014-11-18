@@ -1,21 +1,7 @@
-function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
-    if (selectedRows != null) {
-        for (var i = 0; i < selectedRows.length; i++)
-            results.selectedDetailRows[selectedRows[i]] = 1;
-    }
-    if (selectedSummaryRows != null) {
-        for (var i = 0; i < selectedSummaryRows.length; i++)
-            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
-    }
-    return results;
-}
-
 function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
-    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
-    var firstColumnLabel = _construct1StColumnLabel(this);
+    var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -24,7 +10,7 @@ function ReactTableGetInitialState() {
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
         selectedSummaryRows: selections.selectedSummaryRows,
-        firstColumnLabel: firstColumnLabel
+        firstColumnLabel: _construct1StColumnLabel(this)
     };
 }
 
@@ -61,13 +47,6 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
         this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
-    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
-        rootNode.sortChildren({
-            sortFn: function () {},
-            recursive: false,
-            sortAsc: false,
-            sortByIndex: true
-        });
 
     this.setState({
         rootNode: rootNode,
@@ -76,9 +55,10 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
     });
 
 }
+
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd();
+        this.props.beforeColumnAdd(this);
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -135,4 +115,17 @@ function _construct1StColumnLabel(table) {
     }
     result.push(table.props.columnDefs[0].text);
     return result;
+}
+
+function _getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
 }

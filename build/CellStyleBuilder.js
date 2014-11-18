@@ -2,7 +2,6 @@
 
 function buildLAFConfigObject(columnDef) {
     var formatInstructions = columnDef.formatInstructions;
-    "use strict";
     var result = {
         multiplier: 1,
         roundTo: 2,
@@ -36,7 +35,6 @@ function _computeCellAlignment(alignment, row, columnDef) {
  * @returns { classes: {}, style: {}, value: {}}
  */
 function buildCellLookAndFeel(columnDef, row) {
-    "use strict";
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
@@ -66,7 +64,6 @@ function buildCellLookAndFeel(columnDef, row) {
 }
 
 function getColumnAlignment(columnDef) {
-    "use strict";
     return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
 }
 

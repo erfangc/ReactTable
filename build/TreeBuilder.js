@@ -6,6 +6,8 @@
 function createTree(tableProps) {
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
+    rootNode.sortRecursivelyBySortIndex();
+    rootNode.foldSubTree();
     return rootNode;
 }
 

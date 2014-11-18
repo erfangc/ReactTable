@@ -20,8 +20,9 @@ $(function () {
             groupBy: [{colTag:"country", text: "Country"},{colTag:"last_name", text: "Last Name"}],
             height: "500px",
             columnDefs: columnDefs,
-            beforeColumnAdd: function () {
+            beforeColumnAdd: function (table) {
                 console.log("beforeColumnAdd callback called!");
+                table.addColumn({colTag: "id", text: "ID"});
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
