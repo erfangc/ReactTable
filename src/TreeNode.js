@@ -7,6 +7,7 @@ function TreeNode(sectorTitle, parent) {
     // accessible properties
     this.sectorTitle = sectorTitle;
     this.parent = parent;
+    this.groupByColumnDef = {};
     this.rowData = null;
     this.children = [];
     this.ultimateChildren = [];
@@ -54,11 +55,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @returns the child TreeNode that the data was appended to
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, groupByColumnDef = options.groupByColumnDef;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
         child.sortIndex = sortIndex;
+        child.groupByColumnDef = groupByColumnDef;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -84,19 +86,21 @@ TreeNode.prototype.sortChildren = function (options) {
         return multiplier * sortFn(aRow, bRow);
     });
     if (!this.hasChild())
-        this.ultimateChildren.sort(function (a, b) { return multiplier * sortFn(a, b); });
+        this.ultimateChildren.sort(function (a, b) {
+            return multiplier * sortFn(a, b);
+        });
 
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({ sortFn: sortFn, recursive: recursive, sortAsc: sortAsc });
+            this.children[i].sortChildren({sortFn: sortFn, recursive: recursive, sortAsc: sortAsc});
     }
 }
 
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {
     // test if children have sortIndex - if not skip sorting children
     if (this.hasChild() && _hasSortIndex(this.children[0])) {
-        this.children.sort(function (a,b) {
-            if ( _hasSortIndex(a) && _hasSortIndex(b))
+        this.children.sort(function (a, b) {
+            if (_hasSortIndex(a) && _hasSortIndex(b))
                 return a.sortIndex - b.sortIndex;
             return 0;
         });

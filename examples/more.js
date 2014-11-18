@@ -1,6 +1,16 @@
 $(function () {
     var columnDefs = [
-        {colTag: "first_name", text: "First Name"},
+        {
+            colTag: "first_name", text: "First Name",
+            summaryTemplate: function (data) {
+                var element = React.createElement("i", {
+                    className: "fa fa-info-circle hover-icon", onMouseEnter: function (event) {
+                        console.log(data.treeNode.groupByColumnDef.text + " Has: " + data.treeNode.ultimateChildren.length);
+                    }
+                });
+                return element;
+            }
+        },
         {
             colTag: "last_name", text: "Last Name"
         },
@@ -17,7 +27,7 @@ $(function () {
         var options = {
             rowKey: 'id',
             data: testData,
-            groupBy: [{colTag:"country", text: "Country"},{colTag:"last_name", text: "Last Name"}],
+            groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name", text: "Last Name"}],
             height: "500px",
             columnDefs: columnDefs,
             beforeColumnAdd: function (table) {
@@ -31,8 +41,8 @@ $(function () {
                 console.log("id = " + row.id + " clicked state:" + state);
             },
             onSummarySelectCallback: function (selectedRow, state) {
-                console.log("selectedRow = "+generateSectorKey(selectedRow.sectorPath));
-                console.log("Has Ultimate Children: "+selectedRow.treeNode.ultimateChildren.length);
+                console.log("selectedRow = " + generateSectorKey(selectedRow.sectorPath));
+                console.log("Has Ultimate Children: " + selectedRow.treeNode.ultimateChildren.length);
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));

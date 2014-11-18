@@ -116,12 +116,13 @@ var ReactTable = React.createClass({
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (<Row
+                key={generateRowKey(row, rowKey)}
                 data={row}
                 isSelected={_isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
                 onSelect={this.handleSelect}
-                key={generateRowKey(row, rowKey)}
+                toggleHide={this.handleToggleHide}
                 columnDefs={this.state.columnDefs}
-                toggleHide={this.handleToggleHide}/>);
+                />);
         }, this);
 
         var headers = buildHeaders(this);
