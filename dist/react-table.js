@@ -2,7 +2,6 @@
 
 function buildLAFConfigObject(columnDef) {
     var formatInstructions = columnDef.formatInstructions;
-    "use strict";
     var result = {
         multiplier: 1,
         roundTo: 2,
@@ -19,6 +18,14 @@ function buildLAFConfigObject(columnDef) {
     return result;
 }
 
+function _computeCellAlignment(alignment, row, columnDef) {
+    // force right alignment for summary level numbers
+    if (!row.isDetail && !isNaN(row[columnDef.colTag]))
+        return "right";
+
+    // default alignment
+    return alignment;
+}
 /**
  * Determines the style, classes and text formatting of cell content
  * given a column configuartion object and a row of data
@@ -28,7 +35,6 @@ function buildLAFConfigObject(columnDef) {
  * @returns { classes: {}, style: {}, value: {}}
  */
 function buildCellLookAndFeel(columnDef, row) {
-    "use strict";
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
@@ -50,7 +56,7 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = formatConfig.alignment;
+    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment,row,columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
@@ -58,7 +64,6 @@ function buildCellLookAndFeel(columnDef, row) {
 }
 
 function getColumnAlignment(columnDef) {
-    "use strict";
     return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
 }
 
@@ -354,23 +359,12 @@ function _countDistinct(options) {
 };/** @jsx React.DOM */
 
 /**
- * High Level TODOs
- * TODO add sortIndex to custom numerical buckets so they sort correctly
- */
-
-/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
-
-function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
-    if (rowKey == null)
-        return;
-    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
-}
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
@@ -427,7 +421,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
 
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
+    addColumn: function(columnDef, data) {
+        if (_columnExists(this.state.columnDefs,columnDef))
+            return;
         this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -472,14 +468,14 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var paginationAttr = _getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
                 data: row, 
-                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
                 columnDefs: this.state.columnDefs, 
@@ -508,6 +504,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         );
     }
 });
+
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -536,6 +533,7 @@ var Row = React.createClass({displayName: 'Row',
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
+
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
     handleClick: function (index, event) {
         event.preventDefault();
@@ -572,6 +570,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+
 var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
@@ -637,18 +636,6 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function computePageDisplayRange(currentPage, maxDisplayedPages) {
-    // total number to allocate
-    var displayUnitsLeft = maxDisplayedPages;
-    // allocate to the left
-    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
-    var rightAllocation = displayUnitsLeft - leftAllocation;
-    return {
-        start: currentPage - leftAllocation - 1,
-        end: currentPage + rightAllocation - 1
-    }
-}
-
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var adjustedWideHeaders = false;
@@ -676,28 +663,6 @@ function adjustHeaders() {
     }
 }
 
-function getPageArithmetics(table, data) {
-    var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
-
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
-
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
-    }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
-
-    return result;
-
-}
-
 function bindHeadersToMenu(node) {
     node.find(".rt-headers-container").each(function () {
         var headerContainer = this;
@@ -716,24 +681,65 @@ function bindHeadersToMenu(node) {
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};;function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
-    if (selectedRows != null) {
-        for (var i = 0; i < selectedRows.length; i++)
-            results.selectedDetailRows[selectedRows[i]] = 1;
-    }
-    if (selectedSummaryRows != null) {
-        for (var i = 0; i < selectedSummaryRows.length; i++)
-            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
-    }
-    return results;
+};
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function ReactTableGetInitialState() {
+function _columnExists(columnDefs, columnDef) {
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].colTag == columnDef.colTag)
+            return true;
+    }
+    return false;
+}
+
+function _getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
+
+function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+}
+;function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
-    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
-    var firstColumnLabel = _construct1StColumnLabel(this);
+    var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -742,7 +748,7 @@ function ReactTableGetInitialState() {
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
         selectedSummaryRows: selections.selectedSummaryRows,
-        firstColumnLabel: firstColumnLabel
+        firstColumnLabel: _construct1StColumnLabel(this)
     };
 }
 
@@ -779,13 +785,6 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
         this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
-    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
-        rootNode.sortChildren({
-            sortFn: function () {},
-            recursive: false,
-            sortAsc: false,
-            sortByIndex: true
-        });
 
     this.setState({
         rootNode: rootNode,
@@ -794,9 +793,10 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
     });
 
 }
+
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd();
+        this.props.beforeColumnAdd(this);
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -853,7 +853,21 @@ function _construct1StColumnLabel(table) {
     }
     result.push(table.props.columnDefs[0].text);
     return result;
-};function genericValueBasedSorter(a, b) {
+}
+
+function _getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
+}
+;function genericValueBasedSorter(a, b) {
     var returnValue = 0;
     if (a[this.colTag] < b[this.colTag])
         returnValue = -1;
@@ -887,6 +901,8 @@ function getSortFunction(sortByColumnDef) {
 function createTree(tableProps) {
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
+    rootNode.sortRecursivelyBySortIndex();
+    rootNode.foldSubTree();
     return rootNode;
 }
 
@@ -934,7 +950,8 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
         var result = getSectorName(row, groupBy[i]);
         currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
     }
-};/**
+}
+;/**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
  * @constructor
@@ -948,7 +965,7 @@ function TreeNode(sectorTitle, parent) {
     this.ultimateChildren = [];
     this.collapsed = this.parent != null ? true : false;
     this.sortIndex = null;
-    // private members - TODO use closure to hide this
+    // private members
     this._childrenSectorNameMap = {};
 }
 
@@ -957,9 +974,22 @@ TreeNode.prototype.appendRow = function (row) {
 }
 
 TreeNode.prototype.collapseImmediateChildren = function () {
-    var i;
-    for (i = 0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
         this.children[i].collapsed = true;
+}
+
+TreeNode.prototype.foldSubTree = function () {
+    for (var i = 0; i < this.children.length; i++) {
+        if (!this.children[i].hasChild())
+            this.children[i].collapsed = true;
+        else
+            this.children[i].collapsed = false;
+        this.children[i].foldSubTree();
+    }
+}
+
+TreeNode.prototype.hasChild = function () {
+    return (this.children.length > 0);
 }
 
 TreeNode.prototype.expandRecursively = function () {
@@ -999,30 +1029,34 @@ TreeNode.prototype.getSectorPath = function () {
 }
 
 TreeNode.prototype.sortChildren = function (options) {
-    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc,
-        sortByIndex = options.sortByIndex;
+    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc;
 
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        // if the child.rowData contain sortIndices - sort those
-        if (sortByIndex == true && _hasSortIndex(a, b))
-            return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
-    // sort ultimate children if there are no children
-    if (this.children.length == 0) {
-        this.ultimateChildren.sort(function (a, b) {
-            return multiplier * sortFn(a, b);
-        });
-    }
+    if (!this.hasChild())
+        this.ultimateChildren.sort(function (a, b) { return multiplier * sortFn(a, b); });
+
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({
-                sortFn: sortFn, recursive: recursive,
-                sortAsc: sortAsc, sortByIndex: sortByIndex
-            });
+            this.children[i].sortChildren({ sortFn: sortFn, recursive: recursive, sortAsc: sortAsc });
     }
+}
+
+TreeNode.prototype.sortRecursivelyBySortIndex = function () {
+    // test if children have sortIndex - if not skip sorting children
+    if (this.hasChild() && _hasSortIndex(this.children[0])) {
+        this.children.sort(function (a,b) {
+            if ( _hasSortIndex(a) && _hasSortIndex(b))
+                return a.sortIndex - b.sortIndex;
+            return 0;
+        });
+    }
+    // sort children's children
+    for (var i = 0; i < this.children.length; i++)
+        this.children[i].sortRecursivelyBySortIndex();
 }
 
 /*
@@ -1031,8 +1065,8 @@ TreeNode.prototype.sortChildren = function (options) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(a, b) {
-    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
+function _hasSortIndex(node) {
+    return (node != null && node.sortIndex != null && !isNaN(node.sortIndex))
 };/**
  * Converts the table state from a tree format to a array of rows for rendering
  * @param rootNode

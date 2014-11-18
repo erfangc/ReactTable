@@ -1,11 +1,6 @@
 /** @jsx React.DOM */
 
 /**
- * High Level TODOs
- * TODO add sortIndex to custom numerical buckets so they sort correctly
- */
-
-/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
