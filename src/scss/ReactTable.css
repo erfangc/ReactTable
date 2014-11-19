@@ -42,6 +42,31 @@
         border-right: 1px solid #f9f2f4;
         /* display header menu on hover */
         /* header hover menu */ }
+        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container {
+          position: relative;
+          padding-left: 0.5px; }
+          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container > .rt-downward-caret:before {
+            content: ' ';
+            position: absolute;
+            bottom: 0px;
+            border: 4px solid transparent;
+            border-left-color: #FFF;
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            -o-transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            transform: rotate(90deg); }
+          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container > .rt-upward-caret:before {
+            content: ' ';
+            position: absolute;
+            top: -15px;
+            border: 4px solid transparent;
+            border-left-color: #FFF;
+            -webkit-transform: rotate(-90deg);
+            -moz-transform: rotate(-90deg);
+            -o-transform: rotate(-90deg);
+            -ms-transform: rotate(-90deg);
+            transform: rotate(-90deg); }
         .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-info-header {
           min-width: 100px; }
         .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-element {

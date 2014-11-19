@@ -15,7 +15,7 @@ $(function () {
         },
         {
             colTag: "superlong",
-            text: "This is a super super long column header name - trust me"
+            text: "Some header"
         },
         {
             colTag: "test_score",

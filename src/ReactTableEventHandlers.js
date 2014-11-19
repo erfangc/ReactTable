@@ -33,7 +33,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         recursive: true,
         sortAsc: sortAsc
     });
-    this.setState({rootNode: this.state.rootNode});
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {

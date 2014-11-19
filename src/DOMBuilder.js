@@ -53,6 +53,12 @@ function buildHeaders(table) {
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
                 <a className="btn-link rt-header-anchor-text">{table.state.firstColumnLabel.join("/")}</a>
             </div>
+            <div className="rt-caret-container">
+                {table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                {table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
+            </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
     );
@@ -64,6 +70,12 @@ function buildHeaders(table) {
             <div className="rt-headers-container">
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
+                </div>
+                <div className="rt-caret-container">
+                    {table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                    {table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
                 </div>
                 {buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
             </div>

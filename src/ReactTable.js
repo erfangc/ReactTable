@@ -300,6 +300,15 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
+
+    // Realign sorting carets
+    var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
+    var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
+    setTimeout(function(){
+        downs.addClass("rt-downward-caret");
+        ups.addClass("rt-upward-caret");
+    }, 0);
+
     if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
