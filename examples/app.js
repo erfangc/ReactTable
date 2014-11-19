@@ -10,7 +10,7 @@ $(function () {
         {
             colTag: "nationality", text: "Nationality",
             sort: function (a, b) {
-                return a.country.localeCompare(b.country);
+                return a.nationality.localeCompare(b.nationality);
             }
         },
         {

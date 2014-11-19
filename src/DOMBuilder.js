@@ -28,12 +28,12 @@ function buildMenu(options) {
     var menuItems = [
         <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
         <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
-        summarizeMenuItem
+        summarizeMenuItem,
+        <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
     ];
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        menuItems.push(<div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>);
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
         menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
     } else
