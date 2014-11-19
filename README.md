@@ -64,6 +64,7 @@ format | choose from 'number', 'currency', 'date' or 'string'
 sort   | custom callback function for sorting the column
 cellClassCallback | custom callback for applying custom CSS classes to cells. should should return a object with class names set to true in an object. for example `{ green: true, special: true}`
 formatInstructions | a string that represents how you want cells to be formatted, options are
+summaryTemplate | a function callback that returns a React Component, this component will be appended to the content of the first column of summary rows. Argument passed: `data` representing the summary row
 
 ## Valid `formatInstructions` Options
 

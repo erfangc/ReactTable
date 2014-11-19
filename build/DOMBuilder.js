@@ -4,7 +4,7 @@
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     if (columnDef.customMenuItems) {
-        menuItems.push(React.DOM.div({className: "separator"}), columnDef.customMenuItems(table,columnDef));
+        menuItems.push(React.DOM.div({className: "separator"}), columnDef.customMenuItems(table, columnDef));
     }
     return menuItems;
 }
@@ -99,7 +99,7 @@ function buildHeaders(table) {
 
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
@@ -111,15 +111,18 @@ function buildFirstCellForRow(props) {
         "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
-    if (data.isDetail) {
-        var result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
-    } else {
+    userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
+
+    if (data.isDetail)
+        result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+    else {
         result =
             (
                 React.DOM.td({style: firstCellStyle, key: firstColTag}, 
                     React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
                         React.DOM.strong(null, data[firstColTag])
-                    )
+                    ), 
+                    userDefinedElement
                 )
             );
     }
