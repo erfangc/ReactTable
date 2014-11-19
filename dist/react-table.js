@@ -92,7 +92,7 @@ function applyThousandSeparator(x) {
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     if (columnDef.customMenuItems) {
-        menuItems.push(React.DOM.div({className: "separator"}), columnDef.customMenuItems(table,columnDef));
+        menuItems.push(React.DOM.div({className: "separator"}), columnDef.customMenuItems(table, columnDef));
     }
     return menuItems;
 }
@@ -141,10 +141,12 @@ function buildHeaders(table) {
             React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
                 React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
-            table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                        columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
-            table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                        columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null, 
+            React.DOM.div({className: "rt-caret-container"}, 
+                table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
+                table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
+            ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
@@ -157,10 +159,12 @@ function buildHeaders(table) {
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.DOM.a({className: "btn-link rt-header-anchor-text"}, columnDef.text)
                 ), 
-                table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                        columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
-                table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                        columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null, 
+                React.DOM.div({className: "rt-caret-container"}, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
+                ), 
                 buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
         );
@@ -183,7 +187,7 @@ function buildHeaders(table) {
 
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
@@ -195,15 +199,18 @@ function buildFirstCellForRow(props) {
         "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
-    if (data.isDetail) {
-        var result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
-    } else {
+    userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
+
+    if (data.isDetail)
+        result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+    else {
         result =
             (
                 React.DOM.td({style: firstCellStyle, key: firstColTag}, 
                     React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
                         React.DOM.strong(null, data[firstColTag])
-                    )
+                    ), 
+                    userDefinedElement
                 )
             );
     }
@@ -482,12 +489,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (Row({
+                key: generateRowKey(row, rowKey), 
                 data: row, 
                 isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
-                key: generateRowKey(row, rowKey), 
-                columnDefs: this.state.columnDefs, 
-                toggleHide: this.handleToggleHide}));
+                toggleHide: this.handleToggleHide, 
+                columnDefs: this.state.columnDefs}
+                ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -666,6 +674,8 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
+
+    // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
     setTimeout(function(){
@@ -963,7 +973,7 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
         return;
     for (i = 0; i < groupBy.length; i++) {
         var result = getSectorName(row, groupBy[i]);
-        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
+        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex, groupByColumnDef: groupBy[i]});
     }
 }
 ;/**
@@ -975,6 +985,7 @@ function TreeNode(sectorTitle, parent) {
     // accessible properties
     this.sectorTitle = sectorTitle;
     this.parent = parent;
+    this.groupByColumnDef = {};
     this.rowData = null;
     this.children = [];
     this.ultimateChildren = [];
@@ -1022,11 +1033,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @returns the child TreeNode that the data was appended to
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, groupByColumnDef = options.groupByColumnDef;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
         child.sortIndex = sortIndex;
+        child.groupByColumnDef = groupByColumnDef;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -1052,19 +1064,21 @@ TreeNode.prototype.sortChildren = function (options) {
         return multiplier * sortFn(aRow, bRow);
     });
     if (!this.hasChild())
-        this.ultimateChildren.sort(function (a, b) { return multiplier * sortFn(a, b); });
+        this.ultimateChildren.sort(function (a, b) {
+            return multiplier * sortFn(a, b);
+        });
 
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({ sortFn: sortFn, recursive: recursive, sortAsc: sortAsc });
+            this.children[i].sortChildren({sortFn: sortFn, recursive: recursive, sortAsc: sortAsc});
     }
 }
 
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {
     // test if children have sortIndex - if not skip sorting children
     if (this.hasChild() && _hasSortIndex(this.children[0])) {
-        this.children.sort(function (a,b) {
-            if ( _hasSortIndex(a) && _hasSortIndex(b))
+        this.children.sort(function (a, b) {
+            if (_hasSortIndex(a) && _hasSortIndex(b))
                 return a.sortIndex - b.sortIndex;
             return 0;
         });
