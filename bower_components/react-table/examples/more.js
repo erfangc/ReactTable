@@ -1,15 +1,25 @@
 $(function () {
     var columnDefs = [
-        {colTag: "first_name", text: "First Name"},
+        {
+            colTag: "first_name", text: "First Name",
+            summaryTemplate: function (data) {
+                var element = React.createElement("i", {
+                    className: "fa fa-info-circle hover-icon", onMouseEnter: function (event) {
+                        console.log(data.treeNode.groupByColumnDef.text + " Has: " + data.treeNode.ultimateChildren.length);
+                    }
+                });
+                return element;
+            }
+        },
         {
             colTag: "last_name", text: "Last Name"
         },
-        {colTag: "email", text: "Email"},
-        {
-            colTag: "number", text: "Number", format: 'number', aggregationMethod: "_average"
-        },
+        {colTag: "email", text: "Email", aggregationMethod: "count"},
         {
             colTag: "country", text: "Country"
+        },
+        {
+            colTag: "number", text: "Number", format: 'number', aggregationMethod: "average"
         }
     ];
     $.get('large_data_30k.json').success(function (data) {
@@ -17,11 +27,12 @@ $(function () {
         var options = {
             rowKey: 'id',
             data: testData,
-            groupBy: [{colTag:"country"},{colTag:"last_name"}],
+            groupBy: [{colTag: "country", text: "Country"}, {colTag: "last_name", text: "Last Name"}],
             height: "500px",
             columnDefs: columnDefs,
-            beforeColumnAdd: function () {
+            beforeColumnAdd: function (table) {
                 console.log("beforeColumnAdd callback called!");
+                table.addColumn({colTag: "id", text: "ID"});
             },
             afterColumnRemove: function (a, b) {
                 console.log("Hello There ... you tried to remove " + b.text);
@@ -30,8 +41,8 @@ $(function () {
                 console.log("id = " + row.id + " clicked state:" + state);
             },
             onSummarySelectCallback: function (selectedRow, state) {
-                console.log("selectedRow = "+generateSectorKey(selectedRow.sectorPath));
-                console.log("Has Ultimate Children: "+selectedRow.treeNode.ultimateChildren.length);
+                console.log("selectedRow = " + generateSectorKey(selectedRow.sectorPath));
+                console.log("Has Ultimate Children: " + selectedRow.treeNode.ultimateChildren.length);
             }
         };
         React.render(React.createElement(ReactTable, options), document.getElementById("table"));

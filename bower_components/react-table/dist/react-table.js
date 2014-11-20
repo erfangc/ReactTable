@@ -2,7 +2,6 @@
 
 function buildLAFConfigObject(columnDef) {
     var formatInstructions = columnDef.formatInstructions;
-    "use strict";
     var result = {
         multiplier: 1,
         roundTo: 2,
@@ -19,6 +18,14 @@ function buildLAFConfigObject(columnDef) {
     return result;
 }
 
+function _computeCellAlignment(alignment, row, columnDef) {
+    // force right alignment for summary level numbers
+    if (!row.isDetail && !isNaN(row[columnDef.colTag]))
+        return "right";
+
+    // default alignment
+    return alignment;
+}
 /**
  * Determines the style, classes and text formatting of cell content
  * given a column configuartion object and a row of data
@@ -28,7 +35,6 @@ function buildLAFConfigObject(columnDef) {
  * @returns { classes: {}, style: {}, value: {}}
  */
 function buildCellLookAndFeel(columnDef, row) {
-    "use strict";
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
@@ -50,7 +56,7 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = formatConfig.alignment;
+    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment,row,columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
@@ -58,7 +64,6 @@ function buildCellLookAndFeel(columnDef, row) {
 }
 
 function getColumnAlignment(columnDef) {
-    "use strict";
     return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
 }
 
@@ -87,7 +92,7 @@ function applyThousandSeparator(x) {
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     if (columnDef.customMenuItems) {
-        menuItems.push(React.createElement("div", {className: "separator"}), columnDef.customMenuItems(table,columnDef));
+        menuItems.push(React.createElement("div", {className: "separator"}), columnDef.customMenuItems(table, columnDef));
     }
     return menuItems;
 }
@@ -111,12 +116,12 @@ function buildMenu(options) {
     var menuItems = [
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc"),
-        summarizeMenuItem
+        summarizeMenuItem,
+        React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
     ];
 
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary"));
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
     } else
@@ -134,7 +139,13 @@ function buildHeaders(table) {
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
+            ), 
+            React.createElement("div", {className: "rt-caret-container"}, 
+                table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
@@ -147,6 +158,12 @@ function buildHeaders(table) {
             React.createElement("div", {className: "rt-headers-container"}, 
                 React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                ), 
+                React.createElement("div", {className: "rt-caret-container"}, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
                 ), 
                 buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
@@ -170,7 +187,7 @@ function buildHeaders(table) {
 
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
@@ -182,15 +199,18 @@ function buildFirstCellForRow(props) {
         "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
-    if (data.isDetail) {
-        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
-    } else {
+    userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
+
+    if (data.isDetail)
+        result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+    else {
         result =
             (
                 React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
                     React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
                         React.createElement("strong", null, data[firstColTag])
-                    )
+                    ), 
+                    userDefinedElement
                 )
             );
     }
@@ -288,7 +308,7 @@ function _aggregateColumn(bucketResult, columnDef, groupBy) {
         case "sum":
             result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});
             break;
-        case "_average":
+        case "average":
             result = _average({data: bucketResult, columnDef: columnDef});
             break;
         case "count":
@@ -354,23 +374,12 @@ function _countDistinct(options) {
 };/** @jsx React.DOM */
 
 /**
- * High Level TODOs
- * TODO add sortIndex to custom numerical buckets so they sort correctly
- */
-
-/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
-
-function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
-    if (rowKey == null)
-        return;
-    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
-}
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
@@ -427,7 +436,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
 
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
+    addColumn: function(columnDef, data) {
+        if (_columnExists(this.state.columnDefs,columnDef))
+            return;
         this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -472,18 +483,19 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var paginationAttr = _getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
-                data: row, 
-                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
-                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
-                columnDefs: this.state.columnDefs, 
-                toggleHide: this.handleToggleHide}));
+                data: row, 
+                isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
+                toggleHide: this.handleToggleHide, 
+                columnDefs: this.state.columnDefs}
+                ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -537,7 +549,13 @@ var Row = React.createClass({displayName: 'Row',
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
+
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
+    handleClick: function (index, event) {
+        event.preventDefault();
+        if (index <= this.props.numPages && index >= 1)
+            this.props.handleClick(index);
+    },
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -551,7 +569,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         var items = this.props.items.map(function (item) {
             return (
                 React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                    React.createElement("a", {href: "#", onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
@@ -568,6 +586,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+
 var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
@@ -577,20 +596,29 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     handleChange: function (event) {
         this.setState({userInputBuckets: event.target.value});
     },
+    handleKeyPress: function (event) {
+        if (event.charCode == 13) {
+            event.preventDefault();
+            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+        }
+    },
+    handleClick: function (event) {
+        var $node = $(this.getDOMNode());
+        $node.children(".menu-item-input").children("input").focus();
+    },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
-                    React.createElement("label", null, "Enter Bucket(s)"), 
-                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
-                }, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
@@ -624,18 +652,6 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function computePageDisplayRange(currentPage, maxDisplayedPages) {
-    // total number to allocate
-    var displayUnitsLeft = maxDisplayedPages;
-    // allocate to the left
-    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
-    var rightAllocation = displayUnitsLeft - leftAllocation;
-    return {
-        start: currentPage - leftAllocation - 1,
-        end: currentPage + rightAllocation - 1
-    }
-}
-
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var adjustedWideHeaders = false;
@@ -658,31 +674,18 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
+
+    // Realign sorting carets
+    var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
+    var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
+    setTimeout(function(){
+        downs.addClass("rt-downward-caret");
+        ups.addClass("rt-upward-caret");
+    }, 0);
+
     if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
-}
-
-function getPageArithmetics(table, data) {
-    var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
-
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
-
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
-    }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
-
-    return result;
-
 }
 
 function bindHeadersToMenu(node) {
@@ -703,23 +706,65 @@ function bindHeadersToMenu(node) {
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};;function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
-    if (selectedRows != null) {
-        for (var i = 0; i < selectedRows.length; i++)
-            results.selectedDetailRows[selectedRows[i]] = 1;
-    }
-    if (selectedSummaryRows != null) {
-        for (var i = 0; i < selectedSummaryRows.length; i++)
-            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
-    }
-    return results;
+};
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function ReactTableGetInitialState() {
+function _columnExists(columnDefs, columnDef) {
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].colTag == columnDef.colTag)
+            return true;
+    }
+    return false;
+}
+
+function _getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
+
+function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+}
+;function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
-    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -727,7 +772,8 @@ function ReactTableGetInitialState() {
         height: this.props.height,
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
-        selectedSummaryRows: selections.selectedSummaryRows
+        selectedSummaryRows: selections.selectedSummaryRows,
+        firstColumnLabel: _construct1StColumnLabel(this)
     };
 }
 
@@ -750,33 +796,32 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         recursive: true,
         sortAsc: sortAsc
     });
-    this.setState({rootNode: this.state.rootNode});
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
 
     if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
-    this.props.groupBy = columnDef ? [columnDef] : null;
+    if (columnDef != null) {
+        this.props.groupBy = this.props.groupBy || [];
+        this.props.groupBy.push(columnDef);
+    } else
+        this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
-    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
-        rootNode.sortChildren({
-            sortFn: null,
-            recursive: false,
-            sortAsc: false,
-            sortByIndex: true
-        });
 
     this.setState({
         rootNode: rootNode,
-        currentPage: 1
+        currentPage: 1,
+        firstColumnLabel: _construct1StColumnLabel(this)
     });
 
 }
+
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd();
+        this.props.beforeColumnAdd(this);
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -800,8 +845,7 @@ function ReactTableHandleToggleHide(summaryRow, event) {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandlePageClick(page, event) {
-    event.preventDefault();
+function ReactTableHandlePageClick(page) {
     this.setState({
         currentPage: page
     });
@@ -824,7 +868,31 @@ function _createFloatBuckets(buckets) {
         });
     }
     return floatBuckets;
-};function genericValueBasedSorter(a, b) {
+}
+
+function _construct1StColumnLabel(table) {
+    var result = [];
+    if (table.props.groupBy) {
+        for (var i = 0; i < table.props.groupBy.length; i++)
+            result.push(table.props.groupBy[i].text);
+    }
+    result.push(table.props.columnDefs[0].text);
+    return result;
+}
+
+function _getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
+}
+;function genericValueBasedSorter(a, b) {
     var returnValue = 0;
     if (a[this.colTag] < b[this.colTag])
         returnValue = -1;
@@ -858,6 +926,8 @@ function getSortFunction(sortByColumnDef) {
 function createTree(tableProps) {
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
+    rootNode.sortRecursivelyBySortIndex();
+    rootNode.foldSubTree();
     return rootNode;
 }
 
@@ -903,10 +973,10 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
         return;
     for (i = 0; i < groupBy.length; i++) {
         var result = getSectorName(row, groupBy[i]);
-        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex});
+        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex, groupByColumnDef: groupBy[i]});
     }
-};// TODO consider if this sortIndex property thing is the best way to sort
-/**
+}
+;/**
  * Represents a grouping of table rows with references to children that are also grouping
  * of rows
  * @constructor
@@ -915,12 +985,13 @@ function TreeNode(sectorTitle, parent) {
     // accessible properties
     this.sectorTitle = sectorTitle;
     this.parent = parent;
+    this.groupByColumnDef = {};
     this.rowData = null;
     this.children = [];
     this.ultimateChildren = [];
     this.collapsed = this.parent != null ? true : false;
     this.sortIndex = null;
-    // private members - TODO use closure to hide this
+    // private members
     this._childrenSectorNameMap = {};
 }
 
@@ -929,9 +1000,22 @@ TreeNode.prototype.appendRow = function (row) {
 }
 
 TreeNode.prototype.collapseImmediateChildren = function () {
-    var i;
-    for (i = 0; i < this.children.length; i++)
+    for (var i = 0; i < this.children.length; i++)
         this.children[i].collapsed = true;
+}
+
+TreeNode.prototype.foldSubTree = function () {
+    for (var i = 0; i < this.children.length; i++) {
+        if (!this.children[i].hasChild())
+            this.children[i].collapsed = true;
+        else
+            this.children[i].collapsed = false;
+        this.children[i].foldSubTree();
+    }
+}
+
+TreeNode.prototype.hasChild = function () {
+    return (this.children.length > 0);
 }
 
 TreeNode.prototype.expandRecursively = function () {
@@ -949,11 +1033,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @returns the child TreeNode that the data was appended to
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex;
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, groupByColumnDef = options.groupByColumnDef;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
         child.sortIndex = sortIndex;
+        child.groupByColumnDef = groupByColumnDef;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -971,30 +1056,36 @@ TreeNode.prototype.getSectorPath = function () {
 }
 
 TreeNode.prototype.sortChildren = function (options) {
-    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc,
-        sortByIndex = options.sortByIndex;
+    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc;
 
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        // if the child.rowData contain sortIndices - sort those
-        if (sortByIndex == true && _hasSortIndex(a, b))
-            return a.sortIndex - b.sortIndex;
         return multiplier * sortFn(aRow, bRow);
     });
-    // sort ultimate children if there are no children
-    if (this.children.length == 0) {
+    if (!this.hasChild())
         this.ultimateChildren.sort(function (a, b) {
             return multiplier * sortFn(a, b);
         });
-    }
+
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({
-                sortFn: sortFn, recursive: recursive,
-                sortAsc: sortAsc, sortByIndex: sortByIndex
-            });
+            this.children[i].sortChildren({sortFn: sortFn, recursive: recursive, sortAsc: sortAsc});
     }
+}
+
+TreeNode.prototype.sortRecursivelyBySortIndex = function () {
+    // test if children have sortIndex - if not skip sorting children
+    if (this.hasChild() && _hasSortIndex(this.children[0])) {
+        this.children.sort(function (a, b) {
+            if (_hasSortIndex(a) && _hasSortIndex(b))
+                return a.sortIndex - b.sortIndex;
+            return 0;
+        });
+    }
+    // sort children's children
+    for (var i = 0; i < this.children.length; i++)
+        this.children[i].sortRecursivelyBySortIndex();
 }
 
 /*
@@ -1003,8 +1094,8 @@ TreeNode.prototype.sortChildren = function (options) {
  * ----------------------------------------------------------------------
  */
 
-function _hasSortIndex(a, b) {
-    return (a.sortIndex != null && b.sortIndex != null && !isNaN(a.sortIndex) && !isNaN(a.sortIndex))
+function _hasSortIndex(node) {
+    return (node != null && node.sortIndex != null && !isNaN(node.sortIndex))
 };/**
  * Converts the table state from a tree format to a array of rows for rendering
  * @param rootNode

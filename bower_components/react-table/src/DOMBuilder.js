@@ -4,7 +4,7 @@
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     if (columnDef.customMenuItems) {
-        menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table,columnDef));
+        menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table, columnDef));
     }
     return menuItems;
 }
@@ -28,12 +28,12 @@ function buildMenu(options) {
     var menuItems = [
         <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
         <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
-        summarizeMenuItem
+        summarizeMenuItem,
+        <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
     ];
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        menuItems.push(<div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>);
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
         menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
     } else
@@ -51,7 +51,13 @@ function buildHeaders(table) {
     var firstColumn = (
         <div className="rt-headers-container">
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
+                <a className="btn-link rt-header-anchor-text">{table.state.firstColumnLabel.join("/")}</a>
+            </div>
+            <div className="rt-caret-container">
+                {table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                {table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
             </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
@@ -64,6 +70,12 @@ function buildHeaders(table) {
             <div className="rt-headers-container">
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
+                </div>
+                <div className="rt-caret-container">
+                    {table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                    {table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
                 </div>
                 {buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
             </div>
@@ -87,7 +99,7 @@ function buildHeaders(table) {
 
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
@@ -99,15 +111,18 @@ function buildFirstCellForRow(props) {
         "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
-    if (data.isDetail) {
-        var result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
-    } else {
+    userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
+
+    if (data.isDetail)
+        result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
+    else {
         result =
             (
                 <td style={firstCellStyle} key={firstColTag}>
                     <a onClick={toggleHide.bind(null, data)} className="btn-link">
                         <strong>{data[firstColTag]}</strong>
                     </a>
+                    {userDefinedElement}
                 </td>
             );
     }

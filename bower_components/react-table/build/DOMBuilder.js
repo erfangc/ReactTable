@@ -4,7 +4,7 @@
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     if (columnDef.customMenuItems) {
-        menuItems.push(React.createElement("div", {className: "separator"}), columnDef.customMenuItems(table,columnDef));
+        menuItems.push(React.createElement("div", {className: "separator"}), columnDef.customMenuItems(table, columnDef));
     }
     return menuItems;
 }
@@ -28,12 +28,12 @@ function buildMenu(options) {
     var menuItems = [
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
         React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc"),
-        summarizeMenuItem
+        summarizeMenuItem,
+        React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
     ];
 
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary"));
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
     } else
@@ -51,7 +51,13 @@ function buildHeaders(table) {
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
+            ), 
+            React.createElement("div", {className: "rt-caret-container"}, 
+                table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
@@ -64,6 +70,12 @@ function buildHeaders(table) {
             React.createElement("div", {className: "rt-headers-container"}, 
                 React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                ), 
+                React.createElement("div", {className: "rt-caret-container"}, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === true &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                    table.state.sortAsc != undefined && table.state.sortAsc === false &&
+                            columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
                 ), 
                 buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
@@ -87,7 +99,7 @@ function buildHeaders(table) {
 
 function buildFirstCellForRow(props) {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
-    var firstColTag = columnDef.colTag;
+    var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
@@ -99,15 +111,18 @@ function buildFirstCellForRow(props) {
         "paddingLeft": (10 + identLevel * 25) + "px"
     };
 
-    if (data.isDetail) {
-        var result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
-    } else {
+    userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
+
+    if (data.isDetail)
+        result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+    else {
         result =
             (
                 React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
                     React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
                         React.createElement("strong", null, data[firstColTag])
-                    )
+                    ), 
+                    userDefinedElement
                 )
             );
     }

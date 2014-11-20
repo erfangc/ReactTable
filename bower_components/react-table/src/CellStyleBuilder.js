@@ -2,7 +2,6 @@
 
 function buildLAFConfigObject(columnDef) {
     var formatInstructions = columnDef.formatInstructions;
-    "use strict";
     var result = {
         multiplier: 1,
         roundTo: 2,
@@ -19,6 +18,14 @@ function buildLAFConfigObject(columnDef) {
     return result;
 }
 
+function _computeCellAlignment(alignment, row, columnDef) {
+    // force right alignment for summary level numbers
+    if (!row.isDetail && !isNaN(row[columnDef.colTag]))
+        return "right";
+
+    // default alignment
+    return alignment;
+}
 /**
  * Determines the style, classes and text formatting of cell content
  * given a column configuartion object and a row of data
@@ -28,7 +35,6 @@ function buildLAFConfigObject(columnDef) {
  * @returns { classes: {}, style: {}, value: {}}
  */
 function buildCellLookAndFeel(columnDef, row) {
-    "use strict";
     var results = {classes: {}, styles: {}, value: {}};
     var value = row[columnDef.colTag];
 
@@ -50,7 +56,7 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = formatConfig.alignment;
+    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment,row,columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
@@ -58,7 +64,6 @@ function buildCellLookAndFeel(columnDef, row) {
 }
 
 function getColumnAlignment(columnDef) {
-    "use strict";
     return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
 }
 

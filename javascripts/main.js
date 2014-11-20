@@ -8,7 +8,7 @@ $(function () {
             format: "number",
             formatInstructions: "multiplier:1 roundTo:0 unit:%",
             text: "Test Score",
-            aggregationMethod: "_average",
+            aggregationMethod: "average",
             weightBy: {colTag: "score_weight_factor"},
             cellClassCallback: function (row) {
                 var classes = {green: false, red: false};
@@ -22,7 +22,7 @@ $(function () {
     $.get('bower_components/react-table/examples/sample_data.json').success(function (data) {
         var testData = data;
         // first table
-        var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
+        var groupBy = [{colTag: "nationality", text:"Nationality"}, {colTag: "fruit_preference", text:"Fruit Preference"}];
         var options = {
             groupBy: groupBy,
             rowKey: 'id',

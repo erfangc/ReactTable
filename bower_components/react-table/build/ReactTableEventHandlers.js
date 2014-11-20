@@ -1,20 +1,7 @@
-function getInitialSelections(selectedRows, selectedSummaryRows) {
-    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
-    if (selectedRows != null) {
-        for (var i = 0; i < selectedRows.length; i++)
-            results.selectedDetailRows[selectedRows[i]] = 1;
-    }
-    if (selectedSummaryRows != null) {
-        for (var i = 0; i < selectedSummaryRows.length; i++)
-            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
-    }
-    return results;
-}
-
 function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
-    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -22,7 +9,8 @@ function ReactTableGetInitialState() {
         height: this.props.height,
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
-        selectedSummaryRows: selections.selectedSummaryRows
+        selectedSummaryRows: selections.selectedSummaryRows,
+        firstColumnLabel: _construct1StColumnLabel(this)
     };
 }
 
@@ -45,33 +33,32 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         recursive: true,
         sortAsc: sortAsc
     });
-    this.setState({rootNode: this.state.rootNode});
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
 
     if (buckets != null && buckets != "" && columnDef)
         columnDef.groupByRange = _createFloatBuckets(buckets);
-    this.props.groupBy = columnDef ? [columnDef] : null;
+    if (columnDef != null) {
+        this.props.groupBy = this.props.groupBy || [];
+        this.props.groupBy.push(columnDef);
+    } else
+        this.props.groupBy = null;
 
     var rootNode = createTree(this.props);
-    if (columnDef != null && columnDef.groupByRange != null && columnDef.groupByRange.length > 1)
-        rootNode.sortChildren({
-            sortFn: null,
-            recursive: false,
-            sortAsc: false,
-            sortByIndex: true
-        });
 
     this.setState({
         rootNode: rootNode,
-        currentPage: 1
+        currentPage: 1,
+        firstColumnLabel: _construct1StColumnLabel(this)
     });
 
 }
+
 function ReactTableHandleAdd() {
     if (this.props.beforeColumnAdd)
-        this.props.beforeColumnAdd();
+        this.props.beforeColumnAdd(this);
 }
 
 function ReactTableHandleRemove(columnDefToRemove) {
@@ -95,8 +82,7 @@ function ReactTableHandleToggleHide(summaryRow, event) {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandlePageClick(page, event) {
-    event.preventDefault();
+function ReactTableHandlePageClick(page) {
     this.setState({
         currentPage: page
     });
@@ -119,4 +105,27 @@ function _createFloatBuckets(buckets) {
         });
     }
     return floatBuckets;
+}
+
+function _construct1StColumnLabel(table) {
+    var result = [];
+    if (table.props.groupBy) {
+        for (var i = 0; i < table.props.groupBy.length; i++)
+            result.push(table.props.groupBy[i].text);
+    }
+    result.push(table.props.columnDefs[0].text);
+    return result;
+}
+
+function _getInitialSelections(selectedRows, selectedSummaryRows) {
+    var results = {selectedDetailRows: {}, selectedSummaryRows: {}};
+    if (selectedRows != null) {
+        for (var i = 0; i < selectedRows.length; i++)
+            results.selectedDetailRows[selectedRows[i]] = 1;
+    }
+    if (selectedSummaryRows != null) {
+        for (var i = 0; i < selectedSummaryRows.length; i++)
+            results.selectedSummaryRows[selectedSummaryRows[i]] = 1;
+    }
+    return results;
 }

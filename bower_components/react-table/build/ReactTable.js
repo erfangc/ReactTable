@@ -1,23 +1,12 @@
 /** @jsx React.DOM */
 
 /**
- * High Level TODOs
- * TODO add sortIndex to custom numerical buckets so they sort correctly
- */
-
-/**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
  * @author Erfang Chen
  */
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
-
-function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
-    if (rowKey == null)
-        return;
-    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
-}
 
 var ReactTable = React.createClass({displayName: 'ReactTable',
 
@@ -74,7 +63,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
 
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
+    addColumn: function(columnDef, data) {
+        if (_columnExists(this.state.columnDefs,columnDef))
+            return;
         this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -119,18 +110,19 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        var paginationAttr = getPageArithmetics(this, rasterizedData);
+        var paginationAttr = _getPageArithmetics(this, rasterizedData);
         var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             return (React.createElement(Row, {
-                data: row, 
-                isSelected: isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
-                onSelect: this.handleSelect, 
                 key: generateRowKey(row, rowKey), 
-                columnDefs: this.state.columnDefs, 
-                toggleHide: this.handleToggleHide}));
+                data: row, 
+                isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+                onSelect: this.handleSelect, 
+                toggleHide: this.handleToggleHide, 
+                columnDefs: this.state.columnDefs}
+                ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -184,7 +176,13 @@ var Row = React.createClass({displayName: 'Row',
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
+
 var PageNavigator = React.createClass({displayName: 'PageNavigator',
+    handleClick: function (index, event) {
+        event.preventDefault();
+        if (index <= this.props.numPages && index >= 1)
+            this.props.handleClick(index);
+    },
     render: function () {
         var self = this;
         var cx = React.addons.classSet;
@@ -198,7 +196,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         var items = this.props.items.map(function (item) {
             return (
                 React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {href: "#", onClick: self.props.handleClick.bind(null, item)}, item)
+                    React.createElement("a", {href: "#", onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
@@ -215,6 +213,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
         );
     }
 });
+
 var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
@@ -224,20 +223,29 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     handleChange: function (event) {
         this.setState({userInputBuckets: event.target.value});
     },
+    handleKeyPress: function (event) {
+        if (event.charCode == 13) {
+            event.preventDefault();
+            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+        }
+    },
+    handleClick: function (event) {
+        var $node = $(this.getDOMNode());
+        $node.children(".menu-item-input").children("input").focus();
+    },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", onHover: true, style: {"position": "absolute", "top": "0%", "left": "100%"}}, 
-                    React.createElement("label", null, "Enter Bucket(s)"), 
-                    React.createElement("input", {onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
-                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : function () {
-                }, 
+                onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
@@ -271,18 +279,6 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function computePageDisplayRange(currentPage, maxDisplayedPages) {
-    // total number to allocate
-    var displayUnitsLeft = maxDisplayedPages;
-    // allocate to the left
-    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
-    var rightAllocation = displayUnitsLeft - leftAllocation;
-    return {
-        start: currentPage - leftAllocation - 1,
-        end: currentPage + rightAllocation - 1
-    }
-}
-
 function adjustHeaders() {
     var id = this.state.uniqueId;
     var adjustedWideHeaders = false;
@@ -305,31 +301,18 @@ function adjustHeaders() {
         currentHeader.width(width);
         counter++;
     });
+
+    // Realign sorting carets
+    var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
+    var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
+    setTimeout(function(){
+        downs.addClass("rt-downward-caret");
+        ups.addClass("rt-upward-caret");
+    }, 0);
+
     if (adjustedWideHeaders) {
         adjustHeaders.call(this);
     }
-}
-
-function getPageArithmetics(table, data) {
-    var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
-
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
-
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
-    }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
-
-    return result;
-
 }
 
 function bindHeadersToMenu(node) {
@@ -351,3 +334,57 @@ function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
 };
+
+/*
+ * ----------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------
+ */
+
+function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (rowKey == null)
+        return;
+    return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
+function _columnExists(columnDefs, columnDef) {
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].colTag == columnDef.colTag)
+            return true;
+    }
+    return false;
+}
+
+function _getPageArithmetics(table, data) {
+    var result = {};
+    result.pageSize = table.props.pageSize || 50;
+    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
+
+    result.pageStart = 1;
+    result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+    result.allPages = [];
+    for (var i = result.pageStart; i <= result.pageEnd; i++) {
+        result.allPages.push(i);
+    }
+    // derive the correct page navigator selectable pages from current / total pages
+    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+    return result;
+
+}
+
+function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+    // total number to allocate
+    var displayUnitsLeft = maxDisplayedPages;
+    // allocate to the left
+    var leftAllocation = Math.min(Math.floor(displayUnitsLeft / 2), currentPage - 1);
+    var rightAllocation = displayUnitsLeft - leftAllocation;
+    return {
+        start: currentPage - leftAllocation - 1,
+        end: currentPage + rightAllocation - 1
+    }
+}
