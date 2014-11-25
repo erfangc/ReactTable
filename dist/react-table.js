@@ -240,7 +240,7 @@ function getSectorName(row, groupBy) {
         sortIndex = result.sortIndex;
     } else
         sectorName = row[groupBy.colTag];
-    return {sectorName: sectorName, sortIndex: sortIndex};
+    return {sectorName: sectorName || "Other", sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {
@@ -443,7 +443,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         if (data) {
             this.props.data = data;
             this.state.rootNode = createTree(this.props);
-        }
+        } else
+            recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
     replaceData: function (data) {

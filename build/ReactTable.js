@@ -70,7 +70,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         if (data) {
             this.props.data = data;
             this.state.rootNode = createTree(this.props);
-        }
+        } else
+            recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
     replaceData: function (data) {

@@ -13,7 +13,7 @@ function getSectorName(row, groupBy) {
         sortIndex = result.sortIndex;
     } else
         sectorName = row[groupBy.colTag];
-    return {sectorName: sectorName, sortIndex: sortIndex};
+    return {sectorName: sectorName || "Other", sortIndex: sortIndex};
 }
 
 function aggregateSector(bucketResult, columnDefs, groupBy) {
