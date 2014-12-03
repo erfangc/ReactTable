@@ -107,7 +107,7 @@
               text-shadow: none;
               background-color: #f0f3f5;
               color: #4a5564; }
-              .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a {
+              .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > div {
                 margin: 10px; }
           .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .separator {
             margin: 0 5px;

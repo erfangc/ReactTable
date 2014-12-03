@@ -3,11 +3,48 @@
 
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
-    if (columnDef.customMenuItems) {
-        menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table, columnDef));
+    var popupStyle = {
+        "position": "absolute",
+        "top": "-50%",
+        "whiteSpace": "normal",
+        "width": "250px"
+    };
+    for( var menuItemTitle in table.props.customMenuItems ){
+        for( var menuItemType in table.props.customMenuItems[menuItemTitle] ){
+            if( menuItemType == "infoBox" ){
+                if( columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]] ) {
+                    var direction = table.state.columnDefs.indexOf(columnDef)*10/table.state.columnDefs.length > 5 ?
+                            "right" : "left";
+                    var styles = {};
+                    for(var k in popupStyle) styles[k]=popupStyle[k];
+                    styles[direction] = "100%";
+                    menuItems.push(
+                        <div style={{"position": "relative"}} className="menu-item menu-item-hoverable">
+                            <div>{menuItemTitle}</div>
+                            <div className="menu-item-input" style={styles}>
+                                <div style={{"display": "block"}}>
+                                    {columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+            }
+        }
     }
+
     return menuItems;
+
+    // onClick={table.handleInfoBoxPopup.bind(columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]])}>
+
+    //var menuItems = [];
+    //if (columnDef.customMenuItems) {
+    //    menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table, columnDef));
+    //}
+    //return menuItems;
 }
+
+
 
 function buildMenu(options) {
     var table = options.table,
