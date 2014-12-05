@@ -87,7 +87,10 @@ var ReactTable = React.createClass({
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
-        }.bind(this));
+        }.bind(this), 0);
+        setTimeout(function () {
+            adjustHeaders.call(this);
+        }.bind(this), 500);
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
