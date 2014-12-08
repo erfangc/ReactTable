@@ -61,7 +61,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
         return state;
     },
-
+    clearAllRowSelections: function(){
+        this.setState({
+            selectedDetailRows: {}
+        });
+    },
     /* --- Called from outside the component --- */
     addColumn: function(columnDef, data) {
         if (_columnExists(this.state.columnDefs,columnDef))
