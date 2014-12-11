@@ -22,7 +22,7 @@
     td {
       border-bottom: 1px solid $utility-color;
       padding: 2px 5px;
-      min-width: 50px;
+      min-width: 5px;
       border-right: 1px solid #f9f2f4;
       white-space: nowrap;
     }
@@ -75,10 +75,10 @@
           }
         }
         > .rt-info-header {
-          min-width: 50px;
+          min-width: 5px;
         }
         > .rt-header-element {
-          min-width: 50px;
+          min-width: 5px;
           padding-left: 5px;
           padding-right: 5px;
           padding-bottom: 2px;

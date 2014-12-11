@@ -507,6 +507,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         }.bind(this), 500);
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
+        // dsdsdf
         var $node = $(this.getDOMNode());
         $node.find(".rt-scrollable").bind('scroll', function () {
             $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
