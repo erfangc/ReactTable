@@ -988,7 +988,7 @@ function createTree(tableProps) {
 function buildTreeSkeleton(tableProps) {
     var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
     for (i = 0; i < rawData.length; i++) {
-        rootNode.appendRow(rawData[i]);
+        rootNode.appendUltimateChild(rawData[i]);
         _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
     }
     return rootNode
@@ -1044,7 +1044,7 @@ function TreeNode(sectorTitle, parent) {
     this._childrenSectorNameMap = {};
 }
 
-TreeNode.prototype.appendRow = function (row) {
+TreeNode.prototype.appendUltimateChild = function (row) {
     this.ultimateChildren.push(row);
 }
 
@@ -1091,7 +1091,7 @@ TreeNode.prototype.appendRowToChildren = function (options) {
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
-    this._childrenSectorNameMap[childSectorName].appendRow(childRow);
+    this._childrenSectorNameMap[childSectorName].appendUltimateChild(childRow);
     return this._childrenSectorNameMap[childSectorName];
 }
 

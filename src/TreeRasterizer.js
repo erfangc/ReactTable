@@ -7,7 +7,7 @@ function rasterizeTree(options) {
     var node = options.node, firstColumn = options.firstColumn;
 
     node = _decorateRowData(node, firstColumn);
-    var flatData = [node.rowData];
+    var flatData = node.display == false ? [] : [node.rowData];
 
     if (!node.collapsed) {
         if (node.children.length > 0)

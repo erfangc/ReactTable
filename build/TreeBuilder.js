@@ -19,7 +19,7 @@ function createTree(tableProps) {
 function buildTreeSkeleton(tableProps) {
     var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
     for (i = 0; i < rawData.length; i++) {
-        rootNode.appendRow(rawData[i]);
+        rootNode.appendUltimateChild(rawData[i]);
         _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
     }
     return rootNode
