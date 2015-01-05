@@ -4,7 +4,7 @@ $(function () {
         var columnDefs = json.TITLES.map(function (r) {
             return {colTag: r, text: r}
         })
-        var table1 = React.render(React.createElement(ReactTable, {rootNode: rootNode, data: [], columnDefs: columnDefs}), document.getElementById("table"));
+        var table1 = React.render(React.createElement(ReactTable, {height: "600px",rootNode: rootNode, data: [], columnDefs: columnDefs}), document.getElementById("table"));
     })
 })
 
