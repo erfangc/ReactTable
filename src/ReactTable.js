@@ -61,7 +61,11 @@ var ReactTable = React.createClass({
         });
         return state;
     },
-
+    clearAllRowSelections: function(){
+        this.setState({
+            selectedDetailRows: {}
+        });
+    },
     /* --- Called from outside the component --- */
     addColumn: function(columnDef, data) {
         if (_columnExists(this.state.columnDefs,columnDef))
@@ -87,7 +91,10 @@ var ReactTable = React.createClass({
     componentDidMount: function () {
         setTimeout(function () {
             adjustHeaders.call(this);
-        }.bind(this));
+        }.bind(this), 0);
+        setTimeout(function () {
+            adjustHeaders.call(this);
+        }.bind(this), 500);
         document.addEventListener('click', adjustHeaders.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
@@ -280,26 +287,30 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function adjustHeaders() {
+function adjustHeaders(secondTime) {
     var id = this.state.uniqueId;
     var adjustedWideHeaders = false;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+
     headerElems.each(function () {
         var currentHeader = $(this);
-        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+        var width = $('#' + id + ' .rt-table tr:last td:eq(' + counter + ')').outerWidth() - 1;
         if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-            $(this).width(headerTextWidthWithPadding);
+            currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            adjustedWideHeaders = true;
+            if( !secondTime )
+                adjustedWideHeaders = true;
         }
+        //else {
         currentHeader.width(width);
+        //}
         counter++;
     });
 
@@ -312,7 +323,7 @@ function adjustHeaders() {
     }, 0);
 
     if (adjustedWideHeaders) {
-        adjustHeaders.call(this);
+        adjustHeaders.call(this, true);
     }
 }
 

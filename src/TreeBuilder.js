@@ -4,6 +4,10 @@
  * @return the root TreeNode element of the tree with aggregation
  */
 function createTree(tableProps) {
+    // If the rootNode is passed as a prop - that means the tree is pre-configured
+    if (tableProps.rootNode != null) {
+        return tableProps.rootNode
+    }
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
     rootNode.sortRecursivelyBySortIndex();
@@ -19,7 +23,7 @@ function createTree(tableProps) {
 function buildTreeSkeleton(tableProps) {
     var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
     for (i = 0; i < rawData.length; i++) {
-        rootNode.appendRow(rawData[i]);
+        rootNode.appendUltimateChild(rawData[i]);
         _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
     }
     return rootNode
@@ -53,6 +57,11 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
         return;
     for (i = 0; i < groupBy.length; i++) {
         var result = getSectorName(row, groupBy[i]);
-        currentNode = currentNode.appendRowToChildren({childSectorName: result.sectorName, childRow: row, sortIndex: result.sortIndex, groupByColumnDef: groupBy[i]});
+        currentNode = currentNode.appendRowToChildren({
+            childSectorName: result.sectorName,
+            childRow: row,
+            sortIndex: result.sortIndex,
+            groupByColumnDef: groupBy[i]
+        });
     }
 }

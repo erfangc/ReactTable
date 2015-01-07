@@ -46,10 +46,11 @@ onSelectCallback   |Function        |callback function to invoke when a detail r
 onSummarySelectCallback|Function    |callback function to invoke when a summary row is selected. The selected row will be passed as the first argument to the callback as an object that contain two properties: `detailRows` which contains detail rows belonging to the given summary row plus the `summaryRow` itself. The second argument passed will be a boolean representing the selection state of the row that was just clicked on
 selectedRows       |Array of Strings|row keys of initially selected rows, must be used with the 'rowKey' option
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
+customMenuItems    |Object          |specifies custom header menu options.  Each key of the given object corresponds to the title of the new menu option and the value is an object e.g. {infoBox: "columnDataPoint"}.  infoBox displays a box whose contents are equal to the columnDef's columnDataPoint on hover of the menu item. As of right now, infoBox is the only supported custom menu object type. This will only appear in columns where columnDataPoint exists in columnDef.
 
 ## Table Usage Example
 ```
-var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}] };
+var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}], customMenuItems: {Description: {infoBox: "description"}} };
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 ```
 

@@ -74,6 +74,11 @@ $(function () {
             data: testData,
             height: "300px",
             columnDefs: columnDefs,
+            customMenuItems: {
+                Description: {
+                    infoBox: "formatInstructions"
+                }
+            },
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
                 addMe();

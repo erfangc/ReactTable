@@ -22,7 +22,7 @@
     .rt-table-container .rt-table td {
       border-bottom: 1px solid #f0f3f5;
       padding: 2px 5px;
-      min-width: 100px;
+      min-width: 5px;
       border-right: 1px solid #f9f2f4;
       white-space: nowrap; }
   .rt-table-container .rt-scrollable {
@@ -71,9 +71,9 @@
             -ms-transform: rotate(-90deg);
             transform: rotate(-90deg); }
         .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-info-header {
-          min-width: 100px; }
+          min-width: 5px; }
         .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-element {
-          min-width: 10px;
+          min-width: 5px;
           padding-left: 5px;
           padding-right: 5px;
           padding-bottom: 2px;
@@ -107,7 +107,7 @@
               text-shadow: none;
               background-color: #f0f3f5;
               color: #4a5564; }
-              .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a {
+              .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > div {
                 margin: 10px; }
           .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .separator {
             margin: 0 5px;
