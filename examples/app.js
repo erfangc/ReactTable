@@ -48,7 +48,7 @@ $(function () {
     ];
     var columnDefs2 = [
         {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last Name", aggregationMethod: "count_distinct"},
+        {colTag: "last_name", text: "Last Name", aggregationMethod: "count_and_distinct"},
         {colTag: "email", text: "Email"},
         {
             colTag: "test_score",

@@ -317,6 +317,9 @@ function _aggregateColumn(bucketResult, columnDef, groupBy) {
         case "count_distinct":
             result = _countDistinct({data: bucketResult, columnDef: columnDef});
             break;
+        case "count_and_distinct":
+            result = _countAndDistinct({data: bucketResult, columnDef: columnDef});
+            break;
         default :
             result = "";
     }
@@ -371,6 +374,12 @@ function _countDistinct(options) {
         if (values.hasOwnProperty(prop))
             result++;
     return result == 1 ? data[0][columnDef.colTag] : result;
+}
+
+function _countAndDistinct(options) {
+    var count = _count(options);
+    var distinctCount = _countDistinct(options);
+    return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
 };/** @jsx React.DOM */
 
 /**
