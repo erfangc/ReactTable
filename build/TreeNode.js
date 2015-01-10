@@ -64,7 +64,8 @@ TreeNode.prototype.appendRowToChildren = function (options) {
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
-    this._childrenSectorNameMap[childSectorName].appendUltimateChild(childRow);
+    if (childRow)
+        this._childrenSectorNameMap[childSectorName].appendUltimateChild(childRow);
     return this._childrenSectorNameMap[childSectorName];
 }
 
