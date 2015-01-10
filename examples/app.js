@@ -41,7 +41,7 @@ $(function () {
             aggregationMethod: "sum"
         }
     ];
-    $.get('with_missing_data.json').success(function (data) {
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
