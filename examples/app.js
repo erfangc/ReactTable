@@ -40,31 +40,8 @@ $(function () {
             text: "Weight Factor",
             aggregationMethod: "sum"
         }
-        //,
-        //{
-        //    colTag: "abcd",
-        //    text: "This is a really really long header name wow look how long this is"
-        //}
     ];
-    var columnDefs2 = [
-        {colTag: "first_name", text: "First Name"},
-        {colTag: "last_name", text: "Last Name", aggregationMethod: "count_and_distinct"},
-        {colTag: "email", text: "Email"},
-        {
-            colTag: "test_score",
-            format: "number",
-            groupByRange: [0, 10, 25, 30, 50, 100],
-            formatInstructions: "multiplier:1 roundTo:0 unit:%",
-            text: "Test Score",
-            aggregationMethod: "average",
-            conditionalAggregationMethod: {"fruit_preference": "count"},
-            weightBy: {colTag: "score_weight_factor"}
-        },
-        {colTag: "fruit_preference", text: "Fruit Preference"},
-        {colTag: "score_weight_factor", format: "currency", text: "Weight Factor", aggregationMethod: "sum"}
-    ];
-
-    $.get('sample_data.json').success(function (data) {
+    $.get('with_missing_data.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
@@ -99,22 +76,5 @@ $(function () {
         function addMe() {
             table1.addColumn({colTag: "currency_used", text: "Currency used"});
         }
-
-        // second table
-        var options2 = {
-            rowKey: 'id',
-            data: testData,
-            columnDefs: columnDefs2,
-            onSelectCallback: function (row) {
-                console.log("id = " + row.id + " clicked");
-            },
-            beforeColumnAdd: function () {
-                console.log("beforeColumnAdd callback called!");
-            },
-            afterColumnRemove: function (a, b) {
-                console.log("Hello There ... you tried to remove " + b.text);
-            }
-        }
-        React.render(React.createElement(ReactTable, options2), document.getElementById("table2"));
     })
 })

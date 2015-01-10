@@ -56,9 +56,13 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment,row,columnDef);
+    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment, row, columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
+
+    // show zero as blank
+    if (formatConfig.showZeroAsBlank)
+        results.value = ""
 
     return results;
 }
