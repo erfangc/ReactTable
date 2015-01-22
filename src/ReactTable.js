@@ -204,18 +204,18 @@ var PageNavigator = React.createClass({
         var items = this.props.items.map(function (item) {
             return (
                 <li key={item} className={self.props.activeItem == item ? 'active' : ''}>
-                    <a href="#" onClick={self.handleClick.bind(null, item)}>{item}</a>
+                    <a onClick={self.handleClick.bind(null, item)}>{item}</a>
                 </li>
             )
         });
         return (
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
-                    <a className={prevClass} href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                    <a className={prevClass} onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
-                    <a className={nextClass} href="#" onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                    <a className={nextClass} onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
