@@ -68,9 +68,17 @@ var ReactTable = React.createClass({
     },
     /* --- Called from outside the component --- */
     addColumn: function(columnDef, data) {
-        if (_columnExists(this.state.columnDefs,columnDef))
-            return;
-        this.state.columnDefs.push(columnDef);
+        // Update if exists
+        var updated = false;
+        for (var i = 0; i < this.state.columnDefs.length; i++) {
+            if (this.state.columnDefs[i].colTag == columnDef.colTag) {
+                this.state.columnDefs[i] = columnDef;
+                updated = true;
+                break;
+            }
+        }
+        if( !updated )
+            this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
             this.state.rootNode = createTree(this.props);
@@ -357,14 +365,6 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
-}
-
-function _columnExists(columnDefs, columnDef) {
-    for (var i = 0; i < columnDefs.length; i++) {
-        if (columnDefs[i].colTag == columnDef.colTag)
-            return true;
-    }
-    return false;
 }
 
 function _getPageArithmetics(table, data) {

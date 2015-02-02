@@ -130,11 +130,7 @@ function _weightedAverage(options) {
 
 function _count(options) {
     var data = options.data, columnDef = options.columnDef;
-    var count = 0, i;
-    for (i = 0; i < options.data.length; i++)
-        if (data[i][columnDef.colTag])
-            count++;
-    return count;
+    return options.data.length || 0;
 }
 
 function _countDistinct(options) {
