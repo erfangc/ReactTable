@@ -136,8 +136,10 @@ function _count(options) {
 function _countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
     var values = {}, i, prop;
-    for (i = 0; i < options.data.length; i++)
+    for (i = 0; i < options.data.length; i++){
+        if ( !data[i][columnDef.colTag] ) continue;
         values[data[i][columnDef.colTag]] = 1;
+    }
     var result = 0;
     for (prop in values)
         if (values.hasOwnProperty(prop))
