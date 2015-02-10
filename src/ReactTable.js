@@ -151,7 +151,7 @@ var ReactTable = React.createClass({
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div style={containerStyle} className="rt-scrollable">
+                <div style={containerStyle} className={this.props.disableScrolling ? "" : "rt-scrollable"}>
                     <table className="rt-table">
                         <tbody>
                         {rows}

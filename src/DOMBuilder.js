@@ -119,12 +119,13 @@ function buildHeaders(table) {
         );
     }
     // the plus sign at the end
-    headerColumns.push(
-        <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-            <a className="btn-link rt-plus-sign" onClick={table.handleAdd}>
-                <strong>{"+"}</strong>
-            </a>
-        </span>);
+    if (!table.props.disableAddColumnIcon)
+        headerColumns.push(
+            <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+                <a className="btn-link rt-plus-sign" onClick={table.handleAdd}>
+                    <strong>{"+"}</strong>
+                </a>
+            </span>);
     return (
         <div className="rt-headers-grand-container">
             <div key="header" className="rt-headers">
