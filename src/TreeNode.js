@@ -5,20 +5,21 @@
  */
 function TreeNode(sectorTitle, parent) {
     // accessible properties
-    this.sectorTitle = sectorTitle;
-    this.parent = parent;
-    this.groupByColumnDef = {};
-    this.rowData = null;
-    this.children = [];
-    this.ultimateChildren = [];
-    this.collapsed = this.parent != null ? true : false;
-    this.sortIndex = null;
+    this.sectorTitle = sectorTitle
+    this.parent = parent
+    this.groupByColumnDef = {}
+    this.rowData = null
+    this.display = true
+    this.children = []
+    this.ultimateChildren = []
+    this.collapsed = this.parent != null ? true : false
+    this.sortIndex = null
     // private members
-    this._childrenSectorNameMap = {};
+    this._childrenSectorNameMap = {}
 }
 
 TreeNode.prototype.appendUltimateChild = function (row) {
-    this.ultimateChildren.push(row);
+    this.ultimateChildren.push(row)
 }
 
 TreeNode.prototype.collapseImmediateChildren = function () {

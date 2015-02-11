@@ -101,20 +101,20 @@ function buildCustomMenuItems(table, columnDef) {
         "whiteSpace": "normal",
         "width": "250px"
     };
-    for( var menuItemTitle in table.props.customMenuItems ){
-        for( var menuItemType in table.props.customMenuItems[menuItemTitle] ){
-            if( menuItemType == "infoBox" ){
-                if( columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]] ) {
-                    var direction = table.state.columnDefs.indexOf(columnDef)*10/table.state.columnDefs.length > 5 ?
-                            "right" : "left";
+    for (var menuItemTitle in table.props.customMenuItems) {
+        for (var menuItemType in table.props.customMenuItems[menuItemTitle]) {
+            if (menuItemType == "infoBox") {
+                if (columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]) {
+                    var direction = table.state.columnDefs.indexOf(columnDef) * 10 / table.state.columnDefs.length > 5 ?
+                        "right" : "left";
                     var styles = {};
-                    for(var k in popupStyle) styles[k]=popupStyle[k];
+                    for (var k in popupStyle) styles[k] = popupStyle[k];
                     styles[direction] = "100%";
                     menuItems.push(
-                        React.DOM.div({style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                            React.DOM.div(null, menuItemTitle), 
-                            React.DOM.div({className: "menu-item-input", style: styles}, 
-                                React.DOM.div({style: {"display": "block"}}, 
+                        React.createElement("div", {style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+                            React.createElement("div", null, menuItemTitle), 
+                            React.createElement("div", {className: "menu-item-input", style: styles}, 
+                                React.createElement("div", {style: {"display": "block"}}, 
                                     columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]
                                 )
                             )
@@ -126,16 +126,7 @@ function buildCustomMenuItems(table, columnDef) {
     }
 
     return menuItems;
-
-    // onClick={table.handleInfoBoxPopup.bind(columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]])}>
-
-    //var menuItems = [];
-    //if (columnDef.customMenuItems) {
-    //    menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table, columnDef));
-    //}
-    //return menuItems;
 }
-
 
 
 function buildMenu(options) {
@@ -149,44 +140,65 @@ function buildMenu(options) {
     else
         menuStyle.left = "0%";
 
-    var summarizeMenuItem = SummarizeControl({table: table, columnDef: columnDef});
-
     // construct user custom menu items
-    var customMenuItems = buildCustomMenuItems(table, columnDef);
-
-    var menuItems = [
-        React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
-        React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc"),
-        summarizeMenuItem,
-        React.DOM.div({className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
-    ];
+    var menuItems = []
+    var availableDefaultMenuItems = {
+        sort: [
+            React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
+            React.createElement("div", {className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc")
+        ],
+        summarize: [
+            React.createElement(SummarizeControl, {table: table, columnDef: columnDef}),
+            React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
+        ],
+        remove: [
+            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
+        ]
+    };
+    if (table.props.defaultMenuItems) {
+        for (var i = 0; i < table.props.defaultMenuItems.length; i++) {
+            var itemName = table.props.defaultMenuItems[i]
+            _addMenuItems(menuItems, availableDefaultMenuItems[itemName])
+        }
+    } else {
+        _addMenuItems(menuItems, availableDefaultMenuItems.sort)
+        _addMenuItems(menuItems, availableDefaultMenuItems.summarize)
+        if (!isFirstColumn)
+            _addMenuItems(menuItems, availableDefaultMenuItems.remove)
+    }
 
     if (isFirstColumn) {
-        menuItems.push(React.DOM.div({className: "separator"}));
-        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
-        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
-    } else
-        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column"));
+        menuItems.push(React.createElement("div", {className: "separator"}));
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"))
+        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"))
+    }
+
+    var customMenuItems = buildCustomMenuItems(table, columnDef);
     menuItems.push(customMenuItems);
     return (
-        React.DOM.div({style: menuStyle, className: "rt-header-menu"}, 
+        React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
             menuItems
         )
     );
 }
 
+function _addMenuItems(master, children) {
+    for (var j = 0; j < children.length; j++)
+        master.push(children[j])
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        React.DOM.div({className: "rt-headers-container"}, 
-            React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
+        React.createElement("div", {className: "rt-headers-container"}, 
+            React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
+                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
-            React.DOM.div({className: "rt-caret-container"}, 
+            React.createElement("div", {className: "rt-caret-container"}, 
                 table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
+                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
                 table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
+                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
@@ -196,30 +208,31 @@ function buildHeaders(table) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
         headerColumns.push(
-            React.DOM.div({className: "rt-headers-container"}, 
-                React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: "btn-link rt-header-anchor-text"}, columnDef.text)
+            React.createElement("div", {className: "rt-headers-container"}, 
+                React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
+                    React.createElement("a", {className: "btn-link rt-header-anchor-text"}, columnDef.text)
                 ), 
-                React.DOM.div({className: "rt-caret-container"}, 
+                React.createElement("div", {className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
+                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
                     table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                            columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
+                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
                 ), 
                 buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
         );
     }
     // the plus sign at the end
-    headerColumns.push(
-        React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-            React.DOM.a({className: "btn-link rt-plus-sign", onClick: table.handleAdd}, 
-                React.DOM.strong(null, "+")
-            )
-        ));
+    if (!table.props.disableAddColumnIcon)
+        headerColumns.push(
+            React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+                React.createElement("a", {className: "btn-link rt-plus-sign", onClick: table.handleAdd}, 
+                    React.createElement("strong", null, "+")
+                )
+            ));
     return (
-        React.DOM.div({className: "rt-headers-grand-container"}, 
-            React.DOM.div({key: "header", className: "rt-headers"}, 
+        React.createElement("div", {className: "rt-headers-grand-container"}, 
+            React.createElement("div", {key: "header", className: "rt-headers"}, 
                 headerColumns
             )
         )
@@ -232,7 +245,7 @@ function buildFirstCellForRow(props) {
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: firstColTag}, data[firstColTag]);
+        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -243,13 +256,13 @@ function buildFirstCellForRow(props) {
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
     if (data.isDetail)
-        result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+        result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
     else {
         result =
             (
-                React.DOM.td({style: firstCellStyle, key: firstColTag}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link"}, 
+                        React.createElement("strong", null, data[firstColTag])
                     ), 
                     userDefinedElement
                 )
@@ -259,8 +272,8 @@ function buildFirstCellForRow(props) {
 }
 
 function buildFooter(table, paginationAttr) {
-    return table.props.columnDefs.length > 0 ?
-        (PageNavigator({
+    return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
+        (React.createElement(PageNavigator, {
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
@@ -405,7 +418,7 @@ function _countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
     var values = {}, i, prop;
     for (i = 0; i < options.data.length; i++){
-        if ( !data[i][columnDef.colTag] || !data[i][columnDef.colTag].toString().trim() ) continue;
+        if ( !data[i][columnDef.colTag] ) continue;
         values[data[i][columnDef.colTag]] = 1;
     }
     var result = 0;
@@ -429,7 +442,7 @@ function _countAndDistinct(options) {
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: 'ReactTable',
+var ReactTable = React.createClass({displayName: "ReactTable",
 
     getInitialState: ReactTableGetInitialState,
 
@@ -482,13 +495,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
         return state;
     },
-    clearAllRowSelections: function(){
+    clearAllRowSelections: function () {
         this.setState({
             selectedDetailRows: {}
         });
     },
     /* --- Called from outside the component --- */
-    addColumn: function(columnDef, data) {
+    addColumn: function (columnDef, data) {
         // Update if exists
         var updated = false;
         for (var i = 0; i < this.state.columnDefs.length; i++) {
@@ -498,7 +511,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
                 break;
             }
         }
-        if( !updated )
+        if (!updated)
             this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -552,14 +565,14 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 key: generateRowKey(row, rowKey), 
                 data: row, 
                 isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
                 toggleHide: this.handleToggleHide, 
                 columnDefs: this.state.columnDefs}
-                ));
+            ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -570,11 +583,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             containerStyle.height = this.state.height;
 
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
+                React.createElement("div", {style: containerStyle, className: this.props.disableScrolling ? "" : "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
                         rows
                         )
                     )
@@ -585,7 +598,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     }
 });
 
-var Row = React.createClass({displayName: 'Row',
+var Row = React.createClass({displayName: "Row",
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
@@ -594,7 +607,7 @@ var Row = React.createClass({displayName: 'Row',
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
@@ -610,11 +623,11 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 
-var PageNavigator = React.createClass({displayName: 'PageNavigator',
+var PageNavigator = React.createClass({displayName: "PageNavigator",
     handleClick: function (index, event) {
         event.preventDefault();
         if (index <= this.props.numPages && index >= 1)
@@ -632,26 +645,26 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
     }
 });
 
-var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
+var SummarizeControl = React.createClass({displayName: "SummarizeControl",
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -674,17 +687,17 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.DOM.div({
+            React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.DOM.div(null, "Summarize"), 
+                React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -734,7 +747,7 @@ function adjustHeaders(secondTime) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if( !secondTime )
+            if (!secondTime)
                 adjustedWideHeaders = true;
         }
         //else {
@@ -746,7 +759,7 @@ function adjustHeaders(secondTime) {
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function(){
+    setTimeout(function () {
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
@@ -790,21 +803,26 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
 
 function _getPageArithmetics(table, data) {
     var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
+    if (table.props.disablePagination) {
+        result.lowerVisualBound = 0, result.upperVisualBound = data.length
+    } else {
+        result.pageSize = table.props.pageSize || 50;
+        result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
+        result.pageStart = 1;
+        result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+        result.allPages = [];
+        for (var i = result.pageStart; i <= result.pageEnd; i++) {
+            result.allPages.push(i);
+        }
+        // derive the correct page navigator selectable pages from current / total pages
+        result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+        result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+        result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
     }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
     return result;
 
@@ -1002,6 +1020,8 @@ function createTree(tableProps) {
  */
 function buildTreeSkeleton(tableProps) {
     var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
+    if (tableProps.disableGrandTotal)
+        rootNode.display = false
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
         _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
@@ -1052,20 +1072,21 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
  */
 function TreeNode(sectorTitle, parent) {
     // accessible properties
-    this.sectorTitle = sectorTitle;
-    this.parent = parent;
-    this.groupByColumnDef = {};
-    this.rowData = null;
-    this.children = [];
-    this.ultimateChildren = [];
-    this.collapsed = this.parent != null ? true : false;
-    this.sortIndex = null;
+    this.sectorTitle = sectorTitle
+    this.parent = parent
+    this.groupByColumnDef = {}
+    this.rowData = null
+    this.display = true
+    this.children = []
+    this.ultimateChildren = []
+    this.collapsed = this.parent != null ? true : false
+    this.sortIndex = null
     // private members
-    this._childrenSectorNameMap = {};
+    this._childrenSectorNameMap = {}
 }
 
 TreeNode.prototype.appendUltimateChild = function (row) {
-    this.ultimateChildren.push(row);
+    this.ultimateChildren.push(row)
 }
 
 TreeNode.prototype.collapseImmediateChildren = function () {

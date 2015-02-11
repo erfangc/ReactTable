@@ -46,6 +46,8 @@ $(function () {
         // first table
         var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
         var options = {
+            disableAddColumnIcon: true,
+            defaultMenuItems: ['sort'],
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,

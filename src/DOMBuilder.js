@@ -9,14 +9,14 @@ function buildCustomMenuItems(table, columnDef) {
         "whiteSpace": "normal",
         "width": "250px"
     };
-    for( var menuItemTitle in table.props.customMenuItems ){
-        for( var menuItemType in table.props.customMenuItems[menuItemTitle] ){
-            if( menuItemType == "infoBox" ){
-                if( columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]] ) {
-                    var direction = table.state.columnDefs.indexOf(columnDef)*10/table.state.columnDefs.length > 5 ?
-                            "right" : "left";
+    for (var menuItemTitle in table.props.customMenuItems) {
+        for (var menuItemType in table.props.customMenuItems[menuItemTitle]) {
+            if (menuItemType == "infoBox") {
+                if (columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]) {
+                    var direction = table.state.columnDefs.indexOf(columnDef) * 10 / table.state.columnDefs.length > 5 ?
+                        "right" : "left";
                     var styles = {};
-                    for(var k in popupStyle) styles[k]=popupStyle[k];
+                    for (var k in popupStyle) styles[k] = popupStyle[k];
                     styles[direction] = "100%";
                     menuItems.push(
                         <div style={{"position": "relative"}} className="menu-item menu-item-hoverable">
@@ -34,16 +34,7 @@ function buildCustomMenuItems(table, columnDef) {
     }
 
     return menuItems;
-
-    // onClick={table.handleInfoBoxPopup.bind(columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]])}>
-
-    //var menuItems = [];
-    //if (columnDef.customMenuItems) {
-    //    menuItems.push(<div className="separator"/>, columnDef.customMenuItems(table, columnDef));
-    //}
-    //return menuItems;
 }
-
 
 
 function buildMenu(options) {
@@ -57,30 +48,51 @@ function buildMenu(options) {
     else
         menuStyle.left = "0%";
 
-    var summarizeMenuItem = <SummarizeControl table={table} columnDef={columnDef}/>;
-
     // construct user custom menu items
-    var customMenuItems = buildCustomMenuItems(table, columnDef);
-
-    var menuItems = [
-        <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
-        <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
-        summarizeMenuItem,
-        <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
-    ];
+    var menuItems = []
+    var availableDefaultMenuItems = {
+        sort: [
+            <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
+            <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>
+        ],
+        summarize: [
+            <SummarizeControl table={table} columnDef={columnDef}/>,
+            <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
+        ],
+        remove: [
+            <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>
+        ]
+    };
+    if (table.props.defaultMenuItems) {
+        for (var i = 0; i < table.props.defaultMenuItems.length; i++) {
+            var itemName = table.props.defaultMenuItems[i]
+            _addMenuItems(menuItems, availableDefaultMenuItems[itemName])
+        }
+    } else {
+        _addMenuItems(menuItems, availableDefaultMenuItems.sort)
+        _addMenuItems(menuItems, availableDefaultMenuItems.summarize)
+        if (!isFirstColumn)
+            _addMenuItems(menuItems, availableDefaultMenuItems.remove)
+    }
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
-        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
-    } else
-        menuItems.push(<div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>)
+        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>)
+    }
+
+    var customMenuItems = buildCustomMenuItems(table, columnDef);
     menuItems.push(customMenuItems);
     return (
         <div style={menuStyle} className="rt-header-menu">
             {menuItems}
         </div>
     );
+}
+
+function _addMenuItems(master, children) {
+    for (var j = 0; j < children.length; j++)
+        master.push(children[j])
 }
 
 function buildHeaders(table) {
@@ -92,9 +104,9 @@ function buildHeaders(table) {
             </div>
             <div className="rt-caret-container">
                 {table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
                 {table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
+                columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
             </div>
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
@@ -110,9 +122,9 @@ function buildHeaders(table) {
                 </div>
                 <div className="rt-caret-container">
                     {table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                            columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
+                    columnDef === table.state.columnDefSorted ? <div className="rt-upward-caret"></div> : null}
                     {table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                            columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
+                    columnDef === table.state.columnDefSorted ? <div className="rt-downward-caret"></div> : null}
                 </div>
                 {buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
             </div>
@@ -168,7 +180,7 @@ function buildFirstCellForRow(props) {
 }
 
 function buildFooter(table, paginationAttr) {
-    return table.props.columnDefs.length > 0 ?
+    return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
         (<PageNavigator
             items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
             activeItem={table.state.currentPage}

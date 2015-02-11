@@ -137,7 +137,7 @@ function _countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
     var values = {}, i, prop;
     for (i = 0; i < options.data.length; i++){
-        if ( !data[i][columnDef.colTag] || !data[i][columnDef.colTag].toString().trim() ) continue;
+        if ( !data[i][columnDef.colTag] ) continue;
         values[data[i][columnDef.colTag]] = 1;
     }
     var result = 0;

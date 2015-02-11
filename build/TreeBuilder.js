@@ -22,6 +22,8 @@ function createTree(tableProps) {
  */
 function buildTreeSkeleton(tableProps) {
     var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
+    if (tableProps.disableGrandTotal)
+        rootNode.display = false
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
         _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);

@@ -8,7 +8,7 @@
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: 'ReactTable',
+var ReactTable = React.createClass({displayName: "ReactTable",
 
     getInitialState: ReactTableGetInitialState,
 
@@ -61,13 +61,13 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
         return state;
     },
-    clearAllRowSelections: function(){
+    clearAllRowSelections: function () {
         this.setState({
             selectedDetailRows: {}
         });
     },
     /* --- Called from outside the component --- */
-    addColumn: function(columnDef, data) {
+    addColumn: function (columnDef, data) {
         // Update if exists
         var updated = false;
         for (var i = 0; i < this.state.columnDefs.length; i++) {
@@ -77,7 +77,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
                 break;
             }
         }
-        if( !updated )
+        if (!updated)
             this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -131,14 +131,14 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (Row({
+            return (React.createElement(Row, {
                 key: generateRowKey(row, rowKey), 
                 data: row, 
                 isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
                 toggleHide: this.handleToggleHide, 
                 columnDefs: this.state.columnDefs}
-                ));
+            ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -149,11 +149,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             containerStyle.height = this.state.height;
 
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
+                React.createElement("div", {style: containerStyle, className: this.props.disableScrolling ? "" : "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
                         rows
                         )
                     )
@@ -164,7 +164,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     }
 });
 
-var Row = React.createClass({displayName: 'Row',
+var Row = React.createClass({displayName: "Row",
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
@@ -173,7 +173,7 @@ var Row = React.createClass({displayName: 'Row',
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
@@ -189,11 +189,11 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 
-var PageNavigator = React.createClass({displayName: 'PageNavigator',
+var PageNavigator = React.createClass({displayName: "PageNavigator",
     handleClick: function (index, event) {
         event.preventDefault();
         if (index <= this.props.numPages && index >= 1)
@@ -211,26 +211,26 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
     }
 });
 
-var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
+var SummarizeControl = React.createClass({displayName: "SummarizeControl",
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -253,17 +253,17 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.DOM.div({
+            React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.DOM.div(null, "Summarize"), 
+                React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -313,7 +313,7 @@ function adjustHeaders(secondTime) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if( !secondTime )
+            if (!secondTime)
                 adjustedWideHeaders = true;
         }
         //else {
@@ -325,7 +325,7 @@ function adjustHeaders(secondTime) {
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function(){
+    setTimeout(function () {
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
@@ -369,21 +369,26 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
 
 function _getPageArithmetics(table, data) {
     var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
+    if (table.props.disablePagination) {
+        result.lowerVisualBound = 0, result.upperVisualBound = data.length
+    } else {
+        result.pageSize = table.props.pageSize || 50;
+        result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
+        result.pageStart = 1;
+        result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+        result.allPages = [];
+        for (var i = result.pageStart; i <= result.pageEnd; i++) {
+            result.allPages.push(i);
+        }
+        // derive the correct page navigator selectable pages from current / total pages
+        result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+        result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+        result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
     }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
     return result;
 

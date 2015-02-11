@@ -61,13 +61,13 @@ var ReactTable = React.createClass({
         });
         return state;
     },
-    clearAllRowSelections: function(){
+    clearAllRowSelections: function () {
         this.setState({
             selectedDetailRows: {}
         });
     },
     /* --- Called from outside the component --- */
-    addColumn: function(columnDef, data) {
+    addColumn: function (columnDef, data) {
         // Update if exists
         var updated = false;
         for (var i = 0; i < this.state.columnDefs.length; i++) {
@@ -77,7 +77,7 @@ var ReactTable = React.createClass({
                 break;
             }
         }
-        if( !updated )
+        if (!updated)
             this.state.columnDefs.push(columnDef);
         if (data) {
             this.props.data = data;
@@ -138,7 +138,7 @@ var ReactTable = React.createClass({
                 onSelect={this.handleSelect}
                 toggleHide={this.handleToggleHide}
                 columnDefs={this.state.columnDefs}
-                />);
+            />);
         }, this);
 
         var headers = buildHeaders(this);
@@ -313,7 +313,7 @@ function adjustHeaders(secondTime) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if( !secondTime )
+            if (!secondTime)
                 adjustedWideHeaders = true;
         }
         //else {
@@ -325,7 +325,7 @@ function adjustHeaders(secondTime) {
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function(){
+    setTimeout(function () {
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
@@ -369,21 +369,26 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
 
 function _getPageArithmetics(table, data) {
     var result = {};
-    result.pageSize = table.props.pageSize || 50;
-    result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.pageStart = 1;
-    result.pageEnd = Math.ceil(data.length / result.pageSize);
+    if (table.props.disablePagination) {
+        result.lowerVisualBound = 0, result.upperVisualBound = data.length
+    } else {
+        result.pageSize = table.props.pageSize || 50;
+        result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
-    result.allPages = [];
-    for (var i = result.pageStart; i <= result.pageEnd; i++) {
-        result.allPages.push(i);
+        result.pageStart = 1;
+        result.pageEnd = Math.ceil(data.length / result.pageSize);
+
+        result.allPages = [];
+        for (var i = result.pageStart; i <= result.pageEnd; i++) {
+            result.allPages.push(i);
+        }
+        // derive the correct page navigator selectable pages from current / total pages
+        result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+
+        result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
+        result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
     }
-    // derive the correct page navigator selectable pages from current / total pages
-    result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
-
-    result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
-    result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
     return result;
 
