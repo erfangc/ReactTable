@@ -61,8 +61,8 @@ function buildCellLookAndFeel(columnDef, row) {
     results.value = value;
 
     // show zero as blank
-    if (formatConfig.showZeroAsBlank)
-        results.value = ""
+    if (formatConfig.showZeroAsBlank && results.value == 0)
+        results.value = "";
 
     return results;
 }
