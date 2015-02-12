@@ -8,7 +8,7 @@
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: "ReactTable",
+var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
 
@@ -131,7 +131,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
-            return (React.createElement(Row, {
+            return (Row({
                 key: generateRowKey(row, rowKey), 
                 data: row, 
                 isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
@@ -148,12 +148,15 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
 
+        if (this.props.disableScrolling)
+            containerStyle.overflowY = "hidden";
+
         return (
-            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.createElement("div", {style: containerStyle, className: this.props.disableScrolling ? "" : "rt-scrollable"}, 
-                    React.createElement("table", {className: "rt-table"}, 
-                        React.createElement("tbody", null, 
+                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
+                    React.DOM.table({className: "rt-table"}, 
+                        React.DOM.tbody(null, 
                         rows
                         )
                     )
@@ -164,7 +167,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     }
 });
 
-var Row = React.createClass({displayName: "Row",
+var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
@@ -173,7 +176,7 @@ var Row = React.createClass({displayName: "Row",
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
             cells.push(
-                React.createElement("td", {
+                React.DOM.td({
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
@@ -189,11 +192,11 @@ var Row = React.createClass({displayName: "Row",
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
     }
 });
 
-var PageNavigator = React.createClass({displayName: "PageNavigator",
+var PageNavigator = React.createClass({displayName: 'PageNavigator',
     handleClick: function (index, event) {
         event.preventDefault();
         if (index <= this.props.numPages && index >= 1)
@@ -211,26 +214,26 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
 
         var items = this.props.items.map(function (item) {
             return (
-                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
+                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
-                React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
     }
 });
 
-var SummarizeControl = React.createClass({displayName: "SummarizeControl",
+var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -253,17 +256,17 @@ var SummarizeControl = React.createClass({displayName: "SummarizeControl",
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
+                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.createElement("div", {
+            React.DOM.div({
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.createElement("div", null, "Summarize"), 
+                React.DOM.div(null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -295,9 +298,10 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function adjustHeaders(secondTime) {
+function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
-    var adjustedWideHeaders = false;
+    if( !(adjustCount >= 0) )
+        adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
@@ -313,8 +317,6 @@ function adjustHeaders(secondTime) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if (!secondTime)
-                adjustedWideHeaders = true;
         }
         //else {
         currentHeader.width(width);
@@ -325,14 +327,13 @@ function adjustHeaders(secondTime) {
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function () {
+    setTimeout(function(){
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
 
-    if (adjustedWideHeaders) {
-        adjustHeaders.call(this, true);
-    }
+    if (adjustCount <= 5)
+        adjustHeaders.call(this, ++adjustCount);
 }
 
 function bindHeadersToMenu(node) {

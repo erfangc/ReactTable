@@ -148,10 +148,13 @@ var ReactTable = React.createClass({
         if (this.state.height && parseInt(this.state.height) > 0)
             containerStyle.height = this.state.height;
 
+        if (this.props.disableScrolling)
+            containerStyle.overflowY = "hidden";
+
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div style={containerStyle} className={this.props.disableScrolling ? "" : "rt-scrollable"}>
+                <div style={containerStyle} className="rt-scrollable">
                     <table className="rt-table">
                         <tbody>
                         {rows}
@@ -295,9 +298,10 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function adjustHeaders(secondTime) {
+function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
-    var adjustedWideHeaders = false;
+    if( !(adjustCount >= 0) )
+        adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
@@ -313,8 +317,6 @@ function adjustHeaders(secondTime) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("min-width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if (!secondTime)
-                adjustedWideHeaders = true;
         }
         //else {
         currentHeader.width(width);
@@ -325,14 +327,13 @@ function adjustHeaders(secondTime) {
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function () {
+    setTimeout(function(){
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
 
-    if (adjustedWideHeaders) {
-        adjustHeaders.call(this, true);
-    }
+    if (adjustCount <= 5)
+        adjustHeaders.call(this, ++adjustCount);
 }
 
 function bindHeadersToMenu(node) {

@@ -47,6 +47,9 @@ $(function () {
         var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
         var options = {
             disableAddColumnIcon: true,
+            disableGrandTotal: true,
+            disableScrolling: true,
+            disablePagination: true,
             defaultMenuItems: ['sort'],
             groupBy: groupBy,
             rowKey: 'id',
