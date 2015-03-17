@@ -169,9 +169,11 @@ function buildFirstCellForRow(props) {
         result =
             (
                 React.DOM.td({style: firstCellStyle, key: firstColTag}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
+                        data.treeNode.collapsed ? '+' : '—'
                     ), 
+                    "  ", 
+                    React.DOM.strong(null, data[firstColTag]), 
                     userDefinedElement
                 )
             );

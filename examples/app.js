@@ -44,13 +44,13 @@ $(function () {
     $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
-        var groupBy = [{colTag: "nationality"}, {colTag: "fruit_preference"}];
+        var groupBy = [{colTag: "nationality", text: "Nationality"}, {colTag: "fruit_preference", text: "Fruit Preference"}];
         var options = {
             disableAddColumnIcon: true,
             disableGrandTotal: true,
             disableScrolling: true,
             disablePagination: true,
-            defaultMenuItems: ['sort'],
+            //defaultMenuItems: ['sort'],
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
@@ -71,8 +71,9 @@ $(function () {
             onSelectCallback: function (row, state) {
                 console.log("id = " + row.id + " clicked state:" + state);
             },
-            onsummarySelectCallback: function (result, state) {
-                console.log(result.summaryRow);
+            onSummarySelectCallback: function (result, state) {
+                console.log(result);
+                console.log(state);
                 console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
