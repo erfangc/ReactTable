@@ -115,7 +115,12 @@ function _average(options) {
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
-    return options.data.length == 0 ? 0 : sum / options.data.length;
+    var count = 0;
+    for( var i=0; i<options.data.length; i++ ){
+        if( options.data[i][options.columnDef.colTag] || options.data[i][options.columnDef.colTag] === 0 )
+            count++;
+    }
+    return options.data.length == 0 ? 0 : sum / count;
 }
 
 function _weightedAverage(options) {

@@ -61,8 +61,8 @@ function buildCellLookAndFeel(columnDef, row) {
     results.value = value;
 
     // show zero as blank
-    if (formatConfig.showZeroAsBlank)
-        results.value = ""
+    if (formatConfig.showZeroAsBlank && results.value == 0)
+        results.value = "";
 
     return results;
 }
@@ -261,9 +261,11 @@ function buildFirstCellForRow(props) {
         result =
             (
                 React.DOM.td({style: firstCellStyle, key: firstColTag}, 
-                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link"}, 
-                        React.DOM.strong(null, data[firstColTag])
+                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
+                        data.treeNode.collapsed ? '+' : '—'
                     ), 
+                    "  ", 
+                    React.DOM.strong(null, data[firstColTag]), 
                     userDefinedElement
                 )
             );
@@ -396,7 +398,12 @@ function _average(options) {
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
-    return options.data.length == 0 ? 0 : sum / options.data.length;
+    var count = 0;
+    for( var i=0; i<options.data.length; i++ ){
+        if( options.data[i][options.columnDef.colTag] || options.data[i][options.columnDef.colTag] === 0 )
+            count++;
+    }
+    return options.data.length == 0 ? 0 : sum / count;
 }
 
 function _weightedAverage(options) {
