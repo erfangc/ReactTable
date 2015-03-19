@@ -38,7 +38,7 @@ $(function () {
             format: "number",
             formatInstructions: "multiplier:1000 separator:true",
             text: "Weight Factor",
-            aggregationMethod: "sum"
+            aggregationMethod: "most_data_points"
         }
     ];
     $.get('sample_data.json').success(function (data) {
@@ -47,7 +47,7 @@ $(function () {
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {colTag: "fruit_preference", text: "Fruit Preference"}];
         var options = {
             disableAddColumnIcon: true,
-            disableGrandTotal: true,
+            //disableGrandTotal: true,
             disableScrolling: true,
             disablePagination: true,
             //defaultMenuItems: ['sort'],

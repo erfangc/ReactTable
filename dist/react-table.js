@@ -376,6 +376,9 @@ function _aggregateColumn(bucketResult, columnDef, groupBy) {
         case "count_and_distinct":
             result = _countAndDistinct({data: bucketResult, columnDef: columnDef});
             break;
+        case "most_data_points":
+            result = _mostDataPoints({data: bucketResult, columnDef: columnDef});
+            break;
         default :
             result = "";
     }
@@ -403,7 +406,7 @@ function _simpleAverage(options) {
         if( options.data[i][options.columnDef.colTag] || options.data[i][options.columnDef.colTag] === 0 )
             count++;
     }
-    return options.data.length == 0 ? 0 : sum / count;
+    return count == 0 ? "" : sum / count;
 }
 
 function _weightedAverage(options) {
@@ -436,9 +439,22 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinct(options) {
+    console.log(options);
     var count = _count(options);
     var distinctCount = _countDistinct(options);
     return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
+}
+
+function _mostDataPoints(options) {
+    var best = {count: 0, index: -1};
+    for( var i=0; i<options.data.length; i++ ){
+        var sizeOfObj = Object.keys(options.data[i]).length;
+        if( sizeOfObj > best.count ){
+            best.count = sizeOfObj;
+            best.index = i;
+        }
+    }
+    return best.index == -1 ? "" : options.data[best.index][options.columnDef.colTag];
 };/** @jsx React.DOM */
 
 /**
@@ -756,7 +772,7 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-            currentHeader.css("min-width", headerTextWidthWithPadding + "px");
+            currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
         }
         //else {

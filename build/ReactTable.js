@@ -315,7 +315,7 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-            currentHeader.css("min-width", headerTextWidthWithPadding + "px");
+            currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
         }
         //else {
