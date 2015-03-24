@@ -130,14 +130,21 @@ function buildHeaders(table) {
             </div>
         );
     }
+
+    var corner;
+    var classString = "btn-link rt-plus-sign";
+    if( !table.props.disableAddColumnIcon && table.props.cornerIcon ){
+        corner = <img src={table.props.cornerIcon}/>;
+        classString = "btn-link rt-corner-image";
+    }
+
     // the plus sign at the end
-    if (!table.props.disableAddColumnIcon)
-        headerColumns.push(
-            <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-                <a className="btn-link rt-plus-sign" onClick={table.handleAdd}>
-                    <strong>{"+"}</strong>
-                </a>
-            </span>);
+    headerColumns.push(
+        <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+            <a className={classString} onClick={table.props.disableAddColumn ? null : table.handleAdd}>
+                <strong>{corner ? corner : (table.props.disableAddColumn ? '' : '+')}</strong>
+            </a>
+        </span>);
     return (
         <div className="rt-headers-grand-container">
             <div key="header" className="rt-headers">

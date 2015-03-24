@@ -156,7 +156,6 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinct(options) {
-    console.log(options);
     var count = _count(options);
     var distinctCount = _countDistinct(options);
     return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
@@ -166,7 +165,8 @@ function _mostDataPoints(options) {
     var best = {count: 0, index: -1};
     for( var i=0; i<options.data.length; i++ ){
         var sizeOfObj = Object.keys(options.data[i]).length;
-        if( sizeOfObj > best.count ){
+        if( sizeOfObj > best.count || (sizeOfObj === best.count &&
+                            options.data[i].aggregationTiebreaker > options.data[best.index].aggregationTiebreaker) ){
             best.count = sizeOfObj;
             best.index = i;
         }

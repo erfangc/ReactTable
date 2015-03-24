@@ -46,10 +46,11 @@ $(function () {
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {colTag: "fruit_preference", text: "Fruit Preference"}];
         var options = {
-            disableAddColumnIcon: true,
+            //disableAddColumn: true,
             //disableGrandTotal: true,
-            disableScrolling: true,
+            //disableScrolling: true,
             disablePagination: true,
+            cornerIcon: '../src/filter_icon.png',
             //defaultMenuItems: ['sort'],
             groupBy: groupBy,
             rowKey: 'id',

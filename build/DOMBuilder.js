@@ -130,14 +130,21 @@ function buildHeaders(table) {
             )
         );
     }
+
+    var corner;
+    var classString = "btn-link rt-plus-sign";
+    if( !table.props.disableAddColumnIcon && table.props.cornerIcon ){
+        corner = React.DOM.img({src: table.props.cornerIcon});
+        classString = "btn-link rt-corner-image";
+    }
+
     // the plus sign at the end
-    if (!table.props.disableAddColumnIcon)
-        headerColumns.push(
-            React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-                React.DOM.a({className: "btn-link rt-plus-sign", onClick: table.handleAdd}, 
-                    React.DOM.strong(null, "+")
-                )
-            ));
+    headerColumns.push(
+        React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.DOM.a({className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
+                React.DOM.strong(null, corner ? corner : (table.props.disableAddColumn ? '' : '+'))
+            )
+        ));
     return (
         React.DOM.div({className: "rt-headers-grand-container"}, 
             React.DOM.div({key: "header", className: "rt-headers"}, 

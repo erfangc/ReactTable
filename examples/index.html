@@ -27,8 +27,16 @@
             text-align: center;
             border: 1px solid #4a5564;
             border-radius: 5px;
-            margin-bottom: 1px
-        ;
+            margin-bottom: 1px;
+        }
+        .special-menu{
+            position: absolute;
+            display: none;
+            border: 1px solid black;
+            height: 100px;
+            width: 50px;
+            right: 0;
+            top: 20px;
         }
     </style>
 </head>
@@ -36,22 +44,25 @@
 <div class="demo-label">
     Table with 10K Rows and 2 Level Grouping
 </div>
-<div class="container" id="table"></div>
+<div class="large-container">
+    <div class="special-menu"></div>
+    <div class="container" id="table"></div>
+</div>
 <br/>
 
 <!--<link rel="stylesheet" href="../src/scss/ReactTable.css"/>-->
 <link rel="stylesheet" href="../dist/react-table.css"/>
 
-<script src="../dist/react-table.js"></script>
-<!--<script src="../build/DOMBuilder.js"></script>-->
-<!--<script src="../build/ReactTableEventHandlers.js"></script>-->
-<!--<script src="../build/ReactTable.js"></script>-->
-<!--<script src="../build/DataAggregation.js"></script>-->
-<!--<script src="../build/SortUtils.js"></script>-->
-<!--<script src="../build/CellStyleBuilder.js"></script>-->
-<!--<script src="../build/TreeBuilder.js"></script>-->
-<!--<script src="../build/TreeNode.js"></script>-->
-<!--<script src="../build/TreeRasterizer.js"></script>-->
+<!--<script src="../dist/react-table.js"></script>-->
+<script src="../build/DOMBuilder.js"></script>
+<script src="../build/ReactTableEventHandlers.js"></script>
+<script src="../build/ReactTable.js"></script>
+<script src="../build/DataAggregation.js"></script>
+<script src="../build/SortUtils.js"></script>
+<script src="../build/CellStyleBuilder.js"></script>
+<script src="../build/TreeBuilder.js"></script>
+<script src="../build/TreeNode.js"></script>
+<script src="../build/TreeRasterizer.js"></script>
 
 <script src="app.js"></script>
 

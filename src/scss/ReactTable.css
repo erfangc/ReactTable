@@ -123,9 +123,12 @@
     overflow-y: scroll;
     max-height: 750px; }
 
+.rt-corner-image {
+  padding-left: 2px; }
+
 .rt-plus-sign {
-  padding-left: 5px;
-  padding-right: 5px; }
+  padding-left: 4px;
+  padding-right: 4px; }
 
 /* Pagination */
 .rt-table-container .pagination {

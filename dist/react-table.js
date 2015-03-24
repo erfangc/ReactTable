@@ -222,14 +222,21 @@ function buildHeaders(table) {
             )
         );
     }
+
+    var corner;
+    var classString = "btn-link rt-plus-sign";
+    if( !table.props.disableAddColumnIcon && table.props.cornerIcon ){
+        corner = React.DOM.img({src: table.props.cornerIcon});
+        classString = "btn-link rt-corner-image";
+    }
+
     // the plus sign at the end
-    if (!table.props.disableAddColumnIcon)
-        headerColumns.push(
-            React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-                React.DOM.a({className: "btn-link rt-plus-sign", onClick: table.handleAdd}, 
-                    React.DOM.strong(null, "+")
-                )
-            ));
+    headerColumns.push(
+        React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.DOM.a({className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
+                React.DOM.strong(null, corner ? corner : (table.props.disableAddColumn ? '' : '+'))
+            )
+        ));
     return (
         React.DOM.div({className: "rt-headers-grand-container"}, 
             React.DOM.div({key: "header", className: "rt-headers"}, 
@@ -439,7 +446,6 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinct(options) {
-    console.log(options);
     var count = _count(options);
     var distinctCount = _countDistinct(options);
     return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
@@ -449,7 +455,8 @@ function _mostDataPoints(options) {
     var best = {count: 0, index: -1};
     for( var i=0; i<options.data.length; i++ ){
         var sizeOfObj = Object.keys(options.data[i]).length;
-        if( sizeOfObj > best.count ){
+        if( sizeOfObj > best.count || (sizeOfObj === best.count &&
+                            options.data[i].aggregationTiebreaker > options.data[best.index].aggregationTiebreaker) ){
             best.count = sizeOfObj;
             best.index = i;
         }
