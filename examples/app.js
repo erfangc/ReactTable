@@ -36,12 +36,13 @@ $(function () {
         {
             colTag: "score_weight_factor",
             format: "number",
-            formatInstructions: "multiplier:1000 separator:true",
+            formatInstructions: "multiplier:1000 separator:true showZeroAsBlank:true",
             text: "Weight Factor",
             aggregationMethod: "most_data_points"
+
         }
     ];
-    $.get('sample_data.json').success(function (data) {
+    $.get('sample_data_small.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {colTag: "fruit_preference", text: "Fruit Preference"}];

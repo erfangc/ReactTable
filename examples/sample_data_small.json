@@ -4,8 +4,8 @@
   {"id":4,"first_name":"Nicholas","last_name":"Brooks","email":"nbrooks3@weather.com","nationality":"Indonesia","test_score":24.64,"score_weight_factor":0.86,"fruit_preference":"Dragon Fruit","currency_used":"IDR","web_site":"nhs.uk"},
   {"id":5,"first_name":"Walter","last_name":"Alexander","email":"walexander4@smh.com.au","nationality":"Philippines","test_score":55.36,"score_weight_factor":0.53,"fruit_preference":"Orange","currency_used":"PHP","web_site":"java.com"},
   {"id":6,"first_name":"Carlos","last_name":"Duncan","email":"cduncan5@blogspot.com","nationality":"Indonesia","test_score":55.2,"score_weight_factor":0.06,"fruit_preference":"Dragon Fruit","currency_used":"IDR","web_site":"weibo.com"},
-  {"id":7,"first_name":"Shirley","last_name":"Hunt","email":"shunt6@jigsy.com","nationality":"Brazil","test_score":66.8,"score_weight_factor":0.61,"fruit_preference":"Apple","currency_used":"BRL","web_site":null},
-  {"id":8,"first_name":"Walter","last_name":"Diaz","email":"wdiaz7@nymag.com","nationality":"Nigeria","test_score":null,"score_weight_factor":0.65,"fruit_preference":"Orange","currency_used":"NGN","web_site":"yahoo.com"},
+  {"id":7,"first_name":"Shirley","last_name":"Hunt","email":"shunt6@jigsy.com","nationality":"Brazil","test_score":66.8,"score_weight_factor":0,"fruit_preference":"Apple","currency_used":"BRL","web_site":null},
+  {"id":8,"first_name":"Walter","last_name":"Diaz","email":"wdiaz7@nymag.com","nationality":"Nigeria","test_score":83,"score_weight_factor":0.65,"fruit_preference":"Orange","currency_used":"NGN","web_site":"yahoo.com"},
   {"id":9,"first_name":"Adam","last_name":"Garza","email":"agarza8@washington.edu","nationality":"Bosnia and Herzegovina","test_score":66.07,"score_weight_factor":0.3,"fruit_preference":"Dragon Fruit","currency_used":"BAM","web_site":"hp.com"},
   {"id":10,"first_name":"Theresa","last_name":"Payne","email":"tpayne9@japanpost.jp","nationality":"China","test_score":83.96,"score_weight_factor":0.91,"fruit_preference":"Orange","currency_used":"CNY","web_site":"msn.com"},
   {"id":11,"first_name":"Bonnie","last_name":"Mills","email":"bmillsa@yale.edu","nationality":"Morocco","test_score":84.78,"score_weight_factor":0.92,"fruit_preference":"Apple","currency_used":"MAD","web_site":"unblog.fr"},
@@ -26,5 +26,5 @@
   {"id":26,"first_name":"Diane","last_name":"Rogers","email":"drogersp@unesco.org","nationality":"Indonesia","test_score":52.75,"score_weight_factor":0.88,"fruit_preference":"Apple","currency_used":"IDR","web_site":"unblog.fr"},
   {"id":27,"first_name":"Cynthia","last_name":"Rodriguez","email":"crodriguezq@apache.org","nationality":"United States","test_score":12.85,"score_weight_factor":0.62,"fruit_preference":"Peach","currency_used":"USD","web_site":"thetimes.co.uk"},
   {"id":28,"first_name":"Heather","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"},
-  {"id":29,"first_name":"Boya","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"},
+  {"id":29,"first_name":"Boya","last_name":"Frazier","email":"hfrazierr@barnesandnoble.com","nationality":"Philippines","test_score":11.15,"score_weight_factor":0.28,"fruit_preference":"Apple","currency_used":"PHP","web_site":"guardian.co.uk"}
 ]

@@ -80,21 +80,30 @@ TreeNode.prototype.getSectorPath = function () {
 }
 
 TreeNode.prototype.sortChildren = function (options) {
-    var sortFn = options.sortFn, recursive = options.recursive, sortAsc = options.sortAsc;
+    console.log(this);
+    var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
+        recursive = options.recursive, sortAsc = options.sortAsc;
 
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        return multiplier * sortFn(aRow, bRow);
+        if( !reverseSortFn || multiplier === 1 )
+            return multiplier * sortFn(aRow, bRow);
+        else
+            return reverseSortFn(aRow, bRow);
     });
     if (!this.hasChild())
         this.ultimateChildren.sort(function (a, b) {
-            return multiplier * sortFn(a, b);
+            if( !reverseSortFn || multiplier === 1 )
+                return multiplier * sortFn(a, b);
+            else
+                return reverseSortFn(a, b);
         });
 
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({sortFn: sortFn, recursive: recursive, sortAsc: sortAsc});
+            this.children[i].sortChildren({sortFn: sortFn, reverseSortFn: options.reverseSortFn,
+                                            recursive: recursive, sortAsc: sortAsc});
     }
 }
 

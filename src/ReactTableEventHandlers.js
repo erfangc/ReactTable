@@ -30,6 +30,7 @@ function ReactTableHandleSelect(selectedRow) {
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     this.state.rootNode.sortChildren({
         sortFn: getSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
+        reverseSortFn: getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
         recursive: true,
         sortAsc: sortAsc
     });
