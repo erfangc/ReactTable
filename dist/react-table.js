@@ -1213,7 +1213,6 @@ TreeNode.prototype.getSectorPath = function () {
 }
 
 TreeNode.prototype.sortChildren = function (options) {
-    console.log(this);
     var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
         recursive = options.recursive, sortAsc = options.sortAsc;
 
