@@ -31,6 +31,11 @@ function dateDetailSort(a, b) {
     return returnValue;
 }
 
+function dateDetailReverseSort(a, b) {
+    var returnValue = new Date(b[this.colTag]) - new Date(a[this.colTag]);
+    return returnValue;
+}
+
 function getSortFunction(sortByColumnDef) {
     var format = sortByColumnDef.format || "";
     // if the user provided a custom sort function for the column, use that instead
@@ -46,10 +51,12 @@ function getSortFunction(sortByColumnDef) {
 
 function getReverseSortFunction(sortByColumnDef) {
     var format = sortByColumnDef.format || "";
+    if (sortByColumnDef.sort)
+        return sortByColumnDef.sort;
     if (!sortByColumnDef.sort) {
         switch (format) {
             case "date":
-                return dateDetailSort;
+                return dateDetailReverseSort;
             default :
                 return genericValueBasedReverseSorter;
         }

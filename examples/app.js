@@ -27,8 +27,8 @@ $(function () {
             weightBy: {colTag: "score_weight_factor"},
             cellClassCallback: function (row) {
                 var classes = {green: false, red: false};
-                classes.green = row.test_score > 50 ? true : false;
-                classes.red = row.test_score <= 50 ? true : false;
+                classes.green = row.test_score > 50;
+                classes.red = row.test_score <= 50;
                 return classes;
             }
         },
@@ -57,6 +57,7 @@ $(function () {
             rowKey: 'id',
             data: testData,
             height: "300px",
+            presort: {score_weight_factor: 'desc'},
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {

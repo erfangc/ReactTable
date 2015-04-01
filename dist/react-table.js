@@ -521,13 +521,14 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             state = true;
         }
         this.setState({
-            selectedDetailRows: selectedSummaryRows
+            selectedSummaryRows: selectedSummaryRows
         });
         return state;
     },
     clearAllRowSelections: function () {
         this.setState({
-            selectedDetailRows: {}
+            selectedDetailRows: {},
+            selectedSummaryRows: {}
         });
     },
     /* --- Called from outside the component --- */
@@ -550,12 +551,33 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
+    redoPresort: function(){
+        if (this.props.presort){
+            var colDefToSort;
+            for( var colTag in this.props.presort ){
+                for( var i=0; i<this.props.columnDefs.length; i++ ){
+                    if( this.props.columnDefs[i].colTag === colTag ){
+                        colDefToSort = this.props.columnDefs[i];
+                        if( this.props.presort[colTag] === 'asc' )
+                            this.handleSort(colDefToSort, true);
+                        else if( this.props.presort[colTag] === 'desc' )
+                            this.handleSort(colDefToSort, false);
+                        break;
+                    }
+                }
+            }
+        }
+    },
     replaceData: function (data) {
         this.props.data = data;
         var rootNode = createTree(this.props);
         this.setState({
             rootNode: rootNode,
             currentPage: 1
+        });
+        var table = this;
+        setTimeout(function(){
+            table.redoPresort();
         });
     },
     /* ----------------------------------------- */
@@ -575,6 +597,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
+        var table = this;
+        setTimeout(function(){
+            table.redoPresort();
+        });
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -1035,6 +1061,11 @@ function dateDetailSort(a, b) {
     return returnValue;
 }
 
+function dateDetailReverseSort(a, b) {
+    var returnValue = new Date(b[this.colTag]) - new Date(a[this.colTag]);
+    return returnValue;
+}
+
 function getSortFunction(sortByColumnDef) {
     var format = sortByColumnDef.format || "";
     // if the user provided a custom sort function for the column, use that instead
@@ -1050,10 +1081,12 @@ function getSortFunction(sortByColumnDef) {
 
 function getReverseSortFunction(sortByColumnDef) {
     var format = sortByColumnDef.format || "";
+    if (sortByColumnDef.sort)
+        return sortByColumnDef.sort;
     if (!sortByColumnDef.sort) {
         switch (format) {
             case "date":
-                return dateDetailSort;
+                return dateDetailReverseSort;
             default :
                 return genericValueBasedReverseSorter;
         }
