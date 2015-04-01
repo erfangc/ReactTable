@@ -67,6 +67,12 @@ var ReactTable = React.createClass({
             selectedSummaryRows: {}
         });
     },
+    getRowSelectionStates: function () {
+        return {
+            selectedDetailRows: this.state.selectedDetailRows,
+            selectedSummaryRows: this.state.selectedSummaryRows
+        };
+    },
     /* --- Called from outside the component --- */
     addColumn: function (columnDef, data) {
         // Update if exists
