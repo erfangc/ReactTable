@@ -41,7 +41,7 @@ function getSortFunction(sortByColumnDef) {
     // if the user provided a custom sort function for the column, use that instead
     if (sortByColumnDef.sort)
         return sortByColumnDef.sort;
-    switch (format) {
+    switch (format.toLowerCase()) {
         case "date":
             return dateDetailSort;
         default :
@@ -54,7 +54,7 @@ function getReverseSortFunction(sortByColumnDef) {
     if (sortByColumnDef.sort)
         return sortByColumnDef.sort;
     if (!sortByColumnDef.sort) {
-        switch (format) {
+        switch (format.toLowerCase()) {
             case "date":
                 return dateDetailReverseSort;
             default :
