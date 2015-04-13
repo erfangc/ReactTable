@@ -1093,8 +1093,13 @@ function getSortFunction(sortByColumnDef) {
 
 function getReverseSortFunction(sortByColumnDef) {
     var format = sortByColumnDef.format || "";
-    if (sortByColumnDef.sort)
-        return sortByColumnDef.sort;
+    if (sortByColumnDef.reverseSort)
+        return sortByColumnDef.reverseSort;
+    else if(sortByColumnDef.sort){
+        return function(a,b){
+            return sortByColumnDef.sort.bind(this)(a,b)*-1;
+        }
+    }
     if (!sortByColumnDef.sort) {
         switch (format.toLowerCase()) {
             case "date":
