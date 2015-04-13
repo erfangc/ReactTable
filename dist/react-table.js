@@ -802,6 +802,7 @@ function adjustHeaders(adjustCount) {
     var headerElems = $("#" + id + " .rt-headers-container");
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+    var adjustedSomething = false;
 
     headerElems.each(function () {
         var currentHeader = $(this);
@@ -813,12 +814,17 @@ function adjustHeaders(adjustCount) {
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            adjustedSomething = true;
         }
-        //else {
-        currentHeader.width(width);
-        //}
+        if( width !== currentHeader.width() ) {
+            currentHeader.width(width);
+            adjustedSomething = true;
+        }
         counter++;
     });
+
+    if( !adjustedSomething )
+        return;
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
