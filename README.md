@@ -78,6 +78,20 @@ summaryTemplate | a function callback that returns a React Component, this compo
 * separator - set to `true` to turn on comma separator for large numbers
 * showZeroAsBlank - set to `true` to have cells which equal exactly zero show up as blank in the table
 
+## Functions that can be called on ReactTable object
+The following functions can be called on the variable which is returned after rendering a ReactTable.
+
+Function Name|Returns|Description
+-------|-------|------------------
+toggleSelectDetailRow(key) | undefined | Given a rowKey, toggles the selection of a detail row in the table
+toggleSelectSummaryRow(key) | undefined |Given a path rowKey, toggles the selection of a summary row in the table
+clearAllRowSelections() | undefined |Clears all detail and summary row selections
+getRowSelectionStates() | Object |Returns an object with two entries: One with each of detail and summary row selections
+addColumn(columnDef, data) | undefined | Adds (or updates by checking `colTag`) a column to the table. If `data` is passed in, `data` is replaced as the new data object in table
+redoPresort() | undefined | Redos the `preSort` from the table definition.
+replaceData(data) | undefined | Sets the passed in `data` to be the data object in the table
+setStyleByKey(key, styleObj) | undefined | For a given rowKey, sets a detail row to have extra styling per the passed in styleObj.
+
 #### Example
 Please note you **cannot** have spaces in the format instruction values, since spaces are used as a separator
 
