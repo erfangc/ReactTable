@@ -640,6 +640,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
                 extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
                 isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
                 onSelect: this.handleSelect, 
+                onRightClick: this.props.onRightClick, 
                 toggleHide: this.handleToggleHide, 
                 columnDefs: this.state.columnDefs}
             ));
@@ -697,8 +698,9 @@ var Row = React.createClass({displayName: 'Row',
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
         for (var attrname in this.props.extraStyle) { styles[attrname] = this.props.extraStyle[attrname]; }
-
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), className: classes, style: styles}, cells));
+        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), 
+                    onContextMenu: this.props.onRightClick.bind(null, this.props.data), 
+                    className: classes, style: styles}, cells));
     }
 });
 

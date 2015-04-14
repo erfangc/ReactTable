@@ -56,6 +56,12 @@ $(function () {
             groupBy: groupBy,
             rowKey: 'id',
             data: testData,
+            onRightClick: function(row, event){
+                console.log(row);
+                console.log(state);
+                event.preventDefault();
+                //alert("sweet right click on id " + row.id + "!");
+            },
             height: "300px",
             presort: {score_weight_factor: 'desc'},
             columnDefs: columnDefs,
