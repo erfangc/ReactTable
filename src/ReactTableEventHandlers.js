@@ -10,7 +10,8 @@ function ReactTableGetInitialState() {
         columnDefs: this.props.columnDefs,
         selectedDetailRows: selections.selectedDetailRows,
         selectedSummaryRows: selections.selectedSummaryRows,
-        firstColumnLabel: _construct1StColumnLabel(this)
+        firstColumnLabel: _construct1StColumnLabel(this),
+        extraStyle: {}
     };
 }
 

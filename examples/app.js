@@ -84,6 +84,10 @@ $(function () {
 
         function addMe() {
             table1.addColumn({colTag: "currency_used", text: "Currency used"});
+            table1.setStyleByKey(2,{"background-color": "orange"});
+            setTimeout(function(){
+                table1.setStyleByKey(2,{});
+            },1000);
         }
     })
 })

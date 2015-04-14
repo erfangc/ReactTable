@@ -122,6 +122,12 @@ var ReactTable = React.createClass({
             table.redoPresort();
         });
     },
+    setStyleByKey: function(key, style){
+        this.state.extraStyle[key] = style;
+        this.setState({
+            extraStyle: this.state.extraStyle
+        });
+    },
     /* ----------------------------------------- */
 
     componentDidMount: function () {
@@ -163,9 +169,11 @@ var ReactTable = React.createClass({
 
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
+            var generatedKey = generateRowKey(row, rowKey);
             return (<Row
-                key={generateRowKey(row, rowKey)}
+                key={generatedKey}
                 data={row}
+                extraStyle={_getExtraStyle(generatedKey, this.state.extraStyle)}
                 isSelected={_isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
                 onSelect={this.handleSelect}
                 toggleHide={this.handleToggleHide}
@@ -224,6 +232,8 @@ var Row = React.createClass({
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
+        for (var attrname in this.props.extraStyle) { styles[attrname] = this.props.extraStyle[attrname]; }
+
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)} className={classes} style={styles}>{cells}</tr>);
     }
 });
@@ -404,6 +414,10 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
+}
+
+function _getExtraStyle(geenratedKey, extraStyles){
+    return geenratedKey && extraStyles ? extraStyles[geenratedKey] : null;
 }
 
 function _getPageArithmetics(table, data) {
