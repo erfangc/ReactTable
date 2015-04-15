@@ -62,6 +62,7 @@ The following properties are valid on `columnDef` objects, which are nested unde
 Column Option Name|Description
 -------|------------------
 colTag | column identifier
+conditionalAggregationMethod | changes the aggregation behavior of the column given the current 'groupBy' attribute. Accepts an object where the keys are colTag(s) and values are aggregation methods. ex: `conditionalAggregationMethod: { colA: 'straight_sum', colB: 'average' }` will the sub-total to be computed as a 'average' when grouping by colB and 'straight sum' when grouping by colA
 text   | display text in the table header
 format | choose from 'number', 'currency', 'date' or 'string'
 sort   | custom callback function for sorting the column
