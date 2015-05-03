@@ -4,9 +4,6 @@ High Performance HTML Table with Group By functionality Implemented using Facebo
 
 *requires [react.js](https://github.com/facebook/react)*
 
-####Note:
-`master` is now on tracking the unreleased version 2 of ReactTable. This version represents the data as a tree instead of a 2D array. There are many benefits. See `legacy-version-1` branch for the old code
-
 [See a Demo Here](http://erfangc.github.io/ReactTable/)
 
 Capabilities Include:
@@ -26,7 +23,7 @@ Capabilities Include:
 
 Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) and [jQuery](http://jquery.com/download/) as a dependecy.
 
-    > bower install react-table
+    > bower install ReactTable
 
 ## Usage
 
@@ -70,7 +67,7 @@ reverseSort | custom callback function for sorting the column in reverse (if thi
 cellClassCallback | custom callback for applying custom CSS classes to cells. should should return a object with class names set to true in an object. for example `{ green: true, special: true}`
 formatInstructions | a string that represents how you want cells to be formatted, options are
 summaryTemplate | a function callback that returns a React Component, this component will be appended to the content of the first column of summary rows. Argument passed: `data` representing the summary row
-
+cellTemplate | A custom callback function provided to the table that returns an React component to be rendered. First argument is the row being rendered
 ## Valid `formatInstructions` Options
 
 * multiplier - a number to multiply the cell content by
