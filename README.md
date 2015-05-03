@@ -48,8 +48,12 @@ customMenuItems    |Object          |specifies custom header menu options.  Each
 presort            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
 
 ## Table Usage Example
-```
-var options = { data: data, columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], groupBy: [{colTag: "birth_city"}], customMenuItems: {Description: {infoBox: "description"}} };
+```js
+var options = { 
+        data: data, 
+        columnDefs: [ {colTag: "first_name", text: "First Name"}, ... ], 
+        groupBy: [{colTag: "birth_city"}], customMenuItems: {Description: {infoBox: "description"}} 
+    };
     React.renderComponent(React.createElement(ReactTable,options, document.getElementById("table"));
 ```
 
