@@ -93,16 +93,16 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
-    redoPresort: function(){
-        if (this.props.presort){
+    redoPresort: function () {
+        if (this.props.presort) {
             var colDefToSort;
-            for( var colTag in this.props.presort ){
-                for( var i=0; i<this.props.columnDefs.length; i++ ){
-                    if( this.props.columnDefs[i].colTag === colTag ){
+            for (var colTag in this.props.presort) {
+                for (var i = 0; i < this.props.columnDefs.length; i++) {
+                    if (this.props.columnDefs[i].colTag === colTag) {
                         colDefToSort = this.props.columnDefs[i];
-                        if( this.props.presort[colTag] === 'asc' )
+                        if (this.props.presort[colTag] === 'asc')
                             this.handleSort(colDefToSort, true);
-                        else if( this.props.presort[colTag] === 'desc' )
+                        else if (this.props.presort[colTag] === 'desc')
                             this.handleSort(colDefToSort, false);
                         break;
                     }
@@ -118,11 +118,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1
         });
         var table = this;
-        setTimeout(function(){
+        setTimeout(function () {
             table.redoPresort();
         });
     },
-    setStyleByKey: function(key, style){
+    setStyleByKey: function (key, style) {
         this.state.extraStyle[key] = style;
         this.setState({
             extraStyle: this.state.extraStyle
@@ -146,7 +146,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
         bindHeadersToMenu($node);
         var table = this;
-        setTimeout(function(){
+        setTimeout(function () {
             table.redoPresort();
         });
     },
@@ -170,7 +170,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var rows = rowsToDisplay.map(function (row) {
             var rowKey = this.props.rowKey;
             var generatedKey = generateRowKey(row, rowKey);
-            return (Row({
+            return (React.createElement(Row, {
                 key: generatedKey, 
                 data: row, 
                 extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
@@ -179,7 +179,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
                 onRightClick: this.props.onRightClick, 
                 toggleHide: this.handleToggleHide, 
                 columnDefs: this.state.columnDefs}
-            ));
+                ));
         }, this);
 
         var headers = buildHeaders(this);
@@ -193,11 +193,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             containerStyle.overflowY = "hidden";
 
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
+                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tbody", null, 
                         rows
                         )
                     )
@@ -208,6 +208,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     }
 });
 
+/**
+ * Represents a row in the table, built from cells
+ */
 var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -216,12 +219,16 @@ var Row = React.createClass({displayName: 'Row',
             var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
+            var content = lookAndFeel.value;
+            // determine cell content, based on whether a cell templating callback was provided
+            if (columnDef.cellTemplate)
+                content = columnDef.cellTemplate.call(this, this.props.data);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
-                    lookAndFeel.value
+                    content
                 )
             );
         }
@@ -233,8 +240,10 @@ var Row = React.createClass({displayName: 'Row',
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        for (var attrname in this.props.extraStyle) { styles[attrname] = this.props.extraStyle[attrname]; }
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), 
+        for (var attrname in this.props.extraStyle) {
+            styles[attrname] = this.props.extraStyle[attrname];
+        }
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
                     onContextMenu: this.props.onRightClick.bind(null, this.props.data), 
                     className: classes, style: styles}, cells));
     }
@@ -258,19 +267,21 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, 
+                       onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, 
+                       onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -300,17 +311,20 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, placeholder: "ex: 1,10,15"}), 
-                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), className: "btn-link"}, "Ok")
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+                           placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
+                       onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), 
+                       className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.DOM.div({
+            React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.DOM.div(null, "Summarize"), 
+                React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -344,7 +358,7 @@ function generateRowKey(row, rowKey) {
 
 function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
-    if( !(adjustCount >= 0) )
+    if (!(adjustCount >= 0))
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
@@ -364,20 +378,20 @@ function adjustHeaders(adjustCount) {
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;
         }
-        if( width !== currentHeader.width() ) {
+        if (width !== currentHeader.width()) {
             currentHeader.width(width);
             adjustedSomething = true;
         }
         counter++;
     });
 
-    if( !adjustedSomething )
+    if (!adjustedSomething)
         return;
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function(){
+    setTimeout(function () {
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
@@ -418,7 +432,7 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function _getExtraStyle(geenratedKey, extraStyles){
+function _getExtraStyle(geenratedKey, extraStyles) {
     return geenratedKey && extraStyles ? extraStyles[geenratedKey] : null;
 }
 

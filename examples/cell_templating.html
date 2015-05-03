@@ -2,27 +2,32 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>An Example Using ReactTable</title>
+    <title></title>
     <script src="../bower_components/react/react-with-addons.js"></script>
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="../dist/react-table.css"/>
     <link rel="stylesheet" href="../bower_components/components-font-awesome/css/font-awesome.css"/>
     <style>
         i.hover-icon {
             margin: 0px 0px 0px 5px;
         }
+
         body {
             font-family: Tahoma, Arial, sans-serif;
         }
+
         td.green {
             font-weight: bold;
             background-color: #009941;
             color: #ffffff;
         }
+
         td.red {
             font-weight: bold;
             background-color: darkred;
             color: #ffffff;
         }
+
         .demo-label {
             font-weight: 500;
             color: #ffffff;
@@ -36,25 +41,11 @@
     </style>
 </head>
 <body>
-<div class="demo-label">
-    Using Tree to Represent Data
-</div>
-<div class="container" id="table"></div>
+<div class="demo-label">Custom Templating</div>
 
-<link rel="stylesheet" href="../src/scss/ReactTable.css"/>
+<div id="table"></div>
 
-<!--<script src="../dist/react-table.min.js"></script>-->
-<script src="../src/TreeNode.js"></script>
-<script src="../src/TreeRasterizer.js"></script>
-<script src="../src/TreeBuilder.js"></script>
-<script src="../build/DOMBuilder.js"></script>
-<script src="../src/ReactTableEventHandlers.js"></script>
-<script src="../build/ReactTable.js"></script>
-<script src="../src/DataAggregation.js"></script>
-<script src="../src/SortUtils.js"></script>
-<script src="../src/CellStyleBuilder.js"></script>
-
-<script src="more.js"></script>
-
+<script src="../dist/react-table.min.js"></script>
+<script src="cell_templating.js"></script>
 </body>
 </html>

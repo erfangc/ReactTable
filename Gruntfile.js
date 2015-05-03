@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         concat: {
-            options: { separator: ";" },
+            options: {separator: ";"},
             build: {
                 src: ['build/*.js'],
                 dest: 'dist/<%= pkg.name %>.js'
@@ -26,10 +26,11 @@ module.exports = function (grunt) {
         copy: {
             build: {
                 files: {
-                    'dist/<%= pkg.name %>.css': ['src/scss/ReactTable.css']
+                    'dist/<%= pkg.name %>.css': ['src/scss/ReactTable.css'],
+                    'dist/light-blue/<%= pkg.name %>.css': ['src/scss/light-blue/ReactTable.css']
                 }
             }
         }
     })
-    grunt.registerTask('build', ['concat:build', 'uglify:build','copy:build']);
+    grunt.registerTask('build', ['concat:build', 'uglify:build', 'copy:build']);
 }

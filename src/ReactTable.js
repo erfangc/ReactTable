@@ -93,16 +93,16 @@ var ReactTable = React.createClass({
             recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
-    redoPresort: function(){
-        if (this.props.presort){
+    redoPresort: function () {
+        if (this.props.presort) {
             var colDefToSort;
-            for( var colTag in this.props.presort ){
-                for( var i=0; i<this.props.columnDefs.length; i++ ){
-                    if( this.props.columnDefs[i].colTag === colTag ){
+            for (var colTag in this.props.presort) {
+                for (var i = 0; i < this.props.columnDefs.length; i++) {
+                    if (this.props.columnDefs[i].colTag === colTag) {
                         colDefToSort = this.props.columnDefs[i];
-                        if( this.props.presort[colTag] === 'asc' )
+                        if (this.props.presort[colTag] === 'asc')
                             this.handleSort(colDefToSort, true);
-                        else if( this.props.presort[colTag] === 'desc' )
+                        else if (this.props.presort[colTag] === 'desc')
                             this.handleSort(colDefToSort, false);
                         break;
                     }
@@ -118,11 +118,11 @@ var ReactTable = React.createClass({
             currentPage: 1
         });
         var table = this;
-        setTimeout(function(){
+        setTimeout(function () {
             table.redoPresort();
         });
     },
-    setStyleByKey: function(key, style){
+    setStyleByKey: function (key, style) {
         this.state.extraStyle[key] = style;
         this.setState({
             extraStyle: this.state.extraStyle
@@ -146,7 +146,7 @@ var ReactTable = React.createClass({
         });
         bindHeadersToMenu($node);
         var table = this;
-        setTimeout(function(){
+        setTimeout(function () {
             table.redoPresort();
         });
     },
@@ -179,7 +179,7 @@ var ReactTable = React.createClass({
                 onRightClick={this.props.onRightClick}
                 toggleHide={this.handleToggleHide}
                 columnDefs={this.state.columnDefs}
-            />);
+                />);
         }, this);
 
         var headers = buildHeaders(this);
@@ -208,6 +208,9 @@ var ReactTable = React.createClass({
     }
 });
 
+/**
+ * Represents a row in the table, built from cells
+ */
 var Row = React.createClass({
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
@@ -216,12 +219,16 @@ var Row = React.createClass({
             var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
             var cx = React.addons.classSet;
             var classes = cx(lookAndFeel.classes);
+            var content = lookAndFeel.value;
+            // determine cell content, based on whether a cell templating callback was provided
+            if (columnDef.cellTemplate)
+                content = columnDef.cellTemplate.call(this, this.props.data);
             cells.push(
                 <td
                     className={classes}
                     style={lookAndFeel.styles}
                     key={columnDef.colTag}>
-                    {lookAndFeel.value}
+                    {content}
                 </td>
             );
         }
@@ -233,7 +240,9 @@ var Row = React.createClass({
         var styles = {
             "cursor": this.props.data.isDetail ? "pointer" : "inherit"
         };
-        for (var attrname in this.props.extraStyle) { styles[attrname] = this.props.extraStyle[attrname]; }
+        for (var attrname in this.props.extraStyle) {
+            styles[attrname] = this.props.extraStyle[attrname];
+        }
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
                     onContextMenu={this.props.onRightClick.bind(null, this.props.data)}
                     className={classes} style={styles}>{cells}</tr>);
@@ -266,11 +275,13 @@ var PageNavigator = React.createClass({
         return (
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
-                    <a className={prevClass} onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                    <a className={prevClass}
+                       onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
-                    <a className={nextClass} onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                    <a className={nextClass}
+                       onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
@@ -302,8 +313,11 @@ var SummarizeControl = React.createClass({
             (
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
                     <label style={{"display": "block"}}>Enter Bucket(s)</label>
-                    <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange} placeholder="ex: 1,10,15"/>
-                    <a tabIndex="2" style={{"display": "block"}} onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)} className="btn-link">Ok</a>
+                    <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
+                           placeholder="ex: 1,10,15"/>
+                    <a tabIndex="2" style={{"display": "block"}}
+                       onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)}
+                       className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
@@ -344,7 +358,7 @@ function generateRowKey(row, rowKey) {
 
 function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
-    if( !(adjustCount >= 0) )
+    if (!(adjustCount >= 0))
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
@@ -364,20 +378,20 @@ function adjustHeaders(adjustCount) {
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;
         }
-        if( width !== currentHeader.width() ) {
+        if (width !== currentHeader.width()) {
             currentHeader.width(width);
             adjustedSomething = true;
         }
         counter++;
     });
 
-    if( !adjustedSomething )
+    if (!adjustedSomething)
         return;
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
     var ups = headerElems.find(".rt-upward-caret").removeClass("rt-upward-caret");
-    setTimeout(function(){
+    setTimeout(function () {
         downs.addClass("rt-downward-caret");
         ups.addClass("rt-upward-caret");
     }, 0);
@@ -418,7 +432,7 @@ function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function _getExtraStyle(geenratedKey, extraStyles){
+function _getExtraStyle(geenratedKey, extraStyles) {
     return geenratedKey && extraStyles ? extraStyles[geenratedKey] : null;
 }
 
