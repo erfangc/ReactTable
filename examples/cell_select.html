@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../bower_components/react/react-with-addons.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="../dist/react-table.css"/>
+    <link rel="stylesheet" href="../bower_components/components-font-awesome/css/font-awesome.css"/>
+    <style>
+        i.hover-icon {
+            margin: 0px 0px 0px 5px;
+        }
+
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        td.green {
+            font-weight: bold;
+            background-color: #009941;
+            color: #ffffff;
+        }
+
+        td.red {
+            font-weight: bold;
+            background-color: darkred;
+            color: #ffffff;
+        }
+
+        .demo-label {
+            font-weight: 500;
+            color: #ffffff;
+            background-image: linear-gradient(#646f7f, #4a5564);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #4a5564;
+            border-radius: 5px;
+            margin-bottom: 1px;
+        }
+    </style>
+</head>
+<body>
+<div class="demo-label">Cell Select</div>
+
+<div id="table"></div>
+
+<script src="../dist/react-table.min.js"></script>
+<script src="cell_select.js"></script>
+</body>
+</html>

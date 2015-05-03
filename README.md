@@ -65,9 +65,10 @@ format | choose from 'number', 'currency', 'date' or 'string'
 sort   | custom callback function for sorting the column
 reverseSort | custom callback function for sorting the column in reverse (if this is not provided but custom sort is, it will use inverse of custom sort)
 cellClassCallback | custom callback for applying custom CSS classes to cells. should should return a object with class names set to true in an object. for example `{ green: true, special: true}`
+onCellSelect | custom callback function that triggers when a cell in this column is clicked. `this` is bound to the row component, first argument to the callback is the cell content
 formatInstructions | a string that represents how you want cells to be formatted, options are
 summaryTemplate | a function callback that returns a React Component, this component will be appended to the content of the first column of summary rows. Argument passed: `data` representing the summary row
-cellTemplate | A custom callback function provided to the table that returns an React component to be rendered. First argument is the row being rendered
+cellTemplate | custom callback function provided to the table that returns an React component to be rendered. first argument is the row being rendered
 ## Valid `formatInstructions` Options
 
 * multiplier - a number to multiply the cell content by

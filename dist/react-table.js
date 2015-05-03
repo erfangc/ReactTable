@@ -690,6 +690,7 @@ var Row = React.createClass({displayName: 'Row',
             cells.push(
                 React.createElement("td", {
                     className: classes, 
+                    onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag]) : null, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
                     content
