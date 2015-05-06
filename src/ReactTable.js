@@ -226,7 +226,7 @@ var Row = React.createClass({
             cells.push(
                 <td
                     className={classes}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag]) : null}
+                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null}
                     style={lookAndFeel.styles}
                     key={columnDef.colTag}>
                     {content}
