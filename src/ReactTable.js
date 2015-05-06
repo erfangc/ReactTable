@@ -245,7 +245,7 @@ var Row = React.createClass({
             styles[attrname] = this.props.extraStyle[attrname];
         }
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                    onContextMenu={this.props.onRightClick.bind(null, this.props.data)}
+                    onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data) : null}
                     className={classes} style={styles}>{cells}</tr>);
     }
 });
