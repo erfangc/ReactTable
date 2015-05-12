@@ -53,6 +53,7 @@ $(function () {
             //disableAddColumn: true,
             //disableGrandTotal: true,
             //disableScrolling: true,
+            //disableExporting: true,
             disablePagination: true,
             cornerIcon: '../src/filter_icon.png',
             //defaultMenuItems: ['sort'],

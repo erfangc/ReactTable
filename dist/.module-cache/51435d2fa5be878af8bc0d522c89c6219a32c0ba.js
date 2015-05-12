@@ -31,28 +31,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         this.setState({rootNode: rootNode, currentPage: 1});
     },
     handleDownloadCSV: function() {
-        var $table = $(this.getDOMNode());
-        if( !this.props.disableGrandTotal )
-            var total = $table.find("tr").first().remove();
-
-        var headers = [];
-        $table.find(".rt-header-element").each(function(){
-            headers.push($(this).text());
-        });
-        var data = $table.table2CSV({delivery:'value', header: headers});
-        data = data.replace(/&nbsp;/g,"");
-        data = data.replace(/—/g,"-");
-        $('<a></a>')
-            .attr('id','downloadFile')
-            .attr('href','data:text/csv;charset=utf8,' + encodeURIComponent(data))
-            .attr('download','filename.csv')
-            .appendTo('body')
-            .get(0).click();
-
-        if( !this.props.disableGrandTotal )
-            total.prependTo($table.find("tbody"));
-
-        $("#downloadFile").remove();
+        console.log("yo");
     },
     /* -------------------------------------------------- */
 

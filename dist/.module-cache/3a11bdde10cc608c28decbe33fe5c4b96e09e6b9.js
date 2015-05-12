@@ -65,23 +65,20 @@ function buildMenu(options) {
     };
     if (table.props.defaultMenuItems) {
         for (var i = 0; i < table.props.defaultMenuItems.length; i++) {
-            var itemName = table.props.defaultMenuItems[i];
-            _addMenuItems(menuItems, availableDefaultMenuItems[itemName]);
+            var itemName = table.props.defaultMenuItems[i]
+            _addMenuItems(menuItems, availableDefaultMenuItems[itemName])
         }
     } else {
-        _addMenuItems(menuItems, availableDefaultMenuItems.sort);
-        _addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        _addMenuItems(menuItems, availableDefaultMenuItems.sort)
+        _addMenuItems(menuItems, availableDefaultMenuItems.summarize)
         if (!isFirstColumn)
-            _addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            _addMenuItems(menuItems, availableDefaultMenuItems.remove)
     }
 
     if (isFirstColumn) {
         menuItems.push(React.DOM.div({className: "separator"}));
-        if( !table.props.disableExporting )
-            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownloadCSV.bind(null)}, "Download as CSV"));
-
-        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
-        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
+        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"))
+        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"))
     }
 
     var customMenuItems = buildCustomMenuItems(table, columnDef);

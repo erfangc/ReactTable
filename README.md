@@ -16,6 +16,7 @@ Capabilities Include:
 - Pagination
 - Multiple Tables
 - Custom Formatting Callback
+- Export table to CSV (requires table2CSV.js dependency)
 - Drag & Drop Columns (Not Functional)
 - Drop a Column to Group (Not Functional)
 
@@ -46,6 +47,7 @@ selectedRows       |Array of Strings|row keys of initially selected rows, must b
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 customMenuItems    |Object          |specifies custom header menu options.  Each key of the given object corresponds to the title of the new menu option and the value is an object e.g. `{infoBox: "columnDataPoint"}`.  `infoBox` displays a box whose contents are equal to the columnDef's columnDataPoint on hover of the menu item. As of right now, infoBox is the only supported custom menu object type. This will only appear in columns where columnDataPoint exists in columnDef.
 presort            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
+disableExporting   |boolean         |if true, disables functionality to export table to CSV
 
 ## Table Usage Example
 ```js

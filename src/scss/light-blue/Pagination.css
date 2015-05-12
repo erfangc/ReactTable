@@ -1,0 +1,96 @@
+/*
+Error: Undefined variable: "$padding-base-vertical".
+        on line 13 of Pagination.scss
+
+8:     display: inline; // Remove list-style and block-level defaults
+9:     > a,
+10:     > span {
+11:       position: relative;
+12:       float: left; // Collapse white-space
+13:       padding: $padding-base-vertical $padding-base-horizontal;
+14:       line-height: $line-height-base;
+15:       text-decoration: none;
+16:       color: $pagination-color;
+17:       background-color: $pagination-bg;
+18:       border: 1px solid $pagination-border;
+
+Backtrace:
+Pagination.scss:13
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/variable.rb:49:in `_perform'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/node.rb:50:in `perform'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/list_literal.rb:62:in `block in _perform'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/list_literal.rb:62:in `map'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/list_literal.rb:62:in `_perform'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/script/tree/node.rb:50:in `perform'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:384:in `visit_prop'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `block in visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `block in with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:115:in `with_frame'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block (2 levels) in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `map'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:179:in `with_environment'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:418:in `visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `block in visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `block in with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:115:in `with_frame'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block (2 levels) in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `map'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:179:in `with_environment'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:418:in `visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `block in visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `block in with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:115:in `with_frame'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block (2 levels) in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `map'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:420:in `block in visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:179:in `with_environment'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:418:in `visit_rule'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `block in visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `block in with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:115:in `with_frame'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/stack.rb:79:in `with_base'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:158:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:52:in `block in visit_children'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:52:in `map'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:52:in `visit_children'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:167:in `block in visit_children'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:179:in `with_environment'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:166:in `visit_children'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `block in visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:186:in `visit_root'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/base.rb:36:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:157:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/visitors/perform.rb:8:in `visit'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/root_node.rb:36:in `css_tree'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/tree/root_node.rb:29:in `render_with_sourcemap'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/engine.rb:368:in `_render_with_sourcemap'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/engine.rb:285:in `render_with_sourcemap'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/plugin/compiler.rb:489:in `update_stylesheet'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/plugin/compiler.rb:215:in `block in update_stylesheets'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/plugin/compiler.rb:209:in `each'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/plugin/compiler.rb:209:in `update_stylesheets'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/plugin.rb:82:in `update_stylesheets'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/exec/sass_scss.rb:350:in `watch_or_update'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/exec/sass_scss.rb:50:in `process_result'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/exec/base.rb:52:in `parse'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/lib/sass/exec/base.rb:19:in `parse!'
+C:/Ruby21-x64/lib/ruby/gems/2.1.0/gems/sass-3.4.7/bin/sass:13:in `<top (required)>'
+C:/Ruby21-x64/bin/sass:23:in `load'
+C:/Ruby21-x64/bin/sass:23:in `<main>'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Undefined variable: \"$padding-base-vertical\".\A         on line 13 of Pagination.scss\A \A 8:     display: inline; // Remove list-style and block-level defaults\A 9:     > a,\A 10:     > span {\A 11:       position: relative;\A 12:       float: left; // Collapse white-space\A 13:       padding: $padding-base-vertical $padding-base-horizontal;\A 14:       line-height: $line-height-base;\A 15:       text-decoration: none;\A 16:       color: $pagination-color;\A 17:       background-color: $pagination-bg;\A 18:       border: 1px solid $pagination-border;"; }
