@@ -254,6 +254,7 @@ var Row = React.createClass({displayName: 'Row',
                 React.DOM.td({
                     className: classes, 
                     onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null, 
+                    onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
                     style: lookAndFeel.styles, 
                     key: columnDef.colTag}, 
                     content
@@ -272,7 +273,6 @@ var Row = React.createClass({displayName: 'Row',
             styles[attrname] = this.props.extraStyle[attrname];
         }
         return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), 
-                    onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data) : null, 
                     className: classes, style: styles}, cells));
     }
 });

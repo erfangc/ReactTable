@@ -53,10 +53,14 @@ $(function () {
             disablePagination: true,
             rowKey: 'id',
             data: data,
-            onRightClick: function (row, event) {
+            onRightClick: function (row, column, event) {
+                if(true)
+                    event.preventDefault();
+
+                console.log(this);
+                console.log(a);
                 console.log(row);
-                console.log(state);
-                event.preventDefault();
+                console.log(event);
             },
             height: "600px",
             presort: {score_weight_factor: 'desc'},
