@@ -30,29 +30,29 @@ var ReactTable = React.createClass({
         rootNode.expandRecursively();
         this.setState({rootNode: rootNode, currentPage: 1});
     },
-    handleDownloadCSV: function() {
-        var $table = $(this.getDOMNode());
-        if( !this.props.disableGrandTotal )
-            var total = $table.find("tr").first().remove();
-
-        var headers = [];
-        $table.find(".rt-header-element").each(function(){
-            headers.push($(this).text());
+    handleDownload: function(type) {
+        var reactTableData = this;
+        var tempTable = $("<table></table>");
+        var headers = $("<tr></tr>");
+        $.each(this.props.columnDefs, function(){
+            $("<td></td>").text(this.text).appendTo(headers);
         });
-        var data = $table.table2CSV({delivery:'value', header: headers});
-        data = data.replace(/&nbsp;/g,"");
-        data = data.replace(/—/g,"-");
-        $('<a></a>')
-            .attr('id','downloadFile')
-            .attr('href','data:text/csv;charset=utf8,' + encodeURIComponent(data))
-            .attr('download','filename.csv')
-            .appendTo('body')
-            .get(0).click();
+        var headerWrapper = $("<thead></thead>");
+        headers.appendTo(headerWrapper);
+        headerWrapper.appendTo(tempTable);
 
-        if( !this.props.disableGrandTotal )
-            total.prependTo($table.find("tbody"));
+        var dataWrapper = $("<tbody></tbody>");
+        $.each(this.props.data, function(){
+            var row = $("<tr></tr>");
+            var datum = this;
+            $.each(reactTableData.props.columnDefs, function(){
+                $("<td></td>").text(datum[this.colTag]).appendTo(row);
+            });
+            row.appendTo(dataWrapper);
+        });
+        dataWrapper.appendTo(tempTable);
 
-        $("#downloadFile").remove();
+        tempTable.tableExport({type:type,htmlContent:true});
     },
     /* -------------------------------------------------- */
 

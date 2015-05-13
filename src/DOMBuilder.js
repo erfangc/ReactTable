@@ -77,8 +77,10 @@ function buildMenu(options) {
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        if( !table.props.disableExporting )
-            menuItems.push(<div className="menu-item" onClick={table.handleDownloadCSV.bind(null)}>Download as CSV</div>);
+        if( !table.props.disableExporting ) {
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "excel")}>Download as XLS</div>);
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>Download as PDF</div>);
+        }
 
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
         menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);

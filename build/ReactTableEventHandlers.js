@@ -29,13 +29,19 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
+    var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
+    var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
     this.state.rootNode.sortChildren({
-        sortFn: getSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
-        reverseSortFn: getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy),
+        sortFn: sortFn,
+        reverseSortFn: reverseSortFn,
         recursive: true,
         sortAsc: sortAsc
     });
     this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
+    if( sortAsc )
+        this.props.data.sort(sortFn);
+    else
+        this.props.data.sort(reverseSortFn);
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {

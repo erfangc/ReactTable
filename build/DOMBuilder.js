@@ -77,8 +77,10 @@ function buildMenu(options) {
 
     if (isFirstColumn) {
         menuItems.push(React.DOM.div({className: "separator"}));
-        if( !table.props.disableExporting )
-            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownloadCSV.bind(null)}, "Download as CSV"));
+        if( !table.props.disableExporting ) {
+            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, "Download as XLS"));
+            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, "Download as PDF"));
+        }
 
         menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
         menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));

@@ -1,0 +1,13 @@
+{
+  "name": "tableExport",
+  "homepage": "https://github.com/kayalshri/tableExport.jquery.plugin",
+  "_release": "a891806f7a",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "a891806f7a112ac5bd444c6cfb1a94ceba8168bd"
+  },
+  "_source": "https://github.com/kayalshri/tableExport.jquery.plugin.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/kayalshri/tableExport.jquery.plugin.git"
+}
