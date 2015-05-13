@@ -249,7 +249,7 @@ var Row = React.createClass({displayName: 'Row',
             var content = lookAndFeel.value;
             // determine cell content, based on whether a cell templating callback was provided
             if (columnDef.cellTemplate)
-                content = columnDef.cellTemplate.call(this, this.props.data,columnDef);
+                content = columnDef.cellTemplate.call(this, this.props.data, columnDef, content);
             cells.push(
                 React.DOM.td({
                     className: classes, 
