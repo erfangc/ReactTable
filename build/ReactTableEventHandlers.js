@@ -38,10 +38,6 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         sortAsc: sortAsc
     });
     this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
-    if( sortAsc )
-        this.props.data.sort(sortFn);
-    else
-        this.props.data.sort(reverseSortFn);
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {

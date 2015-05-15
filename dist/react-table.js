@@ -660,33 +660,24 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
     handleDownload: function(type) {
         var reactTableData = this;
-        //var tempTable = $("<table></table>");
-        //var headers = $("<tr></tr>");
-        //$.each(this.props.columnDefs, function(){
-        //    $("<td></td>").text(this.text).appendTo(headers);
-        //});
-        //var headerWrapper = $("<thead></thead>");
-        //headers.appendTo(headerWrapper);
-        //headerWrapper.appendTo(tempTable);
-        //
-        //var dataWrapper = $("<tbody></tbody>");
-        //$.each(this.props.data, function(){
-        //    var row = $("<tr></tr>");
-        //    var datum = this;
-        //    $.each(reactTableData.props.columnDefs, function(){
-        //        $("<td></td>").text(datum[this.colTag]).appendTo(row);
-        //    });
-        //    row.appendTo(dataWrapper);
-        //});
-        //dataWrapper.appendTo(tempTable);
 
         var objToExport = {headers: [], data: []};
+
+        var firstColumn = this.state.columnDefs[0];
+
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: firstColumn,
+            selectedDetailRows: this.state.selectedDetailRows
+        });
 
         $.each(this.props.columnDefs, function(){
             objToExport.headers.push(this.text);
         });
 
-        $.each(this.props.data, function(){
+        $.each(rasterizedData, function(){
+            if( this[firstColumn.colTag] === "Grand Total" )
+                return;
             var row = [];
             var datum = this;
             $.each(reactTableData.props.columnDefs, function(){
@@ -1188,10 +1179,6 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         sortAsc: sortAsc
     });
     this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
-    if( sortAsc )
-        this.props.data.sort(sortFn);
-    else
-        this.props.data.sort(reverseSortFn);
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
