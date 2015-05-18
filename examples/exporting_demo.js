@@ -42,7 +42,7 @@ $(function () {
 
         }
     ];
-    $.get('sample_data.json').success(function (data) {
+    $.get('sample_data_small.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {
@@ -59,6 +59,11 @@ $(function () {
             //defaultMenuItems: ['sort'],
             //groupBy: groupBy,
             rowKey: 'id',
+            customMenuItems: {
+                Definition: {
+                    infoBox: "first_name"
+                }
+            },
             data: testData,
             onRightClick: function (row, event) {
                 console.log(row);
@@ -69,11 +74,6 @@ $(function () {
             height: "300px",
             presort: {score_weight_factor: 'desc'},
             columnDefs: columnDefs,
-            customMenuItems: {
-                Description: {
-                    infoBox: "formatInstructions"
-                }
-            },
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
                 addMe();

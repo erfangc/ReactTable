@@ -51,8 +51,30 @@ function exportToExcel(data){
     excelFile += "</body>";
     excelFile += "</html>";
 
-    var base64data = "base64," + $.base64.encode(excelFile);
-    window.open('data:application/vnd.ms-excel;filename=exportData.doc;' + base64data);
+
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+
+    // If Internet Explorer
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)){
+
+        var tempFrame = $('<iframe></iframe>')
+            .css("display", "none")
+            .attr("id", "ieExcelFrame")
+            .appendTo("body");
+
+        ieExcelFrame.document.open("txt/html","replace");
+        ieExcelFrame.document.write(excelFile);
+        ieExcelFrame.document.close();
+        ieExcelFrame.focus();
+        ieExcelFrame.document.execCommand("SaveAs",true,"exportData.xls");
+
+        tempFrame.remove();
+    }
+    else{          //other browsers
+        var base64data = "base64," + $.base64.encode(excelFile);
+        window.open('data:application/vnd.ms-excel;filename=exportData.doc;' + base64data);
+    }
 }
 
 function exportToPDF(data){

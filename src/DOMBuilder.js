@@ -75,6 +75,9 @@ function buildMenu(options) {
             _addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
 
+    var customMenuItems = buildCustomMenuItems(table, columnDef);
+    menuItems.push(customMenuItems);
+
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
         if( !table.props.disableExporting ) {
@@ -86,8 +89,6 @@ function buildMenu(options) {
         menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
     }
 
-    var customMenuItems = buildCustomMenuItems(table, columnDef);
-    menuItems.push(customMenuItems);
     return (
         <div style={menuStyle} className="rt-header-menu">
             {menuItems}
