@@ -11,7 +11,11 @@ function ReactTableGetInitialState() {
         selectedDetailRows: selections.selectedDetailRows,
         selectedSummaryRows: selections.selectedSummaryRows,
         firstColumnLabel: _construct1StColumnLabel(this),
-        extraStyle: {}
+        extraStyle: {},
+        rows: [],
+        rowMultiplier: 0,
+        hasMoreRows: false,
+        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100
     };
 }
 
@@ -88,8 +92,10 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page) {
     this.setState({
+        //rowMultiplier: this.state.rowMultiplier + 1
         currentPage: page
     });
+
 }
 
 /*

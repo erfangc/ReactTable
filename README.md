@@ -49,6 +49,8 @@ rowKey             |String          |specifies the property in the data array th
 customMenuItems    |Object          |specifies custom header menu options.  Each key of the given object corresponds to the title of the new menu option and the value is an object e.g. `{infoBox: "columnDataPoint"}`.  `infoBox` displays a box whose contents are equal to the columnDef's columnDataPoint on hover of the menu item. As of right now, infoBox is the only supported custom menu object type. This will only appear in columns where columnDataPoint exists in columnDef.
 presort            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
 disableExporting   |boolean         |if true, disables functionality to export table to XLS or PDF
+disableInfiniteScrolling    |boolean|If true, disables infinite scrolling and uses pagination
+itemsPerScroll     |integer         |The number of entries to add to each "infinite scroll"
 
 ## Table Usage Example
 ```js
@@ -96,7 +98,7 @@ clearAllRowSelections() | undefined |Clears all detail and summary row selection
 getRowSelectionStates() | Object |Returns an object with two entries: One with each of detail and summary row selections
 addColumn(columnDef, data) | undefined | Adds (or updates by checking `colTag`) a column to the table. If `data` is passed in, `data` is replaced as the new data object in table
 redoPresort() | undefined | Redos the `preSort` from the table definition.
-replaceData(data) | undefined | Sets the passed in `data` to be the data object in the table
+replaceData(data, stopPresort) | undefined | Sets the passed in `data` to be the data object in the table. Passing true to the second argument will not resort the selection in accordance to the preSort given when the table was created.
 setStyleByKey(key, styleObj) | undefined | For a given rowKey, sets a detail row to have extra styling per the passed in styleObj.
 
 #### Example

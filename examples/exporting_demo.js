@@ -42,7 +42,7 @@ $(function () {
 
         }
     ];
-    $.get('sample_data_small.json').success(function (data) {
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {
@@ -58,6 +58,8 @@ $(function () {
             cornerIcon: '../src/filter_icon.png',
             //defaultMenuItems: ['sort'],
             //groupBy: groupBy,
+            //disableInfiniteScrolling: true,
+            //itemsPerScroll: 500,
             rowKey: 'id',
             customMenuItems: {
                 Definition: {

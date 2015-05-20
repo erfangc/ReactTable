@@ -651,6 +651,69 @@ function parseString(data){
     return content_data;
 };/** @jsx React.DOM */
 
+function topPosition(domElt) {
+    if (!domElt) {
+        return 0;
+    }
+    return domElt.offsetTop + topPosition(domElt.offsetParent);
+}
+
+var InfiniteScroll = React.createClass({
+    displayName: 'InfiniteScroll',
+    propTypes: {
+        pageStart: React.PropTypes.number,
+        threshold: React.PropTypes.number,
+        loadMore: React.PropTypes.func.isRequired,
+        hasMore: React.PropTypes.bool
+    },
+    getDefaultProps: function () {
+        return {
+            pageStart: 0,
+            hasMore: false,
+            threshold: 250
+        };
+    },
+    componentDidMount: function () {
+        this.pageLoaded = this.props.pageStart;
+        this.attachScrollListener();
+    },
+    componentDidUpdate: function () {
+        this.attachScrollListener();
+    },
+    render: function () {
+        var props = this.props;
+        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
+    },
+    scrollListener: function () {
+        var el = this.getDOMNode();
+        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
+            this.detachScrollListener();
+            // call loadMore after detachScrollListener to allow
+            // for non-async loadMore functions
+            this.props.loadMore(this.pageLoaded += 1);
+        }
+    },
+    attachScrollListener: function () {
+        if (!this.props.hasMore) {
+            return;
+        }
+        window.addEventListener('scroll', this.scrollListener);
+        window.addEventListener('resize', this.scrollListener);
+        this.scrollListener();
+    },
+    detachScrollListener: function () {
+        window.removeEventListener('scroll', this.scrollListener);
+        window.removeEventListener('resize', this.scrollListener);
+    },
+    componentWillUnmount: function () {
+        this.detachScrollListener();
+    }
+});
+InfiniteScroll.setDefaultLoader = function (loader) {
+    InfiniteScroll._defaultLoader = loader;
+};;/** @jsx React.DOM */
+
 /**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
@@ -797,7 +860,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             }
         }
     },
-    replaceData: function (data) {
+    replaceData: function (data, stopPresort) {
         this.props.data = data;
         var rootNode = createTree(this.props);
         this.setState({
@@ -805,9 +868,11 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1
         });
         var table = this;
-        setTimeout(function () {
-            table.redoPresort();
-        });
+        if( !stopPresort ) {
+            setTimeout(function () {
+                table.redoPresort();
+            });
+        }
     },
     setStyleByKey: function (key, style) {
         this.state.extraStyle[key] = style;
@@ -815,9 +880,21 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             extraStyle: this.state.extraStyle
         });
     },
+    handleScroll: function(e){
+        var target = $(e.target);
+        var scrolled = target.scrollTop();
+        var scrolledHeight = target.height();
+        var totalHeight = target.find("tbody").height();
+        if( scrolled / (totalHeight-scrolledHeight) > .8 ){
+            this.setState({
+                rowMultiplier: this.state.rowMultiplier + 1
+            });
+        }
+    },
     /* ----------------------------------------- */
 
     componentDidMount: function () {
+        $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 0);
@@ -839,10 +916,32 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
+        $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
     },
     componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
+    },
+    addMoreRows: function(){
+        var rasterizedData = rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        });
+
+
+        var upperBound = (this.state.rowMultiplier + 1) * this.state.itemsPerScroll;
+        var rowsToDisplay = [];
+
+        if( this.state.rows.length < upperBound ) {
+            var lowerBound = this.state.rowMultiplier * this.state.itemsPerScroll;
+            rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
+            this.state.rows = this.state.rows.concat(rowsToDisplay.map(rowMapper, this));
+        }
+        else{
+            rowsToDisplay = rasterizedData.slice(0, upperBound);
+            this.state.rows = rowsToDisplay.map(rowMapper, this);
+        }
     },
     render: function () {
         var rasterizedData = rasterizeTree({
@@ -852,22 +951,15 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
 
         var paginationAttr = _getPageArithmetics(this, rasterizedData);
-        var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
 
-        var rows = rowsToDisplay.map(function (row) {
-            var rowKey = this.props.rowKey;
-            var generatedKey = generateRowKey(row, rowKey);
-            return (Row({
-                key: generatedKey, 
-                data: row, 
-                extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
-                isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
-                onSelect: this.handleSelect, 
-                onRightClick: this.props.onRightClick, 
-                toggleHide: this.handleToggleHide, 
-                columnDefs: this.state.columnDefs}
-                ));
-        }, this);
+        if( this.props.disableInfiniteScrolling ) {
+            var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
+
+            this.state.rows = rowsToDisplay.map(rowMapper, this);
+        }
+        else{
+            this.addMoreRows();
+        }
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
@@ -878,18 +970,24 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
-
+        
+        console.log(this.state.rows.length);
         return (
             React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
                 React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    React.DOM.table({className: "rt-table"}, 
-                        React.DOM.tbody(null, 
-                        rows
+                    InfiniteScroll({
+                        loadMore: this.addMoreRows, 
+                        hasMore: this.state.hasMore, 
+                        loader: React.DOM.div({className: "loader"}, "Loading ...")}, 
+                        React.DOM.table({className: "rt-table"}, 
+                            React.DOM.tbody(null, 
+                                this.state.rows
+                            )
                         )
                     )
                 ), 
-                footer
+                this.props.disableInfiniteScrolling ? footer : null
             )
         );
     }
@@ -1044,6 +1142,21 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
+function rowMapper(row){
+    var rowKey = this.props.rowKey;
+    var generatedKey = generateRowKey(row, rowKey);
+    return (Row({
+        key: generatedKey, 
+        data: row, 
+        extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
+        isSelected: _isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows), 
+        onSelect: this.handleSelect, 
+        onRightClick: this.props.onRightClick, 
+        toggleHide: this.handleToggleHide, 
+        columnDefs: this.state.columnDefs}
+    ));
+}
+
 function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
     if (!(adjustCount >= 0))
@@ -1175,7 +1288,11 @@ function _computePageDisplayRange(currentPage, maxDisplayedPages) {
         selectedDetailRows: selections.selectedDetailRows,
         selectedSummaryRows: selections.selectedSummaryRows,
         firstColumnLabel: _construct1StColumnLabel(this),
-        extraStyle: {}
+        extraStyle: {},
+        rows: [],
+        rowMultiplier: 0,
+        hasMoreRows: false,
+        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100
     };
 }
 
@@ -1252,8 +1369,10 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page) {
     this.setState({
+        //rowMultiplier: this.state.rowMultiplier + 1
         currentPage: page
     });
+
 }
 
 /*
