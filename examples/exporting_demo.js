@@ -68,9 +68,9 @@ $(function () {
             },
             data: testData,
             onRightClick: function (row, event) {
-                console.log(row);
-                console.log(state);
                 event.preventDefault();
+                console.log(row);
+                console.log(event);
                 //alert("sweet right click on id " + row.id + "!");
             },
             height: "300px",
@@ -89,7 +89,6 @@ $(function () {
             onSummarySelectCallback: function (result, state) {
                 console.log(result);
                 console.log(state);
-                console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
         var table1 = React.render(React.createElement(ReactTable, options), document.getElementById("table"));

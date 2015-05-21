@@ -219,12 +219,12 @@ var ReactTable = React.createClass({
         var upperBound = (this.state.rowMultiplier + 1) * this.state.itemsPerScroll;
         var rowsToDisplay = [];
 
-        if( this.state.rows.length < upperBound ) {
+        if( this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length ) {
             var lowerBound = this.state.rowMultiplier * this.state.itemsPerScroll;
             rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
             this.state.rows = this.state.rows.concat(rowsToDisplay.map(rowMapper, this));
         }
-        else{
+        else {
             rowsToDisplay = rasterizedData.slice(0, upperBound);
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
@@ -257,15 +257,13 @@ var ReactTable = React.createClass({
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
         
-        console.log(this.state.rows.length);
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
                 <div style={containerStyle} className="rt-scrollable">
                     <InfiniteScroll
                         loadMore={this.addMoreRows}
-                        hasMore={this.state.hasMore}
-                        loader={<div className="loader">Loading ...</div>}>
+                        hasMore={this.state.hasMore}>
                         <table className="rt-table">
                             <tbody>
                                 {this.state.rows}
@@ -311,7 +309,7 @@ var Row = React.createClass({
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         var styles = {
-            "cursor": this.props.data.isDetail ? "pointer" : "inherit"
+            "cursor": "pointer"
         };
         for (var attrname in this.props.extraStyle) {
             styles[attrname] = this.props.extraStyle[attrname];
