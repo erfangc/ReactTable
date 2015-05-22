@@ -60,6 +60,7 @@ $(function () {
             //groupBy: groupBy,
             //disableInfiniteScrolling: true,
             //itemsPerScroll: 500,
+            pageSize: 1000,
             rowKey: 'id',
             customMenuItems: {
                 Definition: {

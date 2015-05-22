@@ -13,7 +13,6 @@ function ReactTableGetInitialState() {
         firstColumnLabel: _construct1StColumnLabel(this),
         extraStyle: {},
         rows: [],
-        rowMultiplier: 0,
         hasMoreRows: false,
         itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100
     };

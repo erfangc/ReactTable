@@ -173,7 +173,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var totalHeight = target.find("tbody").height();
         if( scrolled / (totalHeight-scrolledHeight) > .8 ){
             this.setState({
-                rowMultiplier: this.state.rowMultiplier + 1
+                rows: this.addMoreRows(true)
             });
         }
     },
@@ -208,25 +208,36 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addMoreRows: function(){
+    addMoreRows: function(calledFromScroll){
+        if( this.props.justAdded ){
+            console.log("just added");
+            this.props.justAdded = false;
+            return this.state.rows;
+        }
+        console.log("rasterizing");
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
         });
 
+        if( !calledFromScroll )
+            this.props.rowMultiplier = this.props.rowMultiplier ? this.props.rowMultiplier : 0;
+        else
+            this.props.rowMultiplier = (this.props.rowMultiplier === undefined ? 0 : this.props.rowMultiplier + 1);
 
-        var upperBound = (this.state.rowMultiplier + 1) * this.state.itemsPerScroll;
+        var upperBound = (this.props.rowMultiplier + 1) * this.state.itemsPerScroll;
         var rowsToDisplay = [];
 
-        if( this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length ) {
-            var lowerBound = this.state.rowMultiplier * this.state.itemsPerScroll;
+        if( calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length ) {
+            var lowerBound = this.state.rows.length;
             rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
-            this.state.rows = this.state.rows.concat(rowsToDisplay.map(rowMapper, this));
+            this.props.justAdded = true;
+            return this.state.rows.concat(rowsToDisplay.map(rowMapper, this))
         }
         else {
             rowsToDisplay = rasterizedData.slice(0, upperBound);
-            this.state.rows = rowsToDisplay.map(rowMapper, this);
+            return rowsToDisplay.map(rowMapper, this)
         }
     },
     render: function () {
@@ -244,7 +255,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
         else{
-            this.addMoreRows();
+            this.state.rows = this.addMoreRows();
         }
 
         var headers = buildHeaders(this);
