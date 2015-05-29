@@ -14,6 +14,7 @@ var ReactTable = React.createClass({
 
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
+    handleAddSort: ReactTableHandleAddSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -151,7 +152,10 @@ var ReactTable = React.createClass({
         var rootNode = createTree(this.props);
         this.setState({
             rootNode: rootNode,
-            currentPage: 1
+            currentPage: 1,
+            sortAsc: undefined,
+            columnDefSorted: undefined,
+            filterInPlace: {}
         });
         var table = this;
         if( !stopPresort ) {
@@ -187,7 +191,7 @@ var ReactTable = React.createClass({
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 500);
-        document.addEventListener('click', adjustHeaders.bind(this));
+        document.addEventListener('click', docClick.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
         $node.find(".rt-scrollable").bind('scroll', function () {
@@ -200,6 +204,8 @@ var ReactTable = React.createClass({
             table.redoPresort();
         });
     },
+    componentWillMount: function(){
+    },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
         $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
@@ -210,11 +216,9 @@ var ReactTable = React.createClass({
     },
     addMoreRows: function(calledFromScroll){
         if( this.props.justAdded ){
-            console.log("just added");
             this.props.justAdded = false;
             return this.state.rows;
         }
-        console.log("rasterizing");
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
@@ -251,12 +255,10 @@ var ReactTable = React.createClass({
 
         if( this.props.disableInfiniteScrolling ) {
             var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
-
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
-        else{
+        else
             this.state.rows = this.addMoreRows();
-        }
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
@@ -450,6 +452,18 @@ function rowMapper(row){
         toggleHide={this.handleToggleHide}
         columnDefs={this.state.columnDefs}
     />);
+}
+
+function docClick(e){
+    adjustHeaders.call(this);
+    // Remove filter-in-place boxes if they are open and they weren't clicked on
+    if( !jQuery.isEmptyObject(this.state.filterInPlace) ){
+        if( !($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element")) ) {
+            this.setState({
+                filterInPlace: {}
+            });
+        }
+    }
 }
 
 function adjustHeaders(adjustCount) {

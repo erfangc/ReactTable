@@ -52,8 +52,11 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
-            React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc")
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, "Add Sort Asc"),
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, "Add Sort Dsc"),
+            React.DOM.div({className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
         ],
         summarize: [
             SummarizeControl({table: table, columnDef: columnDef}),
@@ -101,10 +104,21 @@ function _addMenuItems(master, children) {
         master.push(children[j])
 }
 
+function toggleFilterBox(table, colTag){
+    var fip = table.state.filterInPlace;
+    fip[colTag] = !fip[colTag];
+    table.setState({
+        filterInPlace: fip
+    });
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        React.DOM.div({className: "rt-headers-container"}, 
+        React.DOM.div({className: "rt-headers-container", 
+            onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
             React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
                 React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
@@ -117,14 +131,26 @@ function buildHeaders(table) {
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
+    var ss = {
+        width: "100%"
+    };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+        // bound this on <a> tag: onClick={toggleFilterBox.bind(null, table, columnDef.colTag)}
         headerColumns.push(
-            React.DOM.div({className: "rt-headers-container"}, 
+            React.DOM.div({className: "rt-headers-container", 
+                onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                               table.handleSort.bind(null, columnDef, true) :
+                                  (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                                   table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                    React.DOM.a({className: textClasses}, 
+                        columnDef.text
+                    ), 
+                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"})
                 ), 
                 React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -143,6 +169,7 @@ function buildHeaders(table) {
         corner = React.DOM.img({src: table.props.cornerIcon});
         classString = "btn-link rt-corner-image";
     }
+
 
     // the plus sign at the end
     headerColumns.push(

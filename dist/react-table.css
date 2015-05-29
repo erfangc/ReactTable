@@ -130,6 +130,9 @@
   padding-left: 4px;
   padding-right: 4px; }
 
+.rt-hide {
+  display: none; }
+
 /* Pagination */
 .rt-table-container .pagination {
   display: inline-block;

@@ -144,8 +144,11 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, true)}, "Sort Asc"),
-            React.DOM.div({className: "menu-item", onClick: table.handleSort.bind(null, columnDef, false)}, "Sort Dsc")
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, "Add Sort Asc"),
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, "Add Sort Dsc"),
+            React.DOM.div({className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
         ],
         summarize: [
             SummarizeControl({table: table, columnDef: columnDef}),
@@ -193,10 +196,21 @@ function _addMenuItems(master, children) {
         master.push(children[j])
 }
 
+function toggleFilterBox(table, colTag){
+    var fip = table.state.filterInPlace;
+    fip[colTag] = !fip[colTag];
+    table.setState({
+        filterInPlace: fip
+    });
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        React.DOM.div({className: "rt-headers-container"}, 
+        React.DOM.div({className: "rt-headers-container", 
+            onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
             React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
                 React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
@@ -209,14 +223,26 @@ function buildHeaders(table) {
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
+    var ss = {
+        width: "100%"
+    };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+        // bound this on <a> tag: onClick={toggleFilterBox.bind(null, table, columnDef.colTag)}
         headerColumns.push(
-            React.DOM.div({className: "rt-headers-container"}, 
+            React.DOM.div({className: "rt-headers-container", 
+                onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                               table.handleSort.bind(null, columnDef, true) :
+                                  (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                                   table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: "btn-link rt-header-anchor-text"}, columnDef.text)
+                    React.DOM.a({className: textClasses}, 
+                        columnDef.text
+                    ), 
+                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"})
                 ), 
                 React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -235,6 +261,7 @@ function buildHeaders(table) {
         corner = React.DOM.img({src: table.props.cornerIcon});
         classString = "btn-link rt-corner-image";
     }
+
 
     // the plus sign at the end
     headerColumns.push(
@@ -728,6 +755,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
+    handleAddSort: ReactTableHandleAddSort,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -865,7 +893,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var rootNode = createTree(this.props);
         this.setState({
             rootNode: rootNode,
-            currentPage: 1
+            currentPage: 1,
+            sortAsc: undefined,
+            columnDefSorted: undefined,
+            filterInPlace: {}
         });
         var table = this;
         if( !stopPresort ) {
@@ -901,7 +932,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 500);
-        document.addEventListener('click', adjustHeaders.bind(this));
+        document.addEventListener('click', docClick.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
         $node.find(".rt-scrollable").bind('scroll', function () {
@@ -914,6 +945,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             table.redoPresort();
         });
     },
+    componentWillMount: function(){
+    },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
         $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
@@ -924,11 +957,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     },
     addMoreRows: function(calledFromScroll){
         if( this.props.justAdded ){
-            console.log("just added");
             this.props.justAdded = false;
             return this.state.rows;
         }
-        console.log("rasterizing");
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
@@ -965,12 +996,10 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         if( this.props.disableInfiniteScrolling ) {
             var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
-
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
-        else{
+        else
             this.state.rows = this.addMoreRows();
-        }
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
@@ -1166,6 +1195,18 @@ function rowMapper(row){
     ));
 }
 
+function docClick(e){
+    adjustHeaders.call(this);
+    // Remove filter-in-place boxes if they are open and they weren't clicked on
+    if( !jQuery.isEmptyObject(this.state.filterInPlace) ){
+        if( !($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element")) ) {
+            this.setState({
+                filterInPlace: {}
+            });
+        }
+    }
+}
+
 function adjustHeaders(adjustCount) {
     var id = this.state.uniqueId;
     if (!(adjustCount >= 0))
@@ -1300,7 +1341,8 @@ function _computePageDisplayRange(currentPage, maxDisplayedPages) {
         extraStyle: {},
         rows: [],
         hasMoreRows: false,
-        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100
+        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100,
+        filterInPlace: {}
     };
 }
 
@@ -1326,7 +1368,26 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         recursive: true,
         sortAsc: sortAsc
     });
-    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
+    this.props.currentSortStates = [sortAsc ? sortFn : reverseSortFn];
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy, filterInPlace: {}});
+}
+
+function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
+    if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
+        ReactTableHandleSort.bind(columnDefToSortBy, sortAsc);
+        return;
+    }
+    var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
+    var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
+    this.state.rootNode.addSortToChildren({
+        sortFn: sortFn,
+        reverseSortFn: reverseSortFn,
+        recursive: true,
+        sortAsc: sortAsc,
+        oldSortFns: this.props.currentSortStates
+    });
+    this.props.currentSortStates.push(sortAsc ? sortFn : reverseSortFn);
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy, filterInPlace: {}});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
@@ -1377,7 +1438,6 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page) {
     this.setState({
-        //rowMultiplier: this.state.rowMultiplier + 1
         currentPage: page
     });
 
@@ -1670,6 +1730,70 @@ TreeNode.prototype.sortChildren = function (options) {
         for (var i = 0; i < this.children.length; i++)
             this.children[i].sortChildren({sortFn: sortFn, reverseSortFn: options.reverseSortFn,
                                             recursive: recursive, sortAsc: sortAsc});
+    }
+}
+
+TreeNode.prototype.addSortToChildren = function (options) {
+    var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
+        oldSortFns = options.oldSortFns,
+        recursive = options.recursive, sortAsc = options.sortAsc;
+
+    var multiplier = sortAsc == true ? 1 : -1;
+    var childrenToAddSort = [];
+
+    for( var i=0; i+1<this.children.length; i++ ){
+        transformSortCandidates(this.children, i, true, i+2>=this.children.length);
+    }
+
+    if( !this.hasChild() ) {
+        for (var i = 0; i + 1 < this.ultimateChildren.length; i++) {
+            transformSortCandidates(this.ultimateChildren, i, false, i+2>=this.ultimateChildren.length);
+        }
+    }
+
+    if (recursive) {
+        for (var i = 0; i < this.children.length; i++)
+            this.children[i].addSortToChildren(options);
+    }
+
+    function transformSortCandidates(nodes, i, isChild, lastElement){
+        if( childrenToAddSort.length == 0 )
+            childrenToAddSort.push( $.extend( {}, nodes[i] ) );
+
+        var tieFound = true;
+        for( var j=0; j<oldSortFns.length; j++ ){
+            if( oldSortFns[j](extractData(nodes[i], isChild), extractData(nodes[i+1], isChild)) !== 0 ){
+                tieFound = false;
+                break;
+            }
+        }
+        if( tieFound && !lastElement ){
+            childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+        }
+        else if( childrenToAddSort.length > 1 ){
+            if( lastElement )
+                childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+            // Sort next level
+            childrenToAddSort.sort(function (a, b) {
+                if( !reverseSortFn || multiplier === 1 )
+                    return multiplier * sortFn(extractData(a, isChild), extractData(b, isChild));
+                else
+                    return reverseSortFn(extractData(a, isChild), extractData(b, isChild));
+            });
+            // Replace ultimate children with correct next level of sorting
+            for( var ii=0; ii<childrenToAddSort.length; ii++ ){
+                var childIndexToReplace = i + ii + 1 - (childrenToAddSort.length);
+                nodes[childIndexToReplace] = childrenToAddSort[ii];
+            }
+            childrenToAddSort = [];
+        }
+        else{
+            childrenToAddSort = [];
+        }
+    }
+
+    function extractData(obj, isChild){
+        return isChild ? obj.rowData : obj;
     }
 }
 

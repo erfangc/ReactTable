@@ -106,6 +106,70 @@ TreeNode.prototype.sortChildren = function (options) {
     }
 }
 
+TreeNode.prototype.addSortToChildren = function (options) {
+    var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
+        oldSortFns = options.oldSortFns,
+        recursive = options.recursive, sortAsc = options.sortAsc;
+
+    var multiplier = sortAsc == true ? 1 : -1;
+    var childrenToAddSort = [];
+
+    for( var i=0; i+1<this.children.length; i++ ){
+        transformSortCandidates(this.children, i, true, i+2>=this.children.length);
+    }
+
+    if( !this.hasChild() ) {
+        for (var i = 0; i + 1 < this.ultimateChildren.length; i++) {
+            transformSortCandidates(this.ultimateChildren, i, false, i+2>=this.ultimateChildren.length);
+        }
+    }
+
+    if (recursive) {
+        for (var i = 0; i < this.children.length; i++)
+            this.children[i].addSortToChildren(options);
+    }
+
+    function transformSortCandidates(nodes, i, isChild, lastElement){
+        if( childrenToAddSort.length == 0 )
+            childrenToAddSort.push( $.extend( {}, nodes[i] ) );
+
+        var tieFound = true;
+        for( var j=0; j<oldSortFns.length; j++ ){
+            if( oldSortFns[j](extractData(nodes[i], isChild), extractData(nodes[i+1], isChild)) !== 0 ){
+                tieFound = false;
+                break;
+            }
+        }
+        if( tieFound && !lastElement ){
+            childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+        }
+        else if( childrenToAddSort.length > 1 ){
+            if( lastElement )
+                childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+            // Sort next level
+            childrenToAddSort.sort(function (a, b) {
+                if( !reverseSortFn || multiplier === 1 )
+                    return multiplier * sortFn(extractData(a, isChild), extractData(b, isChild));
+                else
+                    return reverseSortFn(extractData(a, isChild), extractData(b, isChild));
+            });
+            // Replace ultimate children with correct next level of sorting
+            for( var ii=0; ii<childrenToAddSort.length; ii++ ){
+                var childIndexToReplace = i + ii + 1 - (childrenToAddSort.length);
+                nodes[childIndexToReplace] = childrenToAddSort[ii];
+            }
+            childrenToAddSort = [];
+        }
+        else{
+            childrenToAddSort = [];
+        }
+    }
+
+    function extractData(obj, isChild){
+        return isChild ? obj.rowData : obj;
+    }
+}
+
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {
     // test if children have sortIndex - if not skip sorting children
     if (this.hasChild() && _hasSortIndex(this.children[0])) {

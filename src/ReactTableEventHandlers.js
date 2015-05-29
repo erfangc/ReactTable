@@ -14,7 +14,8 @@ function ReactTableGetInitialState() {
         extraStyle: {},
         rows: [],
         hasMoreRows: false,
-        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100
+        itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100,
+        filterInPlace: {}
     };
 }
 
@@ -40,7 +41,26 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
         recursive: true,
         sortAsc: sortAsc
     });
-    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy});
+    this.props.currentSortStates = [sortAsc ? sortFn : reverseSortFn];
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy, filterInPlace: {}});
+}
+
+function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
+    if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
+        ReactTableHandleSort.bind(columnDefToSortBy, sortAsc);
+        return;
+    }
+    var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
+    var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
+    this.state.rootNode.addSortToChildren({
+        sortFn: sortFn,
+        reverseSortFn: reverseSortFn,
+        recursive: true,
+        sortAsc: sortAsc,
+        oldSortFns: this.props.currentSortStates
+    });
+    this.props.currentSortStates.push(sortAsc ? sortFn : reverseSortFn);
+    this.setState({rootNode: this.state.rootNode, sortAsc: sortAsc, columnDefSorted: columnDefToSortBy, filterInPlace: {}});
 }
 
 function ReactTableHandleGroupBy(columnDef, buckets) {
@@ -91,7 +111,6 @@ function ReactTableHandleToggleHide(summaryRow, event) {
 
 function ReactTableHandlePageClick(page) {
     this.setState({
-        //rowMultiplier: this.state.rowMultiplier + 1
         currentPage: page
     });
 

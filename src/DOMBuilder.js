@@ -52,8 +52,11 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
-            <div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
+            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
+            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, true)}>Add Sort Asc</div>,
+            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, false)}>Add Sort Dsc</div>,
+            <div className="menu-item" onClick={table.replaceData.bind(null, table.props.data, true)}>Clear Sort</div>
         ],
         summarize: [
             <SummarizeControl table={table} columnDef={columnDef}/>,
@@ -101,10 +104,21 @@ function _addMenuItems(master, children) {
         master.push(children[j])
 }
 
+function toggleFilterBox(table, colTag){
+    var fip = table.state.filterInPlace;
+    fip[colTag] = !fip[colTag];
+    table.setState({
+        filterInPlace: fip
+    });
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        <div className="rt-headers-container">
+        <div className="rt-headers-container"
+            onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
                 <a className="btn-link rt-header-anchor-text">{table.state.firstColumnLabel.join("/")}</a>
             </div>
@@ -117,14 +131,26 @@ function buildHeaders(table) {
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
     );
+    var ss = {
+        width: "100%"
+    };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+        // bound this on <a> tag: onClick={toggleFilterBox.bind(null, table, columnDef.colTag)}
         headerColumns.push(
-            <div className="rt-headers-container">
+            <div className="rt-headers-container"
+                onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                               table.handleSort.bind(null, columnDef, true) :
+                                  (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                                   table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a className="btn-link rt-header-anchor-text">{columnDef.text}</a>
+                    <a className={textClasses} >
+                        {columnDef.text}
+                    </a>
+                    <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}/>
                 </div>
                 <div className="rt-caret-container">
                     {table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -143,6 +169,7 @@ function buildHeaders(table) {
         corner = <img src={table.props.cornerIcon}/>;
         classString = "btn-link rt-corner-image";
     }
+
 
     // the plus sign at the end
     headerColumns.push(
