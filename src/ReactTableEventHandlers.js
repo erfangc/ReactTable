@@ -53,7 +53,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
     // If it's not sorted yet, sort normally
     if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
-        ReactTableHandleSort(columnDefToSortBy, sortAsc);
+        this.handleSort(columnDefToSortBy, sortAsc);
         return;
     }
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);

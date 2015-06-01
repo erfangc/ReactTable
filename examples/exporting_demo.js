@@ -75,7 +75,7 @@ $(function () {
                 //alert("sweet right click on id " + row.id + "!");
             },
             height: "300px",
-            presort: {score_weight_factor: 'desc'},
+            //presort: {score_weight_factor: 'desc'},
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");

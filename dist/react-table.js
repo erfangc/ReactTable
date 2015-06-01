@@ -233,7 +233,7 @@ function buildHeaders(table) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
         var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
-        // bound this on <a> tag: onClick={toggleFilterBox.bind(null, table, columnDef.colTag)}
+        // bound this on <a> tag: onClick={table.props.disableFilter ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}}
         headerColumns.push(
             React.DOM.div({className: "rt-headers-container", 
                 onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
@@ -1385,7 +1385,7 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
     // If it's not sorted yet, sort normally
     if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
-        ReactTableHandleSort(columnDefToSortBy, sortAsc);
+        this.handleSort(columnDefToSortBy, sortAsc);
         return;
     }
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
@@ -1889,7 +1889,7 @@ function _rasterizeChildren(flatData, options) {
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++) {
-            if( !intermediateResult[j].hiddenByFilter )
+            if( !(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter) )
                 flatData.push(intermediateResult[j]);
         }
     }

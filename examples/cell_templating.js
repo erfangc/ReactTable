@@ -63,7 +63,7 @@ $(function () {
                 console.log(event);
             },
             height: "600px",
-            presort: {score_weight_factor: 'desc'},
+            //presort: {score_weight_factor: 'desc'},
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {

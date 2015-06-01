@@ -31,7 +31,7 @@ function _rasterizeChildren(flatData, options) {
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++) {
-            if( !intermediateResult[j].hiddenByFilter )
+            if( !(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter) )
                 flatData.push(intermediateResult[j]);
         }
     }
