@@ -30,17 +30,21 @@ function _rasterizeChildren(flatData, options) {
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
-        for (j = 0; j < intermediateResult.length; j++)
-            flatData.push(intermediateResult[j]);
+        for (j = 0; j < intermediateResult.length; j++) {
+            if( !intermediateResult[j].hiddenByFilter )
+                flatData.push(intermediateResult[j]);
+        }
     }
 }
 
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        detailRow.sectorPath = node.rowData.sectorPath;
-        detailRow.isDetail = true;
-        flatData.push(detailRow);
+        if( !detailRow.hiddenByFilter ) {
+            detailRow.sectorPath = node.rowData.sectorPath;
+            detailRow.isDetail = true;
+            flatData.push(detailRow);
+        }
     }
 }
 

@@ -132,7 +132,9 @@ function buildHeaders(table) {
         )
     );
     var ss = {
-        width: "100%"
+        width: "100%",
+        height: "13px",
+        padding: "0"
     };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
@@ -150,7 +152,8 @@ function buildHeaders(table) {
                     React.DOM.a({className: textClasses}, 
                         columnDef.text
                     ), 
-                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"})
+                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
+                           onChange: table.handleColumnFilter.bind(null, columnDef)})
                 ), 
                 React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&

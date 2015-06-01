@@ -32,6 +32,11 @@ function ReactTableHandleSelect(selectedRow) {
     }
 }
 
+function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, e.target.value);
+    this.setState({rootNode: this.state.rootNode});
+}
+
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
     var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
@@ -46,8 +51,9 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 }
 
 function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
+    // If it's not sorted yet, sort normally
     if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
-        ReactTableHandleSort.bind(columnDefToSortBy, sortAsc);
+        ReactTableHandleSort(columnDefToSortBy, sortAsc);
         return;
     }
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);

@@ -15,6 +15,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
+    handleColumnFilter: ReactTableHandleColumnFilter,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -155,7 +156,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1,
             sortAsc: undefined,
             columnDefSorted: undefined,
-            filterInPlace: {}
+            filterInPlace: {},
+            currentSortStates: []
         });
         var table = this;
         if( !stopPresort ) {

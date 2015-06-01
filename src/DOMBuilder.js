@@ -132,7 +132,9 @@ function buildHeaders(table) {
         </div>
     );
     var ss = {
-        width: "100%"
+        width: "100%",
+        height: "13px",
+        padding: "0"
     };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
@@ -147,10 +149,11 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a className={textClasses} >
+                    <a className={textClasses}>
                         {columnDef.text}
                     </a>
-                    <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}/>
+                    <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}
+                           onChange={table.handleColumnFilter.bind(null, columnDef)}/>
                 </div>
                 <div className="rt-caret-container">
                     {table.state.sortAsc != undefined && table.state.sortAsc === true &&

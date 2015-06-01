@@ -224,7 +224,9 @@ function buildHeaders(table) {
         )
     );
     var ss = {
-        width: "100%"
+        width: "100%",
+        height: "13px",
+        padding: "0"
     };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
@@ -242,7 +244,8 @@ function buildHeaders(table) {
                     React.DOM.a({className: textClasses}, 
                         columnDef.text
                     ), 
-                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"})
+                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
+                           onChange: table.handleColumnFilter.bind(null, columnDef)})
                 ), 
                 React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -508,7 +511,7 @@ function _mostDataPoints(options) {
     // Row Vs Column
     var rowCount=1;
     $.each(data.data, function(i, value) {
-        if( value.length > 0 && value[0].match("Grand Total") ) {
+        if( value.length > 0 && typeof value[0].match === "function" && value[0].match("Grand Total") ) {
             rowCount++;
             return;
         }
@@ -596,7 +599,7 @@ function exportToPDF(data){
     });
 
     $.each(data.data, function(i, value) {
-        if( value.length > 0 && value[0].match("Grand Total") ) {
+        if( value.length > 0 && typeof value[0].match === "function" && value[0].match("Grand Total") ) {
             return;
         }
         $.each(value, function(index, value2) {
@@ -631,7 +634,7 @@ function exportToPDF(data){
     var rowCalc = 1;
 
     $.each(data.data, function(i, value) {
-        if( value.length > 0 && value[0].match("Grand Total") ) {
+        if( value.length > 0 && typeof value[0].match === "function" && value[0].match("Grand Total") ) {
             return;
         }
         rowCalc++;
@@ -756,6 +759,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
+    handleColumnFilter: ReactTableHandleColumnFilter,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -896,7 +900,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1,
             sortAsc: undefined,
             columnDefSorted: undefined,
-            filterInPlace: {}
+            filterInPlace: {},
+            currentSortStates: []
         });
         var table = this;
         if( !stopPresort ) {
@@ -1359,6 +1364,11 @@ function ReactTableHandleSelect(selectedRow) {
     }
 }
 
+function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, e.target.value);
+    this.setState({rootNode: this.state.rootNode});
+}
+
 function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
     var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
@@ -1373,8 +1383,9 @@ function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
 }
 
 function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
+    // If it's not sorted yet, sort normally
     if( !this.props.currentSortStates || this.props.currentSortStates.length == 0 ) {
-        ReactTableHandleSort.bind(columnDefToSortBy, sortAsc);
+        ReactTableHandleSort(columnDefToSortBy, sortAsc);
         return;
     }
     var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
@@ -1632,15 +1643,16 @@ function _populateChildNodesForRow(rootNode, row, groupBy) {
  */
 function TreeNode(sectorTitle, parent) {
     // accessible properties
-    this.sectorTitle = sectorTitle
-    this.parent = parent
-    this.groupByColumnDef = {}
-    this.rowData = null
-    this.display = true
-    this.children = []
-    this.ultimateChildren = []
-    this.collapsed = this.parent != null ? true : false
-    this.sortIndex = null
+    this.sectorTitle = sectorTitle;
+    this.parent = parent;
+    this.groupByColumnDef = {};
+    this.rowData = null;
+    this.display = true;
+    this.children = [];
+    this.ultimateChildren = [];
+    this.collapsed = this.parent != null;
+    this.sortIndex = null;
+    this.hiddenByFilter = false;
     // private members
     this._childrenSectorNameMap = {}
 }
@@ -1662,11 +1674,11 @@ TreeNode.prototype.foldSubTree = function () {
             this.children[i].collapsed = false;
         this.children[i].foldSubTree();
     }
-}
+};
 
 TreeNode.prototype.hasChild = function () {
     return (this.children.length > 0);
-}
+};
 
 TreeNode.prototype.expandRecursively = function () {
     var i;
@@ -1674,7 +1686,7 @@ TreeNode.prototype.expandRecursively = function () {
         this.children[i].collapsed = false;
         this.children[i].expandRecursively();
     }
-}
+};
 
 /**
  * Appends the given row into the ultimateChildren of the specified child node of the current node
@@ -1695,7 +1707,7 @@ TreeNode.prototype.appendRowToChildren = function (options) {
     if (childRow)
         this._childrenSectorNameMap[childSectorName].appendUltimateChild(childRow);
     return this._childrenSectorNameMap[childSectorName];
-}
+};
 
 TreeNode.prototype.getSectorPath = function () {
     var result = [this.sectorTitle], prevParent = this.parent;
@@ -1704,7 +1716,7 @@ TreeNode.prototype.getSectorPath = function () {
         prevParent = prevParent.parent;
     }
     return result;
-}
+};
 
 TreeNode.prototype.sortChildren = function (options) {
     var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
@@ -1731,7 +1743,7 @@ TreeNode.prototype.sortChildren = function (options) {
             this.children[i].sortChildren({sortFn: sortFn, reverseSortFn: options.reverseSortFn,
                                             recursive: recursive, sortAsc: sortAsc});
     }
-}
+};
 
 TreeNode.prototype.addSortToChildren = function (options) {
     var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
@@ -1795,7 +1807,32 @@ TreeNode.prototype.addSortToChildren = function (options) {
     function extractData(obj, isChild){
         return isChild ? obj.rowData : obj;
     }
-}
+};
+
+TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
+    // Filter aggregations?
+    for( var i=0; i<this.children.length; i++ ){
+        // Call recursively to filter leaf nodes first
+        this.children[i].filterByColumn(columnDef,textToFilterBy);
+        // Check to see if all children are hidden, then hide parent if so
+        var allChildrenHidden = true;
+        for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
+            if( !this.children[i].ultimateChildren[j].hiddenByFilter ){
+                allChildrenHidden = false;
+                break;
+            }
+        }
+        if( allChildrenHidden )
+            this.children[i].hiddenByFilter = true;
+    }
+    if( !this.hasChild() ) {
+        for (var i = 0; i < this.ultimateChildren.length; i++) {
+            if (this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1) {
+                this.ultimateChildren[i].hiddenByFilter = true;
+            }
+        }
+    }
+};
 
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {
     // test if children have sortIndex - if not skip sorting children
@@ -1809,7 +1846,7 @@ TreeNode.prototype.sortRecursivelyBySortIndex = function () {
     // sort children's children
     for (var i = 0; i < this.children.length; i++)
         this.children[i].sortRecursivelyBySortIndex();
-}
+};
 
 /*
  * ----------------------------------------------------------------------
@@ -1851,17 +1888,21 @@ function _rasterizeChildren(flatData, options) {
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
-        for (j = 0; j < intermediateResult.length; j++)
-            flatData.push(intermediateResult[j]);
+        for (j = 0; j < intermediateResult.length; j++) {
+            if( !intermediateResult[j].hiddenByFilter )
+                flatData.push(intermediateResult[j]);
+        }
     }
 }
 
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        detailRow.sectorPath = node.rowData.sectorPath;
-        detailRow.isDetail = true;
-        flatData.push(detailRow);
+        if( !detailRow.hiddenByFilter ) {
+            detailRow.sectorPath = node.rowData.sectorPath;
+            detailRow.isDetail = true;
+            flatData.push(detailRow);
+        }
     }
 }
 
