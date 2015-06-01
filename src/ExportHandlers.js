@@ -1,4 +1,4 @@
-function exportToExcel(data){
+function exportToExcel(data, filename){
     //console.log($(this).html());
     var excel="<table><tr>";
     // Header
@@ -67,17 +67,21 @@ function exportToExcel(data){
         ieExcelFrame.document.write(excelFile);
         ieExcelFrame.document.close();
         ieExcelFrame.focus();
-        ieExcelFrame.document.execCommand("SaveAs",true,"exportData.xls");
+        ieExcelFrame.document.execCommand("SaveAs",true, filename + ".xls");
 
         tempFrame.remove();
     }
     else{          //other browsers
         var base64data = "base64," + $.base64.encode(excelFile);
-        window.open('data:application/vnd.ms-excel;filename=exportData.doc;' + base64data);
+        $("<a></a>").attr("download", filename)
+                    .attr("href", 'data:application/vnd.ms-excel;filename=' + filename + '.doc;' + base64data)
+                    .append("<div id='download-me-now'></div>")
+                    .appendTo("body");
+        $("#download-me-now").click().remove();
     }
 }
 
-function exportToPDF(data){
+function exportToPDF(data, filename){
 
     var defaults = {
         separator: ',',
@@ -155,7 +159,7 @@ function exportToPDF(data){
     });
 
     // Output as Data URI
-    doc.output('save', 'AMI-table.pdf');
+    doc.output('save', filename + '.pdf');
 
 }
 

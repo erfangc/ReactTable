@@ -61,9 +61,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
 
         if( type === "excel" )
-            exportToExcel(objToExport);
+            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
         else if( type === "pdf" )
-            exportToPDF(objToExport);
+            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
 

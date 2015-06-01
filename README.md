@@ -49,6 +49,7 @@ rowKey             |String          |specifies the property in the data array th
 customMenuItems    |Object          |specifies custom header menu options.  Each key of the given object corresponds to the title of the new menu option and the value is an object e.g. `{infoBox: "columnDataPoint"}`.  `infoBox` displays a box whose contents are equal to the columnDef's columnDataPoint on hover of the menu item. As of right now, infoBox is the only supported custom menu object type. This will only appear in columns where columnDataPoint exists in columnDef.
 presort            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
 disableExporting   |boolean         |if true, disables functionality to export table to XLS or PDF
+filenameToSaveAs   |String          |(default: 'table-export') The filename to use to save XLS/PDF
 disableInfiniteScrolling    |boolean|If true, disables infinite scrolling and uses pagination
 itemsPerScroll     |integer         |The number of entries to add to each "infinite scroll"
 

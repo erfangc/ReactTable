@@ -61,6 +61,7 @@ $(function () {
             //disableInfiniteScrolling: true,
             //itemsPerScroll: 500,
             pageSize: 1000,
+            //filenameToSaveAs: "table-awesome",
             rowKey: 'id',
             customMenuItems: {
                 Definition: {
