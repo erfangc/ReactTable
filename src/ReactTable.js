@@ -156,9 +156,9 @@ var ReactTable = React.createClass({
             currentPage: 1,
             sortAsc: undefined,
             columnDefSorted: undefined,
-            filterInPlace: {},
-            currentSortStates: []
+            filterInPlace: {}
         });
+        this.props.currentSortStates = [];
         var table = this;
         if( !stopPresort ) {
             setTimeout(function () {

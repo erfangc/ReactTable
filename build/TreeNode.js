@@ -184,14 +184,11 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
                 break;
             }
         }
-        if( allChildrenHidden )
-            this.children[i].hiddenByFilter = true;
+        this.children[i].hiddenByFilter = allChildrenHidden;
     }
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
-            if (this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1) {
-                this.ultimateChildren[i].hiddenByFilter = true;
-            }
+            this.ultimateChildren[i].hiddenByFilter = this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1;
         }
     }
 };

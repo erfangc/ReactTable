@@ -241,7 +241,8 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: textClasses}, 
+                    React.DOM.a({className: textClasses
+                       }, 
                         columnDef.text
                     ), 
                     React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
@@ -498,7 +499,7 @@ function _mostDataPoints(options) {
         }
     }
     return best.index == -1 ? "" : options.data[best.index][options.columnDef.colTag];
-};function exportToExcel(data){
+};function exportToExcel(data, filename){
     //console.log($(this).html());
     var excel="<table><tr>";
     // Header
@@ -567,17 +568,21 @@ function _mostDataPoints(options) {
         ieExcelFrame.document.write(excelFile);
         ieExcelFrame.document.close();
         ieExcelFrame.focus();
-        ieExcelFrame.document.execCommand("SaveAs",true,"exportData.xls");
+        ieExcelFrame.document.execCommand("SaveAs",true, filename + ".xls");
 
         tempFrame.remove();
     }
     else{          //other browsers
         var base64data = "base64," + $.base64.encode(excelFile);
-        window.open('data:application/vnd.ms-excel;filename=exportData.doc;' + base64data);
+        $("<a></a>").attr("download", filename)
+                    .attr("href", 'data:application/vnd.ms-excel;filename=' + filename + '.doc;' + base64data)
+                    .append("<div id='download-me-now'></div>")
+                    .appendTo("body");
+        $("#download-me-now").click().remove();
     }
 }
 
-function exportToPDF(data){
+function exportToPDF(data, filename){
 
     var defaults = {
         separator: ',',
@@ -655,7 +660,7 @@ function exportToPDF(data){
     });
 
     // Output as Data URI
-    doc.output('save', 'AMI-table.pdf');
+    doc.output('save', filename + '.pdf');
 
 }
 
@@ -805,9 +810,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
 
         if( type === "excel" )
-            exportToExcel(objToExport);
+            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
         else if( type === "pdf" )
-            exportToPDF(objToExport);
+            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
 
@@ -900,9 +905,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             currentPage: 1,
             sortAsc: undefined,
             columnDefSorted: undefined,
-            filterInPlace: {},
-            currentSortStates: []
+            filterInPlace: {}
         });
+        this.props.currentSortStates = [];
         var table = this;
         if( !stopPresort ) {
             setTimeout(function () {
@@ -1365,7 +1370,8 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, e.target.value);
+    var filterText = e.target.value;
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText);
     this.setState({rootNode: this.state.rootNode});
 }
 
@@ -1822,14 +1828,11 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
                 break;
             }
         }
-        if( allChildrenHidden )
-            this.children[i].hiddenByFilter = true;
+        this.children[i].hiddenByFilter = allChildrenHidden;
     }
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
-            if (this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1) {
-                this.ultimateChildren[i].hiddenByFilter = true;
-            }
+            this.ultimateChildren[i].hiddenByFilter = this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1;
         }
     }
 };

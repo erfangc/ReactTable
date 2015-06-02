@@ -33,7 +33,8 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, e.target.value);
+    var filterText = e.target.value;
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText);
     this.setState({rootNode: this.state.rootNode});
 }
 

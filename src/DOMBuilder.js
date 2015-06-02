@@ -149,7 +149,8 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a className={textClasses}>
+                    <a className={textClasses}
+                       >
                         {columnDef.text}
                     </a>
                     <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}
