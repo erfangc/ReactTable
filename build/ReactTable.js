@@ -8,7 +8,7 @@
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: 'ReactTable',
+var ReactTable = React.createClass({displayName: "ReactTable",
 
     getInitialState: ReactTableGetInitialState,
 
@@ -32,7 +32,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         rootNode.expandRecursively();
         this.setState({rootNode: rootNode, currentPage: 1});
     },
-    handleDownload: function(type) {
+    handleDownload: function (type) {
         var reactTableData = this;
 
         var objToExport = {headers: [], data: []};
@@ -45,24 +45,24 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        $.each(this.props.columnDefs, function(){
+        $.each(this.props.columnDefs, function () {
             objToExport.headers.push(this.text);
         });
 
-        $.each(rasterizedData, function(){
-            if( this[firstColumn.colTag] === "Grand Total" )
+        $.each(rasterizedData, function () {
+            if (this[firstColumn.colTag] === "Grand Total")
                 return;
             var row = [];
             var datum = this;
-            $.each(reactTableData.props.columnDefs, function(){
-                row.push( buildCellLookAndFeel(this, datum).value );
+            $.each(reactTableData.props.columnDefs, function () {
+                row.push(buildCellLookAndFeel(this, datum).value);
             });
             objToExport.data.push(row);
         });
 
-        if( type === "excel" )
+        if (type === "excel")
             exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
-        else if( type === "pdf" )
+        else if (type === "pdf")
             exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
@@ -160,7 +160,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
         this.props.currentSortStates = [];
         var table = this;
-        if( !stopPresort ) {
+        if (!stopPresort) {
             setTimeout(function () {
                 table.redoPresort();
             });
@@ -172,12 +172,12 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             extraStyle: this.state.extraStyle
         });
     },
-    handleScroll: function(e){
+    handleScroll: function (e) {
         var target = $(e.target);
         var scrolled = target.scrollTop();
         var scrolledHeight = target.height();
         var totalHeight = target.find("tbody").height();
-        if( scrolled / (totalHeight-scrolledHeight) > .8 ){
+        if (scrolled / (totalHeight - scrolledHeight) > .8) {
             this.setState({
                 rows: this.addMoreRows(true)
             });
@@ -206,7 +206,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             table.redoPresort();
         });
     },
-    componentWillMount: function(){
+    componentWillMount: function () {
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -216,8 +216,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addMoreRows: function(calledFromScroll){
-        if( this.props.justAdded ){
+    addMoreRows: function (calledFromScroll) {
+        if (this.props.justAdded) {
             this.props.justAdded = false;
             return this.state.rows;
         }
@@ -227,7 +227,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        if( !calledFromScroll )
+        if (!calledFromScroll)
             this.props.rowMultiplier = this.props.rowMultiplier ? this.props.rowMultiplier : 0;
         else
             this.props.rowMultiplier = (this.props.rowMultiplier === undefined ? 0 : this.props.rowMultiplier + 1);
@@ -235,7 +235,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         var upperBound = (this.props.rowMultiplier + 1) * this.state.itemsPerScroll;
         var rowsToDisplay = [];
 
-        if( calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length ) {
+        if (calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length) {
             var lowerBound = this.state.rows.length;
             rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
             this.props.justAdded = true;
@@ -255,7 +255,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         var paginationAttr = _getPageArithmetics(this, rasterizedData);
 
-        if( this.props.disableInfiniteScrolling ) {
+        if (this.props.disableInfiniteScrolling) {
             var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
@@ -271,17 +271,17 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
-        
+
         return (
-            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
-                    InfiniteScroll({
+                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
+                    React.createElement(InfiniteScroll, {
                         loadMore: this.addMoreRows, 
                         hasMore: this.state.hasMore}, 
-                        React.DOM.table({className: "rt-table"}, 
-                            React.DOM.tbody(null, 
-                                this.state.rows
+                        React.createElement("table", {className: "rt-table"}, 
+                            React.createElement("tbody", null, 
+                            this.state.rows
                             )
                         )
                     )
@@ -295,26 +295,32 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
 /**
  * Represents a row in the table, built from cells
  */
-var Row = React.createClass({displayName: 'Row',
+var Row = React.createClass({displayName: "Row",
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
+            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
             var cx = React.addons.classSet;
-            var classes = cx(lookAndFeel.classes);
-            var content = lookAndFeel.value;
+            var classes = cx(displayInstructions.classes);
+            var displayContent = displayInstructions.value;
+
+            // convert and format dates
+            if (columnDef.format.toLowerCase() === "date") {
+                if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
+                    displayContent = new Date(displayContent).toLocaleDateString();
+            }
             // determine cell content, based on whether a cell templating callback was provided
             if (columnDef.cellTemplate)
-                content = columnDef.cellTemplate.call(this, this.props.data, columnDef, content);
+                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
             cells.push(
-                React.DOM.td({
+                React.createElement("td", {
                     className: classes, 
                     onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null, 
                     onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
-                    style: lookAndFeel.styles, 
+                    style: displayInstructions.styles, 
                     key: columnDef.colTag}, 
-                    content
+                    displayContent
                 )
             );
         }
@@ -329,12 +335,12 @@ var Row = React.createClass({displayName: 'Row',
         for (var attrname in this.props.extraStyle) {
             styles[attrname] = this.props.extraStyle[attrname];
         }
-        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), 
+        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
                     className: classes, style: styles}, cells));
     }
 });
 
-var PageNavigator = React.createClass({displayName: 'PageNavigator',
+var PageNavigator = React.createClass({displayName: "PageNavigator",
     handleClick: function (index, event) {
         event.preventDefault();
         if (index <= this.props.numPages && index >= 1)
@@ -352,20 +358,20 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
 
         var items = this.props.items.map(function (item) {
             return (
-                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
+                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: prevClass, 
+            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: prevClass, 
                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.DOM.li({className: nextClass}, 
-                    React.DOM.a({className: nextClass, 
+                React.createElement("li", {className: nextClass}, 
+                    React.createElement("a", {className: nextClass, 
                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
@@ -373,7 +379,7 @@ var PageNavigator = React.createClass({displayName: 'PageNavigator',
     }
 });
 
-var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
+var SummarizeControl = React.createClass({displayName: "SummarizeControl",
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -396,20 +402,20 @@ var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
                            placeholder: "ex: 1,10,15"}), 
-                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
                        onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), 
                        className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.DOM.div({
+            React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.DOM.div(null, "Summarize"), 
+                React.createElement("div", null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -441,10 +447,10 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function rowMapper(row){
+function rowMapper(row) {
     var rowKey = this.props.rowKey;
     var generatedKey = generateRowKey(row, rowKey);
-    return (Row({
+    return (React.createElement(Row, {
         key: generatedKey, 
         data: row, 
         extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
@@ -453,14 +459,14 @@ function rowMapper(row){
         onRightClick: this.props.onRightClick, 
         toggleHide: this.handleToggleHide, 
         columnDefs: this.state.columnDefs}
-    ));
+        ));
 }
 
-function docClick(e){
+function docClick(e) {
     adjustHeaders.call(this);
     // Remove filter-in-place boxes if they are open and they weren't clicked on
-    if( !jQuery.isEmptyObject(this.state.filterInPlace) ){
-        if( !($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element")) ) {
+    if (!jQuery.isEmptyObject(this.state.filterInPlace)) {
+        if (!($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element"))) {
             this.setState({
                 filterInPlace: {}
             });
