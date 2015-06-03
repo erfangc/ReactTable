@@ -32,7 +32,7 @@ var ReactTable = React.createClass({
         rootNode.expandRecursively();
         this.setState({rootNode: rootNode, currentPage: 1});
     },
-    handleDownload: function(type) {
+    handleDownload: function (type) {
         var reactTableData = this;
 
         var objToExport = {headers: [], data: []};
@@ -45,24 +45,24 @@ var ReactTable = React.createClass({
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        $.each(this.props.columnDefs, function(){
+        $.each(this.props.columnDefs, function () {
             objToExport.headers.push(this.text);
         });
 
-        $.each(rasterizedData, function(){
-            if( this[firstColumn.colTag] === "Grand Total" )
+        $.each(rasterizedData, function () {
+            if (this[firstColumn.colTag] === "Grand Total")
                 return;
             var row = [];
             var datum = this;
-            $.each(reactTableData.props.columnDefs, function(){
-                row.push( buildCellLookAndFeel(this, datum).value );
+            $.each(reactTableData.props.columnDefs, function () {
+                row.push(buildCellLookAndFeel(this, datum).value);
             });
             objToExport.data.push(row);
         });
 
-        if( type === "excel" )
+        if (type === "excel")
             exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
-        else if( type === "pdf" )
+        else if (type === "pdf")
             exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
@@ -160,7 +160,7 @@ var ReactTable = React.createClass({
         });
         this.props.currentSortStates = [];
         var table = this;
-        if( !stopPresort ) {
+        if (!stopPresort) {
             setTimeout(function () {
                 table.redoPresort();
             });
@@ -172,12 +172,12 @@ var ReactTable = React.createClass({
             extraStyle: this.state.extraStyle
         });
     },
-    handleScroll: function(e){
+    handleScroll: function (e) {
         var target = $(e.target);
         var scrolled = target.scrollTop();
         var scrolledHeight = target.height();
         var totalHeight = target.find("tbody").height();
-        if( scrolled / (totalHeight-scrolledHeight) > .8 ){
+        if (scrolled / (totalHeight - scrolledHeight) > .8) {
             this.setState({
                 rows: this.addMoreRows(true)
             });
@@ -206,7 +206,7 @@ var ReactTable = React.createClass({
             table.redoPresort();
         });
     },
-    componentWillMount: function(){
+    componentWillMount: function () {
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
@@ -216,8 +216,8 @@ var ReactTable = React.createClass({
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addMoreRows: function(calledFromScroll){
-        if( this.props.justAdded ){
+    addMoreRows: function (calledFromScroll) {
+        if (this.props.justAdded) {
             this.props.justAdded = false;
             return this.state.rows;
         }
@@ -227,7 +227,7 @@ var ReactTable = React.createClass({
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        if( !calledFromScroll )
+        if (!calledFromScroll)
             this.props.rowMultiplier = this.props.rowMultiplier ? this.props.rowMultiplier : 0;
         else
             this.props.rowMultiplier = (this.props.rowMultiplier === undefined ? 0 : this.props.rowMultiplier + 1);
@@ -235,7 +235,7 @@ var ReactTable = React.createClass({
         var upperBound = (this.props.rowMultiplier + 1) * this.state.itemsPerScroll;
         var rowsToDisplay = [];
 
-        if( calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length ) {
+        if (calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length) {
             var lowerBound = this.state.rows.length;
             rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
             this.props.justAdded = true;
@@ -255,7 +255,7 @@ var ReactTable = React.createClass({
 
         var paginationAttr = _getPageArithmetics(this, rasterizedData);
 
-        if( this.props.disableInfiniteScrolling ) {
+        if (this.props.disableInfiniteScrolling) {
             var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
             this.state.rows = rowsToDisplay.map(rowMapper, this);
         }
@@ -271,7 +271,7 @@ var ReactTable = React.createClass({
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
-        
+
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
@@ -281,7 +281,7 @@ var ReactTable = React.createClass({
                         hasMore={this.state.hasMore}>
                         <table className="rt-table">
                             <tbody>
-                                {this.state.rows}
+                            {this.state.rows}
                             </tbody>
                         </table>
                     </InfiniteScroll>
@@ -300,21 +300,27 @@ var Row = React.createClass({
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
-            var lookAndFeel = buildCellLookAndFeel(columnDef, this.props.data);
+            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
             var cx = React.addons.classSet;
-            var classes = cx(lookAndFeel.classes);
-            var content = lookAndFeel.value;
+            var classes = cx(displayInstructions.classes);
+            var displayContent = displayInstructions.value;
+
+            // convert and format dates
+            if (columnDef.format.toLowerCase() === "date") {
+                if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
+                    displayContent = new Date(displayContent).toLocaleDateString();
+            }
             // determine cell content, based on whether a cell templating callback was provided
             if (columnDef.cellTemplate)
-                content = columnDef.cellTemplate.call(this, this.props.data, columnDef, content);
+                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
             cells.push(
                 <td
                     className={classes}
                     onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null}
                     onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                    style={lookAndFeel.styles}
+                    style={displayInstructions.styles}
                     key={columnDef.colTag}>
-                    {content}
+                    {displayContent}
                 </td>
             );
         }
@@ -441,7 +447,7 @@ function generateRowKey(row, rowKey) {
     return key;
 }
 
-function rowMapper(row){
+function rowMapper(row) {
     var rowKey = this.props.rowKey;
     var generatedKey = generateRowKey(row, rowKey);
     return (<Row
@@ -453,14 +459,14 @@ function rowMapper(row){
         onRightClick={this.props.onRightClick}
         toggleHide={this.handleToggleHide}
         columnDefs={this.state.columnDefs}
-    />);
+        />);
 }
 
-function docClick(e){
+function docClick(e) {
     adjustHeaders.call(this);
     // Remove filter-in-place boxes if they are open and they weren't clicked on
-    if( !jQuery.isEmptyObject(this.state.filterInPlace) ){
-        if( !($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element")) ) {
+    if (!jQuery.isEmptyObject(this.state.filterInPlace)) {
+        if (!($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element"))) {
             this.setState({
                 filterInPlace: {}
             });
