@@ -34,7 +34,8 @@ function ReactTableHandleSelect(selectedRow) {
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
     var filterText = e.target.value;
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText);
+    var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
     this.setState({rootNode: this.state.rootNode});
 }
 

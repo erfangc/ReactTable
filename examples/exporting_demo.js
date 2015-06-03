@@ -61,6 +61,9 @@ $(function () {
             //disableInfiniteScrolling: true,
             //itemsPerScroll: 500,
             pageSize: 1000,
+            filtering: {
+                caseSensitive: true
+            },
             //filenameToSaveAs: "table-awesome",
             rowKey: 'id',
             customMenuItems: {

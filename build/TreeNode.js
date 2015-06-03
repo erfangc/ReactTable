@@ -171,11 +171,11 @@ TreeNode.prototype.addSortToChildren = function (options) {
     }
 };
 
-TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
+TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
     // Filter aggregations?
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByColumn(columnDef,textToFilterBy);
+        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -188,7 +188,11 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
     }
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
-            this.ultimateChildren[i].hiddenByFilter = this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1;
+            var uChild = this.ultimateChildren[i];
+            if( caseSensitive )
+                uChild.hiddenByFilter = uChild[columnDef.colTag].search(textToFilterBy) === -1;
+            else
+                uChild.hiddenByFilter = uChild[columnDef.colTag].toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
         }
     }
 };

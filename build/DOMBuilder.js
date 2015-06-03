@@ -112,6 +112,16 @@ function toggleFilterBox(table, colTag){
     });
 }
 
+function pressedKey(table, colTag, e){
+    const ESCAPE = 27;
+    if( table.state.filterInPlace[colTag] && e.keyCode == ESCAPE ){
+        table.state.filterInPlace[colTag] = false;
+        table.setState({
+            filterInPlace: table.state.filterInPlace
+        });
+    }
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
@@ -149,12 +159,13 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: textClasses
-                       }, 
+                    React.DOM.a({className: textClasses, 
+                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
                     React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
-                           onChange: table.handleColumnFilter.bind(null, columnDef)})
+                           onChange: table.handleColumnFilter.bind(null, columnDef), 
+                           onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
                 ), 
                 React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&

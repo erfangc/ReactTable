@@ -58,6 +58,10 @@ function buildMenu(options) {
             <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, false)}>Add Sort Dsc</div>,
             <div className="menu-item" onClick={table.replaceData.bind(null, table.props.data, true)}>Clear Sort</div>
         ],
+        filter:[
+            <div className="menu-item" >Clear Filter</div>,
+            <div className="menu-item" >Clear All Filters</div>
+        ],
         summarize: [
             <SummarizeControl table={table} columnDef={columnDef}/>,
             <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
@@ -112,6 +116,16 @@ function toggleFilterBox(table, colTag){
     });
 }
 
+function pressedKey(table, colTag, e){
+    const ESCAPE = 27;
+    if( table.state.filterInPlace[colTag] && e.keyCode == ESCAPE ){
+        table.state.filterInPlace[colTag] = false;
+        table.setState({
+            filterInPlace: table.state.filterInPlace
+        });
+    }
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
@@ -150,11 +164,12 @@ function buildHeaders(table) {
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
-                       >
+                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         {columnDef.text}
                     </a>
                     <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}
-                           onChange={table.handleColumnFilter.bind(null, columnDef)}/>
+                           onChange={table.handleColumnFilter.bind(null, columnDef)}
+                           onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
                 </div>
                 <div className="rt-caret-container">
                     {table.state.sortAsc != undefined && table.state.sortAsc === true &&
