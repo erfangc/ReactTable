@@ -111,10 +111,10 @@ function buildCustomMenuItems(table, columnDef) {
                     for (var k in popupStyle) styles[k] = popupStyle[k];
                     styles[direction] = "100%";
                     menuItems.push(
-                        React.createElement("div", {style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                            React.createElement("div", null, menuItemTitle), 
-                            React.createElement("div", {className: "menu-item-input", style: styles}, 
-                                React.createElement("div", {style: {"display": "block"}}, 
+                        React.DOM.div({style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+                            React.DOM.div(null, menuItemTitle), 
+                            React.DOM.div({className: "menu-item-input", style: styles}, 
+                                React.DOM.div({style: {"display": "block"}}, 
                                     columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]
                                 )
                             )
@@ -146,16 +146,20 @@ function buildMenu(options) {
         sort: [
             //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
             //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, "Add Sort Asc"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, "Add Sort Dsc"),
-            React.createElement("div", {className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, "Add Sort Asc"),
+            React.DOM.div({className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, "Add Sort Dsc"),
+            React.DOM.div({className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
+        ],
+        filter:[
+            React.DOM.div({className: "menu-item"}, "Clear Filter"),
+            React.DOM.div({className: "menu-item"}, "Clear All Filters")
         ],
         summarize: [
-            React.createElement(SummarizeControl, {table: table, columnDef: columnDef}),
-            React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
+            SummarizeControl({table: table, columnDef: columnDef}),
+            React.DOM.div({className: "menu-item", onClick: table.handleGroupBy.bind(null, null)}, "Clear Summary")
         ],
         remove: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
+            React.DOM.div({className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
         ]
     };
     if (table.props.defaultMenuItems) {
@@ -174,18 +178,18 @@ function buildMenu(options) {
     menuItems.push(customMenuItems);
 
     if (isFirstColumn) {
-        menuItems.push(React.createElement("div", {className: "separator"}));
+        menuItems.push(React.DOM.div({className: "separator"}));
         if( !table.props.disableExporting ) {
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, "Download as XLS"));
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, "Download as PDF"));
+            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, "Download as XLS"));
+            menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, "Download as PDF"));
         }
 
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
-        menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
+        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleCollapseAll.bind(null, null)}, "Collapse All"));
+        menuItems.push(React.DOM.div({className: "menu-item", onClick: table.handleExpandAll.bind(null)}, "Expand All"));
     }
 
     return (
-        React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
+        React.DOM.div({style: menuStyle, className: "rt-header-menu"}, 
             menuItems
         )
     );
@@ -204,21 +208,31 @@ function toggleFilterBox(table, colTag){
     });
 }
 
+function pressedKey(table, colTag, e){
+    const ESCAPE = 27;
+    if( table.state.filterInPlace[colTag] && e.keyCode == ESCAPE ){
+        table.state.filterInPlace[colTag] = false;
+        table.setState({
+            filterInPlace: table.state.filterInPlace
+        });
+    }
+}
+
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var firstColumn = (
-        React.createElement("div", {className: "rt-headers-container", 
+        React.DOM.div({className: "rt-headers-container", 
             onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                 table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                 table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
-            React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
+            React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
+                React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
             ), 
-            React.createElement("div", {className: "rt-caret-container"}, 
+            React.DOM.div({className: "rt-caret-container"}, 
                 table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
                 table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
+                columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
             ), 
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
@@ -235,24 +249,25 @@ function buildHeaders(table) {
         var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
         // bound this on <a> tag: onClick={table.props.disableFilter ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}}
         headerColumns.push(
-            React.createElement("div", {className: "rt-headers-container", 
+            React.DOM.div({className: "rt-headers-container", 
                 onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                                table.handleSort.bind(null, columnDef, true) :
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
-                React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.createElement("a", {className: textClasses
-                       }, 
+                React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
+                    React.DOM.a({className: textClasses, 
+                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
-                    React.createElement("input", {style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
-                           onChange: table.handleColumnFilter.bind(null, columnDef)})
+                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
+                           onChange: table.handleColumnFilter.bind(null, columnDef), 
+                           onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
                 ), 
-                React.createElement("div", {className: "rt-caret-container"}, 
+                React.DOM.div({className: "rt-caret-container"}, 
                     table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
+                    columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-upward-caret"}) : null, 
                     table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
+                    columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
                 ), 
                 buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
@@ -262,21 +277,21 @@ function buildHeaders(table) {
     var corner;
     var classString = "btn-link rt-plus-sign";
     if( !table.props.disableAddColumnIcon && table.props.cornerIcon ){
-        corner = React.createElement("img", {src: table.props.cornerIcon});
+        corner = React.DOM.img({src: table.props.cornerIcon});
         classString = "btn-link rt-corner-image";
     }
 
 
     // the plus sign at the end
     headerColumns.push(
-        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-            React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
-                React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : '+'))
+        React.DOM.span({className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.DOM.a({className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
+                React.DOM.strong(null, corner ? corner : (table.props.disableAddColumn ? '' : '+'))
             )
         ));
     return (
-        React.createElement("div", {className: "rt-headers-grand-container"}, 
-            React.createElement("div", {key: "header", className: "rt-headers"}, 
+        React.DOM.div({className: "rt-headers-grand-container"}, 
+            React.DOM.div({key: "header", className: "rt-headers"}, 
                 headerColumns
             )
         )
@@ -289,7 +304,7 @@ function buildFirstCellForRow(props) {
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
-        return React.createElement("td", {key: firstColTag}, data[firstColTag]);
+        return React.DOM.td({key: firstColTag}, data[firstColTag]);
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -300,16 +315,16 @@ function buildFirstCellForRow(props) {
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
     if (data.isDetail)
-        result = React.createElement("td", {style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+        result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
     else {
         result =
             (
-                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
-                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
+                React.DOM.td({style: firstCellStyle, key: firstColTag}, 
+                    React.DOM.a({onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
                         data.treeNode.collapsed ? '+' : '—'
                     ), 
                     "  ", 
-                    React.createElement("strong", null, data[firstColTag]), 
+                    React.DOM.strong(null, data[firstColTag]), 
                     userDefinedElement
                 )
             );
@@ -319,7 +334,7 @@ function buildFirstCellForRow(props) {
 
 function buildFooter(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
-        (React.createElement(PageNavigator, {
+        (PageNavigator({
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
@@ -526,7 +541,7 @@ function _mostDataPoints(options) {
         rowCount++;
         excel += '</tr>';
     });
-    excel += '</table>'
+    excel += '</table>';
 
     var excelFile = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:"+'excel'+"' xmlns='http://www.w3.org/TR/REC-html40'>";
     excelFile += "<head>";
@@ -598,7 +613,7 @@ function exportToPDF(data, filename){
     var startColPosition=defaults.pdfLeftMargin;
 
     $.each(data.headers, function(index, value) {
-        var currentLength = parseString(value).length * 4.5;
+        var currentLength = parseString(value, true).length * 4.5;
         if( !widths[index] || widths[index] < currentLength )
             widths[index] = Math.max(30,currentLength);
     });
@@ -608,7 +623,7 @@ function exportToPDF(data, filename){
             return;
         }
         $.each(value, function(index, value2) {
-            var currentLength = parseString(value2).length * 4.5;
+            var currentLength = parseString(value2, true).length * 4.5;
             if( !widths[index] || widths[index] < currentLength )
                 widths[index] = Math.max(30,currentLength);
         });
@@ -631,7 +646,7 @@ function exportToPDF(data, filename){
         var colPosition = widths.reduce(function(prev,current,idx){
             return idx < index ? prev + current : prev;
         }, startColPosition);
-        doc.text(colPosition,20, parseString(value));
+        doc.text(colPosition,20, parseString(value, true));
     });
 
     // Row Vs Column
@@ -655,7 +670,7 @@ function exportToPDF(data, filename){
             var colPosition = widths.reduce(function(prev,current,idx){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
-            doc.text(colPosition,rowPosition, parseString(value2));
+            doc.text(colPosition,rowPosition, parseString(value2, true));
         });
     });
 
@@ -664,7 +679,7 @@ function exportToPDF(data, filename){
 
 }
 
-function parseString(data){
+function parseString(data, isPdf){
     if( typeof data !== "string" ) {
         if ( data && data.toString )
             data = data.toString();
@@ -675,7 +690,8 @@ function parseString(data){
     var content_data = data.trim();
 
     content_data = content_data.replace(/[^\x00-\x7F]/g, "");
-    content_data = content_data.substr(0,20);
+    if( isPdf )
+        content_data = content_data.substr(0,20);
 
     //if(defaults.escape == 'true'){
     //	content_data = escape(content_data);
@@ -757,7 +773,7 @@ InfiniteScroll.setDefaultLoader = function (loader) {
 var idCounter = 0;
 var SECTOR_SEPARATOR = "#";
 
-var ReactTable = React.createClass({displayName: "ReactTable",
+var ReactTable = React.createClass({displayName: 'ReactTable',
 
     getInitialState: ReactTableGetInitialState,
 
@@ -1022,14 +1038,14 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             containerStyle.overflowY = "hidden";
 
         return (
-            React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
+            React.DOM.div({id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
-                React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
-                    React.createElement(InfiniteScroll, {
+                React.DOM.div({style: containerStyle, className: "rt-scrollable"}, 
+                    InfiniteScroll({
                         loadMore: this.addMoreRows, 
                         hasMore: this.state.hasMore}, 
-                        React.createElement("table", {className: "rt-table"}, 
-                            React.createElement("tbody", null, 
+                        React.DOM.table({className: "rt-table"}, 
+                            React.DOM.tbody(null, 
                             this.state.rows
                             )
                         )
@@ -1044,7 +1060,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 /**
  * Represents a row in the table, built from cells
  */
-var Row = React.createClass({displayName: "Row",
+var Row = React.createClass({displayName: 'Row',
     render: function () {
         var cells = [buildFirstCellForRow(this.props)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
@@ -1055,7 +1071,7 @@ var Row = React.createClass({displayName: "Row",
             var displayContent = displayInstructions.value;
 
             // convert and format dates
-            if (columnDef.format.toLowerCase() === "date") {
+            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                 if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
                     displayContent = new Date(displayContent).toLocaleDateString();
             }
@@ -1063,7 +1079,7 @@ var Row = React.createClass({displayName: "Row",
             if (columnDef.cellTemplate)
                 displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
             cells.push(
-                React.createElement("td", {
+                React.DOM.td({
                     className: classes, 
                     onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null, 
                     onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
@@ -1084,12 +1100,12 @@ var Row = React.createClass({displayName: "Row",
         for (var attrname in this.props.extraStyle) {
             styles[attrname] = this.props.extraStyle[attrname];
         }
-        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
+        return (React.DOM.tr({onClick: this.props.onSelect.bind(null, this.props.data), 
                     className: classes, style: styles}, cells));
     }
 });
 
-var PageNavigator = React.createClass({displayName: "PageNavigator",
+var PageNavigator = React.createClass({displayName: 'PageNavigator',
     handleClick: function (index, event) {
         event.preventDefault();
         if (index <= this.props.numPages && index >= 1)
@@ -1107,20 +1123,20 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
 
         var items = this.props.items.map(function (item) {
             return (
-                React.createElement("li", {key: item, className: self.props.activeItem == item ? 'active' : ''}, 
-                    React.createElement("a", {onClick: self.handleClick.bind(null, item)}, item)
+                React.DOM.li({key: item, className: self.props.activeItem == item ? 'active' : ''}, 
+                    React.DOM.a({onClick: self.handleClick.bind(null, item)}, item)
                 )
             )
         });
         return (
-            React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
-                React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {className: prevClass, 
+            React.DOM.ul({className: prevClass, className: "pagination pull-right"}, 
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({className: prevClass, 
                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
-                React.createElement("li", {className: nextClass}, 
-                    React.createElement("a", {className: nextClass, 
+                React.DOM.li({className: nextClass}, 
+                    React.DOM.a({className: nextClass, 
                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
@@ -1128,7 +1144,7 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
     }
 });
 
-var SummarizeControl = React.createClass({displayName: "SummarizeControl",
+var SummarizeControl = React.createClass({displayName: 'SummarizeControl',
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -1151,20 +1167,20 @@ var SummarizeControl = React.createClass({displayName: "SummarizeControl",
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
             (
-                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+                React.DOM.div({className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.DOM.label({style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.DOM.input({tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
                            placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
+                    React.DOM.a({tabIndex: "2", style: {"display": "block"}, 
                        onClick: table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets), 
                        className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
-            React.createElement("div", {
+            React.DOM.div({
                 onClick: subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.createElement("div", null, "Summarize"), 
+                React.DOM.div(null, "Summarize"), 
                 subMenuAttachment
             )
         );
@@ -1199,7 +1215,7 @@ function generateRowKey(row, rowKey) {
 function rowMapper(row) {
     var rowKey = this.props.rowKey;
     var generatedKey = generateRowKey(row, rowKey);
-    return (React.createElement(Row, {
+    return (Row({
         key: generatedKey, 
         data: row, 
         extraStyle: _getExtraStyle(generatedKey, this.state.extraStyle), 
@@ -1377,7 +1393,8 @@ function ReactTableHandleSelect(selectedRow) {
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
     var filterText = e.target.value;
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText);
+    var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
     this.setState({rootNode: this.state.rootNode});
 }
 
@@ -1821,11 +1838,11 @@ TreeNode.prototype.addSortToChildren = function (options) {
     }
 };
 
-TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
+TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
     // Filter aggregations?
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByColumn(columnDef,textToFilterBy);
+        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -1838,7 +1855,11 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy){
     }
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
-            this.ultimateChildren[i].hiddenByFilter = this.ultimateChildren[i][columnDef.colTag].search(textToFilterBy) === -1;
+            var uChild = this.ultimateChildren[i];
+            if( caseSensitive )
+                uChild.hiddenByFilter = uChild[columnDef.colTag].search(textToFilterBy) === -1;
+            else
+                uChild.hiddenByFilter = uChild[columnDef.colTag].toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
         }
     }
 };

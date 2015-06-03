@@ -306,7 +306,7 @@ var Row = React.createClass({displayName: 'Row',
             var displayContent = displayInstructions.value;
 
             // convert and format dates
-            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
+            if (columnDef.format.toLowerCase() === "date") {
                 if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
                     displayContent = new Date(displayContent).toLocaleDateString();
             }

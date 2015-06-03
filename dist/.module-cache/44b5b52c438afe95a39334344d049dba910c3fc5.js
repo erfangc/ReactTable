@@ -97,7 +97,7 @@ function exportToPDF(data, filename){
     var startColPosition=defaults.pdfLeftMargin;
 
     $.each(data.headers, function(index, value) {
-        var currentLength = parseString(value, true).length * 4.5;
+        var currentLength = parseString(value).length * 4.5;
         if( !widths[index] || widths[index] < currentLength )
             widths[index] = Math.max(30,currentLength);
     });
@@ -107,7 +107,7 @@ function exportToPDF(data, filename){
             return;
         }
         $.each(value, function(index, value2) {
-            var currentLength = parseString(value2, true).length * 4.5;
+            var currentLength = parseString(value2).length * 4.5;
             if( !widths[index] || widths[index] < currentLength )
                 widths[index] = Math.max(30,currentLength);
         });
@@ -130,7 +130,7 @@ function exportToPDF(data, filename){
         var colPosition = widths.reduce(function(prev,current,idx){
             return idx < index ? prev + current : prev;
         }, startColPosition);
-        doc.text(colPosition,20, parseString(value, true));
+        doc.text(colPosition,20, parseString(value));
     });
 
     // Row Vs Column
@@ -154,7 +154,7 @@ function exportToPDF(data, filename){
             var colPosition = widths.reduce(function(prev,current,idx){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
-            doc.text(colPosition,rowPosition, parseString(value2, true));
+            doc.text(colPosition,rowPosition, parseString(value2));
         });
     });
 
@@ -163,7 +163,7 @@ function exportToPDF(data, filename){
 
 }
 
-function parseString(data, isPdf){
+function parseString(data){
     if( typeof data !== "string" ) {
         if ( data && data.toString )
             data = data.toString();
@@ -174,8 +174,7 @@ function parseString(data, isPdf){
     var content_data = data.trim();
 
     content_data = content_data.replace(/[^\x00-\x7F]/g, "");
-    if( isPdf )
-        content_data = content_data.substr(0,20);
+    //content_data = content_data.substr(0,200);
 
     //if(defaults.escape == 'true'){
     //	content_data = escape(content_data);
