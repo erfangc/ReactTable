@@ -62,7 +62,8 @@ $(function () {
             //itemsPerScroll: 500,
             pageSize: 1000,
             filtering: {
-                caseSensitive: true
+                caseSensitive: true,
+                doubleClickCell: true
             },
             //filenameToSaveAs: "table-awesome",
             rowKey: 'id',

@@ -15,7 +15,8 @@ function ReactTableGetInitialState() {
         rows: [],
         hasMoreRows: false,
         itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100,
-        filterInPlace: {}
+        filterInPlace: {},
+        currentFilters: []
     };
 }
 
@@ -32,10 +33,93 @@ function ReactTableHandleSelect(selectedRow) {
     }
 }
 
-function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
-    var filterText = e.target.value;
+function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
+    if( typeof dontSet !== "boolean" )
+        dontSet = undefined;
+
+    var filterText = e.target ? (e.target.value || e.target.textContent) : e;
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
+
+    if( !dontSet ){
+        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
+        for(var i=0; i<this.state.currentFilters.length; i++){
+            if( this.state.currentFilters[i].colDef === columnDefToFilterBy ) {
+                this.state.currentFilters.splice(i,1);
+                this.handleClearFilter(columnDefToFilterBy, true);
+                break;
+            }
+        }
+    }
+
     this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
+
+    if( !dontSet ) {
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterText);
+        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    }
+}
+
+function ReactTableHandleRemoveFilter(colDef, dontSet) {
+    if( typeof dontSet !== "boolean" )
+        dontSet = undefined;
+
+    // First clear out all filters
+    for(var i=0; i<this.state.rootNode.ultimateChildren.length; i++){
+        this.state.rootNode.ultimateChildren[i].hiddenByFilter = false;
+    }
+    // Remove filter from list of current filters
+    for(i=0; i<this.state.currentFilters.length; i++){
+        if( this.state.currentFilters[i].colDef === colDef ) {
+            this.state.currentFilters.splice(i,1);
+            break;
+        }
+    }
+    // Re-filter by looping through old filters
+    for(i=0; i<this.state.currentFilters.length; i++){
+        this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
+    }
+
+    if( !dontSet ) {
+        var fip = this.state.filterInPlace;
+        delete fip[colDef.colTag];
+        this.setState({
+            filterInPlace: fip,
+            rootNode: this.state.rootNode,
+            currentFilters: this.state.currentFilters
+        });
+        $("input.rt-" + colDef.colTag + "-filter-input").val("");
+    }
+}
+
+function ReactTableHandleRemoveAllFilters() {
+    recursivelyClearFilters(this.state.rootNode);
+    this.setState({
+        filterInPlace: {},
+        rootNode: this.state.rootNode,
+        currentFilters: []
+    });
+    $("input.rt-filter-input").val("");
+}
+
+function recursivelyClearFilters(node){
+    node.clearFilter();
+
+    for( var i=0; i<node.children.length; i++ ){
+        recursivelyClearFilters(node.children[i]);
+    }
+
+    if( !node.hasChild() ) {
+        for (var i = 0; i < node.ultimateChildren.length; i++) {
+            node.ultimateChildren[i].hiddenByFilter = false;
+        }
+    }
+}
+
+function reApplyAllFilters(){
+    for( var i=0; i<this.state.currentFilters.length; i++ ){
+        this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
+    }
     this.setState({rootNode: this.state.rootNode});
 }
 
@@ -81,13 +165,18 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
     } else
         this.props.groupBy = null;
 
-    var rootNode = createTree(this.props);
+    this.state.rootNode = createTree(this.props);
+
+    if( this.state.currentFilters.length > 0 ) {
+        reApplyAllFilters.call(this);
+    }
 
     this.setState({
-        rootNode: rootNode,
+        rootNode: this.state.rootNode,
         currentPage: 1,
         firstColumnLabel: _construct1StColumnLabel(this)
     });
+
 
 }
 

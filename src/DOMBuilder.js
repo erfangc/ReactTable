@@ -59,8 +59,8 @@ function buildMenu(options) {
             <div className="menu-item" onClick={table.replaceData.bind(null, table.props.data, true)}>Clear Sort</div>
         ],
         filter:[
-            <div className="menu-item" >Clear Filter</div>,
-            <div className="menu-item" >Clear All Filters</div>
+            <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>,
+            <div className="menu-item" onClick={table.handleClearAllFilters.bind(null)}>Clear All Filters</div>
         ],
         summarize: [
             <SummarizeControl table={table} columnDef={columnDef}/>,
@@ -77,6 +77,7 @@ function buildMenu(options) {
         }
     } else {
         _addMenuItems(menuItems, availableDefaultMenuItems.sort);
+        _addMenuItems(menuItems, availableDefaultMenuItems.filter);
         _addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
             _addMenuItems(menuItems, availableDefaultMenuItems.remove);
@@ -108,11 +109,14 @@ function _addMenuItems(master, children) {
         master.push(children[j])
 }
 
-function toggleFilterBox(table, colTag){
+function toggleFilterBox(table, colTag) {
     var fip = table.state.filterInPlace;
     fip[colTag] = !fip[colTag];
     table.setState({
         filterInPlace: fip
+    });
+    setTimeout(function(){
+        $("input.rt-" + colTag + "-filter-input").focus();
     });
 }
 
@@ -128,13 +132,26 @@ function pressedKey(table, colTag, e){
 
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
+    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+    var ss = {
+        width: "100%",
+        height: "13px",
+        padding: "0"
+    };
     var firstColumn = (
         <div className="rt-headers-container"
             onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
-                table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
+                table.handleSort.bind(null, columnDef, true) :
+                (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
-                <a className="btn-link rt-header-anchor-text">{table.state.firstColumnLabel.join("/")}</a>
+                <a className={textClasses}
+                   onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
+                    {table.state.firstColumnLabel.join("/")}
+                </a>
+                <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                    onChange={table.handleColumnFilter.bind(null, columnDef)}
+                    onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
             </div>
             <div className="rt-caret-container">
                 {table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -145,11 +162,6 @@ function buildHeaders(table) {
             {buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
         </div>
     );
-    var ss = {
-        width: "100%",
-        height: "13px",
-        padding: "0"
-    };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
@@ -164,10 +176,10 @@ function buildHeaders(table) {
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
-                       >
+                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         {columnDef.text}
                     </a>
-                    <input style={ss} className={table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide"}
+                    <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
                            onChange={table.handleColumnFilter.bind(null, columnDef)}
                            onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
                 </div>
@@ -206,13 +218,18 @@ function buildHeaders(table) {
     );
 }
 
-function buildFirstCellForRow(props) {
+function buildFirstCellForRow() {
+    var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
-        return <td key={firstColTag}>{data[firstColTag]}</td>;
+        return <td key={firstColTag}
+                   onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
+                     this.props.handleColumnFilter(null, columnDef) : null}>
+                   {data[firstColTag]}
+               </td>;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -223,7 +240,10 @@ function buildFirstCellForRow(props) {
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
     if (data.isDetail)
-        result = <td style={firstCellStyle} key={firstColTag}>{data[firstColTag]}</td>;
+        result = <td style={firstCellStyle} key={firstColTag}
+            onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
+                this.props.handleColumnFilter(null, columnDef) : null}>
+                   {data[firstColTag]}</td>;
     else {
         result =
             (

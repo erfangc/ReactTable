@@ -16,6 +16,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
     handleColumnFilter: ReactTableHandleColumnFilter,
+    handleClearFilter: ReactTableHandleRemoveFilter,
+    handleClearAllFilters: ReactTableHandleRemoveAllFilters,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -66,7 +68,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
-
     toggleSelectDetailRow: function (key) {
         var selectedDetailRows = this.state.selectedDetailRows, state;
         if (selectedDetailRows[key] != null) {
@@ -297,7 +298,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
  */
 var Row = React.createClass({displayName: 'Row',
     render: function () {
-        var cells = [buildFirstCellForRow(this.props)];
+        var cells = [buildFirstCellForRow.call(this)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -319,7 +320,9 @@ var Row = React.createClass({displayName: 'Row',
                     onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null, 
                     onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
                     style: displayInstructions.styles, 
-                    key: columnDef.colTag}, 
+                    key: columnDef.colTag, 
+                    onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
+                                   this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent
                 )
             );
@@ -458,7 +461,9 @@ function rowMapper(row) {
         onSelect: this.handleSelect, 
         onRightClick: this.props.onRightClick, 
         toggleHide: this.handleToggleHide, 
-        columnDefs: this.state.columnDefs}
+        columnDefs: this.state.columnDefs, 
+        filtering: this.props.filtering, 
+        handleColumnFilter: this.handleColumnFilter.bind}
         ));
 }
 

@@ -172,6 +172,10 @@ TreeNode.prototype.addSortToChildren = function (options) {
 };
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
+    /* At the moment, the below is for text based filtering only.
+       I envision this function will eventually
+       call other functions based on the column type. */
+
     // Filter aggregations?
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
@@ -189,12 +193,23 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSens
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
-            if( caseSensitive )
-                uChild.hiddenByFilter = uChild[columnDef.colTag].search(textToFilterBy) === -1;
-            else
-                uChild.hiddenByFilter = uChild[columnDef.colTag].toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            var row = {};
+            row[columnDef.colTag] = uChild[columnDef.colTag];
+            //if( uChild[columnDef.colTag] ) {
+                if (caseSensitive)
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+                else
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            //}
+            //else{
+            //    uChild.hiddenByFilter = true;
+            //}
         }
     }
+};
+
+TreeNode.prototype.clearFilter = function(){
+    this.hiddenByFilter = false;
 };
 
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {

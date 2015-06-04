@@ -151,8 +151,8 @@ function buildMenu(options) {
             React.DOM.div({className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
         ],
         filter:[
-            React.DOM.div({className: "menu-item"}, "Clear Filter"),
-            React.DOM.div({className: "menu-item"}, "Clear All Filters")
+            React.DOM.div({className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
+            React.DOM.div({className: "menu-item", onClick: table.handleClearAllFilters.bind(null)}, "Clear All Filters")
         ],
         summarize: [
             SummarizeControl({table: table, columnDef: columnDef}),
@@ -169,6 +169,7 @@ function buildMenu(options) {
         }
     } else {
         _addMenuItems(menuItems, availableDefaultMenuItems.sort);
+        _addMenuItems(menuItems, availableDefaultMenuItems.filter);
         _addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
             _addMenuItems(menuItems, availableDefaultMenuItems.remove);
@@ -200,11 +201,14 @@ function _addMenuItems(master, children) {
         master.push(children[j])
 }
 
-function toggleFilterBox(table, colTag){
+function toggleFilterBox(table, colTag) {
     var fip = table.state.filterInPlace;
     fip[colTag] = !fip[colTag];
     table.setState({
         filterInPlace: fip
+    });
+    setTimeout(function(){
+        $("input.rt-" + colTag + "-filter-input").focus();
     });
 }
 
@@ -220,13 +224,26 @@ function pressedKey(table, colTag, e){
 
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
+    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+    var ss = {
+        width: "100%",
+        height: "13px",
+        padding: "0"
+    };
     var firstColumn = (
         React.DOM.div({className: "rt-headers-container", 
             onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
-                table.handleSort.bind(null, columnDef, true) : (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
+                table.handleSort.bind(null, columnDef, true) :
+                (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
+                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
             React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.DOM.a({className: "btn-link rt-header-anchor-text"}, table.state.firstColumnLabel.join("/"))
+                React.DOM.a({className: textClasses, 
+                   onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
+                    table.state.firstColumnLabel.join("/")
+                ), 
+                React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                    onChange: table.handleColumnFilter.bind(null, columnDef), 
+                    onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
             ), 
             React.DOM.div({className: "rt-caret-container"}, 
                 table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -237,11 +254,6 @@ function buildHeaders(table) {
             buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
-    var ss = {
-        width: "100%",
-        height: "13px",
-        padding: "0"
-    };
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
@@ -255,11 +267,11 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: textClasses
-                       }, 
+                    React.DOM.a({className: textClasses, 
+                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
-                    React.DOM.input({style: ss, className: table.state.filterInPlace[columnDef.colTag] ? "" : "rt-hide", 
+                    React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
                            onChange: table.handleColumnFilter.bind(null, columnDef), 
                            onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
                 ), 
@@ -298,13 +310,18 @@ function buildHeaders(table) {
     );
 }
 
-function buildFirstCellForRow(props) {
+function buildFirstCellForRow() {
+    var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
 
     // if sectorPath is not available - return a normal cell
     if (!data.sectorPath)
-        return React.DOM.td({key: firstColTag}, data[firstColTag]);
+        return React.DOM.td({key: firstColTag, 
+                   onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
+                     this.props.handleColumnFilter(null, columnDef) : null}, 
+                   data[firstColTag]
+               );
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -315,7 +332,10 @@ function buildFirstCellForRow(props) {
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
     if (data.isDetail)
-        result = React.DOM.td({style: firstCellStyle, key: firstColTag}, data[firstColTag]);
+        result = React.DOM.td({style: firstCellStyle, key: firstColTag, 
+            onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
+                this.props.handleColumnFilter(null, columnDef) : null}, 
+                   data[firstColTag]);
     else {
         result =
             (
@@ -781,6 +801,8 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
     handleColumnFilter: ReactTableHandleColumnFilter,
+    handleClearFilter: ReactTableHandleRemoveFilter,
+    handleClearAllFilters: ReactTableHandleRemoveAllFilters,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
@@ -831,7 +853,6 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
             exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
     },
     /* -------------------------------------------------- */
-
     toggleSelectDetailRow: function (key) {
         var selectedDetailRows = this.state.selectedDetailRows, state;
         if (selectedDetailRows[key] != null) {
@@ -1062,7 +1083,7 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
  */
 var Row = React.createClass({displayName: 'Row',
     render: function () {
-        var cells = [buildFirstCellForRow(this.props)];
+        var cells = [buildFirstCellForRow.call(this)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -1084,7 +1105,9 @@ var Row = React.createClass({displayName: 'Row',
                     onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null, 
                     onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
                     style: displayInstructions.styles, 
-                    key: columnDef.colTag}, 
+                    key: columnDef.colTag, 
+                    onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
+                                   this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent
                 )
             );
@@ -1223,7 +1246,9 @@ function rowMapper(row) {
         onSelect: this.handleSelect, 
         onRightClick: this.props.onRightClick, 
         toggleHide: this.handleToggleHide, 
-        columnDefs: this.state.columnDefs}
+        columnDefs: this.state.columnDefs, 
+        filtering: this.props.filtering, 
+        handleColumnFilter: this.handleColumnFilter.bind}
         ));
 }
 
@@ -1374,7 +1399,8 @@ function _computePageDisplayRange(currentPage, maxDisplayedPages) {
         rows: [],
         hasMoreRows: false,
         itemsPerScroll: this.props.itemsPerScroll ? this.props.itemsPerScroll : 100,
-        filterInPlace: {}
+        filterInPlace: {},
+        currentFilters: []
     };
 }
 
@@ -1391,10 +1417,93 @@ function ReactTableHandleSelect(selectedRow) {
     }
 }
 
-function ReactTableHandleColumnFilter(columnDefToFilterBy, e){
-    var filterText = e.target.value;
+function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
+    if( typeof dontSet !== "boolean" )
+        dontSet = undefined;
+
+    var filterText = e.target ? (e.target.value || e.target.textContent) : e;
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
+
+    if( !dontSet ){
+        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
+        for(var i=0; i<this.state.currentFilters.length; i++){
+            if( this.state.currentFilters[i].colDef === columnDefToFilterBy ) {
+                this.state.currentFilters.splice(i,1);
+                this.handleClearFilter(columnDefToFilterBy, true);
+                break;
+            }
+        }
+    }
+
     this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
+
+    if( !dontSet ) {
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterText);
+        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    }
+}
+
+function ReactTableHandleRemoveFilter(colDef, dontSet) {
+    if( typeof dontSet !== "boolean" )
+        dontSet = undefined;
+
+    // First clear out all filters
+    for(var i=0; i<this.state.rootNode.ultimateChildren.length; i++){
+        this.state.rootNode.ultimateChildren[i].hiddenByFilter = false;
+    }
+    // Remove filter from list of current filters
+    for(i=0; i<this.state.currentFilters.length; i++){
+        if( this.state.currentFilters[i].colDef === colDef ) {
+            this.state.currentFilters.splice(i,1);
+            break;
+        }
+    }
+    // Re-filter by looping through old filters
+    for(i=0; i<this.state.currentFilters.length; i++){
+        this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
+    }
+
+    if( !dontSet ) {
+        var fip = this.state.filterInPlace;
+        delete fip[colDef.colTag];
+        this.setState({
+            filterInPlace: fip,
+            rootNode: this.state.rootNode,
+            currentFilters: this.state.currentFilters
+        });
+        $("input.rt-" + colDef.colTag + "-filter-input").val("");
+    }
+}
+
+function ReactTableHandleRemoveAllFilters() {
+    recursivelyClearFilters(this.state.rootNode);
+    this.setState({
+        filterInPlace: {},
+        rootNode: this.state.rootNode,
+        currentFilters: []
+    });
+    $("input.rt-filter-input").val("");
+}
+
+function recursivelyClearFilters(node){
+    node.clearFilter();
+
+    for( var i=0; i<node.children.length; i++ ){
+        recursivelyClearFilters(node.children[i]);
+    }
+
+    if( !node.hasChild() ) {
+        for (var i = 0; i < node.ultimateChildren.length; i++) {
+            node.ultimateChildren[i].hiddenByFilter = false;
+        }
+    }
+}
+
+function reApplyAllFilters(){
+    for( var i=0; i<this.state.currentFilters.length; i++ ){
+        this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
+    }
     this.setState({rootNode: this.state.rootNode});
 }
 
@@ -1440,13 +1549,18 @@ function ReactTableHandleGroupBy(columnDef, buckets) {
     } else
         this.props.groupBy = null;
 
-    var rootNode = createTree(this.props);
+    this.state.rootNode = createTree(this.props);
+
+    if( this.state.currentFilters.length > 0 ) {
+        reApplyAllFilters.call(this);
+    }
 
     this.setState({
-        rootNode: rootNode,
+        rootNode: this.state.rootNode,
         currentPage: 1,
         firstColumnLabel: _construct1StColumnLabel(this)
     });
+
 
 }
 
@@ -1839,6 +1953,10 @@ TreeNode.prototype.addSortToChildren = function (options) {
 };
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
+    /* At the moment, the below is for text based filtering only.
+       I envision this function will eventually
+       call other functions based on the column type. */
+
     // Filter aggregations?
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
@@ -1856,12 +1974,23 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSens
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
-            if( caseSensitive )
-                uChild.hiddenByFilter = uChild[columnDef.colTag].search(textToFilterBy) === -1;
-            else
-                uChild.hiddenByFilter = uChild[columnDef.colTag].toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            var row = {};
+            row[columnDef.colTag] = uChild[columnDef.colTag];
+            //if( uChild[columnDef.colTag] ) {
+                if (caseSensitive)
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+                else
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            //}
+            //else{
+            //    uChild.hiddenByFilter = true;
+            //}
         }
     }
+};
+
+TreeNode.prototype.clearFilter = function(){
+    this.hiddenByFilter = false;
 };
 
 TreeNode.prototype.sortRecursivelyBySortIndex = function () {
