@@ -52,7 +52,7 @@ disableExporting   |boolean         |if true, disables functionality to export t
 filenameToSaveAs   |String          |(default: 'table-export') The filename to use to save XLS/PDF
 disableInfiniteScrolling    |boolean|If true, disables infinite scrolling and uses pagination
 itemsPerScroll     |integer         |The number of entries to add to each "infinite scroll"
-filtering          |Object          |An object which can accept the follow properties: "disable" : if set to true, filtering is disabled (defaults to false). "caseSensitive": Set to false if you want case insensitive filtering (default: true)
+filtering          |Object          |An object which can accept the follow properties: "disable" : if set to true, filtering is disabled (defaults to false). "caseSensitive": Set to false if you want case insensitive filtering (default: true). "doubleClickCell": Set to true if you want data in a cell to auto-filter on double click (default: false)
 
 ## Table Usage Example
 ```js

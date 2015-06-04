@@ -172,10 +172,13 @@ TreeNode.prototype.addSortToChildren = function (options) {
 };
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
-    /* At the moment, the below is for text based filtering only.
-       I envision this function will eventually
-       call other functions based on the column type. */
+    //if( columnDef.format === "number" )
+    //    this.filterByNumericColumn(columnDef, textToFilterBy, caseSensitive);
+    //else
+        this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive);
+};
 
+TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive){
     // Filter aggregations?
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
@@ -195,17 +198,16 @@ TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSens
             var uChild = this.ultimateChildren[i];
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
-            //if( uChild[columnDef.colTag] ) {
-                if (caseSensitive)
-                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
-                else
-                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
-            //}
-            //else{
-            //    uChild.hiddenByFilter = true;
-            //}
+            if (caseSensitive)
+                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+            else
+                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
         }
     }
+};
+
+TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy, caseSensitive){
+
 };
 
 TreeNode.prototype.clearFilter = function(){
