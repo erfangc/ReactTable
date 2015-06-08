@@ -308,7 +308,7 @@ var Row = React.createClass({displayName: 'Row',
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
+                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     displayContent = new Date(displayContent).toLocaleDateString();
             }
             // determine cell content, based on whether a cell templating callback was provided

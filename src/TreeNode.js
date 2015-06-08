@@ -173,13 +173,13 @@ TreeNode.prototype.addSortToChildren = function (options) {
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
     //if( columnDef.format === "number" )
-    //    this.filterByNumericColumn(columnDef, textToFilterBy, caseSensitive);
+    //    this.filterByNumericColumn(columnDef, textToFilterBy);
     //else
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive);
 };
 
 TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive){
-    // Filter aggregations?
+    // Filter aggregations
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
         this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive);
@@ -206,8 +206,66 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
     }
 };
 
-TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy, caseSensitive){
+TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
+    //Validate input.  Only accepting numbers, decimal, space, gt, lt, eq
+    if( textToFilterBy.match(/[0-9]|.| |>|<|=/g).join("") !== textToFilterBy)
+        return;
 
+    var availableOperators = [">=", "<=", "<", ">", "="];
+
+    // Filter aggregations
+    for( var i=0; i<this.children.length; i++ ){
+        // Call recursively to filter leaf nodes first
+        this.children[i].filterByNumericColumn(columnDef, textToFilterBy);
+        // Check to see if all children are hidden, then hide parent if so
+        var allChildrenHidden = true;
+        for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
+            if( !this.children[i].ultimateChildren[j].hiddenByFilter ){
+                allChildrenHidden = false;
+                break;
+            }
+        }
+        this.children[i].hiddenByFilter = allChildrenHidden;
+    }
+    if( !this.hasChild() ) {
+        for (var i = 0; i < this.ultimateChildren.length; i++) {
+            var uChild = this.ultimateChildren[i];
+            var row = {};
+            row[columnDef.colTag] = uChild[columnDef.colTag];
+            var conditions = textToFilterBy.split(" ");
+            var passedConditions = undefined;
+            for( var conditionCounter = 0; conditionCounter<conditions.length; conditionCounter++ ) {
+                for (var j = 0; j < availableOperators.length; j++) {
+                    var searchResult = conditions[conditionCounter].search(availableOperators[j]);
+                    // If the token is formatted with the comparision at the beginning e.g. "<44"
+                    if (searchResult === 0) {
+                        try {
+                            passedConditions = eval(uChild[columnDef.colTag] + conditions[conditionCounter]);
+                        }
+                        catch(e){
+                            passedConditions = false;
+                        }
+                    }
+                    // If the token is formatted with the comparision at the end e.g. "44>"
+                    else if( searchResult > 1 ) {
+                        try{
+                            passedConditions = eval(conditions[conditionCounter] + uChild[columnDef.colTag]);
+                        }
+                        catch(e){
+                            passedConditions = false;
+                        }
+                    }
+
+                    if( passedConditions === false || passedConditions === true )
+                        break;
+                }
+                if( passedConditions === false || passedConditions === true )
+                    break;
+            }
+            if( passedConditions === false )
+                uChild.hiddenByFilter = true;
+        }
+    }
 };
 
 TreeNode.prototype.clearFilter = function(){

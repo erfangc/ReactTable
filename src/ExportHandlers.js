@@ -72,13 +72,39 @@ function exportToExcel(data, filename){
         tempFrame.remove();
     }
     else{          //other browsers
-        var base64data = "base64," + $.base64.encode(excelFile);
+        var base64data = $.base64.encode(excelFile);
+        var blob = b64toBlob(base64data, "application/vnd.ms-excel");
+        var blobUrl = URL.createObjectURL(blob);
         $("<a></a>").attr("download", filename)
-                    .attr("href", 'data:application/vnd.ms-excel;filename=' + filename + '.doc;' + base64data)
+                    .attr("href", blobUrl)
                     .append("<div id='download-me-now'></div>")
                     .appendTo("body");
         $("#download-me-now").click().remove();
     }
+}
+
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
 }
 
 function exportToPDF(data, filename){

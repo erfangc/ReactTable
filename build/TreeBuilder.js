@@ -8,6 +8,16 @@ function createTree(tableProps) {
     if (tableProps.rootNode != null) {
         return tableProps.rootNode
     }
+    // If the data is formatted as an array of arrays instead of array of objects
+    if( tableProps.data.length > 0 && Array.isArray(tableProps.data[0]) ){
+        for( var i=0; i<tableProps.data.length; i++ ){
+            var newDataObj = {};
+            for( var j=0; j<tableProps.columnDefs.length; j++ ){
+                newDataObj[tableProps.columnDefs[j].colTag] = tableProps.data[i][j];
+            }
+            tableProps.data[i] = newDataObj;
+        }
+    }
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
     rootNode.sortRecursivelyBySortIndex();
