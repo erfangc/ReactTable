@@ -171,18 +171,18 @@ TreeNode.prototype.addSortToChildren = function (options) {
     }
 };
 
-TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
+TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
     //if( columnDef.format === "number" )
     //    this.filterByNumericColumn(columnDef, textToFilterBy);
     //else
-        this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive);
+        this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
-TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive){
+TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
     // Filter aggregations
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive);
+        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -196,12 +196,17 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
     if( !this.hasChild() ) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
-            var row = {};
-            row[columnDef.colTag] = uChild[columnDef.colTag];
-            if (caseSensitive)
-                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
-            else
-                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            if( customFilterer ){
+                uChild.hiddenByFilter = customFilterer(columnDef, uChild, textToFilterBy);
+            }
+            else {
+                var row = {};
+                row[columnDef.colTag] = uChild[columnDef.colTag];
+                if (caseSensitive)
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+                else
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            }
         }
     }
 };

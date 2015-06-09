@@ -48,7 +48,7 @@ $(function () {
 
         }
     ];
-    $.get('sample_data_small.json').success(function (data) {
+    $.get('large_data_30k.json').success(function (data) {
         var options = {
             disablePagination: true,
             rowKey: 'id',

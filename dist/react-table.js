@@ -608,13 +608,39 @@ function _mostDataPoints(options) {
         tempFrame.remove();
     }
     else{          //other browsers
-        var base64data = "base64," + $.base64.encode(excelFile);
+        var base64data = $.base64.encode(excelFile);
+        var blob = b64toBlob(base64data, "application/vnd.ms-excel");
+        var blobUrl = URL.createObjectURL(blob);
         $("<a></a>").attr("download", filename)
-                    .attr("href", 'data:application/vnd.ms-excel;filename=' + filename + '.doc;' + base64data)
+                    .attr("href", blobUrl)
                     .append("<div id='download-me-now'></div>")
                     .appendTo("body");
         $("#download-me-now").click().remove();
     }
+}
+
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
 }
 
 function exportToPDF(data, filename){
@@ -1093,7 +1119,7 @@ var Row = React.createClass({displayName: 'Row',
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (!isNaN(displayContent)) // if displayContent is a number, we assume displayContent is in milliseconds
+                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     displayContent = new Date(displayContent).toLocaleDateString();
             }
             // determine cell content, based on whether a cell templating callback was provided
@@ -1435,7 +1461,12 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
         }
     }
 
+    var customFilterer = undefined;
+    if( this.props.filtering && this.props.filtering.customFilterer ){
+        customFilterer = this.props.filtering.customFilterer;
+    }
     this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
+    //this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
 
     if( !dontSet ) {
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
@@ -1720,6 +1751,16 @@ function createTree(tableProps) {
     if (tableProps.rootNode != null) {
         return tableProps.rootNode
     }
+    // If the data is formatted as an array of arrays instead of array of objects
+    if( tableProps.data.length > 0 && Array.isArray(tableProps.data[0]) ){
+        for( var i=0; i<tableProps.data.length; i++ ){
+            var newDataObj = {};
+            for( var j=0; j<tableProps.columnDefs.length; j++ ){
+                newDataObj[tableProps.columnDefs[j].colTag] = tableProps.data[i][j];
+            }
+            tableProps.data[i] = newDataObj;
+        }
+    }
     var rootNode = buildTreeSkeleton(tableProps);
     recursivelyAggregateNodes(rootNode, tableProps);
     rootNode.sortRecursivelyBySortIndex();
@@ -1952,18 +1993,57 @@ TreeNode.prototype.addSortToChildren = function (options) {
     }
 };
 
-TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive){
+TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
     //if( columnDef.format === "number" )
-    //    this.filterByNumericColumn(columnDef, textToFilterBy, caseSensitive);
+    //    this.filterByNumericColumn(columnDef, textToFilterBy);
     //else
-        this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive);
+        this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
-TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive){
-    // Filter aggregations?
+TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
+    // Filter aggregations
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive);
+        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
+        // Check to see if all children are hidden, then hide parent if so
+        var allChildrenHidden = true;
+        for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
+            if( !this.children[i].ultimateChildren[j].hiddenByFilter ){
+                allChildrenHidden = false;
+                break;
+            }
+        }
+        this.children[i].hiddenByFilter = allChildrenHidden;
+    }
+    if( !this.hasChild() ) {
+        for (var i = 0; i < this.ultimateChildren.length; i++) {
+            var uChild = this.ultimateChildren[i];
+            if( customFilterer ){
+                uChild.hiddenByFilter = customFilterer(columnDef, uChild, textToFilterBy);
+            }
+            else {
+                var row = {};
+                row[columnDef.colTag] = uChild[columnDef.colTag];
+                if (caseSensitive)
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+                else
+                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            }
+        }
+    }
+};
+
+TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
+    //Validate input.  Only accepting numbers, decimal, space, gt, lt, eq
+    if( textToFilterBy.match(/[0-9]|.| |>|<|=/g).join("") !== textToFilterBy)
+        return;
+
+    var availableOperators = [">=", "<=", "<", ">", "="];
+
+    // Filter aggregations
+    for( var i=0; i<this.children.length; i++ ){
+        // Call recursively to filter leaf nodes first
+        this.children[i].filterByNumericColumn(columnDef, textToFilterBy);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -1979,16 +2059,40 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
             var uChild = this.ultimateChildren[i];
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
-            if (caseSensitive)
-                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
-            else
-                uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+            var conditions = textToFilterBy.split(" ");
+            var passedConditions = undefined;
+            for( var conditionCounter = 0; conditionCounter<conditions.length; conditionCounter++ ) {
+                for (var j = 0; j < availableOperators.length; j++) {
+                    var searchResult = conditions[conditionCounter].search(availableOperators[j]);
+                    // If the token is formatted with the comparision at the beginning e.g. "<44"
+                    if (searchResult === 0) {
+                        try {
+                            passedConditions = eval(uChild[columnDef.colTag] + conditions[conditionCounter]);
+                        }
+                        catch(e){
+                            passedConditions = false;
+                        }
+                    }
+                    // If the token is formatted with the comparision at the end e.g. "44>"
+                    else if( searchResult > 1 ) {
+                        try{
+                            passedConditions = eval(conditions[conditionCounter] + uChild[columnDef.colTag]);
+                        }
+                        catch(e){
+                            passedConditions = false;
+                        }
+                    }
+
+                    if( passedConditions === false || passedConditions === true )
+                        break;
+                }
+                if( passedConditions === false || passedConditions === true )
+                    break;
+            }
+            if( passedConditions === false )
+                uChild.hiddenByFilter = true;
         }
     }
-};
-
-TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy, caseSensitive){
-
 };
 
 TreeNode.prototype.clearFilter = function(){

@@ -42,7 +42,7 @@ $(function () {
 
         }
     ];
-    $.get('sample_data.json').success(function (data) {
+    $.get('large_data_30k.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {

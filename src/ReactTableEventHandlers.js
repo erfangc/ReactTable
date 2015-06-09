@@ -51,7 +51,12 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
         }
     }
 
+    var customFilterer = undefined;
+    if( this.props.filtering && this.props.filtering.customFilterer ){
+        customFilterer = this.props.filtering.customFilterer;
+    }
     this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
+    //this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
 
     if( !dontSet ) {
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
