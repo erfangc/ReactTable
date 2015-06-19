@@ -2,6 +2,9 @@ function ReactTableGetInitialState() {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
     var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    // FILTERING NOT READY****************
+    this.props.filtering = {disable: true};
+    // ******************
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -51,12 +54,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
         }
     }
 
-    var customFilterer = undefined;
+    var customFilterer;
     if( this.props.filtering && this.props.filtering.customFilterer ){
         customFilterer = this.props.filtering.customFilterer;
     }
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
-    //this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
 
     if( !dontSet ) {
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});

@@ -1,5 +1,4 @@
-function exportToExcel(data, filename){
-    //console.log($(this).html());
+function exportToExcel(data, filename, table){
     var excel="<table><tr>";
     // Header
     $.each(data.headers, function(i, value) {
@@ -19,6 +18,11 @@ function exportToExcel(data, filename){
         var colCount=0;
 
         $.each(value, function(j, value2) {
+            if( table.state.columnDefs[j].format.toLowerCase() === "date" ){
+                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                    value2 = new Date(value2).toLocaleDateString();
+
+            }
             excel += "<td>"+parseString(value2)+"</td>";
             colCount++;
         });
@@ -107,7 +111,7 @@ function b64toBlob(b64Data, contentType, sliceSize) {
     return blob;
 }
 
-function exportToPDF(data, filename){
+function exportToPDF(data, filename, table){
 
     var defaults = {
         separator: ',',
@@ -180,6 +184,11 @@ function exportToPDF(data, filename){
             var colPosition = widths.reduce(function(prev,current,idx){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
+            if( table.state.columnDefs[index].format.toLowerCase() === "date" ){
+                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                    value2 = new Date(value2).toLocaleDateString();
+
+            }
             doc.text(colPosition,rowPosition, parseString(value2, true));
         });
     });

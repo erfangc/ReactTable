@@ -197,7 +197,7 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
             if( customFilterer ){
-                uChild.hiddenByFilter = customFilterer(columnDef, uChild, textToFilterBy);
+                uChild.hiddenByFilter = !customFilterer(columnDef, uChild, textToFilterBy);
             }
             else {
                 var row = {};

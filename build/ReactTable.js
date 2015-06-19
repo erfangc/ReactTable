@@ -63,9 +63,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
 
         if (type === "excel")
-            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
+            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export", this);
         else if (type === "pdf")
-            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
+            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export", this);
     },
     /* -------------------------------------------------- */
     toggleSelectDetailRow: function (key) {

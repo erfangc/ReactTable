@@ -42,7 +42,7 @@ $(function () {
 
         }
     ];
-    $.get('large_data_30k.json').success(function (data) {
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
         var groupBy = [{colTag: "nationality", text: "Nationality"}, {
@@ -63,7 +63,11 @@ $(function () {
             pageSize: 1000,
             filtering: {
                 caseSensitive: false,
-                doubleClickCell: true
+                doubleClickCell: true,
+                customFilterer: function(colDef, row, text){
+                    // Return true if you want to show it, false if you want to hide it
+                    return row[colDef.colTag].match(text);
+                }
             },
             //filenameToSaveAs: "table-awesome",
             rowKey: 'id',

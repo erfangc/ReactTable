@@ -534,8 +534,7 @@ function _mostDataPoints(options) {
         }
     }
     return best.index == -1 ? "" : options.data[best.index][options.columnDef.colTag];
-};function exportToExcel(data, filename){
-    //console.log($(this).html());
+};function exportToExcel(data, filename, table){
     var excel="<table><tr>";
     // Header
     $.each(data.headers, function(i, value) {
@@ -555,6 +554,11 @@ function _mostDataPoints(options) {
         var colCount=0;
 
         $.each(value, function(j, value2) {
+            if( table.state.columnDefs[j].format.toLowerCase() === "date" ){
+                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                    value2 = new Date(value2).toLocaleDateString();
+
+            }
             excel += "<td>"+parseString(value2)+"</td>";
             colCount++;
         });
@@ -643,7 +647,7 @@ function b64toBlob(b64Data, contentType, sliceSize) {
     return blob;
 }
 
-function exportToPDF(data, filename){
+function exportToPDF(data, filename, table){
 
     var defaults = {
         separator: ',',
@@ -716,6 +720,11 @@ function exportToPDF(data, filename){
             var colPosition = widths.reduce(function(prev,current,idx){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
+            if( table.state.columnDefs[index].format.toLowerCase() === "date" ){
+                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                    value2 = new Date(value2).toLocaleDateString();
+
+            }
             doc.text(colPosition,rowPosition, parseString(value2, true));
         });
     });
@@ -874,9 +883,9 @@ var ReactTable = React.createClass({displayName: 'ReactTable',
         });
 
         if (type === "excel")
-            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
+            exportToExcel(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export", this);
         else if (type === "pdf")
-            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export");
+            exportToPDF(objToExport, this.props.filenameToSaveAs ? this.props.filenameToSaveAs : "table-export", this);
     },
     /* -------------------------------------------------- */
     toggleSelectDetailRow: function (key) {
@@ -1412,6 +1421,9 @@ function _computePageDisplayRange(currentPage, maxDisplayedPages) {
     // the holy grail of table state - describes structure of the data contained within the table
     var rootNode = createTree(this.props);
     var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    // FILTERING NOT READY****************
+    this.props.filtering = {disable: true};
+    // ******************
     return {
         rootNode: rootNode,
         uniqueId: uniqueId("table"),
@@ -1461,12 +1473,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
         }
     }
 
-    var customFilterer = undefined;
+    var customFilterer;
     if( this.props.filtering && this.props.filtering.customFilterer ){
         customFilterer = this.props.filtering.customFilterer;
     }
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive);
-    //this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
 
     if( !dontSet ) {
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
@@ -2019,7 +2030,7 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
             if( customFilterer ){
-                uChild.hiddenByFilter = customFilterer(columnDef, uChild, textToFilterBy);
+                uChild.hiddenByFilter = !customFilterer(columnDef, uChild, textToFilterBy);
             }
             else {
                 var row = {};
