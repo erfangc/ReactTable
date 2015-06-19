@@ -146,7 +146,8 @@ function buildHeaders(table) {
                     table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
                 <a className={textClasses}
-                   onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
+                   //onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}
+                >
                     {table.state.firstColumnLabel.join("/")}
                 </a>
                 <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
@@ -176,7 +177,8 @@ function buildHeaders(table) {
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
-                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
+                       //onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}
+                    >
                         {columnDef.text}
                     </a>
                     <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}

@@ -3,7 +3,7 @@ function ReactTableGetInitialState() {
     var rootNode = createTree(this.props);
     var selections = _getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     // FILTERING NOT READY****************
-    this.props.filtering = {disable: true};
+    //this.props.filtering = {disable: true};
     // ******************
     return {
         rootNode: rootNode,
