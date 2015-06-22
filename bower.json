@@ -23,7 +23,10 @@
   ],
   "dependencies": {
     "react": "0.12.0",
-    "jquery": "2.1.1",
+    "jquery": "~2.1.1",
     "tableExport": "https://github.com/caguthrie/tableExport.jquery.plugin.git"
+  },
+  "resolutions": {
+    "jquery": "~2.1.1"
   }
 }
