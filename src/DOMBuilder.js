@@ -145,7 +145,7 @@ function buildHeaders(table) {
                 (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                     table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
-                <a className={textClasses}
+                <a href="#" className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                     {table.state.firstColumnLabel.join("/")}
                 </a>
@@ -175,7 +175,7 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a className={textClasses}
+                    <a href="#" className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         {columnDef.text}
                     </a>

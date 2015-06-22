@@ -145,7 +145,7 @@ function buildHeaders(table) {
                 (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                     table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
             React.DOM.div({style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
-                React.DOM.a({className: textClasses, 
+                React.DOM.a({href: "#", className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     table.state.firstColumnLabel.join("/")
                 ), 
@@ -175,7 +175,7 @@ function buildHeaders(table) {
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
                 React.DOM.div({style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.DOM.a({className: textClasses, 
+                    React.DOM.a({href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
