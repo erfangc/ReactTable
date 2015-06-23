@@ -18,7 +18,7 @@ function exportToExcel(data, filename, table){
         var colCount=0;
 
         $.each(value, function(j, value2) {
-            if( table.state.columnDefs[j].format.toLowerCase() === "date" ){
+            if( table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     value2 = new Date(value2).toLocaleDateString();
 
@@ -184,7 +184,7 @@ function exportToPDF(data, filename, table){
             var colPosition = widths.reduce(function(prev,current,idx){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
-            if( table.state.columnDefs[index].format.toLowerCase() === "date" ){
+            if( table.state.columnDefs[index].format && table.state.columnDefs[index].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     value2 = new Date(value2).toLocaleDateString();
 
