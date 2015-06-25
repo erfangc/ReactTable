@@ -471,7 +471,7 @@ function docClick(e) {
     adjustHeaders.call(this);
     // Remove filter-in-place boxes if they are open and they weren't clicked on
     if (!jQuery.isEmptyObject(this.state.filterInPlace)) {
-        if (!($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element"))) {
+        if (!($(e.target).hasClass("rt-headers-container") || $(e.target).parents(".rt-headers-container").length > 0)) {
             this.setState({
                 filterInPlace: {}
             });

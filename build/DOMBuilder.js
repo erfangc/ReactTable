@@ -132,7 +132,8 @@ function pressedKey(table, colTag, e){
 
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
-    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
+    var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
         width: "100%",
         height: "13px",
@@ -149,7 +150,7 @@ function buildHeaders(table) {
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     table.state.firstColumnLabel.join("/")
                 ), 
-                React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                     onChange: table.handleColumnFilter.bind(null, columnDef), 
                     onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
             ), 
@@ -159,14 +160,18 @@ function buildHeaders(table) {
                 table.state.sortAsc != undefined && table.state.sortAsc === false &&
                 columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
             ), 
-            buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
+            React.DOM.div({className: numericPanelClasses}, 
+                NumericFilterPanel(null)
+            ), 
+            table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
-        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+        var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         // bound this on <a> tag: onClick={table.props.disableFilter ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}}
         headerColumns.push(
             React.DOM.div({className: "rt-headers-container", 
@@ -179,7 +184,7 @@ function buildHeaders(table) {
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
-                    React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                    React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                            onChange: table.handleColumnFilter.bind(null, columnDef), 
                            onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
                 ), 
@@ -189,7 +194,13 @@ function buildHeaders(table) {
                     table.state.sortAsc != undefined && table.state.sortAsc === false &&
                     columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
                 ), 
-                buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
+                React.DOM.div({className: numericPanelClasses}, 
+                    NumericFilterPanel({clearFilter: table.handleClearFilter, 
+                                        addFilter: table.handleColumnFilter, 
+                                        colDef: columnDef, 
+                                        currentFilters: table.state.currentFilters})
+                ), 
+                table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
         );
     }

@@ -172,9 +172,9 @@ TreeNode.prototype.addSortToChildren = function (options) {
 };
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
-    //if( columnDef.format === "number" )
-    //    this.filterByNumericColumn(columnDef, textToFilterBy);
-    //else
+    if( columnDef.format === "number" )
+        this.filterByNumericColumn(columnDef, textToFilterBy);
+    else
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
@@ -211,17 +211,11 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
     }
 };
 
-TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
-    //Validate input.  Only accepting numbers, decimal, space, gt, lt, eq
-    if( textToFilterBy.match(/[0-9]|.| |>|<|=/g).join("") !== textToFilterBy)
-        return;
-
-    var availableOperators = [">=", "<=", "<", ">", "="];
-
+TreeNode.prototype.filterByNumericColumn = function(columnDef, filterData){
     // Filter aggregations
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByNumericColumn(columnDef, textToFilterBy);
+        this.children[i].filterByNumericColumn(columnDef, filterData);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -237,38 +231,25 @@ TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
             var uChild = this.ultimateChildren[i];
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
-            var conditions = textToFilterBy.split(" ");
-            var passedConditions = undefined;
-            for( var conditionCounter = 0; conditionCounter<conditions.length; conditionCounter++ ) {
-                for (var j = 0; j < availableOperators.length; j++) {
-                    var searchResult = conditions[conditionCounter].search(availableOperators[j]);
-                    // If the token is formatted with the comparision at the beginning e.g. "<44"
-                    if (searchResult === 0) {
-                        try {
-                            passedConditions = eval(uChild[columnDef.colTag] + conditions[conditionCounter]);
-                        }
-                        catch(e){
-                            passedConditions = false;
-                        }
-                    }
-                    // If the token is formatted with the comparision at the end e.g. "44>"
-                    else if( searchResult > 1 ) {
-                        try{
-                            passedConditions = eval(conditions[conditionCounter] + uChild[columnDef.colTag]);
-                        }
-                        catch(e){
-                            passedConditions = false;
-                        }
-                    }
-
-                    if( passedConditions === false || passedConditions === true )
-                        break;
+            var filterOutNode = false;
+            var multiplier = buildLAFConfigObject(columnDef).multiplier;
+            var value = row[columnDef.colTag]*parseFloat(multiplier);
+            for( var j=0; j<filterData.length; j++ ){
+                if( filterData[j].gt !== undefined ){
+                    if( !(value > filterData[j].gt) )
+                        filterOutNode = true;
                 }
-                if( passedConditions === false || passedConditions === true )
-                    break;
+                else if( filterData[j].lt !== undefined ){
+                    if( !(value < filterData[j].lt) )
+                        filterOutNode = true;
+                }
+                else if( filterData[j].eq !== undefined ) {
+                    if( !(value == filterData[j].eq) )
+                        filterOutNode = true;
+                }
             }
-            if( passedConditions === false )
-                uChild.hiddenByFilter = true;
+
+            uChild.hiddenByFilter = filterOutNode;
         }
     }
 };

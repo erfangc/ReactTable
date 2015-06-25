@@ -224,7 +224,8 @@ function pressedKey(table, colTag, e){
 
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
-    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
+    var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
         width: "100%",
         height: "13px",
@@ -241,7 +242,7 @@ function buildHeaders(table) {
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     table.state.firstColumnLabel.join("/")
                 ), 
-                React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                     onChange: table.handleColumnFilter.bind(null, columnDef), 
                     onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
             ), 
@@ -251,14 +252,18 @@ function buildHeaders(table) {
                 table.state.sortAsc != undefined && table.state.sortAsc === false &&
                 columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
             ), 
-            buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
+            React.DOM.div({className: numericPanelClasses}, 
+                NumericFilterPanel(null)
+            ), 
+            table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})
         )
     );
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
-        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "");
+        var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         // bound this on <a> tag: onClick={table.props.disableFilter ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}}
         headerColumns.push(
             React.DOM.div({className: "rt-headers-container", 
@@ -271,7 +276,7 @@ function buildHeaders(table) {
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         columnDef.text
                     ), 
-                    React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                    React.DOM.input({style: ss, className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                            onChange: table.handleColumnFilter.bind(null, columnDef), 
                            onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
                 ), 
@@ -281,7 +286,13 @@ function buildHeaders(table) {
                     table.state.sortAsc != undefined && table.state.sortAsc === false &&
                     columnDef === table.state.columnDefSorted ? React.DOM.div({className: "rt-downward-caret"}) : null
                 ), 
-                buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
+                React.DOM.div({className: numericPanelClasses}, 
+                    NumericFilterPanel({clearFilter: table.handleClearFilter, 
+                                        addFilter: table.handleColumnFilter, 
+                                        colDef: columnDef, 
+                                        currentFilters: table.state.currentFilters})
+                ), 
+                table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})
             )
         );
     }
@@ -820,6 +831,83 @@ InfiniteScroll.setDefaultLoader = function (loader) {
     InfiniteScroll._defaultLoader = loader;
 };;/** @jsx React.DOM */
 
+var NumericFilterPanel = React.createClass({
+    displayName: 'NumericFilterPanel',
+    getInitialState: function () {
+        return{
+            entry0: {
+                checked: true,
+                dropdown: "gt",
+                input: ""
+            },
+            entry1: {
+                checked: false,
+                dropdown: "gt",
+                input: ""
+            }
+        };
+    },
+    handleChange: function(event) {
+        var domNode = $(this.getDOMNode());
+        var boxes = domNode.find(".rt-numeric-checkbox");
+        this.props.clearFilter(this.props.colDef);
+        var filterData = [];
+        for( var i=0; i<boxes.length; i++ ){
+            var tempHash = {};
+            var inputBoxData = domNode.find(".rt-numeric-input").eq(i).val();
+            var dropdownBoxData = domNode.find(".rt-numeric-dropdown").eq(i).find(":selected").val();
+            tempHash[dropdownBoxData] = inputBoxData;
+
+            if( boxes.eq(i).is(":checked") ) {
+                filterData.push(tempHash);
+                this.state["entry" + i].checked = true;
+            }
+            else{
+                this.state["entry" + i].checked = false;
+            }
+            this.state["entry" + i].dropdown = dropdownBoxData;
+            this.state["entry" + i].input = inputBoxData;
+        }
+        this.props.addFilter(this.props.colDef, filterData);
+        this.setState({entry0: this.state.entry0, entry1: this.state.entry1});
+    },
+    changeCheckbox: function(e){
+        var entryName = "entry" + $(e.target).data("order");
+        this.state[entryName].checked = e.target.checked;
+        this.setState({entryName: this.state[entryName]});
+    },
+    render: function () {
+        var inputStyle = {
+            "width": "70px"
+        };
+        return (
+            React.DOM.div(null, 
+                React.DOM.input({'data-order': "0", className: "rt-numeric-checkbox", type: "checkbox", checked: this.state.entry0.checked, onChange: this.changeCheckbox}), 
+                React.DOM.select({'data-order': "0", className: "rt-numeric-dropdown"}, 
+                    React.DOM.option({value: "gt"}, "Greater Than"), 
+                    React.DOM.option({value: "lt"}, "Less Than"), 
+                    React.DOM.option({value: "eq"}, "Equals")
+                ), 
+                React.DOM.input({'data-order': "0", className: "rt-numeric-input", style: inputStyle, type: "number"}), 
+
+                React.DOM.br(null), 
+
+                React.DOM.input({'data-order': "1", className: "rt-numeric-checkbox", type: "checkbox", checked: this.state.entry1.checked, onChange: this.changeCheckbox}), 
+                React.DOM.select({'data-order': "1", className: "rt-numeric-dropdown"}, 
+                    React.DOM.option({value: "gt"}, "Greater Than"), 
+                    React.DOM.option({value: "lt"}, "Less Than"), 
+                    React.DOM.option({value: "eq"}, "Equals")
+                ), 
+                React.DOM.input({'data-order': "1", className: "rt-numeric-input", style: inputStyle, type: "number"}), 
+
+                React.DOM.br(null), 
+
+                React.DOM.button({onClick: this.handleChange}, "Submit")
+            )
+        );
+    }
+});;/** @jsx React.DOM */
+
 /**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
  * and can refer to children 'sectors'
@@ -1291,7 +1379,7 @@ function docClick(e) {
     adjustHeaders.call(this);
     // Remove filter-in-place boxes if they are open and they weren't clicked on
     if (!jQuery.isEmptyObject(this.state.filterInPlace)) {
-        if (!($(e.target).hasClass("rt-header-element") || $(e.target).parent().hasClass("rt-header-element"))) {
+        if (!($(e.target).hasClass("rt-headers-container") || $(e.target).parents(".rt-headers-container").length > 0)) {
             this.setState({
                 filterInPlace: {}
             });
@@ -1459,7 +1547,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
     if( typeof dontSet !== "boolean" )
         dontSet = undefined;
 
-    var filterText = e.target ? (e.target.value || e.target.textContent) : e;
+    var filterData = e.target ? (e.target.value || e.target.textContent) : e;
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
 
     if( !dontSet ){
@@ -1477,11 +1565,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
     if( this.props.filtering && this.props.filtering.customFilterer ){
         customFilterer = this.props.filtering.customFilterer;
     }
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
 
     if( !dontSet ) {
-        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterText);
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 }
@@ -2005,9 +2093,9 @@ TreeNode.prototype.addSortToChildren = function (options) {
 };
 
 TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
-    //if( columnDef.format === "number" )
-    //    this.filterByNumericColumn(columnDef, textToFilterBy);
-    //else
+    if( columnDef.format === "number" )
+        this.filterByNumericColumn(columnDef, textToFilterBy);
+    else
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
@@ -2044,17 +2132,11 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
     }
 };
 
-TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
-    //Validate input.  Only accepting numbers, decimal, space, gt, lt, eq
-    if( textToFilterBy.match(/[0-9]|.| |>|<|=/g).join("") !== textToFilterBy)
-        return;
-
-    var availableOperators = [">=", "<=", "<", ">", "="];
-
+TreeNode.prototype.filterByNumericColumn = function(columnDef, filterData){
     // Filter aggregations
     for( var i=0; i<this.children.length; i++ ){
         // Call recursively to filter leaf nodes first
-        this.children[i].filterByNumericColumn(columnDef, textToFilterBy);
+        this.children[i].filterByNumericColumn(columnDef, filterData);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
         for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
@@ -2070,38 +2152,25 @@ TreeNode.prototype.filterByNumericColumn = function(columnDef, textToFilterBy){
             var uChild = this.ultimateChildren[i];
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
-            var conditions = textToFilterBy.split(" ");
-            var passedConditions = undefined;
-            for( var conditionCounter = 0; conditionCounter<conditions.length; conditionCounter++ ) {
-                for (var j = 0; j < availableOperators.length; j++) {
-                    var searchResult = conditions[conditionCounter].search(availableOperators[j]);
-                    // If the token is formatted with the comparision at the beginning e.g. "<44"
-                    if (searchResult === 0) {
-                        try {
-                            passedConditions = eval(uChild[columnDef.colTag] + conditions[conditionCounter]);
-                        }
-                        catch(e){
-                            passedConditions = false;
-                        }
-                    }
-                    // If the token is formatted with the comparision at the end e.g. "44>"
-                    else if( searchResult > 1 ) {
-                        try{
-                            passedConditions = eval(conditions[conditionCounter] + uChild[columnDef.colTag]);
-                        }
-                        catch(e){
-                            passedConditions = false;
-                        }
-                    }
-
-                    if( passedConditions === false || passedConditions === true )
-                        break;
+            var filterOutNode = false;
+            var multiplier = buildLAFConfigObject(columnDef).multiplier;
+            var value = row[columnDef.colTag]*parseFloat(multiplier);
+            for( var j=0; j<filterData.length; j++ ){
+                if( filterData[j].gt !== undefined ){
+                    if( !(value > filterData[j].gt) )
+                        filterOutNode = true;
                 }
-                if( passedConditions === false || passedConditions === true )
-                    break;
+                else if( filterData[j].lt !== undefined ){
+                    if( !(value < filterData[j].lt) )
+                        filterOutNode = true;
+                }
+                else if( filterData[j].eq !== undefined ) {
+                    if( !(value == filterData[j].eq) )
+                        filterOutNode = true;
+                }
             }
-            if( passedConditions === false )
-                uChild.hiddenByFilter = true;
+
+            uChild.hiddenByFilter = filterOutNode;
         }
     }
 };

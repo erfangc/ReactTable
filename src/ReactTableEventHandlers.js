@@ -40,7 +40,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
     if( typeof dontSet !== "boolean" )
         dontSet = undefined;
 
-    var filterText = e.target ? (e.target.value || e.target.textContent) : e;
+    var filterData = e.target ? (e.target.value || e.target.textContent) : e;
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
 
     if( !dontSet ){
@@ -58,11 +58,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet){
     if( this.props.filtering && this.props.filtering.customFilterer ){
         customFilterer = this.props.filtering.customFilterer;
     }
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterText, caseSensitive, customFilterer);
+    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
 
     if( !dontSet ) {
-        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterText});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterText);
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 }

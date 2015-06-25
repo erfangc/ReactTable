@@ -63,11 +63,12 @@ $(function () {
             pageSize: 1000,
             filtering: {
                 caseSensitive: false,
-                doubleClickCell: true,
-                customFilterer: function(colDef, row, text){
-                    // Return true if you want to show it, false if you want to hide it
-                    return row[colDef.colTag].match(text);
-                }
+                doubleClickCell: true
+                //,
+                //customFilterer: function(colDef, row, text){
+                //    // Return true if you want to show it, false if you want to hide it
+                //    return row[colDef.colTag].match(text);
+                //}
             },
             //filenameToSaveAs: "table-awesome",
             rowKey: 'id',
