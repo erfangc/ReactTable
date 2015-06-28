@@ -6,45 +6,52 @@
  *
  * states are used to store info that cannot be inferred or derived from 'props', such as user interaction that occur within the component (collapsing a subtotal grouping / adding a column to sort)
  *
- * @returns {{rootNode: the, uniqueId: *, currentPage: number, columnDefs: (*|Array|newColumnDefs), selectedDetailRows: (*|results.selectedDetailRows|{}|selectedDetailRows), selectedSummaryRows: (*|results.selectedSummaryRows|{}|selectedSummaryRows), extraStyle: {}, rows: Array, hasMoreRows: boolean, itemsPerScroll: *, filterInPlace: {}, currentFilters: Array}}
- * @constructor
  */
 function ReactTableGetInitialState() {
-    // the holy grail of table state - describes structure of the data contained within the table
-    var rootNode = createTree(this.props);
-    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
 
-    /**
-     * please document justification as state
-     */
-    return {
-        rootNode: rootNode, // justifiable as a state because its children contain sub-states like collapse/expanded
+    var initialState = {
         uniqueId: uniqueId("table"), // i guess since this is randomly generated, it is not derivable from props alone
         currentPage: 1, // self-explanatory
         lastScrollTop: 0, // self-explanatory, this is the spiritual of currentPage for paginators
-        columnDefs: this.props.columnDefs, // this is really a modifiable prop, but fine ...
-        selectedDetailRows: selections.selectedDetailRows, // another modifiable prop ... so fine ..
-        selectedSummaryRows: selections.selectedSummaryRows, // save as above
+
+        // we shall consider any props that is modifiable through user interaction a state
+        columnDefs: this.props.columnDefs,
+        subtotalBy: this.props.subtotalBy,
+
         lowerVisualBound: 0,
         upperVisualBound: this.props.pageSize,
         extraStyle: {}, // TODO document use
-        rows: [], // TODO the current row components being rendered, this is DEFINITELY not a state ... it should be determined based on props and other states in the render() function
+        /**
+         * TODO 'rows' is DEFINITELY not a state !!! keeping it as a state is problematic. The "rows" that should be rendered at any point in time should be derivable from props + states
+         * it should be determined based on props and other states in the render() function
+         */
+        rows: [],
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [] // TODO same as above
     };
+
+    /**
+     * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
+     * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
+     */
+    initialState.rootNode = createNewRootNode(this.props, initialState);
+
+    var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
+    initialState.selectedDetailRows = selections.selectedDetailRows; // another modifiable prop ... so fine ..
+    initialState.selectedSummaryRows = selections.selectedSummaryRows; // save as above
+
+    return initialState;
 }
 
 function ReactTableHandleSelect(selectedRow) {
-    var rowKey = this.props.rowKey, state;
+    var rowKey = this.props.rowKey;
     if (rowKey == null)
         return;
-    if (selectedRow.isDetail != null & selectedRow.isDetail == true) {
-        state = this.toggleSelectDetailRow(selectedRow[rowKey]);
-        this.props.onSelectCallback(selectedRow, state);
-    } else {
-        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
-        this.props.onSummarySelectCallback(selectedRow, state);
-    }
+    if (selectedRow.isDetail != null & selectedRow.isDetail == true)
+        this.props.onSelectCallback(selectedRow, this.toggleSelectDetailRow(selectedRow[rowKey]));
+    else
+        this.props.onSummarySelectCallback(selectedRow, this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath)));
+
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
@@ -134,7 +141,7 @@ function recursivelyClearFilters(node) {
     }
 }
 
-function reApplyAllFilters() {
+function applyAllFilters() {
     for (var i = 0; i < this.state.currentFilters.length; i++) {
         this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
     }
@@ -183,29 +190,37 @@ function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
     });
 }
 
-function ReactTableHandleGroupBy(columnDef, buckets) {
+function ReactTableHandleSubtotalBy(columnDef, partitions) {
 
-    if (buckets != null && buckets != "" && columnDef)
-        columnDef.groupByRange = partitionNumberLine(buckets);
-    if (columnDef != null) {
-        this.props.groupBy = this.props.groupBy || [];
-        this.props.groupBy.push(columnDef);
-    } else
-        this.props.groupBy = null;
+    var subtotalBy = this.state.subtotalBy || [];
+    /**
+     * determine if the subtotal operation require partitioning of the column values first
+     */
+    if (partitions != null && partitions != "" && columnDef)
+        columnDef.subtotalByRange = partitionNumberLine(partitions);
 
-    this.state.rootNode = createTree(this.props);
+    /**
+     * if the passed in columnDef is null, then we clear all subtotal
+     */
+    if (columnDef != null && columnDef.constructor.name != 'SyntheticMouseEvent')
+        subtotalBy.push(columnDef);
+    else if (columnDef != null && columnDef.constructor.name === 'SyntheticMouseEvent')
+        subtotalBy = [];
 
-    if (this.state.currentFilters.length > 0) {
-        reApplyAllFilters.call(this);
-    }
+    if (this.state.currentFilters.length > 0)
+        applyAllFilters.call(this);
 
-    this.setState({
-        rootNode: this.state.rootNode,
-        currentPage: 1,
-        lowerVisualBound: 0,
-        upperVisualBound: this.props.pageSize,
-        firstColumnLabel: buildFirstColumnLabel(this)
-    });
+    /**
+     * extend the current state to derive new state after subtotal operation, then create a new rootNode
+     */
+    const newState = this.state;
+    newState.currentPage = 1;
+    newState.lowerVisualBound = 0;
+    newState.upperVisualBound = this.props.pageSize;
+    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    newState.subtotalBy = subtotalBy;
+    newState.rootNode = createNewRootNode(this.props, newState);
+    this.setState(newState);
 }
 
 function ReactTableHandleAdd() {
@@ -231,7 +246,7 @@ function ReactTableHandleRemove(columnDefToRemove) {
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
     summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
-    this.setState({rootNode: this.state.rootNode});
+    this.setState({});
 }
 
 function ReactTableHandlePageClick(page) {
@@ -247,7 +262,7 @@ function ReactTableHandlePageClick(page) {
  * ----------------------------------------------------------------------
  */
 function partitionNumberLine(buckets) {
-    var i = 0, stringBuckets, floatBuckets = [];
+    var i, stringBuckets, floatBuckets = [];
     stringBuckets = buckets.split(",");
     for (i = 0; i < stringBuckets.length; i++) {
         var floatBucket = parseFloat(stringBuckets[i]);
@@ -262,11 +277,11 @@ function partitionNumberLine(buckets) {
 
 function buildFirstColumnLabel(table) {
     var result = [];
-    if (table.props.groupBy) {
-        for (var i = 0; i < table.props.groupBy.length; i++)
-            result.push(table.props.groupBy[i].text);
+    if (table.state.subtotalBy) {
+        for (var i = 0; i < table.state.subtotalBy.length; i++)
+            result.push(table.state.subtotalBy[i].text);
     }
-    result.push(table.props.columnDefs[0].text);
+    result.push(table.state.columnDefs[0].text);
     return result;
 }
 

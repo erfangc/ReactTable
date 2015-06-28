@@ -39,6 +39,7 @@ Option Name        |Type              |Description
 data               |Array of Objects|the raw data array (Required)
 columnDefs         |Array of Objects|column definitions on how to construct the headers of the table
 groupBy            |Array of Objects|columnDefs to dynamically group rows by
+sortBy            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
 afterColumnRemove  |Function        |callback function to invoke after a column has been removed by the user
 beforeColumnAdd    |Function        |callback function to invoke when the "+" button is clicked on the header
 onSelectCallback   |Function        |callback function to invoke when a detail row is selected. The selected row will be passed to the callback function as the first argument. The second argument passed will be a boolean representing the selection state of the row that was just clicked on
@@ -47,11 +48,10 @@ onRightClick       |Function        |callback function to invoke when a row is r
 selectedRows       |Array of Strings|row keys of initially selected rows, must be used with the 'rowKey' option
 rowKey             |String          |specifies the property in the data array that should be used as the unique identifier of the given row for example: `{ssn: xxxx, first_name: "Bob"}; { rowKey: 'ssn'}`
 customMenuItems    |Object          |specifies custom header menu options.  Each key of the given object corresponds to the title of the new menu option and the value is an object e.g. `{infoBox: "columnDataPoint"}`.  `infoBox` displays a box whose contents are equal to the columnDef's columnDataPoint on hover of the menu item. As of right now, infoBox is the only supported custom menu object type. This will only appear in columns where columnDataPoint exists in columnDef.
-presort            |Object          |specifies which column to pre-sort a rendered table. Key corresponds to a key in the data object to sort on and whose value is either `asc` or `desc` depending on wheather you would like ascending or descending sorting automatically when the table is rendered. e.g. `{date: 'asc'}`
 disableExporting   |boolean         |if true, disables functionality to export table to XLS or PDF
+disableGrandTotal  |boolean         |if true, prevents the grand total row from showing
 filenameToSaveAs   |String          |(default: 'table-export') The filename to use to save XLS/PDF
 disableInfiniteScrolling    |boolean|If true, disables infinite scrolling and uses pagination
-itemsPerScroll     |integer         |The number of entries to add to each "infinite scroll"
 filtering          |Object          |An object which can accept the follow properties: "disable" : if set to true, filtering is disabled (defaults to false). "caseSensitive": Set to false if you want case insensitive filtering (default: true). "doubleClickCell": Set to true if you want data in a cell to auto-filter on double click (default: false)
 
 ## Table Usage Example
@@ -100,7 +100,7 @@ toggleSelectSummaryRow(key) | undefined |Given a path rowKey, toggles the select
 clearAllRowSelections() | undefined |Clears all detail and summary row selections
 getRowSelectionStates() | Object |Returns an object with two entries: One with each of detail and summary row selections
 addColumn(columnDef, data) | undefined | Adds (or updates by checking `colTag`) a column to the table. If `data` is passed in, `data` is replaced as the new data object in table
-redoPresort() | undefined | Redos the `preSort` from the table definition.
+applySort() | undefined | apply the sorting defined in `sortBy`
 replaceData(data, stopPresort) | undefined | Sets the passed in `data` to be the data object in the table. Passing true to the second argument will not resort the selection in accordance to the preSort given when the table was created.
 setStyleByKey(key, styleObj) | undefined | For a given rowKey, sets a detail row to have extra styling per the passed in styleObj.
 
@@ -119,7 +119,7 @@ You will first need to download and install [react-tools](http://facebook.github
 
 Each time you update source files, you should run the JSX compiler provided as part of react-tools via:
 
-    > jsx ./src ./build
+    > nodejs $react_tools_base/bin/jsx ./src ./build
     // assuming your working directory is the project base directory
 
 Alternatively you can automatically perform this by using `jsx --watch` or setup a file watcher in Webstorm. If you are setting up a file watcher in Webstorm, it may be best to install `react-tools` locally instead of globally, simply remove `-g` from the above `npm` command

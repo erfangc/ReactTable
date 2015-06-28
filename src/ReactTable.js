@@ -6,12 +6,45 @@
  * @author Erfang Chen
  */
 var idCounter = 0;
-var SECTOR_SEPARATOR = "#";
+const SECTOR_SEPARATOR = "#";
 
+/**
+ * The main component class. Creates an table element with the corresponding sub-components
+ * Please make sure to use caution when adding to props or states. Per react.js best-practices, we should avoid
+ * storing states where possible, and props should be documented in 'propTypes', see below, for validation purposes.
+ */
 var ReactTable = React.createClass({
 
     getInitialState: ReactTableGetInitialState,
     propTypes: {
+        /**
+         * core props
+         */
+        data: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        columnDefs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        subtotalBy: React.PropTypes.arrayOf(React.PropTypes.object),
+        sortBy: React.PropTypes.objectOf(React.PropTypes.string),
+        selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
+        rowKey: React.PropTypes.string,
+        /**
+         * callbacks that the table accept
+         */
+        afterColumnRemove: React.PropTypes.func,
+        beforeColumnAdd: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func,
+        onSummarySelectCallback: React.PropTypes.func,
+        onRightClick: React.PropTypes.func,
+        /**
+         * props to selectively disable table features
+         */
+        disableAddColumn: React.PropTypes.bool,
+        disablePagination: React.PropTypes.bool,
+        disableInfiniteScrolling: React.PropTypes.bool,
+        disableExporting: React.PropTypes.bool,
+        disableGrandTotal: React.PropTypes.bool,
+        /**
+         * misc props
+         */
         pageSize: React.PropTypes.number
     },
     getDefaultProps: function () {
@@ -19,30 +52,42 @@ var ReactTable = React.createClass({
             pageSize: 50,
             extraStyle: {
                 "cursor": "pointer"
-            }
+            },
+            subtotalBy: [],
+            sortBy: {}
         };
     },
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
+    clearSort: function () {
+
+    },
     handleColumnFilter: ReactTableHandleColumnFilter,
     handleClearFilter: ReactTableHandleRemoveFilter,
     handleClearAllFilters: ReactTableHandleRemoveAllFilters,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleGroupBy: ReactTableHandleGroupBy,
+    handleSubtotalBy: ReactTableHandleSubtotalBy,
     handlePageClick: ReactTableHandlePageClick,
     handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
-        var rootNode = this.state.rootNode;
-        rootNode.collapseImmediateChildren();
-        this.setState({rootNode: rootNode, currentPage: 1});
+        this.state.rootNode.foldSubTree();
+        this.state.rootNode.collapseImmediateChildren();
+        this.setState({
+            currentPage: 1,
+            lowerVisualBound: 0,
+            upperVisualBound: this.props.pageSize
+        });
     },
     handleExpandAll: function () {
-        var rootNode = this.state.rootNode;
-        rootNode.expandRecursively();
-        this.setState({rootNode: rootNode, currentPage: 1});
+        this.state.rootNode.expandRecursively();
+        this.setState({
+            currentPage: 1,
+            lowerVisualBound: 0,
+            upperVisualBound: this.props.pageSize
+        });
     },
     handleDownload: function (type) {
         var reactTableData = this;
@@ -123,24 +168,25 @@ var ReactTable = React.createClass({
         };
     },
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
-        // Update if exists
-        var updated = false;
-        for (var i = 0; i < this.state.columnDefs.length; i++) {
-            if (this.state.columnDefs[i].colTag == columnDef.colTag) {
-                this.state.columnDefs[i] = columnDef;
-                updated = true;
-                break;
-            }
-        }
-        if (!updated)
-            this.state.columnDefs.push(columnDef);
-        if (data) {
-            this.props.data = data;
-            this.state.rootNode = createTree(this.props);
-        } else
-            recursivelyAggregateNodes(this.state.rootNode, this.props);
-        this.setState({rootNode: this.state.rootNode});
+    /**
+     * Add a new column to the table. This assumes the data props has been updated to reflect the values referred to by
+     * the new column you are about to add.
+     *
+     * @param columnDef the column definition to add
+     * @param idx the position in the columnDefs state to add it to, if not specified, will just append
+     */
+    addColumn: function (columnDef, idx) {
+        var columnDefs = this.state.columnDefs;
+        // do nothing if columnDef already exist
+        if (columnDefs.indexOf(columnDef) != -1)
+            return;
+        if (idx)
+            columnDefs.splice(idx, 0, columnDef);
+        else
+            columnDefs.push(columnDef)
+        this.setState({
+            columnDefs: columnDefs
+        });
     },
     applySort: function (sortBy) {
         if (!sortBy)
@@ -157,24 +203,6 @@ var ReactTable = React.createClass({
                     break;
                 }
             }
-        }
-    },
-    replaceData: function (data, noSort) {
-        this.props.data = data;
-        var rootNode = createTree(this.props);
-        this.setState({
-            rootNode: rootNode,
-            currentPage: 1,
-            sortAsc: undefined,
-            columnDefSorted: undefined,
-            filterInPlace: {}
-        });
-        this.props.currentSortStates = [];
-        var table = this;
-        if (!noSort) {
-            setTimeout(function () {
-                table.applySort(table.props.sortBy);
-            });
         }
     },
     handleScroll: function (e) {
@@ -219,7 +247,8 @@ var ReactTable = React.createClass({
     /* ----------------------------------------- */
 
     componentDidMount: function () {
-        $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
+        if (!this.props.disableInfiniteScrolling)
+            $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 0);
@@ -244,14 +273,15 @@ var ReactTable = React.createClass({
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
-        $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
+        if (this.props.disableInfiniteScrolling)
+            $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
     },
     componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
     render: function () {
-        var rasterizedData = rasterizeTree({
+        const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
@@ -373,7 +403,7 @@ var PageNavigator = React.createClass({
     }
 });
 
-var SummarizeControl = React.createClass({
+var SubtotalControl = React.createClass({
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -385,7 +415,7 @@ var SummarizeControl = React.createClass({
     handleKeyPress: function (event) {
         if (event.charCode == 13) {
             event.preventDefault();
-            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
         }
     },
     handleClick: function () {
@@ -401,15 +431,15 @@ var SummarizeControl = React.createClass({
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
                            placeholder="ex: 1,10,15"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)}
+                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
                        className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
             <div
-                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick}
+                onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
-                <div>Summarize</div>
+                <div>Add Subtotal</div>
                 {subMenuAttachment}
             </div>
         );

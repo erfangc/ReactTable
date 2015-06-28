@@ -1,42 +1,20 @@
 /** @jsx React.DOM */
 /* Virtual DOM builder helpers */
 
-// TODO custom menu items needs to be passed in by the client not constructed internally
+/**
+ * Extracts the react components that constitute menu items from the current columnDef for the given table
+ * if the given columnDef has customMenuFactory method defined, the factory method will be called to create
+ * menu items. Otherwise an array property with the name customMenuItems on columnDef will be searched
+ * @param table
+ * @param columnDef
+ * @returns {Array}
+ */
 function buildCustomMenuItems(table, columnDef) {
-    var menuItems = [];
-    var popupStyle = {
-        "position": "absolute",
-        "top": "-50%",
-        "whiteSpace": "normal",
-        "width": "250px"
-    };
-    for (var menuItemTitle in table.props.customMenuItems) {
-        for (var menuItemType in table.props.customMenuItems[menuItemTitle]) {
-            if (menuItemType == "infoBox") {
-                if (columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]) {
-                    var direction = table.state.columnDefs.indexOf(columnDef) * 10 / table.state.columnDefs.length > 5 ?
-                        "right" : "left";
-                    var styles = {};
-                    for (var k in popupStyle) styles[k] = popupStyle[k];
-                    styles[direction] = "100%";
-                    menuItems.push(
-                        React.createElement("div", {style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                            React.createElement("div", null, menuItemTitle), 
-                            React.createElement("div", {className: "menu-item-input", style: styles}, 
-                                React.createElement("div", {style: {"display": "block"}}, 
-                                    columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]
-                                )
-                            )
-                        )
-                    );
-                }
-            }
-        }
-    }
-
-    return menuItems;
+    if (columnDef.customMenuFactory && typeof columnDef.customMenuFactory === 'function')
+        return columnDef.customMenuFactory.call(columnDef, table);
+    else if (columnDef.customMenuItems && Array.isArray(columnDef.customMenuItems))
+        return columnDef.customMenuItems;
 }
-
 
 function buildMenu(options) {
     var table = options.table,
@@ -53,17 +31,19 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, "Add Sort Asc"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, "Add Sort Dsc"),
-            React.createElement("div", {className: "menu-item", onClick: table.replaceData.bind(null, table.props.data, true)}, "Clear Sort")
+            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, 
+                React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
+            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, 
+                React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
+            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort")
         ],
         filter: [
             React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
             React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
         ],
         summarize: [
-            React.createElement(SummarizeControl, {table: table, columnDef: columnDef}),
-            React.createElement("div", {className: "menu-item", onClick: table.handleGroupBy}, "Clear Summary")
+            React.createElement(SubtotalControl, {table: table, columnDef: columnDef}),
+            React.createElement("div", {className: "menu-item", onClick: table.handleSubtotalBy}, "Clear Subtotal")
         ],
         remove: [
             React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
@@ -72,14 +52,14 @@ function buildMenu(options) {
     if (table.props.defaultMenuItems) {
         for (var i = 0; i < table.props.defaultMenuItems.length; i++) {
             var itemName = table.props.defaultMenuItems[i];
-            _addMenuItems(menuItems, availableDefaultMenuItems[itemName]);
+            addMenuItems(menuItems, availableDefaultMenuItems[itemName]);
         }
     } else {
-        _addMenuItems(menuItems, availableDefaultMenuItems.sort);
-        _addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        _addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        addMenuItems(menuItems, availableDefaultMenuItems.sort);
+        addMenuItems(menuItems, availableDefaultMenuItems.filter);
+        addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
-            _addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
 
     var customMenuItems = buildCustomMenuItems(table, columnDef);
@@ -88,10 +68,10 @@ function buildMenu(options) {
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
         if (!table.props.disableExporting) {
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, "Download as" + ' ' +
-                "XLS"));
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, "Download as" + ' ' +
-                "PDF"));
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, React.createElement("i", {
+                className: "fa fa-file-excel-o"}), " Download as XLS"));
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, React.createElement("i", {
+                className: "fa fa-file-pdf-o"}), " Download as PDF"));
         }
 
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll}, "Collapse" + ' ' +
@@ -106,7 +86,7 @@ function buildMenu(options) {
     );
 }
 
-function _addMenuItems(master, children) {
+function addMenuItems(master, children) {
     for (var j = 0; j < children.length; j++)
         master.push(children[j])
 }
@@ -151,7 +131,7 @@ function buildHeaders(table) {
              onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                 table.handleSort.bind(null, columnDef, true) :
                 (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
+                    table.handleSort.bind(null, columnDef, false) : table.render())}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
                 React.createElement("a", {href: "#", className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
@@ -190,7 +170,7 @@ function buildHeaders(table) {
                  onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                                table.handleSort.bind(null, columnDef, true) :
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                                   table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}, 
+                                   table.handleSort.bind(null, columnDef, false) : table.render())}, 
                 React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
@@ -235,7 +215,7 @@ function buildHeaders(table) {
     headerColumns.push(
         React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
             React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
-                React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : '+'))
+                React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : React.createElement("i", {className: "fa fa-plus"})))
             )
         ));
     return (
@@ -281,7 +261,7 @@ function buildFirstCellForRow() {
             (
                 React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
                     React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
-                        data.treeNode.collapsed ? '+' : '—'
+                        data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
                     "  ", 
                     React.createElement("strong", null, data[firstColTag]), 

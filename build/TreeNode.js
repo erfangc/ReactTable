@@ -7,7 +7,7 @@ function TreeNode(sectorTitle, parent) {
     // accessible properties
     this.sectorTitle = sectorTitle;
     this.parent = parent;
-    this.groupByColumnDef = {};
+    this.subtotalByColumnDef = {};
     this.rowData = null;
     this.display = true;
     this.children = [];
@@ -57,12 +57,12 @@ TreeNode.prototype.expandRecursively = function () {
  * @returns the child TreeNode that the data was appended to
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, groupByColumnDef = options.groupByColumnDef;
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, subtotalByColumnDef = options.subtotalByColumnDef;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
         child.sortIndex = sortIndex;
-        child.groupByColumnDef = groupByColumnDef;
+        child.subtotalByColumnDef = subtotalByColumnDef;
         this.children.push(child);
         this._childrenSectorNameMap[childSectorName] = child;
     }
@@ -80,6 +80,12 @@ TreeNode.prototype.getSectorPath = function () {
     return result;
 };
 
+/**
+ * TODO accept sortFn as an array, and if so, the children rows will be sorted in a layered fashion
+ * where the first function in the sortFn array determines the primary sorting and the second function becomes the
+ * tie breaker
+ * @param options
+ */
 TreeNode.prototype.sortChildren = function (options) {
     var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
         recursive = options.recursive, sortAsc = options.sortAsc;
@@ -87,14 +93,14 @@ TreeNode.prototype.sortChildren = function (options) {
     var multiplier = sortAsc == true ? 1 : -1;
     this.children.sort(function (a, b) {
         var aRow = a.rowData, bRow = b.rowData;
-        if( !reverseSortFn || multiplier === 1 )
+        if (!reverseSortFn || multiplier === 1)
             return multiplier * sortFn(aRow, bRow);
         else
             return reverseSortFn(aRow, bRow);
     });
     if (!this.hasChild())
         this.ultimateChildren.sort(function (a, b) {
-            if( !reverseSortFn || multiplier === 1 )
+            if (!reverseSortFn || multiplier === 1)
                 return multiplier * sortFn(a, b);
             else
                 return reverseSortFn(a, b);
@@ -102,11 +108,17 @@ TreeNode.prototype.sortChildren = function (options) {
 
     if (recursive) {
         for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({sortFn: sortFn, reverseSortFn: options.reverseSortFn,
-                                            recursive: recursive, sortAsc: sortAsc});
+            this.children[i].sortChildren({
+                sortFn: sortFn, reverseSortFn: options.reverseSortFn,
+                recursive: recursive, sortAsc: sortAsc
+            });
     }
 };
 
+/**
+ * @deprecated
+ * @param options
+ */
 TreeNode.prototype.addSortToChildren = function (options) {
     var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
         oldSortFns = options.oldSortFns,
@@ -115,13 +127,13 @@ TreeNode.prototype.addSortToChildren = function (options) {
     var multiplier = sortAsc == true ? 1 : -1;
     var childrenToAddSort = [];
 
-    for( var i=0; i+1<this.children.length; i++ ){
-        transformSortCandidates(this.children, i, true, i+2>=this.children.length);
+    for (var i = 0; i + 1 < this.children.length; i++) {
+        transformSortCandidates(this.children, i, true, i + 2 >= this.children.length);
     }
 
-    if( !this.hasChild() ) {
+    if (!this.hasChild()) {
         for (var i = 0; i + 1 < this.ultimateChildren.length; i++) {
-            transformSortCandidates(this.ultimateChildren, i, false, i+2>=this.ultimateChildren.length);
+            transformSortCandidates(this.ultimateChildren, i, false, i + 2 >= this.ultimateChildren.length);
         }
     }
 
@@ -130,73 +142,73 @@ TreeNode.prototype.addSortToChildren = function (options) {
             this.children[i].addSortToChildren(options);
     }
 
-    function transformSortCandidates(nodes, i, isChild, lastElement){
-        if( childrenToAddSort.length == 0 )
-            childrenToAddSort.push( $.extend( {}, nodes[i] ) );
+    function transformSortCandidates(nodes, i, isChild, lastElement) {
+        if (childrenToAddSort.length == 0)
+            childrenToAddSort.push($.extend({}, nodes[i]));
 
         var tieFound = true;
-        for( var j=0; j<oldSortFns.length; j++ ){
-            if( oldSortFns[j](extractData(nodes[i], isChild), extractData(nodes[i+1], isChild)) !== 0 ){
+        for (var j = 0; j < oldSortFns.length; j++) {
+            if (oldSortFns[j](extractData(nodes[i], isChild), extractData(nodes[i + 1], isChild)) !== 0) {
                 tieFound = false;
                 break;
             }
         }
-        if( tieFound && !lastElement ){
-            childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+        if (tieFound && !lastElement) {
+            childrenToAddSort.push($.extend({}, nodes[i + 1]));
         }
-        else if( childrenToAddSort.length > 1 ){
-            if( lastElement )
-                childrenToAddSort.push( $.extend( {}, nodes[i+1] ) );
+        else if (childrenToAddSort.length > 1) {
+            if (lastElement)
+                childrenToAddSort.push($.extend({}, nodes[i + 1]));
             // Sort next level
             childrenToAddSort.sort(function (a, b) {
-                if( !reverseSortFn || multiplier === 1 )
+                if (!reverseSortFn || multiplier === 1)
                     return multiplier * sortFn(extractData(a, isChild), extractData(b, isChild));
                 else
                     return reverseSortFn(extractData(a, isChild), extractData(b, isChild));
             });
             // Replace ultimate children with correct next level of sorting
-            for( var ii=0; ii<childrenToAddSort.length; ii++ ){
+            for (var ii = 0; ii < childrenToAddSort.length; ii++) {
                 var childIndexToReplace = i + ii + 1 - (childrenToAddSort.length);
                 nodes[childIndexToReplace] = childrenToAddSort[ii];
             }
             childrenToAddSort = [];
         }
-        else{
+        else {
             childrenToAddSort = [];
         }
     }
 
-    function extractData(obj, isChild){
+    function extractData(obj, isChild) {
         return isChild ? obj.rowData : obj;
     }
 };
 
-TreeNode.prototype.filterByColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
-    if( columnDef.format === "number" )
+TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {
+    if (columnDef.format === "number")
         this.filterByNumericColumn(columnDef, textToFilterBy);
     else
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
-TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, caseSensitive, customFilterer){
+TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {
     // Filter aggregations
-    for( var i=0; i<this.children.length; i++ ){
+    for (var i = 0; i < this.children.length; i++) {
         // Call recursively to filter leaf nodes first
         this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
-        for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
-            if( !this.children[i].ultimateChildren[j].hiddenByFilter ){
+        for (var j = 0; j < this.children[i].ultimateChildren.length; j++) {
+            if (!this.children[i].ultimateChildren[j].hiddenByFilter) {
                 allChildrenHidden = false;
                 break;
             }
         }
         this.children[i].hiddenByFilter = allChildrenHidden;
     }
-    if( !this.hasChild() ) {
+    if (!this.hasChild()) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
-            if( customFilterer ){
+            if (customFilterer) {
                 uChild.hiddenByFilter = !customFilterer(columnDef, uChild, textToFilterBy);
             }
             else {
@@ -211,40 +223,40 @@ TreeNode.prototype.filterByTextColumn = function(columnDef, textToFilterBy, case
     }
 };
 
-TreeNode.prototype.filterByNumericColumn = function(columnDef, filterData){
+TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
     // Filter aggregations
-    for( var i=0; i<this.children.length; i++ ){
+    for (var i = 0; i < this.children.length; i++) {
         // Call recursively to filter leaf nodes first
         this.children[i].filterByNumericColumn(columnDef, filterData);
         // Check to see if all children are hidden, then hide parent if so
         var allChildrenHidden = true;
-        for( var j=0; j<this.children[i].ultimateChildren.length; j++ ){
-            if( !this.children[i].ultimateChildren[j].hiddenByFilter ){
+        for (var j = 0; j < this.children[i].ultimateChildren.length; j++) {
+            if (!this.children[i].ultimateChildren[j].hiddenByFilter) {
                 allChildrenHidden = false;
                 break;
             }
         }
         this.children[i].hiddenByFilter = allChildrenHidden;
     }
-    if( !this.hasChild() ) {
+    if (!this.hasChild()) {
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
             var filterOutNode = false;
             var multiplier = buildLAFConfigObject(columnDef).multiplier;
-            var value = row[columnDef.colTag]*parseFloat(multiplier);
-            for( var j=0; j<filterData.length; j++ ){
-                if( filterData[j].gt !== undefined ){
-                    if( !(value > filterData[j].gt) )
+            var value = row[columnDef.colTag] * parseFloat(multiplier);
+            for (var j = 0; j < filterData.length; j++) {
+                if (filterData[j].gt !== undefined) {
+                    if (!(value > filterData[j].gt))
                         filterOutNode = true;
                 }
-                else if( filterData[j].lt !== undefined ){
-                    if( !(value < filterData[j].lt) )
+                else if (filterData[j].lt !== undefined) {
+                    if (!(value < filterData[j].lt))
                         filterOutNode = true;
                 }
-                else if( filterData[j].eq !== undefined ) {
-                    if( !(value == filterData[j].eq) )
+                else if (filterData[j].eq !== undefined) {
+                    if (!(value == filterData[j].eq))
                         filterOutNode = true;
                 }
             }
@@ -254,7 +266,7 @@ TreeNode.prototype.filterByNumericColumn = function(columnDef, filterData){
     }
 };
 
-TreeNode.prototype.clearFilter = function(){
+TreeNode.prototype.clearFilter = function () {
     this.hiddenByFilter = false;
 };
 

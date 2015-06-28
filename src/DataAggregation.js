@@ -1,25 +1,25 @@
 /**
  * find the right sector name for the current row for the given level of row grouping
- * this method can take partition groupBy columns that are numeric in nature and bucket rows based on where they fall
+ * this method can take partition subtotalBy columns that are numeric in nature and bucket rows based on where they fall
  * in the partition
- * @param groupBy the column to group groupBy
+ * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
  */
-function getSectorName(row, groupBy) {
+function getSectorName(row, subtotalBy) {
     var sectorName = "", sortIndex = null;
-    if (groupBy.format == "number" || groupBy.format == "currency") {
-        var result = _resolveNumericSectorName(groupBy, row);
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency") {
+        var result = resolvePartitionName(subtotalBy, row);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
     } else
-        sectorName = row[groupBy.colTag];
+        sectorName = row[subtotalBy.colTag];
     return {sectorName: sectorName || "Other", sortIndex: sortIndex};
 }
 
-function aggregateSector(bucketResult, columnDefs, groupBy) {
+function aggregateSector(bucketResult, columnDefs, subtotalBy) {
     var result = {};
     for (var i = 1; i < columnDefs.length; i++)
-        result[columnDefs[i].colTag] = _aggregateColumn(bucketResult, columnDefs[i], groupBy);
+        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], subtotalBy);
     return result;
 }
 
@@ -29,23 +29,23 @@ function aggregateSector(bucketResult, columnDefs, groupBy) {
  * ----------------------------------------------------------------------
  */
 
-function _resolveNumericSectorName(groupBy, row) {
+function resolvePartitionName(subtotalBy, row) {
     var sectorName = "", sortIndex = "";
-    if (groupBy.groupByRange) {
-        for (var i = 0; i < groupBy.groupByRange.length; i++) {
-            if (row[groupBy.colTag] < groupBy.groupByRange[i]) {
-                sectorName = groupBy.text + " " + (i != 0 ? groupBy.groupByRange[i - 1] : 0) + " - " + groupBy.groupByRange[i];
+    if (subtotalBy.subtotalByRange) {
+        for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
+            if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
+                sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
                 sortIndex = i;
                 break;
             }
         }
         if (!sectorName) {
-            sectorName = groupBy.text + " " + groupBy.groupByRange[groupBy.groupByRange.length - 1] + "+";
+            sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
             sortIndex = i + 1;
         }
     }
     else
-        sectorName = groupBy.text;
+        sectorName = subtotalBy.text;
     return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
@@ -55,28 +55,28 @@ function _resolveNumericSectorName(groupBy, row) {
  *
  * conditional aggregation is the ability to switch up aggregation method based on the columnDef used in group by
  * the columnDef property `conditionalAggregationMethod` takes the an object {key:value, key2: value2} where `key(s)`
- * are the colTag and `value{s}` is the corresponding aggregation method to use when table groupBy is set to the colTag specified in the key
+ * are the colTag and `value{s}` is the corresponding aggregation method to use when table subtotalBy is set to the colTag specified in the key
  *
  * @param columnDef
- * @param groupBy
+ * @param subtotalBy
  */
-function _resolveAggregationMethod(columnDef, groupBy) {
+function resolveAggregationMethod(columnDef, subtotalBy) {
     var result = "";
     if (columnDef.aggregationMethod) {
         result = columnDef.aggregationMethod;
     }
     // resolve conditional aggregation method
-    if (columnDef.conditionalAggregationMethod && groupBy && groupBy.length == 1) {
-        var groupByColTag = groupBy[0].colTag;
-        if (columnDef.conditionalAggregationMethod[groupByColTag])
-            result = columnDef.conditionalAggregationMethod[groupByColTag];
+    if (columnDef.conditionalAggregationMethod && subtotalBy && subtotalBy.length == 1) {
+        var subtotalByColTag = subtotalBy[0].colTag;
+        if (columnDef.conditionalAggregationMethod[subtotalByColTag])
+            result = columnDef.conditionalAggregationMethod[subtotalByColTag];
     }
     return result.toLowerCase();
 }
 
-function _aggregateColumn(bucketResult, columnDef, groupBy) {
+function aggregateColumn(bucketResult, columnDef, subtotalBy) {
     var result;
-    var aggregationMethod = _resolveAggregationMethod(columnDef, groupBy);
+    var aggregationMethod = resolveAggregationMethod(columnDef, subtotalBy);
     switch (aggregationMethod) {
         case "sum":
             result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});

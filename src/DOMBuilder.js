@@ -1,42 +1,20 @@
 /** @jsx React.DOM */
 /* Virtual DOM builder helpers */
 
-// TODO custom menu items needs to be passed in by the client not constructed internally
+/**
+ * Extracts the react components that constitute menu items from the current columnDef for the given table
+ * if the given columnDef has customMenuFactory method defined, the factory method will be called to create
+ * menu items. Otherwise an array property with the name customMenuItems on columnDef will be searched
+ * @param table
+ * @param columnDef
+ * @returns {Array}
+ */
 function buildCustomMenuItems(table, columnDef) {
-    var menuItems = [];
-    var popupStyle = {
-        "position": "absolute",
-        "top": "-50%",
-        "whiteSpace": "normal",
-        "width": "250px"
-    };
-    for (var menuItemTitle in table.props.customMenuItems) {
-        for (var menuItemType in table.props.customMenuItems[menuItemTitle]) {
-            if (menuItemType == "infoBox") {
-                if (columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]) {
-                    var direction = table.state.columnDefs.indexOf(columnDef) * 10 / table.state.columnDefs.length > 5 ?
-                        "right" : "left";
-                    var styles = {};
-                    for (var k in popupStyle) styles[k] = popupStyle[k];
-                    styles[direction] = "100%";
-                    menuItems.push(
-                        <div style={{"position": "relative"}} className="menu-item menu-item-hoverable">
-                            <div>{menuItemTitle}</div>
-                            <div className="menu-item-input" style={styles}>
-                                <div style={{"display": "block"}}>
-                                    {columnDef[table.props.customMenuItems[menuItemTitle][menuItemType]]}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-            }
-        }
-    }
-
-    return menuItems;
+    if (columnDef.customMenuFactory && typeof columnDef.customMenuFactory === 'function')
+        return columnDef.customMenuFactory.call(columnDef, table);
+    else if (columnDef.customMenuItems && Array.isArray(columnDef.customMenuItems))
+        return columnDef.customMenuItems;
 }
-
 
 function buildMenu(options) {
     var table = options.table,
@@ -53,17 +31,19 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, true)}>Add Sort Asc</div>,
-            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, false)}>Add Sort Dsc</div>,
-            <div className="menu-item" onClick={table.replaceData.bind(null, table.props.data, true)}>Clear Sort</div>
+            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, true)}>
+                <i className="fa fa-sort-alpha-asc"/> Sort</div>,
+            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, false)}>
+                <i className="fa fa-sort-alpha-desc"></i> Sort</div>,
+            <div className="menu-item" onClick={table.clearSort}>Clear Sort</div>
         ],
         filter: [
             <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>,
             <div className="menu-item" onClick={table.handleClearAllFilters}>Clear All Filters</div>
         ],
         summarize: [
-            <SummarizeControl table={table} columnDef={columnDef}/>,
-            <div className="menu-item" onClick={table.handleGroupBy}>Clear Summary</div>
+            <SubtotalControl table={table} columnDef={columnDef}/>,
+            <div className="menu-item" onClick={table.handleSubtotalBy}>Clear Subtotal</div>
         ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>
@@ -72,14 +52,14 @@ function buildMenu(options) {
     if (table.props.defaultMenuItems) {
         for (var i = 0; i < table.props.defaultMenuItems.length; i++) {
             var itemName = table.props.defaultMenuItems[i];
-            _addMenuItems(menuItems, availableDefaultMenuItems[itemName]);
+            addMenuItems(menuItems, availableDefaultMenuItems[itemName]);
         }
     } else {
-        _addMenuItems(menuItems, availableDefaultMenuItems.sort);
-        _addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        _addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        addMenuItems(menuItems, availableDefaultMenuItems.sort);
+        addMenuItems(menuItems, availableDefaultMenuItems.filter);
+        addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
-            _addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
 
     var customMenuItems = buildCustomMenuItems(table, columnDef);
@@ -88,10 +68,10 @@ function buildMenu(options) {
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
         if (!table.props.disableExporting) {
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "excel")}>Download as
-                XLS</div>);
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>Download as
-                PDF</div>);
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "excel")}><i
+                className="fa fa-file-excel-o"></i> Download as XLS</div>);
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}><i
+                className="fa fa-file-pdf-o"></i> Download as PDF</div>);
         }
 
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll}>Collapse
@@ -106,7 +86,7 @@ function buildMenu(options) {
     );
 }
 
-function _addMenuItems(master, children) {
+function addMenuItems(master, children) {
     for (var j = 0; j < children.length; j++)
         master.push(children[j])
 }
@@ -151,7 +131,7 @@ function buildHeaders(table) {
              onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                 table.handleSort.bind(null, columnDef, true) :
                 (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
+                    table.handleSort.bind(null, columnDef, false) : table.render())}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
                 <a href="#" className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
@@ -190,7 +170,7 @@ function buildHeaders(table) {
                  onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                                table.handleSort.bind(null, columnDef, true) :
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                                   table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
+                                   table.handleSort.bind(null, columnDef, false) : table.render())}>
                 <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a href="#" className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
@@ -235,7 +215,7 @@ function buildHeaders(table) {
     headerColumns.push(
         <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
             <a className={classString} onClick={table.props.disableAddColumn ? null : table.handleAdd}>
-                <strong>{corner ? corner : (table.props.disableAddColumn ? '' : '+')}</strong>
+                <strong>{corner ? corner : (table.props.disableAddColumn ? '' : <i className="fa fa-plus"/>)}</strong>
             </a>
         </span>);
     return (
@@ -281,7 +261,7 @@ function buildFirstCellForRow() {
             (
                 <td style={firstCellStyle} key={firstColTag}>
                     <a onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
-                        {data.treeNode.collapsed ? '+' : '—'}
+                        {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
                     </a>
                     &nbsp;&nbsp;
                     <strong>{data[firstColTag]}</strong>
