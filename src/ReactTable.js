@@ -2,7 +2,7 @@
 
 /**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
- * and can refer to children 'sectors'
+ * and can refer to children 'sectors'.
  * @author Erfang Chen
  */
 var idCounter = 0;
@@ -11,7 +11,14 @@ var SECTOR_SEPARATOR = "#";
 var ReactTable = React.createClass({
 
     getInitialState: ReactTableGetInitialState,
-
+    propTypes: {
+        pageSize: React.PropTypes.number
+    },
+    getDefaultProps: function () {
+        return {
+            pageSize: 50
+        };
+    },
     /* --- Called by component or child react components --- */
     handleSort: ReactTableHandleSort,
     handleAddSort: ReactTableHandleAddSort,
@@ -132,24 +139,24 @@ var ReactTable = React.createClass({
             recursivelyAggregateNodes(this.state.rootNode, this.props);
         this.setState({rootNode: this.state.rootNode});
     },
-    redoPresort: function () {
-        if (this.props.presort) {
-            var colDefToSort;
-            for (var colTag in this.props.presort) {
-                for (var i = 0; i < this.props.columnDefs.length; i++) {
-                    if (this.props.columnDefs[i].colTag === colTag) {
-                        colDefToSort = this.props.columnDefs[i];
-                        if (this.props.presort[colTag] === 'asc')
-                            this.handleSort(colDefToSort, true);
-                        else if (this.props.presort[colTag] === 'desc')
-                            this.handleSort(colDefToSort, false);
-                        break;
-                    }
+    applySort: function (sortBy) {
+        if (!sortBy)
+            return;
+        var colDefToSort;
+        for (var colTag in this.props.presort) {
+            for (var i = 0; i < this.props.columnDefs.length; i++) {
+                if (this.props.columnDefs[i].colTag === colTag) {
+                    colDefToSort = this.props.columnDefs[i];
+                    if (this.props.presort[colTag] === 'asc')
+                        this.handleSort(colDefToSort, true);
+                    else if (this.props.presort[colTag] === 'desc')
+                        this.handleSort(colDefToSort, false);
+                    break;
                 }
             }
         }
     },
-    replaceData: function (data, stopPresort) {
+    replaceData: function (data, noSort) {
         this.props.data = data;
         var rootNode = createTree(this.props);
         this.setState({
@@ -161,28 +168,38 @@ var ReactTable = React.createClass({
         });
         this.props.currentSortStates = [];
         var table = this;
-        if (!stopPresort) {
+        if (!noSort) {
             setTimeout(function () {
-                table.redoPresort();
+                table.applySort(table.props.sortBy);
             });
         }
-    },
-    setStyleByKey: function (key, style) {
-        this.state.extraStyle[key] = style;
-        this.setState({
-            extraStyle: this.state.extraStyle
-        });
     },
     handleScroll: function (e) {
-        var target = $(e.target);
-        var scrolled = target.scrollTop();
-        var scrolledHeight = target.height();
-        var totalHeight = target.find("tbody").height();
-        if (scrolled / (totalHeight - scrolledHeight) > .8) {
-            this.setState({
-                rows: this.addMoreRows(true)
-            });
+        const $target = $(e.target);
+        const scrollTop = $target.scrollTop();
+        const height = $target.height();
+        const totalHeight = $target.find("tbody").height();
+        /**
+         * always update lastScrollTop on scroll event - it helps us determine
+         * whether the next scroll event is up or down
+         */
+        var newState = {lastScrollTop: scrollTop};
+
+        /**
+         * we determine the correct display boundaries by keeping the distance between lower and upper visual bound
+         * to some constant multiple of pageSize
+         */
+        const rowDisplayBoundry = 2 * this.props.pageSize;
+        if (scrollTop < this.state.lastScrollTop && scrollTop < 0.2 * totalHeight) {
+            // up scroll limit triggered
+            newState.lowerVisualBound = Math.max(this.state.lowerVisualBound - this.props.pageSize, 0);
+            newState.upperVisualBound = newState.lowerVisualBound + rowDisplayBoundry;
+        } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) > 0.9 * totalHeight) {
+            // down scroll limit triggered
+            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize;
+            newState.lowerVisualBound = newState.upperVisualBound - rowDisplayBoundry;
         }
+        this.setState(newState);
     },
     /* ----------------------------------------- */
 
@@ -194,6 +211,7 @@ var ReactTable = React.createClass({
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 500);
+
         document.addEventListener('click', docClick.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
@@ -204,7 +222,7 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($node);
         var table = this;
         setTimeout(function () {
-            table.redoPresort();
+            table.applySort(table.props.sortBy);
         });
     },
     componentWillMount: function () {
@@ -217,36 +235,6 @@ var ReactTable = React.createClass({
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addMoreRows: function (calledFromScroll) {
-        if (this.props.justAdded) {
-            this.props.justAdded = false;
-            return this.state.rows;
-        }
-        var rasterizedData = rasterizeTree({
-            node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
-        });
-
-        if (!calledFromScroll)
-            this.props.rowMultiplier = this.props.rowMultiplier ? this.props.rowMultiplier : 0;
-        else
-            this.props.rowMultiplier = (this.props.rowMultiplier === undefined ? 0 : this.props.rowMultiplier + 1);
-
-        var upperBound = (this.props.rowMultiplier + 1) * this.state.itemsPerScroll;
-        var rowsToDisplay = [];
-
-        if (calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length) {
-            var lowerBound = this.state.rows.length;
-            rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
-            this.props.justAdded = true;
-            return this.state.rows.concat(rowsToDisplay.map(rowMapper, this))
-        }
-        else {
-            rowsToDisplay = rasterizedData.slice(0, upperBound);
-            return rowsToDisplay.map(rowMapper, this)
-        }
-    },
     render: function () {
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
@@ -254,21 +242,19 @@ var ReactTable = React.createClass({
             selectedDetailRows: this.state.selectedDetailRows
         });
 
-        var paginationAttr = _getPageArithmetics(this, rasterizedData);
+        var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        if (this.props.disableInfiniteScrolling) {
-            var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
-            this.state.rows = rowsToDisplay.map(rowMapper, this);
-        }
+        if (this.props.disableInfiniteScrolling)
+            this.state.rows = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
         else
-            this.state.rows = this.addMoreRows();
+            this.state.rows = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
 
         var headers = buildHeaders(this);
         var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0)
-            containerStyle.height = this.state.height;
+        if (this.props.height && parseInt(this.props.height) > 0)
+            containerStyle.height = this.props.height;
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
@@ -277,15 +263,11 @@ var ReactTable = React.createClass({
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
                 <div style={containerStyle} className="rt-scrollable">
-                    <InfiniteScroll
-                        loadMore={this.addMoreRows}
-                        hasMore={this.state.hasMore}>
-                        <table className="rt-table">
-                            <tbody>
-                            {this.state.rows}
-                            </tbody>
-                        </table>
-                    </InfiniteScroll>
+                    <table className="rt-table">
+                        <tbody>
+                        {this.state.rows}
+                        </tbody>
+                    </table>
                 </div>
                 {this.props.disableInfiniteScrolling ? footer : null}
             </div>
@@ -317,7 +299,7 @@ var Row = React.createClass({
             cells.push(
                 <td
                     className={classes}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null}
+                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
                     onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
                     style={displayInstructions.styles}
                     key={columnDef.colTag}
@@ -456,8 +438,8 @@ function rowMapper(row) {
     return (<Row
         key={generatedKey}
         data={row}
-        extraStyle={_getExtraStyle(generatedKey, this.state.extraStyle)}
-        isSelected={_isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
+        extraStyle={resolveExtraStyles(generatedKey, this.props.extraStyle)}
+        isSelected={isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
         onSelect={this.handleSelect}
         onRightClick={this.props.onRightClick}
         toggleHide={this.handleToggleHide}
@@ -549,17 +531,17 @@ function uniqueId(prefix) {
  * ----------------------------------------------------------------------
  */
 
-function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function _getExtraStyle(geenratedKey, extraStyles) {
-    return geenratedKey && extraStyles ? extraStyles[geenratedKey] : null;
+function resolveExtraStyles(generatedKey, extraStyles) {
+    return generatedKey && extraStyles ? extraStyles[generatedKey] : null;
 }
 
-function _getPageArithmetics(table, data) {
+function getPaginationAttr(table, data) {
     var result = {};
 
     if (table.props.disablePagination) {
@@ -576,7 +558,7 @@ function _getPageArithmetics(table, data) {
             result.allPages.push(i);
         }
         // derive the correct page navigator selectable pages from current / total pages
-        result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+        result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
@@ -586,7 +568,7 @@ function _getPageArithmetics(table, data) {
 
 }
 
-function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // total number to allocate
     var displayUnitsLeft = maxDisplayedPages;
     // allocate to the left

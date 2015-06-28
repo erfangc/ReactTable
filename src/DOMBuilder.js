@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 /* Virtual DOM builder helpers */
 
+// TODO custom menu items needs to be passed in by the client not constructed internally
 function buildCustomMenuItems(table, columnDef) {
     var menuItems = [];
     var popupStyle = {
@@ -52,19 +53,17 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, true)}>Sort Asc</div>,
-            //<div className="menu-item" onClick={table.handleSort.bind(null, columnDef, false)}>Sort Dsc</div>,
             <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, true)}>Add Sort Asc</div>,
             <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, false)}>Add Sort Dsc</div>,
             <div className="menu-item" onClick={table.replaceData.bind(null, table.props.data, true)}>Clear Sort</div>
         ],
-        filter:[
+        filter: [
             <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>,
-            <div className="menu-item" onClick={table.handleClearAllFilters.bind(null)}>Clear All Filters</div>
+            <div className="menu-item" onClick={table.handleClearAllFilters}>Clear All Filters</div>
         ],
         summarize: [
             <SummarizeControl table={table} columnDef={columnDef}/>,
-            <div className="menu-item" onClick={table.handleGroupBy.bind(null, null)}>Clear Summary</div>
+            <div className="menu-item" onClick={table.handleGroupBy}>Clear Summary</div>
         ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>
@@ -88,13 +87,16 @@ function buildMenu(options) {
 
     if (isFirstColumn) {
         menuItems.push(<div className="separator"/>);
-        if( !table.props.disableExporting ) {
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "excel")}>Download as XLS</div>);
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>Download as PDF</div>);
+        if (!table.props.disableExporting) {
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "excel")}>Download as
+                XLS</div>);
+            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>Download as
+                PDF</div>);
         }
 
-        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll.bind(null, null)}>Collapse All</div>);
-        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll.bind(null)}>Expand All</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll}>Collapse
+            All</div>);
+        menuItems.push(<div className="menu-item" onClick={table.handleExpandAll}>Expand All</div>);
     }
 
     return (
@@ -115,21 +117,26 @@ function toggleFilterBox(table, colTag) {
     table.setState({
         filterInPlace: fip
     });
-    setTimeout(function(){
+    setTimeout(function () {
         $("input.rt-" + colTag + "-filter-input").focus();
     });
 }
 
-function pressedKey(table, colTag, e){
+function pressedKey(table, colTag, e) {
     const ESCAPE = 27;
-    if( table.state.filterInPlace[colTag] && e.keyCode == ESCAPE ){
+    if (table.state.filterInPlace[colTag] && e.keyCode == ESCAPE) {
         table.state.filterInPlace[colTag] = false;
         table.setState({
             filterInPlace: table.state.filterInPlace
         });
     }
 }
-
+/**
+ * creates the header row of the table
+ * TODO too long needs refactoring
+ * @param table
+ * @returns {XML}
+ */
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
     var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
@@ -141,18 +148,19 @@ function buildHeaders(table) {
     };
     var firstColumn = (
         <div className="rt-headers-container"
-            onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+             onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                 table.handleSort.bind(null, columnDef, true) :
                 (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                     table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
             <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
                 <a href="#" className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                    {table.state.firstColumnLabel.join("/")}
+                    {buildFirstColumnLabel(table).join("/")}
                 </a>
-                <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-                    onChange={table.handleColumnFilter.bind(null, columnDef)}
-                    onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
+                <input style={ss}
+                       className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
+                       onChange={table.handleColumnFilter.bind(null, columnDef)}
+                       onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
             </div>
             <div className="rt-caret-container">
                 {table.state.sortAsc != undefined && table.state.sortAsc === true &&
@@ -163,19 +171,23 @@ function buildHeaders(table) {
             <div className={numericPanelClasses}>
                 <NumericFilterPanel></NumericFilterPanel>
             </div>
-            {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: {textAlign: "left"}, isFirstColumn: true})}
+            {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({
+                table: table,
+                columnDef: columnDef,
+                style: {textAlign: "left"},
+                isFirstColumn: true
+            })}
         </div>
     );
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
         style = {textAlign: "center"};
-        var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
-        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
-        // bound this on <a> tag: onClick={table.props.disableFilter ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}}
+        numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
+        textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             <div className="rt-headers-container"
-                onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
+                 onDoubleClick={table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
                                table.handleSort.bind(null, columnDef, true) :
                                   (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
                                    table.handleSort.bind(null, columnDef, false) : table.replaceData.bind(null, table.props.data, true))}>
@@ -184,7 +196,8 @@ function buildHeaders(table) {
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         {columnDef.text}
                     </a>
-                    <input style={ss} className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
+                    <input style={ss}
+                           className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
                            onChange={table.handleColumnFilter.bind(null, columnDef)}
                            onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
                 </div>
@@ -200,14 +213,19 @@ function buildHeaders(table) {
                                         colDef={columnDef}
                                         currentFilters={table.state.currentFilters}></NumericFilterPanel>
                 </div>
-                {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({table: table, columnDef: columnDef, style: style, isFirstColumn: false})}
+                {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({
+                    table: table,
+                    columnDef: columnDef,
+                    style: style,
+                    isFirstColumn: false
+                })}
             </div>
         );
     }
 
     var corner;
     var classString = "btn-link rt-plus-sign";
-    if( !table.props.disableAddColumnIcon && table.props.cornerIcon ){
+    if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
         corner = <img src={table.props.cornerIcon}/>;
         classString = "btn-link rt-corner-image";
     }
@@ -228,7 +246,10 @@ function buildHeaders(table) {
         </div>
     );
 }
-
+/**
+ * create the first cell for each row, append the proper ident level based on the cell's depth in the subtotaling tree
+ * @returns {*}
+ */
 function buildFirstCellForRow() {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
@@ -239,8 +260,8 @@ function buildFirstCellForRow() {
         return <td key={firstColTag}
                    onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
                      this.props.handleColumnFilter(null, columnDef) : null}>
-                   {data[firstColTag]}
-               </td>;
+            {data[firstColTag]}
+        </td>;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -252,9 +273,9 @@ function buildFirstCellForRow() {
 
     if (data.isDetail)
         result = <td style={firstCellStyle} key={firstColTag}
-            onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
+                     onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
                 this.props.handleColumnFilter(null, columnDef) : null}>
-                   {data[firstColTag]}</td>;
+            {data[firstColTag]}</td>;
     else {
         result =
             (
