@@ -36,7 +36,7 @@ function buildTreeSkeleton(tableProps) {
         rootNode.display = false
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
+        populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
     }
     return rootNode
 }
@@ -63,7 +63,7 @@ function recursivelyAggregateNodes(node, tableProps) {
  * ----------------------------------------------------------------------
  */
 
-function _populateChildNodesForRow(rootNode, row, groupBy) {
+function populateChildNodesForRow(rootNode, row, groupBy) {
     var i, currentNode = rootNode;
     if (groupBy == null || groupBy.length == 0)
         return;

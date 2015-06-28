@@ -16,7 +16,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     getDefaultProps: function () {
         return {
-            pageSize: 50
+            pageSize: 50,
+            extraStyle: {
+                "cursor": "pointer"
+            }
         };
     },
     /* --- Called by component or child react components --- */
@@ -179,6 +182,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         const scrollTop = $target.scrollTop();
         const height = $target.height();
         const totalHeight = $target.find("tbody").height();
+        const avgRowHeight = totalHeight / (this.state.upperVisualBound - this.state.lowerVisualBound);
         /**
          * always update lastScrollTop on scroll event - it helps us determine
          * whether the next scroll event is up or down
@@ -190,14 +194,25 @@ var ReactTable = React.createClass({displayName: "ReactTable",
          * to some constant multiple of pageSize
          */
         const rowDisplayBoundry = 2 * this.props.pageSize;
-        if (scrollTop < this.state.lastScrollTop && scrollTop < 0.2 * totalHeight) {
+        if (scrollTop < this.state.lastScrollTop && scrollTop <= 0) {
             // up scroll limit triggered
             newState.lowerVisualBound = Math.max(this.state.lowerVisualBound - this.props.pageSize, 0);
             newState.upperVisualBound = newState.lowerVisualBound + rowDisplayBoundry;
-        } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) > 0.9 * totalHeight) {
+            // if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+            if (!(newState.lowerVisualBound === 0))
+                setTimeout(function () {
+                    $target.scrollTop(Math.max(scrollTop + this.props.pageSize * avgRowHeight, 0));
+                }.bind(this));
+
+        } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) >= totalHeight) {
             // down scroll limit triggered
             newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize;
             newState.lowerVisualBound = newState.upperVisualBound - rowDisplayBoundry;
+            setTimeout(function () {
+                // TODO ensure that new scrollTop doesn't trigger another load event
+                // TODO ensure this computationally NOT through flagging variables
+                $target.scrollTop(scrollTop - this.props.pageSize * avgRowHeight);
+            }.bind(this));
         }
         this.setState(newState);
     },
@@ -242,6 +257,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             selectedDetailRows: this.state.selectedDetailRows
         });
 
+        // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
         if (this.props.disableInfiniteScrolling)
@@ -250,7 +266,6 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             this.state.rows = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
 
         var headers = buildHeaders(this);
-        var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0)
@@ -269,7 +284,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
                         )
                     )
                 ), 
-                this.props.disableInfiniteScrolling ? footer : null
+                this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null
             )
         );
     }
@@ -284,7 +299,7 @@ var Row = React.createClass({displayName: "Row",
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var cx = React.addons.classSet;
+            const cx = React.addons.classSet;
             var classes = cx(displayInstructions.classes);
             var displayContent = displayInstructions.value;
 
@@ -309,19 +324,13 @@ var Row = React.createClass({displayName: "Row",
                 )
             );
         }
-        var cx = React.addons.classSet;
-        var classes = cx({
+        classes = cx({
             'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
-        var styles = {
-            "cursor": "pointer"
-        };
-        for (var attrname in this.props.extraStyle) {
-            styles[attrname] = this.props.extraStyle[attrname];
-        }
+        // apply extra CSS if specified
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-                    className: classes, style: styles}, cells));
+                    className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -379,7 +388,7 @@ var SummarizeControl = React.createClass({displayName: "SummarizeControl",
             this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
         }
     },
-    handleClick: function (event) {
+    handleClick: function () {
         var $node = $(this.getDOMNode());
         $node.children(".menu-item-input").children("input").focus();
     },
