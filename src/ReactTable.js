@@ -6,7 +6,6 @@
  * @author Erfang Chen
  */
 var idCounter = 0;
-const SECTOR_SEPARATOR = "#";
 
 /**
  * The main component class. Creates an table element with the corresponding sub-components
@@ -23,7 +22,7 @@ var ReactTable = React.createClass({
         data: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
         columnDefs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
         subtotalBy: React.PropTypes.arrayOf(React.PropTypes.object),
-        sortBy: React.PropTypes.objectOf(React.PropTypes.string),
+        sortBy: React.PropTypes.arrayOf(React.PropTypes.object),
         selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
         rowKey: React.PropTypes.string,
         /**
@@ -54,14 +53,38 @@ var ReactTable = React.createClass({
                 "cursor": "pointer"
             },
             subtotalBy: [],
-            sortBy: {}
+            sortBy: []
         };
     },
     /* --- Called by component or child react components --- */
-    handleSort: ReactTableHandleSort,
-    handleAddSort: ReactTableHandleAddSort,
-    clearSort: function () {
+    handleAddSort: function (columnDef, sortType) {
+        const sortBy = this.state.sortBy;
+        /**
+         * if the current column is already part of the sort, then replace its sort type
+         * otherwise add it to the list of columns that needs to be sorted
+         */
+        var colPosition = findPositionByColTag(sortBy, columnDef.colTag);
+        if (colPosition != -1)
+            sortBy[colPosition].sortType = sortType;
+        else
+            sortBy.push({colTag: columnDef.colTag, sortType: sortType});
 
+        var newState = {
+            sortBy: sortBy
+        };
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this, sortBy));
+        newState.rootNode = this.state.rootNode;
+        this.setState(newState);
+    },
+    /**
+     * clearing sort always creates a new rootNode
+     * so all sub-state information in the rootNode will be lost
+     */
+    clearSort: function () {
+        const newState = this.state;
+        newState.sortBy = [];
+        newState.rootNode = createNewRootNode(this.props, this.state);
+        this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
     handleClearFilter: ReactTableHandleRemoveFilter,
@@ -188,23 +211,6 @@ var ReactTable = React.createClass({
             columnDefs: columnDefs
         });
     },
-    applySort: function (sortBy) {
-        if (!sortBy)
-            return;
-        var colDefToSort;
-        for (var colTag in this.props.presort) {
-            for (var i = 0; i < this.props.columnDefs.length; i++) {
-                if (this.props.columnDefs[i].colTag === colTag) {
-                    colDefToSort = this.props.columnDefs[i];
-                    if (this.props.presort[colTag] === 'asc')
-                        this.handleSort(colDefToSort, true);
-                    else if (this.props.presort[colTag] === 'desc')
-                        this.handleSort(colDefToSort, false);
-                    break;
-                }
-            }
-        }
-    },
     handleScroll: function (e) {
         const $target = $(e.target);
         const scrollTop = $target.scrollTop();
@@ -264,10 +270,6 @@ var ReactTable = React.createClass({
             $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
-        var table = this;
-        setTimeout(function () {
-            table.applySort(table.props.sortBy);
-        });
     },
     componentWillMount: function () {
     },
@@ -290,10 +292,11 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
+        var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
-            this.state.rows = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
+            rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
         else
-            this.state.rows = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
+            rowsToDisplay = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
 
         var headers = buildHeaders(this);
 
@@ -310,7 +313,7 @@ var ReactTable = React.createClass({
                 <div style={containerStyle} className="rt-scrollable">
                     <table className="rt-table">
                         <tbody>
-                        {this.state.rows}
+                        {rowsToDisplay}
                         </tbody>
                     </table>
                 </div>
@@ -455,7 +458,7 @@ var SubtotalControl = React.createClass({
 function generateSectorKey(sectorPath) {
     if (sectorPath == null)
         return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
+    return sectorPath.join("#");
 }
 
 function generateRowKey(row, rowKey) {
@@ -562,8 +565,7 @@ function bindHeadersToMenu(node) {
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};
-
+}
 /*
  * ----------------------------------------------------------------------
  * Helpers
@@ -584,7 +586,8 @@ function getPaginationAttr(table, data) {
     var result = {};
 
     if (table.props.disablePagination) {
-        result.lowerVisualBound = 0, result.upperVisualBound = data.length
+        result.lowerVisualBound = 0;
+        result.upperVisualBound = data.length
     } else {
         result.pageSize = table.props.pageSize || 50;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;

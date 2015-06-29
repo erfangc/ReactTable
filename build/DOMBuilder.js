@@ -31,9 +31,9 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, true)}, 
+            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
                 React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, false)}, 
+            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
                 React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
             React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort")
         ],
@@ -113,12 +113,20 @@ function pressedKey(table, colTag, e) {
 }
 /**
  * creates the header row of the table
- * TODO too long needs refactoring
+ * TODO too long needs refactoring big time I am not kidding
  * @param table
  * @returns {XML}
  */
 function buildHeaders(table) {
     var columnDef = table.state.columnDefs[0], i, style = {};
+    /**
+     * sortDef tracks whether the current column is being sorted
+     */
+    var sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
+    var sortIcon = null;
+    if (sortDef)
+        sortIcon =
+            React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType})
     var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
     var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
@@ -127,26 +135,17 @@ function buildHeaders(table) {
         padding: "0"
     };
     var firstColumn = (
-        React.createElement("div", {className: "rt-headers-container", 
-             onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
-                table.handleSort.bind(null, columnDef, true) :
-                (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                    table.handleSort.bind(null, columnDef, false) : table.render())}, 
+        React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
                 React.createElement("a", {href: "#", className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     buildFirstColumnLabel(table).join("/")
                 ), 
+                sortIcon, 
                 React.createElement("input", {style: ss, 
                        className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                        onChange: table.handleColumnFilter.bind(null, columnDef), 
                        onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
-            ), 
-            React.createElement("div", {className: "rt-caret-container"}, 
-                table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
-                table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
             ), 
             React.createElement("div", {className: numericPanelClasses}, 
                 React.createElement(NumericFilterPanel, null)
@@ -162,30 +161,27 @@ function buildHeaders(table) {
     var headerColumns = [firstColumn];
     for (i = 1; i < table.state.columnDefs.length; i++) {
         columnDef = table.state.columnDefs[i];
+        sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
+        sortIcon = null;
+        if (sortDef)
+            sortIcon =
+                React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType})
+
         style = {textAlign: "center"};
         numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
-            React.createElement("div", {className: "rt-headers-container", 
-                 onDoubleClick: table.state.sortAsc === undefined || table.state.sortAsc === null || columnDef != table.state.columnDefSorted ?
-                               table.handleSort.bind(null, columnDef, true) :
-                                  (columnDef == table.state.columnDefSorted && table.state.sortAsc ?
-                                   table.handleSort.bind(null, columnDef, false) : table.render())}, 
+            React.createElement("div", {className: "rt-headers-container"}, 
                 React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
-                        columnDef.text
+                        React.createElement("span", null, columnDef.text)
                     ), 
+                    sortIcon, 
                     React.createElement("input", {style: ss, 
                            className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
                            onChange: table.handleColumnFilter.bind(null, columnDef), 
                            onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
-                ), 
-                React.createElement("div", {className: "rt-caret-container"}, 
-                    table.state.sortAsc != undefined && table.state.sortAsc === true &&
-                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-upward-caret"}) : null, 
-                    table.state.sortAsc != undefined && table.state.sortAsc === false &&
-                    columnDef === table.state.columnDefSorted ? React.createElement("div", {className: "rt-downward-caret"}) : null
                 ), 
                 React.createElement("div", {className: numericPanelClasses}, 
                     React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 

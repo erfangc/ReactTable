@@ -81,106 +81,39 @@ TreeNode.prototype.getSectorPath = function () {
 };
 
 /**
- * TODO accept sortFn as an array, and if so, the children rows will be sorted in a layered fashion
- * where the first function in the sortFn array determines the primary sorting and the second function becomes the
- * tie breaker
- * @param options
+ * Return a composite sorter that takes multiple sort functions in an array and apply them in order.
+ * @param funcs the list of functions to sort by
+ * @param isSummaryRow indicate whether the sort function are to be applied to sumamry rows, whose `rowData` property needs to be compared
+ *
+ * @returns {Function} a function that sorts the comparable elements by using constituents of funcs until the 'tie' is broken
  */
-TreeNode.prototype.sortChildren = function (options) {
-    var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
-        recursive = options.recursive, sortAsc = options.sortAsc;
-
-    var multiplier = sortAsc == true ? 1 : -1;
-    this.children.sort(function (a, b) {
-        var aRow = a.rowData, bRow = b.rowData;
-        if (!reverseSortFn || multiplier === 1)
-            return multiplier * sortFn(aRow, bRow);
-        else
-            return reverseSortFn(aRow, bRow);
-    });
-    if (!this.hasChild())
-        this.ultimateChildren.sort(function (a, b) {
-            if (!reverseSortFn || multiplier === 1)
-                return multiplier * sortFn(a, b);
+function buildCompositeSorter(funcs, isSummaryRow) {
+    return function (a, b) {
+        var i = 0, sortOutcome = 0;
+        while (sortOutcome == 0 && i < funcs.length) {
+            if (isSummaryRow)
+                sortOutcome = funcs[i](a.rowData, b.rowData);
             else
-                return reverseSortFn(a, b);
-        });
-
-    if (recursive) {
-        for (var i = 0; i < this.children.length; i++)
-            this.children[i].sortChildren({
-                sortFn: sortFn, reverseSortFn: options.reverseSortFn,
-                recursive: recursive, sortAsc: sortAsc
-            });
+                sortOutcome = funcs[i](a, b);
+            i++;
+        }
+        return sortOutcome;
     }
-};
+}
 
 /**
- * @deprecated
- * @param options
+ * Sort the child nodes of this node recursively according to the array of sort functions passed into sortFuncs
+ * @param sortFuncs
  */
-TreeNode.prototype.addSortToChildren = function (options) {
-    var sortFn = options.sortFn, reverseSortFn = options.reverseSortFn,
-        oldSortFns = options.oldSortFns,
-        recursive = options.recursive, sortAsc = options.sortAsc;
-
-    var multiplier = sortAsc == true ? 1 : -1;
-    var childrenToAddSort = [];
-
-    for (var i = 0; i + 1 < this.children.length; i++) {
-        transformSortCandidates(this.children, i, true, i + 2 >= this.children.length);
+TreeNode.prototype.sortNodes = function (sortFuncs) {
+    if (this.hasChild()) {
+        this.children.sort(buildCompositeSorter(sortFuncs, true));
+        $.each(this.children, function (idx, child) {
+            child.sortNodes(sortFuncs);
+        });
     }
-
-    if (!this.hasChild()) {
-        for (var i = 0; i + 1 < this.ultimateChildren.length; i++) {
-            transformSortCandidates(this.ultimateChildren, i, false, i + 2 >= this.ultimateChildren.length);
-        }
-    }
-
-    if (recursive) {
-        for (var i = 0; i < this.children.length; i++)
-            this.children[i].addSortToChildren(options);
-    }
-
-    function transformSortCandidates(nodes, i, isChild, lastElement) {
-        if (childrenToAddSort.length == 0)
-            childrenToAddSort.push($.extend({}, nodes[i]));
-
-        var tieFound = true;
-        for (var j = 0; j < oldSortFns.length; j++) {
-            if (oldSortFns[j](extractData(nodes[i], isChild), extractData(nodes[i + 1], isChild)) !== 0) {
-                tieFound = false;
-                break;
-            }
-        }
-        if (tieFound && !lastElement) {
-            childrenToAddSort.push($.extend({}, nodes[i + 1]));
-        }
-        else if (childrenToAddSort.length > 1) {
-            if (lastElement)
-                childrenToAddSort.push($.extend({}, nodes[i + 1]));
-            // Sort next level
-            childrenToAddSort.sort(function (a, b) {
-                if (!reverseSortFn || multiplier === 1)
-                    return multiplier * sortFn(extractData(a, isChild), extractData(b, isChild));
-                else
-                    return reverseSortFn(extractData(a, isChild), extractData(b, isChild));
-            });
-            // Replace ultimate children with correct next level of sorting
-            for (var ii = 0; ii < childrenToAddSort.length; ii++) {
-                var childIndexToReplace = i + ii + 1 - (childrenToAddSort.length);
-                nodes[childIndexToReplace] = childrenToAddSort[ii];
-            }
-            childrenToAddSort = [];
-        }
-        else {
-            childrenToAddSort = [];
-        }
-    }
-
-    function extractData(obj, isChild) {
-        return isChild ? obj.rowData : obj;
-    }
+    else
+        this.ultimateChildren.sort(buildCompositeSorter(sortFuncs, false));
 };
 
 TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {

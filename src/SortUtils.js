@@ -1,72 +1,84 @@
-function genericValueBasedSorter(a, b) {
-    var returnValue = 0;
-    if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
-        returnValue = 1;
-    else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
-        returnValue = -1;
-    else if (a[this.colTag] < b[this.colTag])
-        returnValue = -1;
-    else if (a[this.colTag] > b[this.colTag])
-        returnValue = 1;
+const lexicalSorter = {
+    asc: function (a, b) {
+        var returnValue = 0;
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+            returnValue = 1;
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+            returnValue = -1;
+        else if (a[this.colTag] < b[this.colTag])
+            returnValue = -1;
+        else if (a[this.colTag] > b[this.colTag])
+            returnValue = 1;
+        return returnValue;
+    },
+    desc: function (a, b) {
+        var returnValue = 0;
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+            returnValue = 1;
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+            returnValue = -1;
+        else if (a[this.colTag] < b[this.colTag])
+            returnValue = 1;
+        else if (a[this.colTag] > b[this.colTag])
+            returnValue = -1;
+        return returnValue;
+    }
+};
 
-    return returnValue;
-}
+const dateSorter = {
+    asc: function (a, b) {
+        return new Date(a[this.colTag]) - new Date(b[this.colTag]);
+    },
+    desc: function (a, b) {
+        return -1 * dateSorter.asc.call(null, a, b);
+    }
+};
 
-function genericValueBasedReverseSorter(a, b) {
-    var returnValue = 0;
-    if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
-        returnValue = 1;
-    else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
-        returnValue = -1;
-    else if (a[this.colTag] < b[this.colTag])
-        returnValue = 1;
-    else if (a[this.colTag] > b[this.colTag])
-        returnValue = -1;
-
-    return returnValue;
-}
-
-function dateDetailSort(a, b) {
-    var returnValue = new Date(a[this.colTag]) - new Date(b[this.colTag]);
-    return returnValue;
-}
-
-function dateDetailReverseSort(a, b) {
-    var returnValue = new Date(b[this.colTag]) - new Date(a[this.colTag]);
-    return returnValue;
-}
-
-function getSortFunction(sortByColumnDef) {
-    var format = sortByColumnDef.format || "";
+/**
+ * resolves t he appropriate sort function for the given `columnDef`
+ * if the columnDef comes with a set of sort functions under a `sort` property, it will override the default resolution
+ * otherwise determination is made based on `columnDef.format`
+ * @param columnDef
+ * @param sortType 'asc' or 'desc'
+ * @returns {function}
+ */
+function getSortFunction(columnDef, sortType) {
+    const format = columnDef.format || "";
+    var sorter = lexicalSorter[sortType].bind(columnDef);
     // if the user provided a custom sort function for the column, use that instead
-    if (sortByColumnDef.sort)
-        return sortByColumnDef.sort;
-    switch (format.toLowerCase()) {
-        case "date":
-            return dateDetailSort;
-        default :
-            return genericValueBasedSorter;
-    }
+    if (columnDef.sort && columnDef[sortType])
+        sorter = columnDef.sort[sortType].bind(columnDef);
+    else if (format === "date")
+        sorter = dateSorter[sortType].bind(columnDef);
+    return sorter;
 }
 
-function getReverseSortFunction(sortByColumnDef) {
-    var format = sortByColumnDef.format || "";
-    if (sortByColumnDef.reverseSort)
-        return sortByColumnDef.reverseSort;
-    else if(sortByColumnDef.sort){
-        return function(a,b){
-            return sortByColumnDef.sort.bind(this)(a,b)*-1;
-        }
-    }
-    if (!sortByColumnDef.sort) {
-        switch (format.toLowerCase()) {
-            case "date":
-                return dateDetailReverseSort;
-            default :
-                return genericValueBasedReverseSorter;
-        }
-    }
+/**
+ * converts the sortBy object which maps colTag to sortType in ['asc', 'desc'] into a array of sort functions
+ * @param sortBy
+ */
+function convertSortByToFuncs(table, sortBy) {
+    return sortBy.map(function (s) {
+        const pos = findPositionByColTag(table.state.columnDefs, s.colTag);
+        return getSortFunction(table.state.columnDefs[pos], s.sortType);
+    });
 }
 
+function findPositionByColTag(columnDefs, colTag) {
+    var pos = -1;
+    $.each(columnDefs, function (i, columnDef) {
+        if (columnDef.colTag === colTag)
+            pos = i;
+    });
+    return pos;
+}
 
-
+function findDefByColTag(columnDefs, colTag) {
+    var result = null;
+    $.each(columnDefs, function (i, columnDef) {
+        if (columnDef.colTag === colTag) {
+            result = columnDef;
+        }
+    });
+    return result;
+}

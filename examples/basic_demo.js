@@ -42,22 +42,14 @@ $(function () {
 
         }
     ];
-    $.get('large_data_30k.json').success(function (data) {
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
-        var groupBy = [{colTag: "nationality", text: "Nationality"}, {
-            colTag: "fruit_preference",
-            text: "Fruit Preference"
-        }];
         var options = {
-            //disableAddColumn: true,
-            //disableGrandTotal: true,
-            //disableScrolling: true,
-            //disableExporting: true,
             disablePagination: true,
-            cornerIcon: '../src/filter_icon.png',
-            //defaultMenuItems: ['sort'],
-            subtotalBy: subtotalBy,
+            subtotalBy: [{
+                colTag: "nationality", text: "Nationality"
+            }],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, event) {
@@ -65,8 +57,8 @@ $(function () {
                 console.log(state);
                 event.preventDefault();
             },
-            height: "300px",
-            presort: {score_weight_factor: 'desc'},
+            height: "750px",
+            sortBy: [{colTag: "score_weight_factor", sortType: 'desc'}],
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {

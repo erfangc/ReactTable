@@ -17,15 +17,11 @@ function ReactTableGetInitialState() {
         // we shall consider any props that is modifiable through user interaction a state
         columnDefs: this.props.columnDefs,
         subtotalBy: this.props.subtotalBy,
+        sortBy: this.props.sortBy,
 
         lowerVisualBound: 0,
         upperVisualBound: this.props.pageSize,
         extraStyle: {}, // TODO document use
-        /**
-         * TODO 'rows' is DEFINITELY not a state !!! keeping it as a state is problematic. The "rows" that should be rendered at any point in time should be derivable from props + states
-         * it should be determined based on props and other states in the render() function
-         */
-        rows: [],
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [] // TODO same as above
     };
@@ -146,48 +142,6 @@ function applyAllFilters() {
         this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
     }
     this.setState({rootNode: this.state.rootNode});
-}
-
-function ReactTableHandleSort(columnDefToSortBy, sortAsc) {
-    var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
-    var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
-    this.state.rootNode.sortChildren({
-        sortFn: sortFn,
-        reverseSortFn: reverseSortFn,
-        recursive: true,
-        sortAsc: sortAsc
-    });
-    this.props.currentSortStates = [sortAsc ? sortFn : reverseSortFn];
-    this.setState({
-        rootNode: this.state.rootNode,
-        sortAsc: sortAsc,
-        columnDefSorted: columnDefToSortBy,
-        filterInPlace: {}
-    });
-}
-
-function ReactTableHandleAddSort(columnDefToSortBy, sortAsc) {
-    // If it's not sorted yet, sort normally
-    if (!this.props.currentSortStates || this.props.currentSortStates.length == 0) {
-        this.handleSort(columnDefToSortBy, sortAsc);
-        return;
-    }
-    var sortFn = getSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
-    var reverseSortFn = getReverseSortFunction(columnDefToSortBy).bind(columnDefToSortBy);
-    this.state.rootNode.addSortToChildren({
-        sortFn: sortFn,
-        reverseSortFn: reverseSortFn,
-        recursive: true,
-        sortAsc: sortAsc,
-        oldSortFns: this.props.currentSortStates
-    });
-    this.props.currentSortStates.push(sortAsc ? sortFn : reverseSortFn);
-    this.setState({
-        rootNode: this.state.rootNode,
-        sortAsc: sortAsc,
-        columnDefSorted: columnDefToSortBy,
-        filterInPlace: {}
-    });
 }
 
 function ReactTableHandleSubtotalBy(columnDef, partitions) {

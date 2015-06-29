@@ -119,8 +119,8 @@ function _average(options) {
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
     var count = 0;
-    for( var i=0; i<options.data.length; i++ ){
-        if( options.data[i][options.columnDef.colTag] || options.data[i][options.columnDef.colTag] === 0 )
+    for (var i = 0; i < options.data.length; i++) {
+        if (options.data[i][options.columnDef.colTag] || options.data[i][options.columnDef.colTag] === 0)
             count++;
     }
     return count == 0 ? "" : sum / count;
@@ -144,8 +144,8 @@ function _count(options) {
 function _countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
     var values = {}, i, prop;
-    for (i = 0; i < options.data.length; i++){
-        if ( !data[i][columnDef.colTag] ) continue;
+    for (i = 0; i < options.data.length; i++) {
+        if (!data[i][columnDef.colTag]) continue;
         values[data[i][columnDef.colTag]] = 1;
     }
     var result = 0;
@@ -163,10 +163,10 @@ function _countAndDistinct(options) {
 
 function _mostDataPoints(options) {
     var best = {count: 0, index: -1};
-    for( var i=0; i<options.data.length; i++ ){
+    for (var i = 0; i < options.data.length; i++) {
         var sizeOfObj = Object.keys(options.data[i]).length;
-        if( sizeOfObj > best.count || (sizeOfObj === best.count &&
-                            options.data[i].aggregationTiebreaker > options.data[best.index].aggregationTiebreaker) ){
+        if (sizeOfObj > best.count || (sizeOfObj === best.count &&
+            options.data[i].aggregationTiebreaker > options.data[best.index].aggregationTiebreaker)) {
             best.count = sizeOfObj;
             best.index = i;
         }
