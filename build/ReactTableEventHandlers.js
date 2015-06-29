@@ -31,10 +31,11 @@ function ReactTableGetInitialState() {
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
     initialState.rootNode = createNewRootNode(this.props, initialState);
+    initialState.rootNode.sortNodes(convertSortByToFuncs(this, initialState.sortBy, initialState.columnDefs));
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
-    initialState.selectedDetailRows = selections.selectedDetailRows; // another modifiable prop ... so fine ..
-    initialState.selectedSummaryRows = selections.selectedSummaryRows; // save as above
+    initialState.selectedDetailRows = selections.selectedDetailRows;
+    initialState.selectedSummaryRows = selections.selectedSummaryRows;
 
     return initialState;
 }

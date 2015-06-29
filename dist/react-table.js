@@ -1180,13 +1180,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         const scrollTop = $target.scrollTop();
         const height = $target.height();
         const totalHeight = $target.find("tbody").height();
-        const avgRowHeight = totalHeight / (this.state.upperVisualBound - this.state.lowerVisualBound);
+        const avgRowHeight = totalHeight / $target.find("tbody > tr").length;
         /**
          * always update lastScrollTop on scroll event - it helps us determine
          * whether the next scroll event is up or down
          */
         var newState = {lastScrollTop: scrollTop};
-
         /**
          * we determine the correct display boundaries by keeping the distance between lower and upper visual bound
          * to some constant multiple of pageSize
@@ -1196,7 +1195,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             // up scroll limit triggered
             newState.lowerVisualBound = Math.max(this.state.lowerVisualBound - this.props.pageSize, 0);
             newState.upperVisualBound = newState.lowerVisualBound + rowDisplayBoundry;
-            // if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+            /**
+             * if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+             */
             if (!(newState.lowerVisualBound === 0))
                 setTimeout(function () {
                     $target.scrollTop(Math.max(scrollTop + this.props.pageSize * avgRowHeight, 0));
@@ -1204,13 +1205,22 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 
         } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) >= totalHeight) {
             // down scroll limit triggered
-            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize;
-            newState.lowerVisualBound = newState.upperVisualBound - rowDisplayBoundry;
-            setTimeout(function () {
-                var newScrollTop = scrollTop - this.props.pageSize * avgRowHeight;
-                if (newScrollTop > 0)
-                    $target.scrollTop(newScrollTop);
-            }.bind(this));
+            /**
+             * we either increment upperVisualBound by a single page (specified via props.pageSize) or the max rows that can be displayed
+             * we know the end has been reached if upperVisualBound + pageSize > maxRows
+             */
+            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize > this.state.maxRows ? this.state.maxRows : this.state.upperVisualBound + this.props.pageSize;
+            newState.lowerVisualBound = Math.max(newState.upperVisualBound - rowDisplayBoundry, 0);
+            /**
+             * if previous upperVisualBound is the default (props.pageSize), it could actually be greater than the current
+             */
+            const additionalRows = Math.max(newState.upperVisualBound - this.state.upperVisualBound, 0);
+            if (additionalRows > 0)
+                setTimeout(function () {
+                    var newScrollTop = scrollTop - (additionalRows * avgRowHeight);
+                    if (newScrollTop > 0)
+                        $target.scrollTop(newScrollTop);
+                }.bind(this));
         }
         this.setState(newState);
     },
@@ -1252,6 +1262,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
         });
+        // maxRows is referenced later during event handling to determine upperVisualBound
+        this.state.maxRows = rasterizedData.length;
 
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
@@ -1620,10 +1632,11 @@ function ReactTableGetInitialState() {
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
     initialState.rootNode = createNewRootNode(this.props, initialState);
+    initialState.rootNode.sortNodes(convertSortByToFuncs(this, initialState.sortBy, initialState.columnDefs));
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
-    initialState.selectedDetailRows = selections.selectedDetailRows; // another modifiable prop ... so fine ..
-    initialState.selectedSummaryRows = selections.selectedSummaryRows; // save as above
+    initialState.selectedDetailRows = selections.selectedDetailRows;
+    initialState.selectedSummaryRows = selections.selectedSummaryRows;
 
     return initialState;
 }
@@ -1843,9 +1856,9 @@ function getInitialSelections(selectedRows, selectedSummaryRows) {
 ;const lexicalSorter = {
     asc: function (a, b) {
         var returnValue = 0;
-        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)) && b[this.colTag])
             returnValue = 1;
-        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)))
             returnValue = -1;
         else if (a[this.colTag] < b[this.colTag])
             returnValue = -1;
@@ -1855,9 +1868,9 @@ function getInitialSelections(selectedRows, selectedSummaryRows) {
     },
     desc: function (a, b) {
         var returnValue = 0;
-        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)) && b[this.colTag])
             returnValue = 1;
-        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)))
             returnValue = -1;
         else if (a[this.colTag] < b[this.colTag])
             returnValue = 1;
@@ -1897,12 +1910,15 @@ function getSortFunction(columnDef, sortType) {
 
 /**
  * converts the sortBy object which maps colTag to sortType in ['asc', 'desc'] into a array of sort functions
- * @param sortBy
+ * @param table the table component
+ * @param sortBy an array indicating desired colTags to sort by
+ * @param columnDefs columnDefs to use to resolve sort function, if not present it will be pulled from `table`
  */
-function convertSortByToFuncs(table, sortBy) {
+function convertSortByToFuncs(table, sortBy, columnDefs) {
+    const columnDefsToUse = columnDefs || table.state.columnDefs;
     return sortBy.map(function (s) {
-        const pos = findPositionByColTag(table.state.columnDefs, s.colTag);
-        return getSortFunction(table.state.columnDefs[pos], s.sortType);
+        const pos = findPositionByColTag(columnDefsToUse, s.colTag);
+        return getSortFunction(columnDefsToUse[pos], s.sortType);
     });
 }
 
