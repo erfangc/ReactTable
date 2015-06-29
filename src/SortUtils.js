@@ -1,9 +1,9 @@
 const lexicalSorter = {
     asc: function (a, b) {
         var returnValue = 0;
-        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)) && b[this.colTag])
             returnValue = 1;
-        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)))
             returnValue = -1;
         else if (a[this.colTag] < b[this.colTag])
             returnValue = -1;
@@ -13,9 +13,9 @@ const lexicalSorter = {
     },
     desc: function (a, b) {
         var returnValue = 0;
-        if (!a[this.colTag] && (a[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank) && b[this.colTag])
+        if (!a[this.colTag] && (a[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)) && b[this.colTag])
             returnValue = 1;
-        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || this.formatConfig.showZeroAsBlank))
+        else if (a[this.colTag] && !b[this.colTag] && (b[this.colTag] !== 0 || (this.formatConfig && this.formatConfig.showZeroAsBlank)))
             returnValue = -1;
         else if (a[this.colTag] < b[this.colTag])
             returnValue = 1;
@@ -55,12 +55,15 @@ function getSortFunction(columnDef, sortType) {
 
 /**
  * converts the sortBy object which maps colTag to sortType in ['asc', 'desc'] into a array of sort functions
- * @param sortBy
+ * @param table the table component
+ * @param sortBy an array indicating desired colTags to sort by
+ * @param columnDefs columnDefs to use to resolve sort function, if not present it will be pulled from `table`
  */
-function convertSortByToFuncs(table, sortBy) {
+function convertSortByToFuncs(table, sortBy, columnDefs) {
+    const columnDefsToUse = columnDefs || table.state.columnDefs;
     return sortBy.map(function (s) {
-        const pos = findPositionByColTag(table.state.columnDefs, s.colTag);
-        return getSortFunction(table.state.columnDefs[pos], s.sortType);
+        const pos = findPositionByColTag(columnDefsToUse, s.colTag);
+        return getSortFunction(columnDefsToUse[pos], s.sortType);
     });
 }
 

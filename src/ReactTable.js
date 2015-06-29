@@ -216,13 +216,12 @@ var ReactTable = React.createClass({
         const scrollTop = $target.scrollTop();
         const height = $target.height();
         const totalHeight = $target.find("tbody").height();
-        const avgRowHeight = totalHeight / (this.state.upperVisualBound - this.state.lowerVisualBound);
+        const avgRowHeight = totalHeight / $target.find("tbody > tr").length;
         /**
          * always update lastScrollTop on scroll event - it helps us determine
          * whether the next scroll event is up or down
          */
         var newState = {lastScrollTop: scrollTop};
-
         /**
          * we determine the correct display boundaries by keeping the distance between lower and upper visual bound
          * to some constant multiple of pageSize
@@ -232,7 +231,9 @@ var ReactTable = React.createClass({
             // up scroll limit triggered
             newState.lowerVisualBound = Math.max(this.state.lowerVisualBound - this.props.pageSize, 0);
             newState.upperVisualBound = newState.lowerVisualBound + rowDisplayBoundry;
-            // if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+            /**
+             * if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+             */
             if (!(newState.lowerVisualBound === 0))
                 setTimeout(function () {
                     $target.scrollTop(Math.max(scrollTop + this.props.pageSize * avgRowHeight, 0));
@@ -240,13 +241,22 @@ var ReactTable = React.createClass({
 
         } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) >= totalHeight) {
             // down scroll limit triggered
-            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize;
-            newState.lowerVisualBound = newState.upperVisualBound - rowDisplayBoundry;
-            setTimeout(function () {
-                var newScrollTop = scrollTop - this.props.pageSize * avgRowHeight;
-                if (newScrollTop > 0)
-                    $target.scrollTop(newScrollTop);
-            }.bind(this));
+            /**
+             * we either increment upperVisualBound by a single page (specified via props.pageSize) or the max rows that can be displayed
+             * we know the end has been reached if upperVisualBound + pageSize > maxRows
+             */
+            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize > this.state.maxRows ? this.state.maxRows : this.state.upperVisualBound + this.props.pageSize;
+            newState.lowerVisualBound = Math.max(newState.upperVisualBound - rowDisplayBoundry, 0);
+            /**
+             * if previous upperVisualBound is the default (props.pageSize), it could actually be greater than the current
+             */
+            const additionalRows = Math.max(newState.upperVisualBound - this.state.upperVisualBound, 0);
+            if (additionalRows > 0)
+                setTimeout(function () {
+                    var newScrollTop = scrollTop - (additionalRows * avgRowHeight);
+                    if (newScrollTop > 0)
+                        $target.scrollTop(newScrollTop);
+                }.bind(this));
         }
         this.setState(newState);
     },
@@ -288,6 +298,8 @@ var ReactTable = React.createClass({
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
         });
+        // maxRows is referenced later during event handling to determine upperVisualBound
+        this.state.maxRows = rasterizedData.length;
 
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);

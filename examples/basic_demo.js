@@ -52,6 +52,7 @@ $(function () {
         // first table
         var options = {
             disablePagination: true,
+            sortBy: [{colTag: "test_score", sortType: "asc"}],
             subtotalBy: [{
                 colTag: "nationality", text: "Nationality"
             }],
@@ -63,7 +64,6 @@ $(function () {
                 event.preventDefault();
             },
             height: "750px",
-            sortBy: [{colTag: "score_weight_factor", sortType: 'desc'}],
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {
