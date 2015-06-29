@@ -72,7 +72,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var newState = {
             sortBy: sortBy
         };
-        this.state.rootNode.sortNodes(convertSortByToFuncs(this, sortBy));
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
         newState.rootNode = this.state.rootNode;
         this.setState(newState);
     },
@@ -174,6 +174,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             selectedSummaryRows: selectedSummaryRows
         });
         return state;
+    },
+    forceSort: function () {
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
+        this.setState({});
     },
     getDetailToggleState: function (key) {
         return this.state.selectedDetailRows[key] && true;

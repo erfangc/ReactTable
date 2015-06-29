@@ -1,6 +1,6 @@
 /**
  * find the right sector name for the current row for the given level of row grouping
- * this method can take partition subtotalBy columns that are numeric in nature and bucket rows based on where they fall
+ * this method can take partition subtotalBy columns that are numeric in nature and partition rows based on where they fall
  * in the partition
  * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
@@ -16,10 +16,10 @@ function getSectorName(row, subtotalBy) {
     return {sectorName: sectorName || "Other", sortIndex: sortIndex};
 }
 
-function aggregateSector(bucketResult, columnDefs, subtotalBy) {
+function aggregateSector(partitionResult, columnDefs, subtotalBy) {
     var result = {};
     for (var i = 1; i < columnDefs.length; i++)
-        result[columnDefs[i].colTag] = aggregateColumn(bucketResult, columnDefs[i], subtotalBy);
+        result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy);
     return result;
 }
 
@@ -74,27 +74,27 @@ function resolveAggregationMethod(columnDef, subtotalBy) {
     return result.toLowerCase();
 }
 
-function aggregateColumn(bucketResult, columnDef, subtotalBy) {
+function aggregateColumn(partitionResult, columnDef, subtotalBy) {
     var result;
     var aggregationMethod = resolveAggregationMethod(columnDef, subtotalBy);
     switch (aggregationMethod) {
         case "sum":
-            result = _straightSumAggregation({data: bucketResult, columnDef: columnDef});
+            result = _straightSumAggregation({data: partitionResult, columnDef: columnDef});
             break;
         case "average":
-            result = _average({data: bucketResult, columnDef: columnDef});
+            result = _average({data: partitionResult, columnDef: columnDef});
             break;
         case "count":
-            result = _count({data: bucketResult, columnDef: columnDef});
+            result = _count({data: partitionResult, columnDef: columnDef});
             break;
         case "count_distinct":
-            result = _countDistinct({data: bucketResult, columnDef: columnDef});
+            result = _countDistinct({data: partitionResult, columnDef: columnDef});
             break;
         case "count_and_distinct":
-            result = _countAndDistinct({data: bucketResult, columnDef: columnDef});
+            result = _countAndDistinct({data: partitionResult, columnDef: columnDef});
             break;
         case "most_data_points":
-            result = _mostDataPoints({data: bucketResult, columnDef: columnDef});
+            result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
             break;
         default :
             result = "";

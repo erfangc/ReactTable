@@ -1,7 +1,7 @@
 /**
  * Transform the current props into a tree structure representing the complex state
  * @param props
- * @return the root TreeNode element of the tree with aggregation
+ * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
 
