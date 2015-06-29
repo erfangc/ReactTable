@@ -59,11 +59,9 @@ function getSortFunction(columnDef, sortType) {
  * @param sortBy an array indicating desired colTags to sort by
  * @param columnDefs columnDefs to use to resolve sort function, if not present it will be pulled from `table`
  */
-function convertSortByToFuncs(table, sortBy, columnDefs) {
-    const columnDefsToUse = columnDefs || table.state.columnDefs;
+function convertSortByToFuncs(columnDefs, sortBy) {
     return sortBy.map(function (s) {
-        const pos = findPositionByColTag(columnDefsToUse, s.colTag);
-        return getSortFunction(columnDefsToUse[pos], s.sortType);
+        return getSortFunction(findDefByColTag(columnDefs, s.colTag), s.sortType);
     });
 }
 

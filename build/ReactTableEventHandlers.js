@@ -31,7 +31,8 @@ function ReactTableGetInitialState() {
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
     initialState.rootNode = createNewRootNode(this.props, initialState);
-    initialState.rootNode.sortNodes(convertSortByToFuncs(this, initialState.sortBy, initialState.columnDefs));
+    if (initialState.sortBy.length > 0)
+        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     initialState.selectedDetailRows = selections.selectedDetailRows;
@@ -216,9 +217,9 @@ function ReactTableHandlePageClick(page) {
  * Helpers
  * ----------------------------------------------------------------------
  */
-function partitionNumberLine(buckets) {
+function partitionNumberLine(partitions) {
     var i, stringBuckets, floatBuckets = [];
-    stringBuckets = buckets.split(",");
+    stringBuckets = partitions.split(",");
     for (i = 0; i < stringBuckets.length; i++) {
         var floatBucket = parseFloat(stringBuckets[i]);
         if (!isNaN(floatBucket))
