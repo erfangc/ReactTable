@@ -1,6 +1,6 @@
 {
   "name": "react-table",
-  "version": "v2.0.1",
+  "version": "v3.0.0-beta",
   "homepage": "https://github.com/erfangc/ReactTable",
   "authors": [
     "erfangc <erfangc@gmail.com>"
@@ -25,6 +25,7 @@
     "react": "0.12.0",
     "jquery": "~2.1.1",
     "font-awesome": "~4.3.0",
-    "tableExport": "https://github.com/caguthrie/tableExport.jquery.plugin.git"
+    "tableExport": "https://github.com/caguthrie/tableExport.jquery.plugin.git",
+    "tableExportAddons": "https://github.com/caguthrie/tableExport.jquery.plugin.git"
   }
 }
