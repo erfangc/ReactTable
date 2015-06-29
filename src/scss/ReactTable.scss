@@ -45,13 +45,13 @@
       > .rt-headers-container {
         display: inline-block;
         border-right: 1px solid #f9f2f4;
-        > .rt-numeric-filter-container{
+        > .rt-numeric-filter-container {
           position: absolute;
           text-shadow: none;
           color: #4a5564;
           border-radius: 2px;
           background-color: #f0f3f5;
-//          max-width: 110px;
+          //          max-width: 110px;
         }
         > .rt-caret-container {
           position: relative;
@@ -106,6 +106,8 @@
           border-radius: 2px;
           background-color: $utility-color;
           max-width: 110px;
+          z-index: 1;
+
           /* menu items */
           .menu-item {
             font-size: 9px;
@@ -162,7 +164,7 @@
   padding-left: 2px;
 }
 
-.rt-numeric-filter-box{
+.rt-numeric-filter-box {
 }
 
 .rt-plus-sign {

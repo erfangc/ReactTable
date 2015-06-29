@@ -1,42 +1,32 @@
 /**
  * Transform the current props into a tree structure representing the complex state
- * @param tableProps
+ * @param props
  * @return the root TreeNode element of the tree with aggregation
  */
-function createTree(tableProps) {
-    // If the rootNode is passed as a prop - that means the tree is pre-configured
-    if (tableProps.rootNode != null) {
-        return tableProps.rootNode
-    }
-    // If the data is formatted as an array of arrays instead of array of objects
-    if( tableProps.data.length > 0 && Array.isArray(tableProps.data[0]) ){
-        for( var i=0; i<tableProps.data.length; i++ ){
-            var newDataObj = {};
-            for( var j=0; j<tableProps.columnDefs.length; j++ ){
-                newDataObj[tableProps.columnDefs[j].colTag] = tableProps.data[i][j];
-            }
-            tableProps.data[i] = newDataObj;
-        }
-    }
-    var rootNode = buildTreeSkeleton(tableProps);
-    recursivelyAggregateNodes(rootNode, tableProps);
+function createNewRootNode(props, state) {
+
+    var rootNode = buildTreeSkeleton(props, state);
+    recursivelyAggregateNodes(rootNode, state);
+
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
+
     return rootNode;
 }
 
 /**
- * Creates the data tree backed by props.data and grouped columns specified in groupBy
- * @param tableProps
+ * Creates the TreeNode structure backed by props.data and grouped by columns specified in subtotalBy
+ * @param props
+ * @param state
  * @return {TreeNode} the root node
  */
-function buildTreeSkeleton(tableProps) {
-    var rootNode = new TreeNode("Grand Total", null), rawData = tableProps.data, i;
-    if (tableProps.disableGrandTotal)
+function buildTreeSkeleton(props, state) {
+    var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
+    if (props.disableGrandTotal)
         rootNode.display = false
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        _populateChildNodesForRow(rootNode, rawData[i], tableProps.groupBy);
+        populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
     }
     return rootNode
 }
@@ -46,14 +36,14 @@ function buildTreeSkeleton(tableProps) {
  * @param node
  * @param tableProps
  */
-function recursivelyAggregateNodes(node, tableProps) {
+function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
-    node.rowData = aggregateSector(node.ultimateChildren, tableProps.columnDefs, tableProps.groupBy);
+    node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);
 
     // for each child - aggregate those as well
     if (node.children.length > 0) {
         for (var i = 0; i < node.children.length; i++)
-            recursivelyAggregateNodes(node.children[i], tableProps);
+            recursivelyAggregateNodes(node.children[i], state);
     }
 }
 
@@ -63,17 +53,17 @@ function recursivelyAggregateNodes(node, tableProps) {
  * ----------------------------------------------------------------------
  */
 
-function _populateChildNodesForRow(rootNode, row, groupBy) {
+function populateChildNodesForRow(rootNode, row, subtotalBy) {
     var i, currentNode = rootNode;
-    if (groupBy == null || groupBy.length == 0)
+    if (subtotalBy == null || subtotalBy.length == 0)
         return;
-    for (i = 0; i < groupBy.length; i++) {
-        var result = getSectorName(row, groupBy[i]);
+    for (i = 0; i < subtotalBy.length; i++) {
+        var result = getSectorName(row, subtotalBy[i]);
         currentNode = currentNode.appendRowToChildren({
             childSectorName: result.sectorName,
             childRow: row,
             sortIndex: result.sortIndex,
-            groupByColumnDef: groupBy[i]
+            subtotalByColumnDef: subtotalBy[i]
         });
     }
 }

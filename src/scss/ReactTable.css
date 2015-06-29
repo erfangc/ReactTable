@@ -12,7 +12,7 @@
     border-collapse: collapse;
     border-spacing: 0;
     color: #4a5564;
-    background-color: #fff; }
+    background-color: white; }
     .rt-table-container .rt-table tr.selected {
       background-color: #e1e7eb; }
     .rt-table-container .rt-table tr.summary-selected {
@@ -30,7 +30,7 @@
   .rt-table-container > .rt-headers-grand-container {
     position: relative; }
     .rt-table-container > .rt-headers-grand-container > .rt-headers {
-      color: #fff;
+      color: white;
       background-color: #4a5564;
       font-weight: bold;
       text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
@@ -94,6 +94,7 @@
           border-radius: 2px;
           background-color: #f0f3f5;
           max-width: 110px;
+          z-index: 1;
           /* menu items */ }
           .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item {
             font-size: 9px;
@@ -103,7 +104,7 @@
             border-radius: 1px; }
             .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item:hover {
               background-color: #4a5564;
-              color: #fff; }
+              color: white; }
             .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item.menu-item-hoverable:hover .menu-item-input {
               display: block; }
             .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input {
@@ -155,7 +156,7 @@
       line-height: 1.42857;
       text-decoration: none;
       color: #4a5564;
-      background-color: #fff;
+      background-color: white;
       border: 1px solid #f0f3f5;
       margin-left: -1px; }
   .rt-table-container .pagination > li > a:hover, .rt-table-container .pagination > li > a:focus,
@@ -169,7 +170,7 @@
   .rt-table-container .pagination > .active > span:hover,
   .rt-table-container .pagination > .active > span:focus {
     z-index: 2;
-    color: #fff;
+    color: white;
     background-color: #4a5564;
     border-color: #f0f3f5;
     cursor: default; }
@@ -179,9 +180,7 @@
   .rt-table-container .pagination > .disabled > a,
   .rt-table-container .pagination > .disabled > a:hover,
   .rt-table-container .pagination > .disabled > a:focus {
-    color: #ddd;
-    background-color: #fff;
+    color: #dddddd;
+    background-color: white;
     border-color: #f0f3f5;
     cursor: not-allowed; }
-
-/*# sourceMappingURL=ReactTable.css.map */

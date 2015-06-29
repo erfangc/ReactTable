@@ -1,4 +1,5 @@
 $(function () {
+    var table;
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
         {
@@ -15,7 +16,7 @@ $(function () {
         },
         {
             colTag: "superlong",
-            text: "Some header"
+            text: "Some header", isLoading: true
         },
         {
             colTag: "test_score",
@@ -42,32 +43,27 @@ $(function () {
 
         }
     ];
-    $.get('sample_data_small.json').success(function (data) {
+    $("#stop-loading").on('click', function () {
+        columnDefs[4].isLoading = false;
+        table.setState({});
+    });
+    $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
-        var groupBy = [{colTag: "nationality", text: "Nationality"}, {
-            colTag: "fruit_preference",
-            text: "Fruit Preference"
-        }];
         var options = {
-            //disableAddColumn: true,
-            //disableGrandTotal: true,
-            //disableScrolling: true,
-            //disableExporting: true,
             disablePagination: true,
-            cornerIcon: '../src/filter_icon.png',
-            //defaultMenuItems: ['sort'],
-            groupBy: groupBy,
+            sortBy: [{colTag: "test_score", sortType: "asc"}],
+            subtotalBy: [{
+                colTag: "nationality", text: "Nationality"
+            }],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, event) {
                 console.log(row);
                 console.log(state);
                 event.preventDefault();
-                //alert("sweet right click on id " + row.id + "!");
             },
-            height: "300px",
-            presort: {score_weight_factor: 'desc'},
+            height: "750px",
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {
@@ -90,14 +86,10 @@ $(function () {
                 console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
-        var table1 = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+        table = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
 
         function addMe() {
-            table1.addColumn({colTag: "currency_used", text: "Currency used"});
-            table1.setStyleByKey(2, {"background-color": "orange"});
-            setTimeout(function () {
-                table1.setStyleByKey(2, {});
-            }, 1000);
+            table.addColumn({colTag: "currency_used", text: "Currency used"});
         }
     })
 })

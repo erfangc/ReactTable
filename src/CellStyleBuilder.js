@@ -1,5 +1,10 @@
 /** @jsx React.DOM */
 
+/**
+ * Construct Look and Feel object with instructions on how to display cell content
+ * @param columnDef
+ * @returns {{multiplier: number, roundTo: number, unit: string, alignment: string}}
+ */
 function buildLAFConfigObject(columnDef) {
     var formatInstructions = columnDef.formatInstructions;
     var result = {
@@ -18,7 +23,14 @@ function buildLAFConfigObject(columnDef) {
     return result;
 }
 
-function _computeCellAlignment(alignment, row, columnDef) {
+/**
+ * Compute cell alignment based on row attribute and column definition that intersects at a given cell
+ * @param alignment the default alignment
+ * @param row the row component of the cell of interest
+ * @param columnDef the column definition associated with the cell of interest
+ * @returns {*}
+ */
+function computeCellAlignment(alignment, row, columnDef) {
     // force right alignment for summary level numbers
     if (!row.isDetail && !isNaN(row[columnDef.colTag]))
         return "right";
@@ -56,7 +68,7 @@ function buildCellLookAndFeel(columnDef, row) {
         value = "$" + value;
 
     // determine alignment
-    results.styles.textAlign = _computeCellAlignment(formatConfig.alignment, row, columnDef);
+    results.styles.textAlign = computeCellAlignment(formatConfig.alignment, row, columnDef);
     results.styles.width = columnDef.text.length + "em";
     results.value = value;
 
@@ -66,11 +78,22 @@ function buildCellLookAndFeel(columnDef, row) {
 
     return results;
 }
-
+/**
+ * return default column alignment given data type
+ * @param columnDef
+ * @returns {string}
+ */
 function getColumnAlignment(columnDef) {
     return (columnDef.format == "number" || columnDef.format == "currency") ? "right" : "left"
 }
 
+/**
+ * takes a cell value and apply format instruction as needed
+ * @param value
+ * @param columnDef
+ * @param formatConfig
+ * @returns {*}
+ */
 function formatNumber(value, columnDef, formatConfig) {
     if (!isNaN(value) && (columnDef.format == "number" || columnDef.format == "currency")) {
         // multiplier
@@ -83,7 +106,11 @@ function formatNumber(value, columnDef, formatConfig) {
     }
     return value;
 }
-
+/**
+ *
+ * @param x
+ * @returns {string}
+ */
 function applyThousandSeparator(x) {
     var parts = x.toString().split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");

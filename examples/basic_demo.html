@@ -3,23 +3,25 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>An Example Using ReactTable</title>
-    <script src="../bower_components/react/react-with-addons.js"></script>
-    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../other_dependencies/table2CSV.js"></script>
+    <link rel="stylesheet" href="../dist/react-table.css"/>
+    <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.min.css"/>
     <style>
         body {
             font-family: Tahoma, Arial, sans-serif;
         }
+
         td.green {
             font-weight: bold;
             background-color: #009941;
             color: #ffffff;
         }
+
         td.red {
             font-weight: bold;
             background-color: darkred;
             color: #ffffff;
         }
+
         .demo-label {
             font-weight: 500;
             color: #ffffff;
@@ -30,7 +32,8 @@
             border-radius: 5px;
             margin-bottom: 1px;
         }
-        .special-menu{
+
+        .special-menu {
             position: absolute;
             display: none;
             border: 1px solid black;
@@ -43,28 +46,32 @@
 </head>
 <body>
 <div class="demo-label">
-    Table with 10K Rows and 2 Level Grouping
+    <span>Table with 10K Rows and 2 Level Grouping</span>
+    <button id="stop-loading">Stop Loading</button>
 </div>
 <div class="large-container">
     <div class="special-menu"></div>
     <div class="container" id="table"></div>
 </div>
 <br/>
-
-<!--<link rel="stylesheet" href="../src/scss/ReactTable.css"/>-->
-<link rel="stylesheet" href="../dist/react-table.css"/>
-
-<!--<script src="../dist/react-table.js"></script>-->
-<script src="../build/DOMBuilder.js"></script>
-<script src="../build/ReactTableEventHandlers.js"></script>
-<script src="../build/ReactTable.js"></script>
-<script src="../build/DataAggregation.js"></script>
-<script src="../build/SortUtils.js"></script>
+<script src="../bower_components/react/react-with-addons.js"></script>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../other_dependencies/table2CSV.js"></script>
+<!-- table components -->
 <script src="../build/CellStyleBuilder.js"></script>
+<script src="../build/DataAggregation.js"></script>
+<script src="../build/DOMBuilder.js"></script>
+<script src="../build/ExportHandlers.js"></script>
+<script src="../build/InfiniteScroll.js"></script>
+<script src="../build/NumericFilterPanel.js"></script>
+<script src="../build/ReactTableEventHandlers.js"></script>
+<script src="../build/SortUtils.js"></script>
 <script src="../build/TreeBuilder.js"></script>
 <script src="../build/TreeNode.js"></script>
 <script src="../build/TreeRasterizer.js"></script>
-
+<script src="../build/MenuItemAddons.js"></script>
+<script src="../build/ReactTable.js"></script>
+<!-- end table components -->
 <script src="basic_demo.js"></script>
 
 </body>

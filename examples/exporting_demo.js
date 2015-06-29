@@ -57,7 +57,7 @@ $(function () {
             //disablePagination: true,
             cornerIcon: '../src/filter_icon.png',
             //defaultMenuItems: ['sort'],
-            //groupBy: groupBy,
+            //subtotalBy: subtotalBy,
             //disableInfiniteScrolling: true,
             //itemsPerScroll: 500,
             pageSize: 1000,

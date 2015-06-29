@@ -2,37 +2,115 @@
 
 /**
  * The core data is represented as a multi-node tree structure, where each node on the tree represents a 'sector'
- * and can refer to children 'sectors'
+ * and can refer to children 'sectors'.
  * @author Erfang Chen
  */
 var idCounter = 0;
-var SECTOR_SEPARATOR = "#";
 
+/**
+ * The main component class. Creates an table element with the corresponding sub-components
+ * Please make sure to use caution when adding to props or states. Per react.js best-practices, we should avoid
+ * storing states where possible, and props should be documented in 'propTypes', see below, for validation purposes.
+ */
 var ReactTable = React.createClass({
 
     getInitialState: ReactTableGetInitialState,
-
+    propTypes: {
+        /**
+         * core props
+         */
+        data: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        columnDefs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        subtotalBy: React.PropTypes.arrayOf(React.PropTypes.object),
+        sortBy: React.PropTypes.arrayOf(React.PropTypes.object),
+        selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
+        rowKey: React.PropTypes.string,
+        /**
+         * callbacks that the table accept
+         */
+        afterColumnRemove: React.PropTypes.func,
+        beforeColumnAdd: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func,
+        onSummarySelectCallback: React.PropTypes.func,
+        onRightClick: React.PropTypes.func,
+        /**
+         * props to selectively disable table features
+         */
+        disableAddColumn: React.PropTypes.bool,
+        disablePagination: React.PropTypes.bool,
+        disableInfiniteScrolling: React.PropTypes.bool,
+        disableExporting: React.PropTypes.bool,
+        disableGrandTotal: React.PropTypes.bool,
+        /**
+         * misc props
+         */
+        pageSize: React.PropTypes.number
+    },
+    getDefaultProps: function () {
+        return {
+            pageSize: 50,
+            extraStyle: {
+                "cursor": "pointer"
+            },
+            subtotalBy: [],
+            sortBy: []
+        };
+    },
     /* --- Called by component or child react components --- */
-    handleSort: ReactTableHandleSort,
-    handleAddSort: ReactTableHandleAddSort,
+    handleAddSort: function (columnDef, sortType) {
+        const sortBy = this.state.sortBy;
+        /**
+         * if the current column is already part of the sort, then replace its sort type
+         * otherwise add it to the list of columns that needs to be sorted
+         */
+        var colPosition = findPositionByColTag(sortBy, columnDef.colTag);
+        if (colPosition != -1)
+            sortBy[colPosition].sortType = sortType;
+        else
+            sortBy.push({colTag: columnDef.colTag, sortType: sortType});
+
+        var newState = {
+            sortBy: sortBy
+        };
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this, sortBy));
+        newState.rootNode = this.state.rootNode;
+        this.setState(newState);
+    },
+    /**
+     * clearing sort always creates a new rootNode
+     * so all sub-state information in the rootNode will be lost
+     */
+    clearSort: function () {
+        const newState = this.state;
+        newState.sortBy = [];
+        newState.rootNode = createNewRootNode(this.props, this.state);
+        this.setState(newState);
+    },
     handleColumnFilter: ReactTableHandleColumnFilter,
     handleClearFilter: ReactTableHandleRemoveFilter,
     handleClearAllFilters: ReactTableHandleRemoveAllFilters,
     handleAdd: ReactTableHandleAdd,
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
-    handleGroupBy: ReactTableHandleGroupBy,
+    handleSubtotalBy: ReactTableHandleSubtotalBy,
     handlePageClick: ReactTableHandlePageClick,
     handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
-        var rootNode = this.state.rootNode;
-        rootNode.collapseImmediateChildren();
-        this.setState({rootNode: rootNode, currentPage: 1});
+        this.state.rootNode.foldSubTree();
+        this.state.rootNode.collapseImmediateChildren();
+        this.setState({
+            currentPage: 1,
+            lowerVisualBound: 0,
+            upperVisualBound: this.props.pageSize
+        });
     },
     handleExpandAll: function () {
-        var rootNode = this.state.rootNode;
-        rootNode.expandRecursively();
-        this.setState({rootNode: rootNode, currentPage: 1});
+        this.state.rootNode.expandRecursively();
+        this.setState({
+            currentPage: 1,
+            lowerVisualBound: 0,
+            upperVisualBound: this.props.pageSize
+        });
     },
     handleDownload: function (type) {
         var reactTableData = this;
@@ -113,87 +191,87 @@ var ReactTable = React.createClass({
         };
     },
     /* --- Called from outside the component --- */
-    addColumn: function (columnDef, data) {
-        // Update if exists
-        var updated = false;
-        for (var i = 0; i < this.state.columnDefs.length; i++) {
-            if (this.state.columnDefs[i].colTag == columnDef.colTag) {
-                this.state.columnDefs[i] = columnDef;
-                updated = true;
-                break;
-            }
-        }
-        if (!updated)
-            this.state.columnDefs.push(columnDef);
-        if (data) {
-            this.props.data = data;
-            this.state.rootNode = createTree(this.props);
-        } else
-            recursivelyAggregateNodes(this.state.rootNode, this.props);
-        this.setState({rootNode: this.state.rootNode});
-    },
-    redoPresort: function () {
-        if (this.props.presort) {
-            var colDefToSort;
-            for (var colTag in this.props.presort) {
-                for (var i = 0; i < this.props.columnDefs.length; i++) {
-                    if (this.props.columnDefs[i].colTag === colTag) {
-                        colDefToSort = this.props.columnDefs[i];
-                        if (this.props.presort[colTag] === 'asc')
-                            this.handleSort(colDefToSort, true);
-                        else if (this.props.presort[colTag] === 'desc')
-                            this.handleSort(colDefToSort, false);
-                        break;
-                    }
-                }
-            }
-        }
-    },
-    replaceData: function (data, stopPresort) {
-        this.props.data = data;
-        var rootNode = createTree(this.props);
+    /**
+     * Add a new column to the table. This assumes the data props has been updated to reflect the values referred to by
+     * the new column you are about to add.
+     *
+     * @param columnDef the column definition to add
+     * @param idx the position in the columnDefs state to add it to, if not specified, will just append
+     */
+    addColumn: function (columnDef, idx) {
+        var columnDefs = this.state.columnDefs;
+        // do nothing if columnDef already exist
+        if (columnDefs.indexOf(columnDef) != -1)
+            return;
+        if (idx)
+            columnDefs.splice(idx, 0, columnDef);
+        else
+            columnDefs.push(columnDef)
         this.setState({
-            rootNode: rootNode,
-            currentPage: 1,
-            sortAsc: undefined,
-            columnDefSorted: undefined,
-            filterInPlace: {}
-        });
-        this.props.currentSortStates = [];
-        var table = this;
-        if (!stopPresort) {
-            setTimeout(function () {
-                table.redoPresort();
-            });
-        }
-    },
-    setStyleByKey: function (key, style) {
-        this.state.extraStyle[key] = style;
-        this.setState({
-            extraStyle: this.state.extraStyle
+            columnDefs: columnDefs
         });
     },
     handleScroll: function (e) {
-        var target = $(e.target);
-        var scrolled = target.scrollTop();
-        var scrolledHeight = target.height();
-        var totalHeight = target.find("tbody").height();
-        if (scrolled / (totalHeight - scrolledHeight) > .8) {
-            this.setState({
-                rows: this.addMoreRows(true)
-            });
+        const $target = $(e.target);
+        const scrollTop = $target.scrollTop();
+        const height = $target.height();
+        const totalHeight = $target.find("tbody").height();
+        const avgRowHeight = totalHeight / $target.find("tbody > tr").length;
+        /**
+         * always update lastScrollTop on scroll event - it helps us determine
+         * whether the next scroll event is up or down
+         */
+        var newState = {lastScrollTop: scrollTop};
+        /**
+         * we determine the correct display boundaries by keeping the distance between lower and upper visual bound
+         * to some constant multiple of pageSize
+         */
+        const rowDisplayBoundry = 2 * this.props.pageSize;
+        if (scrollTop < this.state.lastScrollTop && scrollTop <= 0) {
+            // up scroll limit triggered
+            newState.lowerVisualBound = Math.max(this.state.lowerVisualBound - this.props.pageSize, 0);
+            newState.upperVisualBound = newState.lowerVisualBound + rowDisplayBoundry;
+            /**
+             * if top most rows reached, do nothing, otherwise reset scrollTop to preserve current view
+             */
+            if (!(newState.lowerVisualBound === 0))
+                setTimeout(function () {
+                    $target.scrollTop(Math.max(scrollTop + this.props.pageSize * avgRowHeight, 0));
+                }.bind(this));
+
+        } else if (scrollTop > this.state.lastScrollTop && (scrollTop + height) >= totalHeight) {
+            // down scroll limit triggered
+            /**
+             * we either increment upperVisualBound by a single page (specified via props.pageSize) or the max rows that can be displayed
+             * we know the end has been reached if upperVisualBound + pageSize > maxRows
+             */
+            newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize > this.state.maxRows ? this.state.maxRows : this.state.upperVisualBound + this.props.pageSize;
+            newState.lowerVisualBound = Math.max(newState.upperVisualBound - rowDisplayBoundry, 0);
+            /**
+             * if previous upperVisualBound is the default (props.pageSize), it could actually be greater than the current
+             */
+            const additionalRows = Math.max(newState.upperVisualBound - this.state.upperVisualBound, 0);
+            if (additionalRows > 0)
+                setTimeout(function () {
+                    var newScrollTop = scrollTop - (additionalRows * avgRowHeight);
+                    if (newScrollTop > 0)
+                        $target.scrollTop(newScrollTop);
+                }.bind(this));
         }
+        this.setState(newState);
     },
     /* ----------------------------------------- */
 
     componentDidMount: function () {
-        $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
+        if (!this.props.disableInfiniteScrolling)
+            $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 0);
         setTimeout(function () {
             adjustHeaders.call(this);
         }.bind(this), 500);
+
         document.addEventListener('click', docClick.bind(this));
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
@@ -202,73 +280,41 @@ var ReactTable = React.createClass({
             $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
-        var table = this;
-        setTimeout(function () {
-            table.redoPresort();
-        });
     },
     componentWillMount: function () {
     },
     componentWillUnmount: function () {
         window.removeEventListener('resize', adjustHeaders.bind(this));
-        $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
+        if (this.props.disableInfiniteScrolling)
+            $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
     },
     componentDidUpdate: function () {
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addMoreRows: function (calledFromScroll) {
-        if (this.props.justAdded) {
-            this.props.justAdded = false;
-            return this.state.rows;
-        }
-        var rasterizedData = rasterizeTree({
-            node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
-        });
-
-        if (!calledFromScroll)
-            this.props.rowMultiplier = this.props.rowMultiplier ? this.props.rowMultiplier : 0;
-        else
-            this.props.rowMultiplier = (this.props.rowMultiplier === undefined ? 0 : this.props.rowMultiplier + 1);
-
-        var upperBound = (this.props.rowMultiplier + 1) * this.state.itemsPerScroll;
-        var rowsToDisplay = [];
-
-        if (calledFromScroll && this.state.rows.length < upperBound && this.state.rows.length < rasterizedData.length) {
-            var lowerBound = this.state.rows.length;
-            rowsToDisplay = rasterizedData.slice(lowerBound, upperBound);
-            this.props.justAdded = true;
-            return this.state.rows.concat(rowsToDisplay.map(rowMapper, this))
-        }
-        else {
-            rowsToDisplay = rasterizedData.slice(0, upperBound);
-            return rowsToDisplay.map(rowMapper, this)
-        }
-    },
     render: function () {
-        var rasterizedData = rasterizeTree({
+        const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
         });
+        // maxRows is referenced later during event handling to determine upperVisualBound
+        this.state.maxRows = rasterizedData.length;
 
-        var paginationAttr = _getPageArithmetics(this, rasterizedData);
+        // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
+        var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        if (this.props.disableInfiniteScrolling) {
-            var rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1);
-            this.state.rows = rowsToDisplay.map(rowMapper, this);
-        }
+        var rowsToDisplay = [];
+        if (this.props.disableInfiniteScrolling)
+            rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
         else
-            this.state.rows = this.addMoreRows();
+            rowsToDisplay = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
 
         var headers = buildHeaders(this);
-        var footer = buildFooter(this, paginationAttr);
 
         var containerStyle = {};
-        if (this.state.height && parseInt(this.state.height) > 0)
-            containerStyle.height = this.state.height;
+        if (this.props.height && parseInt(this.props.height) > 0)
+            containerStyle.height = this.props.height;
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
@@ -277,17 +323,13 @@ var ReactTable = React.createClass({
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
                 <div style={containerStyle} className="rt-scrollable">
-                    <InfiniteScroll
-                        loadMore={this.addMoreRows}
-                        hasMore={this.state.hasMore}>
-                        <table className="rt-table">
-                            <tbody>
-                            {this.state.rows}
-                            </tbody>
-                        </table>
-                    </InfiniteScroll>
+                    <table className="rt-table">
+                        <tbody>
+                        {rowsToDisplay}
+                        </tbody>
+                    </table>
                 </div>
-                {this.props.disableInfiniteScrolling ? footer : null}
+                {this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null}
             </div>
         );
     }
@@ -302,9 +344,11 @@ var Row = React.createClass({
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var cx = React.addons.classSet;
+            const cx = React.addons.classSet;
             var classes = cx(displayInstructions.classes);
-            var displayContent = displayInstructions.value;
+            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+            var displayContent = columnDef.isLoading ?
+                <i className="fa fa-spin fa-spinner"></i> : displayInstructions.value;
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
@@ -317,7 +361,7 @@ var Row = React.createClass({
             cells.push(
                 <td
                     className={classes}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(this, this.props.data[columnDef.colTag], columnDef, i) : null}
+                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
                     onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
                     style={displayInstructions.styles}
                     key={columnDef.colTag}
@@ -327,19 +371,13 @@ var Row = React.createClass({
                 </td>
             );
         }
-        var cx = React.addons.classSet;
-        var classes = cx({
+        classes = cx({
             'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
-        var styles = {
-            "cursor": "pointer"
-        };
-        for (var attrname in this.props.extraStyle) {
-            styles[attrname] = this.props.extraStyle[attrname];
-        }
+        // apply extra CSS if specified
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                    className={classes} style={styles}>{cells}</tr>);
+                    className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -382,7 +420,7 @@ var PageNavigator = React.createClass({
     }
 });
 
-var SummarizeControl = React.createClass({
+var SubtotalControl = React.createClass({
     getInitialState: function () {
         return {
             userInputBuckets: ""
@@ -394,10 +432,10 @@ var SummarizeControl = React.createClass({
     handleKeyPress: function (event) {
         if (event.charCode == 13) {
             event.preventDefault();
-            this.props.table.handleGroupBy(this.props.columnDef, this.state.userInputBuckets);
+            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
         }
     },
-    handleClick: function (event) {
+    handleClick: function () {
         var $node = $(this.getDOMNode());
         $node.children(".menu-item-input").children("input").focus();
     },
@@ -410,15 +448,15 @@ var SummarizeControl = React.createClass({
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
                            placeholder="ex: 1,10,15"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleGroupBy.bind(null, columnDef, this.state.userInputBuckets)}
+                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
                        className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
             <div
-                onClick={subMenuAttachment == null ? table.handleGroupBy.bind(null, columnDef, null) : this.handleClick}
+                onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
-                <div>Summarize</div>
+                <div>Add Subtotal</div>
                 {subMenuAttachment}
             </div>
         );
@@ -434,7 +472,7 @@ var SummarizeControl = React.createClass({
 function generateSectorKey(sectorPath) {
     if (sectorPath == null)
         return "";
-    return sectorPath.join(SECTOR_SEPARATOR);
+    return sectorPath.join("#");
 }
 
 function generateRowKey(row, rowKey) {
@@ -456,8 +494,8 @@ function rowMapper(row) {
     return (<Row
         key={generatedKey}
         data={row}
-        extraStyle={_getExtraStyle(generatedKey, this.state.extraStyle)}
-        isSelected={_isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
+        extraStyle={resolveExtraStyles(generatedKey, this.props.extraStyle)}
+        isSelected={isRowSelected(row, this.props.rowKey, this.state.selectedDetailRows, this.state.selectedSummaryRows)}
         onSelect={this.handleSelect}
         onRightClick={this.props.onRightClick}
         toggleHide={this.handleToggleHide}
@@ -541,29 +579,29 @@ function bindHeadersToMenu(node) {
 function uniqueId(prefix) {
     var id = ++idCounter + '';
     return prefix ? prefix + id : id;
-};
-
+}
 /*
  * ----------------------------------------------------------------------
  * Helpers
  * ----------------------------------------------------------------------
  */
 
-function _isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
 }
 
-function _getExtraStyle(geenratedKey, extraStyles) {
-    return geenratedKey && extraStyles ? extraStyles[geenratedKey] : null;
+function resolveExtraStyles(generatedKey, extraStyles) {
+    return generatedKey && extraStyles ? extraStyles[generatedKey] : null;
 }
 
-function _getPageArithmetics(table, data) {
+function getPaginationAttr(table, data) {
     var result = {};
 
     if (table.props.disablePagination) {
-        result.lowerVisualBound = 0, result.upperVisualBound = data.length
+        result.lowerVisualBound = 0;
+        result.upperVisualBound = data.length
     } else {
         result.pageSize = table.props.pageSize || 50;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
@@ -576,7 +614,7 @@ function _getPageArithmetics(table, data) {
             result.allPages.push(i);
         }
         // derive the correct page navigator selectable pages from current / total pages
-        result.pageDisplayRange = _computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
+        result.pageDisplayRange = computePageDisplayRange(table.state.currentPage, result.maxDisplayedPages);
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
@@ -586,7 +624,7 @@ function _getPageArithmetics(table, data) {
 
 }
 
-function _computePageDisplayRange(currentPage, maxDisplayedPages) {
+function computePageDisplayRange(currentPage, maxDisplayedPages) {
     // total number to allocate
     var displayUnitsLeft = maxDisplayedPages;
     // allocate to the left
