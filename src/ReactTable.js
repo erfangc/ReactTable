@@ -243,9 +243,9 @@ var ReactTable = React.createClass({
             newState.upperVisualBound = this.state.upperVisualBound + this.props.pageSize;
             newState.lowerVisualBound = newState.upperVisualBound - rowDisplayBoundry;
             setTimeout(function () {
-                // TODO ensure that new scrollTop doesn't trigger another load event
-                // TODO ensure this computationally NOT through flagging variables
-                $target.scrollTop(scrollTop - this.props.pageSize * avgRowHeight);
+                var newScrollTop = scrollTop - this.props.pageSize * avgRowHeight;
+                if (newScrollTop > 0)
+                    $target.scrollTop(newScrollTop);
             }.bind(this));
         }
         this.setState(newState);
