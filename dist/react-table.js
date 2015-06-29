@@ -154,11 +154,13 @@ function buildMenu(options) {
                 React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
             React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
                 React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort")
+            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort"),
+            React.createElement("div", {className: "separator"})
         ],
         filter: [
             React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
+            React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters"),
+            React.createElement("div", {className: "separator"})
         ],
         summarize: [
             React.createElement(SubtotalControl, {table: table, columnDef: columnDef}),
@@ -1296,7 +1298,9 @@ var Row = React.createClass({displayName: "Row",
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
             const cx = React.addons.classSet;
             var classes = cx(displayInstructions.classes);
-            var displayContent = displayInstructions.value;
+            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+            var displayContent = columnDef.isLoading ?
+                React.createElement("i", {className: "fa fa-spin fa-spinner"}) : displayInstructions.value;
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
@@ -2074,13 +2078,18 @@ TreeNode.prototype.getSectorPath = function () {
 /**
  * Return a composite sorter that takes multiple sort functions in an array and apply them in order.
  * @param funcs the list of functions to sort by
+ * @param isSummaryRow indicate whether the sort function are to be applied to sumamry rows, whose `rowData` property needs to be compared
+ *
  * @returns {Function} a function that sorts the comparable elements by using constituents of funcs until the 'tie' is broken
  */
-function buildCompositeSorter(funcs) {
+function buildCompositeSorter(funcs, isSummaryRow) {
     return function (a, b) {
         var i = 0, sortOutcome = 0;
         while (sortOutcome == 0 && i < funcs.length) {
-            sortOutcome = funcs[i](a, b);
+            if (isSummaryRow)
+                sortOutcome = funcs[i](a.rowData, b.rowData);
+            else
+                sortOutcome = funcs[i](a, b);
             i++;
         }
         return sortOutcome;
@@ -2093,13 +2102,13 @@ function buildCompositeSorter(funcs) {
  */
 TreeNode.prototype.sortNodes = function (sortFuncs) {
     if (this.hasChild()) {
-        this.children.sort(buildCompositeSorter(sortFuncs));
+        this.children.sort(buildCompositeSorter(sortFuncs, true));
         $.each(this.children, function (idx, child) {
             child.sortNodes(sortFuncs);
         });
     }
     else
-        this.ultimateChildren.sort(buildCompositeSorter(sortFuncs));
+        this.ultimateChildren.sort(buildCompositeSorter(sortFuncs, false));
 };
 
 TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {

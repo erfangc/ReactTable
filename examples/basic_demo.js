@@ -1,4 +1,5 @@
 $(function () {
+    var table;
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
         {
@@ -15,7 +16,7 @@ $(function () {
         },
         {
             colTag: "superlong",
-            text: "Some header"
+            text: "Some header", isLoading: true
         },
         {
             colTag: "test_score",
@@ -42,6 +43,10 @@ $(function () {
 
         }
     ];
+    $("#stop-loading").on('click', function () {
+        columnDefs[4].isLoading = false;
+        table.setState({});
+    });
     $.get('sample_data.json').success(function (data) {
         var testData = data;
         // first table
@@ -81,14 +86,10 @@ $(function () {
                 console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
-        var table1 = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
+        table = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
 
         function addMe() {
-            table1.addColumn({colTag: "currency_used", text: "Currency used"});
-            table1.setStyleByKey(2, {"background-color": "orange"});
-            setTimeout(function () {
-                table1.setStyleByKey(2, {});
-            }, 1000);
+            table.addColumn({colTag: "currency_used", text: "Currency used"});
         }
     })
 })

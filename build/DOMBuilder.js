@@ -35,11 +35,13 @@ function buildMenu(options) {
                 React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
             React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
                 React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort")
+            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort"),
+            React.createElement("div", {className: "separator"})
         ],
         filter: [
             React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
+            React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters"),
+            React.createElement("div", {className: "separator"})
         ],
         summarize: [
             React.createElement(SubtotalControl, {table: table, columnDef: columnDef}),

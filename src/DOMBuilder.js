@@ -35,11 +35,13 @@ function buildMenu(options) {
                 <i className="fa fa-sort-alpha-asc"/> Sort</div>,
             <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'desc')}>
                 <i className="fa fa-sort-alpha-desc"></i> Sort</div>,
-            <div className="menu-item" onClick={table.clearSort}>Clear Sort</div>
+            <div className="menu-item" onClick={table.clearSort}>Clear Sort</div>,
+            <div className="separator"/>
         ],
         filter: [
             <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>,
-            <div className="menu-item" onClick={table.handleClearAllFilters}>Clear All Filters</div>
+            <div className="menu-item" onClick={table.handleClearAllFilters}>Clear All Filters</div>,
+            <div className="separator"/>
         ],
         summarize: [
             <SubtotalControl table={table} columnDef={columnDef}/>,

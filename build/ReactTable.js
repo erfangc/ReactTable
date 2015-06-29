@@ -334,7 +334,9 @@ var Row = React.createClass({displayName: "Row",
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
             const cx = React.addons.classSet;
             var classes = cx(displayInstructions.classes);
-            var displayContent = displayInstructions.value;
+            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+            var displayContent = columnDef.isLoading ?
+                React.createElement("i", {className: "fa fa-spin fa-spinner"}) : displayInstructions.value;
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
