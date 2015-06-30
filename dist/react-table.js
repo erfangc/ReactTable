@@ -1311,11 +1311,11 @@ var ReactTable = React.createClass({displayName: "ReactTable",
  */
 var Row = React.createClass({displayName: "Row",
     render: function () {
+        const cx = React.addons.classSet;
         var cells = [buildFirstCellForRow.call(this)];
         for (var i = 1; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
             var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            const cx = React.addons.classSet;
             var classes = cx(displayInstructions.classes);
             // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
             var displayContent = columnDef.isLoading ?
