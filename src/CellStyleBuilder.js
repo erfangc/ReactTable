@@ -1,4 +1,3 @@
-/** @jsx React.DOM */
 
 /**
  * Construct Look and Feel object with instructions on how to display cell content
@@ -38,6 +37,7 @@ function computeCellAlignment(alignment, row, columnDef) {
     // default alignment
     return alignment;
 }
+
 /**
  * Determines the style, classes and text formatting of cell content
  * given a column configuartion object and a row of data
