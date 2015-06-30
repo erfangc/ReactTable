@@ -164,7 +164,7 @@ function buildMenu(options) {
         ],
         summarize: [
             React.createElement(SubtotalControl, {table: table, columnDef: columnDef}),
-            React.createElement("div", {className: "menu-item", onClick: table.handleSubtotalBy}, "Clear Subtotal")
+            React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, "Clear Subtotal")
         ],
         remove: [
             React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
@@ -1059,6 +1059,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleSubtotalBy: ReactTableHandleSubtotalBy,
+    handleClearSubtotal: ReactTableHandleClearSubtotal,
     handlePageClick: ReactTableHandlePageClick,
     handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
@@ -1751,6 +1752,17 @@ function applyAllFilters() {
         this.handleColumnFilter(this.state.currentFilters[i].colDef, this.state.currentFilters[i].filterText, true);
     }
     this.setState({rootNode: this.state.rootNode});
+}
+
+function ReactTableHandleClearSubtotal() {
+    const newState = this.state;
+    newState.currentPage = 1;
+    newState.lowerVisualBound = 0;
+    newState.upperVisualBound = this.props.pageSize;
+    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    newState.subtotalBy = [];
+    newState.rootNode = createNewRootNode(this.props, newState);
+    this.setState(newState);
 }
 
 function ReactTableHandleSubtotalBy(columnDef, partitions) {

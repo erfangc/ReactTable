@@ -146,6 +146,17 @@ function applyAllFilters() {
     this.setState({rootNode: this.state.rootNode});
 }
 
+function ReactTableHandleClearSubtotal() {
+    const newState = this.state;
+    newState.currentPage = 1;
+    newState.lowerVisualBound = 0;
+    newState.upperVisualBound = this.props.pageSize;
+    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    newState.subtotalBy = [];
+    newState.rootNode = createNewRootNode(this.props, newState);
+    this.setState(newState);
+}
+
 function ReactTableHandleSubtotalBy(columnDef, partitions) {
 
     var subtotalBy = this.state.subtotalBy || [];

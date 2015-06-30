@@ -45,7 +45,7 @@ function buildMenu(options) {
         ],
         summarize: [
             <SubtotalControl table={table} columnDef={columnDef}/>,
-            <div className="menu-item" onClick={table.handleSubtotalBy}>Clear Subtotal</div>
+            <div className="menu-item" onClick={table.handleClearSubtotal}>Clear Subtotal</div>
         ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>

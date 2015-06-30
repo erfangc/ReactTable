@@ -93,6 +93,7 @@ var ReactTable = React.createClass({
     handleRemove: ReactTableHandleRemove,
     handleToggleHide: ReactTableHandleToggleHide,
     handleSubtotalBy: ReactTableHandleSubtotalBy,
+    handleClearSubtotal: ReactTableHandleClearSubtotal,
     handlePageClick: ReactTableHandlePageClick,
     handleSelect: ReactTableHandleSelect,
     handleCollapseAll: function () {
