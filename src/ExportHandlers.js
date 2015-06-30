@@ -17,8 +17,9 @@ function exportToExcel(data, filename, table){
         excel += "<tr>";
         var colCount=0;
 
+        // TODO Chris the names here as needs to be refactored
         $.each(value, function(j, value2) {
-            if( table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
+            if(table.state.columnDefs[j] && table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     value2 = new Date(value2).toLocaleDateString();
 

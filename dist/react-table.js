@@ -154,7 +154,7 @@ function buildMenu(options) {
                 React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
             React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
                 React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, "Clear Sort"),
+            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear Sort"),
             React.createElement("div", {className: "separator"})
         ],
         filter: [
@@ -177,7 +177,8 @@ function buildMenu(options) {
         }
     } else {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
-        addMenuItems(menuItems, availableDefaultMenuItems.filter);
+        if (!(table.props.filtering && table.props.filtering.disable))
+            addMenuItems(menuItems, availableDefaultMenuItems.filter);
         addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
@@ -590,8 +591,9 @@ function _mostDataPoints(options) {
         excel += "<tr>";
         var colCount=0;
 
+        // TODO Chris the names here as needs to be refactored
         $.each(value, function(j, value2) {
-            if( table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
+            if(table.state.columnDefs[j] && table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                     value2 = new Date(value2).toLocaleDateString();
 
@@ -792,7 +794,70 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/**
+};/** @jsx React.DOM */
+
+function topPosition(domElt) {
+    if (!domElt) {
+        return 0;
+    }
+    return domElt.offsetTop + topPosition(domElt.offsetParent);
+}
+
+var InfiniteScroll = React.createClass({
+    displayName: 'InfiniteScroll',
+    propTypes: {
+        pageStart: React.PropTypes.number,
+        threshold: React.PropTypes.number,
+        loadMore: React.PropTypes.func.isRequired,
+        hasMore: React.PropTypes.bool
+    },
+    getDefaultProps: function () {
+        return {
+            pageStart: 0,
+            hasMore: false,
+            threshold: 250
+        };
+    },
+    componentDidMount: function () {
+        this.pageLoaded = this.props.pageStart;
+        this.attachScrollListener();
+    },
+    componentDidUpdate: function () {
+        this.attachScrollListener();
+    },
+    render: function () {
+        var props = this.props;
+        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
+    },
+    scrollListener: function () {
+        var el = this.getDOMNode();
+        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
+            this.detachScrollListener();
+            // call loadMore after detachScrollListener to allow
+            // for non-async loadMore functions
+            this.props.loadMore(this.pageLoaded += 1);
+        }
+    },
+    attachScrollListener: function () {
+        if (!this.props.hasMore) {
+            return;
+        }
+        window.addEventListener('scroll', this.scrollListener);
+        window.addEventListener('resize', this.scrollListener);
+        this.scrollListener();
+    },
+    detachScrollListener: function () {
+        window.removeEventListener('scroll', this.scrollListener);
+        window.removeEventListener('resize', this.scrollListener);
+    },
+    componentWillUnmount: function () {
+        this.detachScrollListener();
+    }
+});
+InfiniteScroll.setDefaultLoader = function (loader) {
+    InfiniteScroll._defaultLoader = loader;
+};;/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",

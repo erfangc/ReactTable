@@ -51,6 +51,9 @@ $(function () {
         var testData = data;
         // first table
         var options = {
+            filtering: {
+                disable: true
+            },
             disablePagination: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
             subtotalBy: [{

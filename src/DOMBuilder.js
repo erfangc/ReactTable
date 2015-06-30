@@ -35,7 +35,7 @@ function buildMenu(options) {
                 <i className="fa fa-sort-alpha-asc"/> Sort</div>,
             <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'desc')}>
                 <i className="fa fa-sort-alpha-desc"></i> Sort</div>,
-            <div className="menu-item" onClick={table.clearSort}>Clear Sort</div>,
+            <div className="menu-item" onClick={table.clearSort}><i className="fa fa-ban"></i> Clear Sort</div>,
             <div className="separator"/>
         ],
         filter: [
@@ -58,7 +58,8 @@ function buildMenu(options) {
         }
     } else {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
-        addMenuItems(menuItems, availableDefaultMenuItems.filter);
+        if (!(table.props.filtering && table.props.filtering.disable))
+            addMenuItems(menuItems, availableDefaultMenuItems.filter);
         addMenuItems(menuItems, availableDefaultMenuItems.summarize);
         if (!isFirstColumn)
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
