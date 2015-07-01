@@ -1178,7 +1178,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     addColumn: function (columnDef, idx) {
         var columnDefs = this.state.columnDefs;
         // do nothing if columnDef already exist
-        if (columnDefs.indexOf(columnDef) != -1)
+        if (!columnDef.colTag || findPositionByColTag(columnDefs, columnDef.colTag) != -1)
             return;
         if (idx)
             columnDefs.splice(idx + 1, 0, columnDef);
