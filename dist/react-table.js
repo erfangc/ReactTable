@@ -130,7 +130,7 @@ function applyThousandSeparator(x) {
  */
 function buildCustomMenuItems(table, columnDef) {
     if (columnDef.customMenuFactory && typeof columnDef.customMenuFactory === 'function')
-        return columnDef.customMenuFactory.call(columnDef, table);
+        return columnDef.customMenuFactory(columnDef, table);
     else if (columnDef.customMenuItems && Array.isArray(columnDef.customMenuItems))
         return columnDef.customMenuItems;
 }
@@ -1048,7 +1048,13 @@ var ReactTable = React.createClass({displayName: "ReactTable",
      */
     clearSort: function () {
         const newState = this.state;
-        newState.sortBy = [];
+        /**
+         * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
+         */
+        const sortBy = this.state.sortBy;
+        while (sortBy.length > 0)
+            sortBy.pop();
+        newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
         this.setState(newState);
     },
@@ -1175,7 +1181,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         if (columnDefs.indexOf(columnDef) != -1)
             return;
         if (idx)
-            columnDefs.splice(idx, 0, columnDef);
+            columnDefs.splice(idx + 1, 0, columnDef);
         else
             columnDefs.push(columnDef)
         this.setState({
@@ -1760,7 +1766,13 @@ function ReactTableHandleClearSubtotal() {
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
     newState.firstColumnLabel = buildFirstColumnLabel(this);
-    newState.subtotalBy = [];
+    /**
+     * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
+     */
+    const subtotalBy = this.state.subtotalBy;
+    while (subtotalBy.length > 0)
+        subtotalBy.pop();
+    newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
     this.setState(newState);
 }
