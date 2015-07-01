@@ -82,7 +82,13 @@ var ReactTable = React.createClass({
      */
     clearSort: function () {
         const newState = this.state;
-        newState.sortBy = [];
+        /**
+         * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
+         */
+        const sortBy = this.state.sortBy;
+        while (sortBy.length > 0)
+            sortBy.pop();
+        newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
         this.setState(newState);
     },
@@ -209,7 +215,7 @@ var ReactTable = React.createClass({
         if (columnDefs.indexOf(columnDef) != -1)
             return;
         if (idx)
-            columnDefs.splice(idx, 0, columnDef);
+            columnDefs.splice(idx + 1, 0, columnDef);
         else
             columnDefs.push(columnDef)
         this.setState({

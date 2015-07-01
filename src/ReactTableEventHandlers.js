@@ -152,7 +152,13 @@ function ReactTableHandleClearSubtotal() {
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
     newState.firstColumnLabel = buildFirstColumnLabel(this);
-    newState.subtotalBy = [];
+    /**
+     * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
+     */
+    const subtotalBy = this.state.subtotalBy;
+    while (subtotalBy.length > 0)
+        subtotalBy.pop();
+    newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
     this.setState(newState);
 }

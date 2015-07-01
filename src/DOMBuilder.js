@@ -11,7 +11,7 @@
  */
 function buildCustomMenuItems(table, columnDef) {
     if (columnDef.customMenuFactory && typeof columnDef.customMenuFactory === 'function')
-        return columnDef.customMenuFactory.call(columnDef, table);
+        return columnDef.customMenuFactory(columnDef, table);
     else if (columnDef.customMenuItems && Array.isArray(columnDef.customMenuItems))
         return columnDef.customMenuItems;
 }
