@@ -47,7 +47,7 @@ function ReactTableHandleSelect(selectedRow) {
         return;
     if (selectedRow.isDetail != null & selectedRow.isDetail == true)
         this.props.onSelectCallback(selectedRow, this.toggleSelectDetailRow(selectedRow[rowKey]));
-    else
+    else if (this.props.onSummarySelectCallback)
         this.props.onSummarySelectCallback(selectedRow, this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath)));
 
 }
