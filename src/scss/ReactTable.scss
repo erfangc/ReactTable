@@ -38,7 +38,7 @@
       color: $contrast-text-color;
       background-color: $dark-bg-color;
       font-weight: bold;
-      text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
       white-space: nowrap;
       overflow: hidden;
       -ms-overflow-style: none; /* Solves "blinking scrollbar" issues in IE */
@@ -48,56 +48,22 @@
         -webkit-user-select: none;
         -ms-user-select: none;
         user-select: none;
-        -o-user-select: none;
         display: inline-block;
         border-right: 1px solid #f9f2f4;
         > .rt-numeric-filter-container {
+          // TODO this shit needs to overflow like the a river
           position: absolute;
           text-shadow: none;
           color: #4a5564;
           border-radius: 2px;
           background-color: #f0f3f5;
-          //          max-width: 110px;
-        }
-        > .rt-caret-container {
-          position: relative;
-          padding-left: 0.5px;
-          > .rt-downward-caret:before {
-            content: ' ';
-            position: absolute;
-            bottom: 0px;
-            right: 1px;
-            border: 4px solid transparent;
-            border-left-color: #FFF;
-            -webkit-transform: rotate(90deg);
-            -moz-transform: rotate(90deg);
-            -o-transform: rotate(90deg);
-            -ms-transform: rotate(90deg);
-            transform: rotate(90deg);
-          }
-          > .rt-upward-caret:before {
-            content: ' ';
-            position: absolute;
-            top: -15px;
-            right: 1px;
-            border: 4px solid transparent;
-            border-left-color: #FFF;
-            -webkit-transform: rotate(-90deg);
-            -moz-transform: rotate(-90deg);
-            -o-transform: rotate(-90deg);
-            -ms-transform: rotate(-90deg);
-            transform: rotate(-90deg);
-          }
         }
         > .rt-info-header {
           min-width: 5px;
         }
         > .rt-header-element {
           min-width: 5px;
-          padding-left: 5px;
-          padding-right: 5px;
-          padding-bottom: 2px;
-          padding-top: 2px;
+          padding: 2px 5px;
         }
         /* display header menu on hover */
         &:hover .rt-header-menu {
@@ -111,12 +77,11 @@
           color: $text-color;
           border-radius: 2px;
           background-color: $utility-color;
-          max-width: 110px;
           z-index: 1;
 
           /* menu items */
           .menu-item {
-            font-size: 9px;
+            font-size: 10px;
             margin: 5px;
             padding: 5px;
             border-radius: 1px;
@@ -132,7 +97,6 @@
               text-align: left;
               display: none;
               font-size: 10px;
-              text-shadow: none;
               background-color: $utility-color;
               color: $dark-bg-color;
               > input, > label, > a, > div {
@@ -140,6 +104,7 @@
               }
             }
           }
+
           .separator {
             margin: 0 5px;
             border-radius: 2px;

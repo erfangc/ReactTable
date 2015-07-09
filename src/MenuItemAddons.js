@@ -17,14 +17,15 @@ const InfoBox = React.createClass({
                     styles: {
                         "position": "absolute",
                         "whiteSpace": "normal",
-                        "top": "100%",
+                        "top": "150%",
                         "right": "0",
                         "fontSize": "10px",
                         "textShadow": "none",
-                        "textAlign": "left",
                         "backgroundColor": "#f0f3f5",
                         "color": "#4a5564",
-                        "width": "250px"
+                        "width": "250px",
+                        "padding": "10px",
+                        "borderRadius": "1px"
                     }
                 }
             },
