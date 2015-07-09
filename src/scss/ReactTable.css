@@ -39,6 +39,12 @@
       -ms-overflow-style: none;
       /* Solves "blinking scrollbar" issues in IE */ }
       .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container {
+        cursor: pointer;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -o-user-select: none;
         display: inline-block;
         border-right: 1px solid #f9f2f4;
         /* display header menu on hover */
@@ -98,7 +104,6 @@
           /* menu items */ }
           .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item {
             font-size: 9px;
-            cursor: pointer;
             margin: 5px;
             padding: 5px;
             border-radius: 1px; }

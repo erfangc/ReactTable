@@ -57,6 +57,26 @@ var ReactTable = React.createClass({
         };
     },
     /* --- Called by component or child react components --- */
+    /**
+     * Handles resetting all current sorting and replacing sort order
+     * by the columnDef specified
+     * @param columnDef
+     */
+    handleSetSort: function (columnDef) {
+        const sortBy = this.state.sortBy;
+        const existing = findDefByColTag(sortBy, columnDef.colTag);
+        const sortType = existing && existing.sortType === 'asc' ? 'desc' : 'asc';
+        while (sortBy.length > 0)
+            sortBy.pop();
+        sortBy.push({colTag: columnDef.colTag, sortType: sortType});
+        var newState = {
+            sortBy: sortBy
+        };
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+        newState.rootNode = this.state.rootNode;
+        this.setState(newState);
+
+    },
     handleAddSort: function (columnDef, sortType) {
         const sortBy = this.state.sortBy;
         /**

@@ -16,7 +16,11 @@ $(function () {
         },
         {
             colTag: "superlong",
-            text: "Some header", isLoading: true
+            text: "Some header",
+            customMenuItems: [React.createElement(InfoBox, {
+                title: "Info Box!",
+                text: "Hover Me! I am very long winded definition of some column that you can one day be looking at ... "
+            })]
         },
         {
             colTag: "test_score",

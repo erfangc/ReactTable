@@ -175,7 +175,8 @@ function buildHeaders(table) {
         textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             <div className="rt-headers-container">
-                <div style={style} className="rt-header-element rt-info-header" key={columnDef.colTag}>
+                <div onDoubleClick={table.handleSetSort.bind(null,columnDef)} style={style}
+                     className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a href="#" className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         <span>{columnDef.text}</span>
