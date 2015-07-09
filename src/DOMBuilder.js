@@ -135,7 +135,7 @@ function buildHeaders(table) {
     };
     var firstColumn = (
         <div className="rt-headers-container">
-            <div style={{textAlign: "center"}} className="rt-header-element" key={columnDef.colTag}>
+            <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} className="rt-header-element" key={columnDef.colTag}>
                 <a href="#" className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                     {buildFirstColumnLabel(table).join("/")}
@@ -175,7 +175,8 @@ function buildHeaders(table) {
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a href="#" className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                        <span>{columnDef.text}</span>
+                        <span>{columnDef.text} {columnDef.isLoading ?
+                            <i className="fa fa-spinner fa-spin"></i> : null}</span>
                     </a>
                     {sortIcon}
                     <input style={ss}

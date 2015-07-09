@@ -20,7 +20,8 @@ $(function () {
             customMenuItems: [React.createElement(InfoBox, {
                 title: "Info Box!",
                 text: "Hover Me! I am very long winded definition of some column that you can one day be looking at ... "
-            })]
+            })],
+            isLoading: true
         },
         {
             colTag: "test_score",

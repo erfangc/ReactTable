@@ -58,7 +58,7 @@ const InfoBox = React.createClass({
  */
 const SortMenu = React.createClass({
     propTypes: {
-        table: React.PropTypes.component,
+        table: React.PropTypes.object,
         columnDef: React.PropTypes.object
     },
     getInitialState: function () {
@@ -73,7 +73,6 @@ const SortMenu = React.createClass({
     hideSubMenu: function () {
         this.setState({showSubMenu: false});
     },
-    // TODO implement
     render: function () {
         const table = this.props.table;
         const columnDef = this.props.columnDef;
