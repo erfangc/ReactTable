@@ -294,7 +294,8 @@ function buildHeaders(table) {
         textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             React.createElement("div", {className: "rt-headers-container"}, 
-                React.createElement("div", {style: style, className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
+                React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef), style: style, 
+                     className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         React.createElement("span", null, columnDef.text)
@@ -794,99 +795,61 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/** @jsx React.DOM */
-
-function topPosition(domElt) {
-    if (!domElt) {
-        return 0;
-    }
-    return domElt.offsetTop + topPosition(domElt.offsetParent);
-}
-
-var InfiniteScroll = React.createClass({
-    displayName: 'InfiniteScroll',
-    propTypes: {
-        pageStart: React.PropTypes.number,
-        threshold: React.PropTypes.number,
-        loadMore: React.PropTypes.func.isRequired,
-        hasMore: React.PropTypes.bool
-    },
-    getDefaultProps: function () {
-        return {
-            pageStart: 0,
-            hasMore: false,
-            threshold: 250
-        };
-    },
-    componentDidMount: function () {
-        this.pageLoaded = this.props.pageStart;
-        this.attachScrollListener();
-    },
-    componentDidUpdate: function () {
-        this.attachScrollListener();
-    },
-    render: function () {
-        var props = this.props;
-        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
-    },
-    scrollListener: function () {
-        var el = this.getDOMNode();
-        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
-            this.detachScrollListener();
-            // call loadMore after detachScrollListener to allow
-            // for non-async loadMore functions
-            this.props.loadMore(this.pageLoaded += 1);
-        }
-    },
-    attachScrollListener: function () {
-        if (!this.props.hasMore) {
-            return;
-        }
-        window.addEventListener('scroll', this.scrollListener);
-        window.addEventListener('resize', this.scrollListener);
-        this.scrollListener();
-    },
-    detachScrollListener: function () {
-        window.removeEventListener('scroll', this.scrollListener);
-        window.removeEventListener('resize', this.scrollListener);
-    },
-    componentWillUnmount: function () {
-        this.detachScrollListener();
-    }
-});
-InfiniteScroll.setDefaultLoader = function (loader) {
-    InfiniteScroll._defaultLoader = loader;
-};;/**
+};/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",
-        propTypes: {
-            title: React.PropTypes.string.isRequired,
-            text: React.PropTypes.string.isRequired,
-            styles: React.PropTypes.object
-        },
-        getDefaultProps: function () {
-            return {
-                styles: {
-                    "position": "absolute",
-                    "whiteSpace": "normal",
-                    "width": "250px"
+            propTypes: {
+                title: React.PropTypes.string.isRequired,
+                text: React.PropTypes.string.isRequired,
+                styles: React.PropTypes.object
+            },
+            getInitialState: function () {
+                return {
+                    showInfoBox: false
+                };
+            },
+            getDefaultProps: function () {
+                return {
+                    styles: {
+                        "position": "absolute",
+                        "whiteSpace": "normal",
+                        "top": "100%",
+                        "right": "0",
+                        "fontSize": "10px",
+                        "textShadow": "none",
+                        "textAlign": "left",
+                        "backgroundColor": "#f0f3f5",
+                        "color": "#4a5564",
+                        "width": "250px"
+                    }
                 }
+            },
+            showInfoBox: function () {
+                // determine whether we should show the info box left or right facing, depending on its position in the headers
+                this.setState({showInfoBox: true});
+            },
+            hideInfoBox: function () {
+                this.setState({showInfoBox: false});
             }
-        },
-        render: function () {
-            return (
-                React.createElement("div", {style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                    React.createElement("div", null, this.props.title), 
-                    React.createElement("div", {className: "menu-item-input", style: this.props.styles}, 
-                        React.createElement("div", {style: {"display": "block"}}, this.props.text)
+            ,
+            render: function () {
+                var infoBox = this.state.showInfoBox ?
+                    React.createElement("div", {style: this.props.styles}, 
+                        React.createElement("div", null, this.props.text)
+                    ) : null;
+
+                return (
+                    React.createElement("div", {style: {"position": "relative"}, className: "menu-item", onMouseEnter: this.showInfoBox, 
+                         onMouseLeave: this.hideInfoBox}, 
+                        React.createElement("div", null, this.props.title), 
+                        infoBox
                     )
-                )
-            );
+                );
+            }
         }
-    }
-);
+    )
+    ;
 ;/** @jsx React.DOM */
 
 var NumericFilterPanel = React.createClass({
@@ -1023,6 +986,26 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         };
     },
     /* --- Called by component or child react components --- */
+    /**
+     * Handles resetting all current sorting and replacing sort order
+     * by the columnDef specified
+     * @param columnDef
+     */
+    handleSetSort: function (columnDef) {
+        const sortBy = this.state.sortBy;
+        const existing = findDefByColTag(sortBy, columnDef.colTag);
+        const sortType = existing && existing.sortType === 'asc' ? 'desc' : 'asc';
+        while (sortBy.length > 0)
+            sortBy.pop();
+        sortBy.push({colTag: columnDef.colTag, sortType: sortType});
+        var newState = {
+            sortBy: sortBy
+        };
+        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+        newState.rootNode = this.state.rootNode;
+        this.setState(newState);
+
+    },
     handleAddSort: function (columnDef, sortType) {
         const sortBy = this.state.sortBy;
         /**
