@@ -37,7 +37,8 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            <SubMenu menuItem={<span><i className="fa fa-sort"></i> Sort</span>} subMenu={
+            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)}
+                     menuItem={<span><i className="fa fa-sort"></i> Sort</span>} subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
                     <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'asc')}>
                         <i className="fa fa-sort-alpha-asc"/> Asc

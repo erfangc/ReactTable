@@ -156,7 +156,8 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SubMenu, {menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), subMenu: 
+            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), 
+                     menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                     React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
                         React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Asc"
@@ -947,7 +948,13 @@ const InfoBox = React.createClass({displayName: "InfoBox",
 const SubMenu = React.createClass({displayName: "SubMenu",
     propTypes: {
         subMenu: React.PropTypes.object,
-        menuItem: React.PropTypes.object
+        menuItem: React.PropTypes.object,
+        onMenuClick: React.PropTypes.func
+    },
+    getDefaultProps: function () {
+        return {
+            onMenuClick: function () {}
+        }
     },
     getInitialState: function () {
         return {
@@ -966,7 +973,8 @@ const SubMenu = React.createClass({displayName: "SubMenu",
             this.props.subMenu : null;
 
         return (
-            React.createElement("div", {className: "menu-item", style: {position:"relative"}, onMouseEnter: this.showSubMenu, 
+            React.createElement("div", {onClick: this.props.onMenuClick, className: "menu-item", style: {position:"relative"}, 
+                 onMouseEnter: this.showSubMenu, 
                  onMouseLeave: this.hideSubMenu}, 
                 this.props.menuItem, 
                 subMenu

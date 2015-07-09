@@ -59,7 +59,13 @@ const InfoBox = React.createClass({
 const SubMenu = React.createClass({
     propTypes: {
         subMenu: React.PropTypes.object,
-        menuItem: React.PropTypes.object
+        menuItem: React.PropTypes.object,
+        onMenuClick: React.PropTypes.func
+    },
+    getDefaultProps: function () {
+        return {
+            onMenuClick: function () {}
+        }
     },
     getInitialState: function () {
         return {
@@ -78,7 +84,8 @@ const SubMenu = React.createClass({
             this.props.subMenu : null;
 
         return (
-            <div className="menu-item" style={{position:"relative"}} onMouseEnter={this.showSubMenu}
+            <div onClick={this.props.onMenuClick} className="menu-item" style={{position:"relative"}}
+                 onMouseEnter={this.showSubMenu}
                  onMouseLeave={this.hideSubMenu}>
                 {this.props.menuItem}
                 {subMenu}
