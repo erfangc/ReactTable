@@ -141,17 +141,40 @@ function buildMenu(options) {
         style = options.style,
         isFirstColumn = options.isFirstColumn, menuStyle = {};
 
+    const subMenuStyles = {
+        "top": "-20%",
+        "left": "100%",
+        "padding": "5px"
+    };
+
     if (style.textAlign == 'right')
         menuStyle.right = "0%";
     else
         menuStyle.left = "0%";
 
     // construct user custom menu items
-    var menuItems = []
+    var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SortMenu, {table: table, columnDef: columnDef}),
-            React.createElement("div", {className: "separator"})
+            React.createElement(SubMenu, {menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), subMenu: 
+                React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
+                        React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Asc"
+                    ), 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'desc')}, 
+                        React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Desc"
+                    ), 
+                    React.createElement("div", {className: "separator"}), 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
+                        React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Add Asc"
+                    ), 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
+                        React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Add Desc"
+                    ), 
+                    React.createElement("div", {className: "separator"}), 
+                    React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Sort")
+                )}
+            )
         ],
         filter: [
             React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
@@ -159,8 +182,12 @@ function buildMenu(options) {
             React.createElement("div", {className: "separator"})
         ],
         summarize: [
-            React.createElement(SubtotalControl, {table: table, columnDef: columnDef}),
-            React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, "Clear Subtotal")
+            React.createElement(SubMenu, {menuItem: React.createElement("span", null, "Subtotal"), subMenu: 
+                React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                   React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, "Clear Subtotal")
+                )
+            })
         ],
         remove: [
             React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
@@ -244,7 +271,7 @@ function buildHeaders(table) {
     var sortIcon = null;
     if (sortDef)
         sortIcon =
-            React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType})
+            React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType});
     var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
     var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
@@ -254,7 +281,8 @@ function buildHeaders(table) {
     };
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
-            React.createElement("div", {style: {textAlign: "center"}, onDoubleClick: table.handleSetSort.bind(null,columnDef, null), className: "rt-header-element", key: columnDef.colTag}, 
+            React.createElement("div", {style: {textAlign: "center"}, onDoubleClick: table.handleSetSort.bind(null,columnDef, null), 
+                 className: "rt-header-element", key: columnDef.colTag}, 
                 React.createElement("a", {href: "#", className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     buildFirstColumnLabel(table).join("/")
@@ -283,7 +311,7 @@ function buildHeaders(table) {
         sortIcon = null;
         if (sortDef)
             sortIcon =
-                React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType})
+                React.createElement("i", {className: "fa fa-sort-"+sortDef.sortType});
 
         style = {textAlign: "center"};
         numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
@@ -913,10 +941,10 @@ const InfoBox = React.createClass({displayName: "InfoBox",
 /**
  * This component represent a sort menu item that expands into a sub-menu that allow the user to control table sorting
  */
-const SortMenu = React.createClass({displayName: "SortMenu",
+const SubMenu = React.createClass({displayName: "SubMenu",
     propTypes: {
-        table: React.PropTypes.object,
-        columnDef: React.PropTypes.object
+        subMenu: React.PropTypes.object,
+        menuItem: React.PropTypes.object
     },
     getInitialState: function () {
         return {
@@ -931,41 +959,13 @@ const SortMenu = React.createClass({displayName: "SortMenu",
         this.setState({showSubMenu: false});
     },
     render: function () {
-        const table = this.props.table;
-        const columnDef = this.props.columnDef;
-        const subMenuStyles = {
-            "position": "absolute",
-            "top": "-20%",
-            "left": "100%",
-            textShadow: "none",
-            borderRadius: "2px",
-            "backgroundColor": "#f0f3f5",
-            "color": "#4a5564",
-            zIndex: 1
-        };
         const subMenu = this.state.showSubMenu ?
-            React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
-                    React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Asc"
-                ), 
-                React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'desc')}, 
-                    React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Desc"
-                ), 
-                React.createElement("div", {className: "separator"}), 
-                React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
-                    React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Add Asc"
-                ), 
-                React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
-                    React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Add Desc"
-                ), 
-                React.createElement("div", {className: "separator"}), 
-                React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Sort")
-            ) : null;
+            this.props.subMenu : null;
 
         return (
             React.createElement("div", {className: "menu-item", style: {position:"relative"}, onMouseEnter: this.showSubMenu, 
                  onMouseLeave: this.hideSubMenu}, 
-                React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), 
+                this.props.menuItem, 
                 subMenu
             ));
     }

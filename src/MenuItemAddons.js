@@ -56,10 +56,10 @@ const InfoBox = React.createClass({
 /**
  * This component represent a sort menu item that expands into a sub-menu that allow the user to control table sorting
  */
-const SortMenu = React.createClass({
+const SubMenu = React.createClass({
     propTypes: {
-        table: React.PropTypes.object,
-        columnDef: React.PropTypes.object
+        subMenu: React.PropTypes.object,
+        menuItem: React.PropTypes.object
     },
     getInitialState: function () {
         return {
@@ -74,41 +74,13 @@ const SortMenu = React.createClass({
         this.setState({showSubMenu: false});
     },
     render: function () {
-        const table = this.props.table;
-        const columnDef = this.props.columnDef;
-        const subMenuStyles = {
-            "position": "absolute",
-            "top": "-20%",
-            "left": "100%",
-            textShadow: "none",
-            borderRadius: "2px",
-            "backgroundColor": "#f0f3f5",
-            "color": "#4a5564",
-            zIndex: 1
-        };
         const subMenu = this.state.showSubMenu ?
-            <div className="rt-header-menu" style={subMenuStyles}>
-                <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'asc')}>
-                    <i className="fa fa-sort-alpha-asc"/> Asc
-                </div>
-                <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'desc')}>
-                    <i className="fa fa-sort-alpha-desc"></i> Desc
-                </div>
-                <div className="separator"></div>
-                <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'asc')}>
-                    <i className="fa fa-plus"/><i className="fa fa-sort-alpha-asc"/> Add Asc
-                </div>
-                <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'desc')}>
-                    <i className="fa fa-plus"/><i className="fa fa-sort-alpha-desc"></i> Add Desc
-                </div>
-                <div className="separator"></div>
-                <div className="menu-item" onClick={table.clearSort}><i className="fa fa-ban"></i> Clear All Sort</div>
-            </div> : null;
+            this.props.subMenu : null;
 
         return (
             <div className="menu-item" style={{position:"relative"}} onMouseEnter={this.showSubMenu}
                  onMouseLeave={this.hideSubMenu}>
-                <span><i className="fa fa-sort"></i> Sort</span>
+                {this.props.menuItem}
                 {subMenu}
             </div>);
     }

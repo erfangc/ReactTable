@@ -22,17 +22,40 @@ function buildMenu(options) {
         style = options.style,
         isFirstColumn = options.isFirstColumn, menuStyle = {};
 
+    const subMenuStyles = {
+        "top": "-20%",
+        "left": "100%",
+        "padding": "5px"
+    };
+
     if (style.textAlign == 'right')
         menuStyle.right = "0%";
     else
         menuStyle.left = "0%";
 
     // construct user custom menu items
-    var menuItems = []
+    var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            <SortMenu table={table} columnDef={columnDef}></SortMenu>,
-            <div className="separator"/>
+            <SubMenu menuItem={<span><i className="fa fa-sort"></i> Sort</span>} subMenu={
+                <div className="rt-header-menu" style={subMenuStyles}>
+                    <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'asc')}>
+                        <i className="fa fa-sort-alpha-asc"/> Asc
+                    </div>
+                    <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'desc')}>
+                        <i className="fa fa-sort-alpha-desc"></i> Desc
+                    </div>
+                    <div className="separator"></div>
+                    <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'asc')}>
+                        <i className="fa fa-plus"/><i className="fa fa-sort-alpha-asc"/> Add Asc
+                    </div>
+                    <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'desc')}>
+                        <i className="fa fa-plus"/><i className="fa fa-sort-alpha-desc"></i> Add Desc
+                    </div>
+                    <div className="separator"></div>
+                    <div className="menu-item" onClick={table.clearSort}><i className="fa fa-ban"></i> Clear All Sort</div>
+                </div>}>
+            </SubMenu>
         ],
         filter: [
             <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>,
@@ -40,8 +63,12 @@ function buildMenu(options) {
             <div className="separator"/>
         ],
         summarize: [
-            <SubtotalControl table={table} columnDef={columnDef}/>,
-            <div className="menu-item" onClick={table.handleClearSubtotal}>Clear Subtotal</div>
+            <SubMenu menuItem={<span>Subtotal</span>} subMenu={
+                <div className="rt-header-menu" style={subMenuStyles}>
+                   <SubtotalControl table={table} columnDef={columnDef}/>
+                    <div className="menu-item" onClick={table.handleClearSubtotal}>Clear Subtotal</div>
+                </div>
+            }></SubMenu>
         ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>
@@ -125,7 +152,7 @@ function buildHeaders(table) {
     var sortIcon = null;
     if (sortDef)
         sortIcon =
-            <i className={"fa fa-sort-"+sortDef.sortType}></i>
+            <i className={"fa fa-sort-"+sortDef.sortType}></i>;
     var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
     var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
@@ -135,7 +162,8 @@ function buildHeaders(table) {
     };
     var firstColumn = (
         <div className="rt-headers-container">
-            <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} className="rt-header-element" key={columnDef.colTag}>
+            <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)}
+                 className="rt-header-element" key={columnDef.colTag}>
                 <a href="#" className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                     {buildFirstColumnLabel(table).join("/")}
@@ -164,7 +192,7 @@ function buildHeaders(table) {
         sortIcon = null;
         if (sortDef)
             sortIcon =
-                <i className={"fa fa-sort-"+sortDef.sortType}></i>
+                <i className={"fa fa-sort-"+sortDef.sortType}></i>;
 
         style = {textAlign: "center"};
         numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
