@@ -150,11 +150,7 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
-                React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
-                React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Sort"),
-            React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear Sort"),
+            React.createElement(SortMenu, {table: table, columnDef: columnDef}),
             React.createElement("div", {className: "separator"})
         ],
         filter: [
@@ -294,7 +290,7 @@ function buildHeaders(table) {
         textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             React.createElement("div", {className: "rt-headers-container"}, 
-                React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef), style: style, 
+                React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef, null), style: style, 
                      className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
@@ -795,62 +791,185 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/**
+};/** @jsx React.DOM */
+
+function topPosition(domElt) {
+    if (!domElt) {
+        return 0;
+    }
+    return domElt.offsetTop + topPosition(domElt.offsetParent);
+}
+
+var InfiniteScroll = React.createClass({
+    displayName: 'InfiniteScroll',
+    propTypes: {
+        pageStart: React.PropTypes.number,
+        threshold: React.PropTypes.number,
+        loadMore: React.PropTypes.func.isRequired,
+        hasMore: React.PropTypes.bool
+    },
+    getDefaultProps: function () {
+        return {
+            pageStart: 0,
+            hasMore: false,
+            threshold: 250
+        };
+    },
+    componentDidMount: function () {
+        this.pageLoaded = this.props.pageStart;
+        this.attachScrollListener();
+    },
+    componentDidUpdate: function () {
+        this.attachScrollListener();
+    },
+    render: function () {
+        var props = this.props;
+        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
+    },
+    scrollListener: function () {
+        var el = this.getDOMNode();
+        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
+            this.detachScrollListener();
+            // call loadMore after detachScrollListener to allow
+            // for non-async loadMore functions
+            this.props.loadMore(this.pageLoaded += 1);
+        }
+    },
+    attachScrollListener: function () {
+        if (!this.props.hasMore) {
+            return;
+        }
+        window.addEventListener('scroll', this.scrollListener);
+        window.addEventListener('resize', this.scrollListener);
+        this.scrollListener();
+    },
+    detachScrollListener: function () {
+        window.removeEventListener('scroll', this.scrollListener);
+        window.removeEventListener('resize', this.scrollListener);
+    },
+    componentWillUnmount: function () {
+        this.detachScrollListener();
+    }
+});
+InfiniteScroll.setDefaultLoader = function (loader) {
+    InfiniteScroll._defaultLoader = loader;
+};;/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",
-            propTypes: {
-                title: React.PropTypes.string.isRequired,
-                text: React.PropTypes.string.isRequired,
-                styles: React.PropTypes.object
-            },
-            getInitialState: function () {
-                return {
-                    showInfoBox: false
-                };
-            },
-            getDefaultProps: function () {
-                return {
-                    styles: {
-                        "position": "absolute",
-                        "whiteSpace": "normal",
-                        "top": "100%",
-                        "right": "0",
-                        "fontSize": "10px",
-                        "textShadow": "none",
-                        "textAlign": "left",
-                        "backgroundColor": "#f0f3f5",
-                        "color": "#4a5564",
-                        "width": "250px"
-                    }
+        propTypes: {
+            title: React.PropTypes.string.isRequired,
+            text: React.PropTypes.string.isRequired,
+            styles: React.PropTypes.object
+        },
+        getInitialState: function () {
+            return {
+                showInfoBox: false
+            };
+        },
+        getDefaultProps: function () {
+            return {
+                styles: {
+                    "position": "absolute",
+                    "whiteSpace": "normal",
+                    "top": "150%",
+                    "right": "0",
+                    "fontSize": "10px",
+                    "textShadow": "none",
+                    "backgroundColor": "#f0f3f5",
+                    "color": "#4a5564",
+                    "width": "250px",
+                    "padding": "10px",
+                    "borderRadius": "1px"
                 }
-            },
-            showInfoBox: function () {
-                // determine whether we should show the info box left or right facing, depending on its position in the headers
-                this.setState({showInfoBox: true});
-            },
-            hideInfoBox: function () {
-                this.setState({showInfoBox: false});
             }
-            ,
-            render: function () {
-                var infoBox = this.state.showInfoBox ?
-                    React.createElement("div", {style: this.props.styles}, 
-                        React.createElement("div", null, this.props.text)
-                    ) : null;
+        },
+        showInfoBox: function () {
+            // determine whether we should show the info box left or right facing, depending on its position in the headers
+            this.setState({showInfoBox: true});
+        },
+        hideInfoBox: function () {
+            this.setState({showInfoBox: false});
+        },
+        render: function () {
+            var infoBox = this.state.showInfoBox ?
+                React.createElement("div", {style: this.props.styles}, 
+                    React.createElement("div", null, this.props.text)
+                ) : null;
 
-                return (
-                    React.createElement("div", {style: {"position": "relative"}, className: "menu-item", onMouseEnter: this.showInfoBox, 
-                         onMouseLeave: this.hideInfoBox}, 
-                        React.createElement("div", null, this.props.title), 
-                        infoBox
-                    )
-                );
-            }
+            return (
+                React.createElement("div", {style: {"position": "relative"}, className: "menu-item", onMouseEnter: this.showInfoBox, 
+                     onMouseLeave: this.hideInfoBox}, 
+                    React.createElement("div", null, this.props.title), 
+                    infoBox
+                )
+            );
         }
-    )
-    ;
-;/** @jsx React.DOM */
+    }
+);
+
+/**
+ * This component represent a sort menu item that expands into a sub-menu that allow the user to control table sorting
+ */
+const SortMenu = React.createClass({displayName: "SortMenu",
+    propTypes: {
+        table: React.PropTypes.component,
+        columnDef: React.PropTypes.object
+    },
+    getInitialState: function () {
+        return {
+            showSubMenu: false
+        };
+    },
+    showSubMenu: function () {
+        // determine whether we should show the info box left or right facing, depending on its position in the headers
+        this.setState({showSubMenu: true});
+    },
+    hideSubMenu: function () {
+        this.setState({showSubMenu: false});
+    },
+    // TODO implement
+    render: function () {
+        const table = this.props.table;
+        const columnDef = this.props.columnDef;
+        const subMenuStyles = {
+            "position": "absolute",
+            "top": "-20%",
+            "left": "100%",
+            textShadow: "none",
+            borderRadius: "2px",
+            "backgroundColor": "#f0f3f5",
+            "color": "#4a5564",
+            zIndex: 1
+        };
+        const subMenu = this.state.showSubMenu ?
+            React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
+                    React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Asc"
+                ), 
+                React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'desc')}, 
+                    React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Desc"
+                ), 
+                React.createElement("div", {className: "separator"}), 
+                React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
+                    React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Add Asc"
+                ), 
+                React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
+                    React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Add Desc"
+                ), 
+                React.createElement("div", {className: "separator"}), 
+                React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Sort")
+            ) : null;
+
+        return (
+            React.createElement("div", {className: "menu-item", style: {position:"relative"}, onMouseEnter: this.showSubMenu, 
+                 onMouseLeave: this.hideSubMenu}, 
+                React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), 
+                subMenu
+            ));
+    }
+});;/** @jsx React.DOM */
 
 var NumericFilterPanel = React.createClass({
     displayName: 'NumericFilterPanel',
@@ -991,10 +1110,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
      * by the columnDef specified
      * @param columnDef
      */
-    handleSetSort: function (columnDef) {
+    handleSetSort: function (columnDef, sortType) {
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
-        const sortType = existing && existing.sortType === 'asc' ? 'desc' : 'asc';
+        sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
         while (sortBy.length > 0)
             sortBy.pop();
         sortBy.push({colTag: columnDef.colTag, sortType: sortType});

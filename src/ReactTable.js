@@ -62,10 +62,10 @@ var ReactTable = React.createClass({
      * by the columnDef specified
      * @param columnDef
      */
-    handleSetSort: function (columnDef) {
+    handleSetSort: function (columnDef, sortType) {
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
-        const sortType = existing && existing.sortType === 'asc' ? 'desc' : 'asc';
+        sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
         while (sortBy.length > 0)
             sortBy.pop();
         sortBy.push({colTag: columnDef.colTag, sortType: sortType});

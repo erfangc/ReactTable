@@ -1,191 +1,68 @@
 /* Table Declarations */
 /* Pagination Variables - Credit: Bootstrap */
-.rt-table-container {
-  box-sizing: border-box;
-  font-family: Tahoma, Arial, sans-serif;
-  font-size: 11px;
-  /************* main table styling *************/
-  /************* table header styling *************/
-  /************* misc styling *************/ }
-  .rt-table-container .rt-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0;
-    color: #4a5564;
-    background-color: white; }
-    .rt-table-container .rt-table tr.selected {
-      background-color: #e1e7eb; }
-    .rt-table-container .rt-table tr.summary-selected {
-      background-color: #d1dbe1; }
-    .rt-table-container .rt-table tr:hover {
-      background-color: #f0f3f5; }
-    .rt-table-container .rt-table td {
-      border-bottom: 1px solid #f0f3f5;
-      padding: 2px 5px;
-      min-width: 5px;
-      border-right: 1px solid #f9f2f4;
-      white-space: nowrap; }
-  .rt-table-container .rt-scrollable {
-    overflow-x: auto; }
-  .rt-table-container > .rt-headers-grand-container {
-    position: relative; }
-    .rt-table-container > .rt-headers-grand-container > .rt-headers {
-      color: white;
-      background-color: #4a5564;
-      font-weight: bold;
-      text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-      white-space: nowrap;
-      overflow: hidden;
-      -ms-overflow-style: none;
-      /* Solves "blinking scrollbar" issues in IE */ }
-      .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container {
-        cursor: pointer;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        -o-user-select: none;
-        display: inline-block;
-        border-right: 1px solid #f9f2f4;
-        /* display header menu on hover */
-        /* header hover menu */ }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-numeric-filter-container {
-          position: absolute;
-          text-shadow: none;
-          color: #4a5564;
-          border-radius: 2px;
-          background-color: #f0f3f5; }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container {
-          position: relative;
-          padding-left: 0.5px; }
-          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container > .rt-downward-caret:before {
-            content: ' ';
-            position: absolute;
-            bottom: 0px;
-            right: 1px;
-            border: 4px solid transparent;
-            border-left-color: #FFF;
-            -webkit-transform: rotate(90deg);
-            -moz-transform: rotate(90deg);
-            -o-transform: rotate(90deg);
-            -ms-transform: rotate(90deg);
-            transform: rotate(90deg); }
-          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-caret-container > .rt-upward-caret:before {
-            content: ' ';
-            position: absolute;
-            top: -15px;
-            right: 1px;
-            border: 4px solid transparent;
-            border-left-color: #FFF;
-            -webkit-transform: rotate(-90deg);
-            -moz-transform: rotate(-90deg);
-            -o-transform: rotate(-90deg);
-            -ms-transform: rotate(-90deg);
-            transform: rotate(-90deg); }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-info-header {
-          min-width: 5px; }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-element {
-          min-width: 5px;
-          padding-left: 5px;
-          padding-right: 5px;
-          padding-bottom: 2px;
-          padding-top: 2px; }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container:hover .rt-header-menu {
-          display: block; }
-        .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu {
-          display: none;
-          position: absolute;
-          text-shadow: none;
-          color: #4a5564;
-          border-radius: 2px;
-          background-color: #f0f3f5;
-          max-width: 110px;
-          z-index: 1;
-          /* menu items */ }
-          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item {
-            font-size: 9px;
-            margin: 5px;
-            padding: 5px;
-            border-radius: 1px; }
-            .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item:hover {
-              background-color: #4a5564;
-              color: white; }
-            .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item.menu-item-hoverable:hover .menu-item-input {
-              display: block; }
-            .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input {
-              text-align: left;
-              display: none;
-              font-size: 10px;
-              text-shadow: none;
-              background-color: #f0f3f5;
-              color: #4a5564; }
-              .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > div {
-                margin: 10px; }
-          .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .separator {
-            margin: 0 5px;
-            border-radius: 2px;
-            border: 1px solid #d1dbe1; }
-  .rt-table-container a.btn-link {
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer; }
-  .rt-table-container a.disabled {
-    pointer-events: none; }
-  .rt-table-container > .rt-scrollable {
-    overflow-y: scroll;
-    max-height: 750px; }
+.rt-table-container { box-sizing: border-box; font-family: Tahoma, Arial, sans-serif; font-size: 11px; /************* main table styling *************/ /************* table header styling *************/ /************* misc styling *************/ }
 
-.rt-corner-image {
-  padding-left: 2px; }
+.rt-table-container .rt-table { width: 100%; border-collapse: collapse; border-spacing: 0; color: #4a5564; background-color: #fff; }
 
-.rt-plus-sign {
-  padding-left: 4px;
-  padding-right: 4px; }
+.rt-table-container .rt-table tr.selected { background-color: #e1e7eb; }
 
-.rt-hide {
-  display: none; }
+.rt-table-container .rt-table tr.summary-selected { background-color: #d1dbe1; }
+
+.rt-table-container .rt-table tr:hover { background-color: #f0f3f5; }
+
+.rt-table-container .rt-table td { border-bottom: 1px solid #f0f3f5; padding: 2px 5px; min-width: 5px; border-right: 1px solid #f9f2f4; white-space: nowrap; }
+
+.rt-table-container .rt-scrollable { overflow-x: auto; }
+
+.rt-table-container > .rt-headers-grand-container { position: relative; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers { color: #fff; background-color: #4a5564; font-weight: bold; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5); white-space: nowrap; overflow: hidden; -ms-overflow-style: none; /* Solves "blinking scrollbar" issues in IE */ }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container { cursor: pointer; -moz-user-select: none; -webkit-user-select: none; -ms-user-select: none; user-select: none; display: inline-block; border-right: 1px solid #f9f2f4; /* display header menu on hover */ /* header hover menu */ }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-numeric-filter-container { position: absolute; text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-info-header { min-width: 5px; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-element { min-width: 5px; padding: 2px 5px; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container:hover .rt-header-menu { display: block; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu { display: none; position: absolute; text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; z-index: 1; /* menu items */ }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item { font-size: 10px; margin: 5px; padding: 5px; border-radius: 1px; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item:hover { background-color: #4a5564; color: #fff; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item.menu-item-hoverable:hover .menu-item-input { display: block; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input { text-align: left; display: none; font-size: 10px; background-color: #f0f3f5; color: #4a5564; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > input, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > label, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > a, .rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .menu-item .menu-item-input > div { margin: 10px; }
+
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-header-menu .separator { margin: 0 5px; border-radius: 2px; border: 1px solid #d1dbe1; }
+
+.rt-table-container a.btn-link { color: inherit; text-decoration: none; cursor: pointer; }
+
+.rt-table-container a.disabled { pointer-events: none; }
+
+.rt-table-container > .rt-scrollable { overflow-y: scroll; max-height: 750px; }
+
+.rt-corner-image { padding-left: 2px; }
+
+.rt-plus-sign { padding-left: 4px; padding-right: 4px; }
+
+.rt-hide { display: none; }
 
 /* Pagination */
-.rt-table-container .pagination {
-  display: inline-block;
-  padding-left: 0;
-  margin: 10px 0;
-  font-size: 11px; }
-  .rt-table-container .pagination > li {
-    display: inline; }
-    .rt-table-container .pagination > li > a,
-    .rt-table-container .pagination > li > span {
-      position: relative;
-      float: left;
-      padding: 6px 12px;
-      line-height: 1.42857;
-      text-decoration: none;
-      color: #4a5564;
-      background-color: white;
-      border: 1px solid #f0f3f5;
-      margin-left: -1px; }
-  .rt-table-container .pagination > li > a:hover, .rt-table-container .pagination > li > a:focus,
-  .rt-table-container .pagination > li > span:hover,
-  .rt-table-container .pagination > li > span:focus {
-    color: #4a5564;
-    background-color: #f0f3f5;
-    border-color: #f0f3f5; }
-  .rt-table-container .pagination > .active > a, .rt-table-container .pagination > .active > a:hover, .rt-table-container .pagination > .active > a:focus,
-  .rt-table-container .pagination > .active > span,
-  .rt-table-container .pagination > .active > span:hover,
-  .rt-table-container .pagination > .active > span:focus {
-    z-index: 2;
-    color: white;
-    background-color: #4a5564;
-    border-color: #f0f3f5;
-    cursor: default; }
-  .rt-table-container .pagination > .disabled > span,
-  .rt-table-container .pagination > .disabled > span:hover,
-  .rt-table-container .pagination > .disabled > span:focus,
-  .rt-table-container .pagination > .disabled > a,
-  .rt-table-container .pagination > .disabled > a:hover,
-  .rt-table-container .pagination > .disabled > a:focus {
-    color: #dddddd;
-    background-color: white;
-    border-color: #f0f3f5;
-    cursor: not-allowed; }
+.rt-table-container .pagination { display: inline-block; padding-left: 0; margin: 10px 0; font-size: 11px; }
+
+.rt-table-container .pagination > li { display: inline; }
+
+.rt-table-container .pagination > li > a, .rt-table-container .pagination > li > span { position: relative; float: left; padding: 6px 12px; line-height: 1.42857; text-decoration: none; color: #4a5564; background-color: #fff; border: 1px solid #f0f3f5; margin-left: -1px; }
+
+.rt-table-container .pagination > li > a:hover, .rt-table-container .pagination > li > a:focus, .rt-table-container .pagination > li > span:hover, .rt-table-container .pagination > li > span:focus { color: #4a5564; background-color: #f0f3f5; border-color: #f0f3f5; }
+
+.rt-table-container .pagination > .active > a, .rt-table-container .pagination > .active > a:hover, .rt-table-container .pagination > .active > a:focus, .rt-table-container .pagination > .active > span, .rt-table-container .pagination > .active > span:hover, .rt-table-container .pagination > .active > span:focus { z-index: 2; color: #fff; background-color: #4a5564; border-color: #f0f3f5; cursor: default; }
+
+.rt-table-container .pagination > .disabled > span, .rt-table-container .pagination > .disabled > span:hover, .rt-table-container .pagination > .disabled > span:focus, .rt-table-container .pagination > .disabled > a, .rt-table-container .pagination > .disabled > a:hover, .rt-table-container .pagination > .disabled > a:focus { color: #ddd; background-color: #fff; border-color: #f0f3f5; cursor: not-allowed; }

@@ -31,11 +31,7 @@ function buildMenu(options) {
     var menuItems = []
     var availableDefaultMenuItems = {
         sort: [
-            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'asc')}>
-                <i className="fa fa-sort-alpha-asc"/> Sort</div>,
-            <div className="menu-item" onClick={table.handleAddSort.bind(null, columnDef, 'desc')}>
-                <i className="fa fa-sort-alpha-desc"></i> Sort</div>,
-            <div className="menu-item" onClick={table.clearSort}><i className="fa fa-ban"></i> Clear Sort</div>,
+            <SortMenu table={table} columnDef={columnDef}></SortMenu>,
             <div className="separator"/>
         ],
         filter: [
@@ -175,7 +171,7 @@ function buildHeaders(table) {
         textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             <div className="rt-headers-container">
-                <div onDoubleClick={table.handleSetSort.bind(null,columnDef)} style={style}
+                <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a href="#" className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
