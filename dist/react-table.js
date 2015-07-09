@@ -254,7 +254,7 @@ function buildHeaders(table) {
     };
     var firstColumn = (
         React.createElement("div", {className: "rt-headers-container"}, 
-            React.createElement("div", {style: {textAlign: "center"}, className: "rt-header-element", key: columnDef.colTag}, 
+            React.createElement("div", {style: {textAlign: "center"}, onDoubleClick: table.handleSetSort.bind(null,columnDef, null), className: "rt-header-element", key: columnDef.colTag}, 
                 React.createElement("a", {href: "#", className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                     buildFirstColumnLabel(table).join("/")
@@ -294,7 +294,8 @@ function buildHeaders(table) {
                      className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {href: "#", className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
-                        React.createElement("span", null, columnDef.text)
+                        React.createElement("span", null, columnDef.text, " ", columnDef.isLoading ?
+                            React.createElement("i", {className: "fa fa-spinner fa-spin"}) : null)
                     ), 
                     sortIcon, 
                     React.createElement("input", {style: ss, 
@@ -914,7 +915,7 @@ const InfoBox = React.createClass({displayName: "InfoBox",
  */
 const SortMenu = React.createClass({displayName: "SortMenu",
     propTypes: {
-        table: React.PropTypes.component,
+        table: React.PropTypes.object,
         columnDef: React.PropTypes.object
     },
     getInitialState: function () {
@@ -929,7 +930,6 @@ const SortMenu = React.createClass({displayName: "SortMenu",
     hideSubMenu: function () {
         this.setState({showSubMenu: false});
     },
-    // TODO implement
     render: function () {
         const table = this.props.table;
         const columnDef = this.props.columnDef;
@@ -1427,7 +1427,7 @@ var Row = React.createClass({displayName: "Row",
             var classes = cx(displayInstructions.classes);
             // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
             var displayContent = columnDef.isLoading ?
-                React.createElement("i", {className: "fa fa-spin fa-spinner"}) : displayInstructions.value;
+                "Loading ... " : displayInstructions.value;
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
