@@ -487,7 +487,7 @@ var SubtotalControl = React.createClass({
             <div
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
-                <div>Add Subtotal</div>
+                <div><i className="fa fa-plus"></i> Add Subtotal</div>
                 {subMenuAttachment}
             </div>
         );

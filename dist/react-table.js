@@ -182,15 +182,18 @@ function buildMenu(options) {
             React.createElement("div", {className: "separator"})
         ],
         summarize: [
-            React.createElement(SubMenu, {menuItem: React.createElement("span", null, "Subtotal"), subMenu: 
+            React.createElement(SubMenu, {
+                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
+                subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                    React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, "Clear Subtotal")
+                    React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
             })
         ],
         remove: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, "Remove Column")
+            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, React.createElement("i", {
+                className: "fa fa-remove"}), " Remove Column")
         ]
     };
     if (table.props.defaultMenuItems) {
@@ -1535,7 +1538,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
             React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.createElement("div", null, "Add Subtotal"), 
+                React.createElement("div", null, React.createElement("i", {className: "fa fa-plus"}), " Add Subtotal"), 
                 subMenuAttachment
             )
         );

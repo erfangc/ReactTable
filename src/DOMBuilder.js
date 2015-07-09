@@ -63,15 +63,18 @@ function buildMenu(options) {
             <div className="separator"/>
         ],
         summarize: [
-            <SubMenu menuItem={<span>Subtotal</span>} subMenu={
+            <SubMenu
+                menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
+                subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
                    <SubtotalControl table={table} columnDef={columnDef}/>
-                    <div className="menu-item" onClick={table.handleClearSubtotal}>Clear Subtotal</div>
+                    <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
                 </div>
             }></SubMenu>
         ],
         remove: [
-            <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}>Remove Column</div>
+            <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}><i
+                className="fa fa-remove"></i> Remove Column</div>
         ]
     };
     if (table.props.defaultMenuItems) {
