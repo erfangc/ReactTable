@@ -37,7 +37,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)}
+            <SubMenu onMenuClick={table.handleSetSort.bind(null,columnDef,null)}
                      menuItem={<span><i className="fa fa-sort"></i> Sort</span>} subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
                     <div className="menu-item" onClick={table.handleSetSort.bind(null, columnDef, 'asc')}>
@@ -64,9 +64,9 @@ function buildMenu(options) {
             <div className="separator"/>
         ],
         summarize: [
-            <SubMenu
-                menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
-                subMenu={
+            <SubMenu onMenuClick={table.handleSubtotalBy.bind(null, columnDef, null)}
+                     menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
+                     subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
                    <SubtotalControl table={table} columnDef={columnDef}/>
                     <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>

@@ -146,7 +146,8 @@ function applyAllFilters() {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandleClearSubtotal() {
+function ReactTableHandleClearSubtotal(event) {
+    event.stopPropagation();
     const newState = this.state;
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
@@ -163,8 +164,8 @@ function ReactTableHandleClearSubtotal() {
     this.setState(newState);
 }
 
-function ReactTableHandleSubtotalBy(columnDef, partitions) {
-
+function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
+    event.stopPropagation();
     var subtotalBy = this.state.subtotalBy || [];
     /**
      * determine if the subtotal operation require partitioning of the column values first

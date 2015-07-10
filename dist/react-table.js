@@ -156,7 +156,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), 
+            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null,columnDef,null), 
                      menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                     React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
@@ -183,9 +183,9 @@ function buildMenu(options) {
             React.createElement("div", {className: "separator"})
         ],
         summarize: [
-            React.createElement(SubMenu, {
-                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
-                subMenu: 
+            React.createElement(SubMenu, {onMenuClick: table.handleSubtotalBy.bind(null, columnDef, null), 
+                     menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
+                     subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
@@ -824,70 +824,7 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/** @jsx React.DOM */
-
-function topPosition(domElt) {
-    if (!domElt) {
-        return 0;
-    }
-    return domElt.offsetTop + topPosition(domElt.offsetParent);
-}
-
-var InfiniteScroll = React.createClass({
-    displayName: 'InfiniteScroll',
-    propTypes: {
-        pageStart: React.PropTypes.number,
-        threshold: React.PropTypes.number,
-        loadMore: React.PropTypes.func.isRequired,
-        hasMore: React.PropTypes.bool
-    },
-    getDefaultProps: function () {
-        return {
-            pageStart: 0,
-            hasMore: false,
-            threshold: 250
-        };
-    },
-    componentDidMount: function () {
-        this.pageLoaded = this.props.pageStart;
-        this.attachScrollListener();
-    },
-    componentDidUpdate: function () {
-        this.attachScrollListener();
-    },
-    render: function () {
-        var props = this.props;
-        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
-    },
-    scrollListener: function () {
-        var el = this.getDOMNode();
-        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
-            this.detachScrollListener();
-            // call loadMore after detachScrollListener to allow
-            // for non-async loadMore functions
-            this.props.loadMore(this.pageLoaded += 1);
-        }
-    },
-    attachScrollListener: function () {
-        if (!this.props.hasMore) {
-            return;
-        }
-        window.addEventListener('scroll', this.scrollListener);
-        window.addEventListener('resize', this.scrollListener);
-        this.scrollListener();
-    },
-    detachScrollListener: function () {
-        window.removeEventListener('scroll', this.scrollListener);
-        window.removeEventListener('resize', this.scrollListener);
-    },
-    componentWillUnmount: function () {
-        this.detachScrollListener();
-    }
-});
-InfiniteScroll.setDefaultLoader = function (loader) {
-    InfiniteScroll._defaultLoader = loader;
-};;/**
+};/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",
@@ -1121,7 +1058,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
      * by the columnDef specified
      * @param columnDef
      */
-    handleSetSort: function (columnDef, sortType) {
+    handleSetSort: function (columnDef, sortType, event) {
+        event.stopPropagation();
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
         sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
@@ -1136,7 +1074,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         this.setState(newState);
 
     },
-    handleAddSort: function (columnDef, sortType) {
+    handleAddSort: function (columnDef, sortType, event) {
+        event.stopPropagation();
         const sortBy = this.state.sortBy;
         /**
          * if the current column is already part of the sort, then replace its sort type
@@ -1159,7 +1098,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
      * clearing sort always creates a new rootNode
      * so all sub-state information in the rootNode will be lost
      */
-    clearSort: function () {
+    clearSort: function (event) {
+        event.stopPropagation();
         const newState = this.state;
         /**
          * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
@@ -1873,7 +1813,8 @@ function applyAllFilters() {
     this.setState({rootNode: this.state.rootNode});
 }
 
-function ReactTableHandleClearSubtotal() {
+function ReactTableHandleClearSubtotal(event) {
+    event.stopPropagation();
     const newState = this.state;
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
@@ -1890,8 +1831,8 @@ function ReactTableHandleClearSubtotal() {
     this.setState(newState);
 }
 
-function ReactTableHandleSubtotalBy(columnDef, partitions) {
-
+function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
+    event.stopPropagation();
     var subtotalBy = this.state.subtotalBy || [];
     /**
      * determine if the subtotal operation require partitioning of the column values first

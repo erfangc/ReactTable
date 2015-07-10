@@ -62,7 +62,8 @@ var ReactTable = React.createClass({
      * by the columnDef specified
      * @param columnDef
      */
-    handleSetSort: function (columnDef, sortType) {
+    handleSetSort: function (columnDef, sortType, event) {
+        event.stopPropagation();
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
         sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
@@ -77,7 +78,8 @@ var ReactTable = React.createClass({
         this.setState(newState);
 
     },
-    handleAddSort: function (columnDef, sortType) {
+    handleAddSort: function (columnDef, sortType, event) {
+        event.stopPropagation();
         const sortBy = this.state.sortBy;
         /**
          * if the current column is already part of the sort, then replace its sort type
@@ -100,7 +102,8 @@ var ReactTable = React.createClass({
      * clearing sort always creates a new rootNode
      * so all sub-state information in the rootNode will be lost
      */
-    clearSort: function () {
+    clearSort: function (event) {
+        event.stopPropagation();
         const newState = this.state;
         /**
          * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
