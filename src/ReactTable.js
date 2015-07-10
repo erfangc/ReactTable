@@ -469,7 +469,8 @@ var SubtotalControl = React.createClass({
             this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
         }
     },
-    handleClick: function () {
+    handleClick: function (event) {
+        event.stopPropagation();
         var $node = $(this.getDOMNode());
         $node.children(".menu-item-input").children("input").focus();
     },

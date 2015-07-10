@@ -64,9 +64,10 @@ function buildMenu(options) {
             <div className="separator"/>
         ],
         summarize: [
-            <SubMenu onMenuClick={table.handleSubtotalBy.bind(null, columnDef, null)}
-                     menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
-                     subMenu={
+            <SubMenu
+                onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
+                menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
+                subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
                    <SubtotalControl table={table} columnDef={columnDef}/>
                     <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>

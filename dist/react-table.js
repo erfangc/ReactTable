@@ -183,9 +183,10 @@ function buildMenu(options) {
             React.createElement("div", {className: "separator"})
         ],
         summarize: [
-            React.createElement(SubMenu, {onMenuClick: table.handleSubtotalBy.bind(null, columnDef, null), 
-                     menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
-                     subMenu: 
+            React.createElement(SubMenu, {
+                onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
+                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
+                subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
@@ -824,7 +825,70 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/**
+};/** @jsx React.DOM */
+
+function topPosition(domElt) {
+    if (!domElt) {
+        return 0;
+    }
+    return domElt.offsetTop + topPosition(domElt.offsetParent);
+}
+
+var InfiniteScroll = React.createClass({
+    displayName: 'InfiniteScroll',
+    propTypes: {
+        pageStart: React.PropTypes.number,
+        threshold: React.PropTypes.number,
+        loadMore: React.PropTypes.func.isRequired,
+        hasMore: React.PropTypes.bool
+    },
+    getDefaultProps: function () {
+        return {
+            pageStart: 0,
+            hasMore: false,
+            threshold: 250
+        };
+    },
+    componentDidMount: function () {
+        this.pageLoaded = this.props.pageStart;
+        this.attachScrollListener();
+    },
+    componentDidUpdate: function () {
+        this.attachScrollListener();
+    },
+    render: function () {
+        var props = this.props;
+        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
+    },
+    scrollListener: function () {
+        var el = this.getDOMNode();
+        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
+            this.detachScrollListener();
+            // call loadMore after detachScrollListener to allow
+            // for non-async loadMore functions
+            this.props.loadMore(this.pageLoaded += 1);
+        }
+    },
+    attachScrollListener: function () {
+        if (!this.props.hasMore) {
+            return;
+        }
+        window.addEventListener('scroll', this.scrollListener);
+        window.addEventListener('resize', this.scrollListener);
+        this.scrollListener();
+    },
+    detachScrollListener: function () {
+        window.removeEventListener('scroll', this.scrollListener);
+        window.removeEventListener('resize', this.scrollListener);
+    },
+    componentWillUnmount: function () {
+        this.detachScrollListener();
+    }
+});
+InfiniteScroll.setDefaultLoader = function (loader) {
+    InfiniteScroll._defaultLoader = loader;
+};;/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",
@@ -1465,7 +1529,8 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
             this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
         }
     },
-    handleClick: function () {
+    handleClick: function (event) {
+        event.stopPropagation();
         var $node = $(this.getDOMNode());
         $node.children(".menu-item-input").children("input").focus();
     },
