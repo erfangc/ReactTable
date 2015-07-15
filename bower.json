@@ -27,5 +27,8 @@
     "font-awesome": "~4.3.0",
     "tableExport": "https://github.com/caguthrie/tableExport.jquery.plugin.git",
     "tableExportAddons": "https://github.com/caguthrie/tableExport.jquery.plugin.git"
+  },
+  "devDependencies": {
+    "underscore": "~1.8.3"
   }
 }
