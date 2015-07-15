@@ -3,11 +3,14 @@ $(function () {
     var columnDefs = [
         {colTag: "first_name", text: "First Name"},
         {
-            colTag: "last_name", text: "Last Name", customMenuItems: function (table, columnDef) {
-            return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
-        }
+            colTag: "last_name",
+            text: "Last Name",
+            aggregationMethod: "count_and_distinct",
+            customMenuItems: function (table, columnDef) {
+                return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
+            }
         },
-        {colTag: "email", text: "Email"},
+        {colTag: "email", text: "Email", aggregationMethod: "count_and_distinct"},
         {
             colTag: "nationality", text: "Nationality",
             sort: function (a, b) {

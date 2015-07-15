@@ -568,22 +568,38 @@ function _weightedAverage(options) {
 }
 
 function _count(options) {
-    var data = options.data, columnDef = options.columnDef;
     return options.data.length || 0;
 }
 
+/**
+ * count the distinct values in an array of column values
+ * @param options
+ * @return {*}
+ * @private
+ */
 function _countDistinct(options) {
     var data = options.data, columnDef = options.columnDef;
-    var values = {}, i, prop;
-    for (i = 0; i < options.data.length; i++) {
-        if (!data[i][columnDef.colTag]) continue;
-        values[data[i][columnDef.colTag]] = 1;
+
+    if (data.length == 0)
+        return 0;
+
+    /**
+     * collect all rows of the given column in data as an array
+     */
+    const allData =
+        options.data.map(function (row) {
+            return row[columnDef.colTag];
+        });
+
+    /**
+     * iterate through allData - keeping only unique members
+     */
+    const uniqData = [];
+    for (var j = 0; j < allData.length; j++) {
+        if (allData[j] !== "" && allData[j] !== null && uniqData.indexOf(allData[j]) == -1)
+            uniqData.push(allData[j]);
     }
-    var result = 0;
-    for (prop in values)
-        if (values.hasOwnProperty(prop))
-            result++;
-    return result == 1 ? data[0][columnDef.colTag] : result;
+    return uniqData.length == 1 ? uniqData[0] : uniqData.length;
 }
 
 function _countAndDistinct(options) {
