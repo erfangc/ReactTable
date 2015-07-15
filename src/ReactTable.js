@@ -241,6 +241,10 @@ var ReactTable = React.createClass({
             columnDefs.splice(idx + 1, 0, columnDef);
         else
             columnDefs.push(columnDef)
+        /**
+         * we will want to perform an aggregation
+         */
+        recursivelyAggregateNodes(this.state.rootNode, this.state);
         this.setState({
             columnDefs: columnDefs
         });
