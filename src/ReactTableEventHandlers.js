@@ -161,12 +161,17 @@ function ReactTableHandleClearSubtotal(event) {
         subtotalBy.pop();
     newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
+    /**
+     * subtotaling destroys sort, so here we re-apply sort
+     */
+    if (this.state.sortBy.length > 0)
+        newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
     this.setState(newState);
 }
 
 function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     event.stopPropagation();
-    var subtotalBy = this.state.subtotalBy || [];
+    const subtotalBy = this.state.subtotalBy || [];
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */
@@ -174,13 +179,12 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
         columnDef.subtotalByRange = partitionNumberLine(partitions);
 
     /**
-     * if the passed in columnDef is null, then we clear all subtotal
+     * make sure a valid column def is passed in
      */
     if (columnDef != null && columnDef.constructor.name != 'SyntheticMouseEvent')
         subtotalBy.push(columnDef);
-    else if (columnDef != null && columnDef.constructor.name === 'SyntheticMouseEvent')
-        subtotalBy = [];
 
+    // TODO Chris - what is this?
     if (this.state.currentFilters.length > 0)
         applyAllFilters.call(this);
 
@@ -194,6 +198,11 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.firstColumnLabel = buildFirstColumnLabel(this);
     newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
+    /**
+     * subtotaling destroys sort, so here we re-apply sort
+     */
+    if (this.state.sortBy.length > 0)
+        newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
     this.setState(newState);
 }
 
