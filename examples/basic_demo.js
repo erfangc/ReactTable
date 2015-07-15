@@ -10,7 +10,7 @@ $(function () {
              * using underscore
              * @param options
              */
-            aggregationMethod: function (options) {
+            aggregationFunction: function (options) {
                 var data = options.data, columnDef = options.columnDef;
                 const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
                     if (a === b)

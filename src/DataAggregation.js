@@ -62,8 +62,8 @@ function resolvePartitionName(subtotalBy, row) {
  */
 function resolveAggregationMethod(columnDef, subtotalBy) {
     var result;
-    if (typeof columnDef.aggregationMethod === 'function')
-        result = columnDef.aggregationMethod;
+    if (typeof columnDef.aggregationFunction === 'function')
+        result = columnDef.aggregationFunction;
     else if (typeof columnDef.aggregationMethod === 'string')
         result = columnDef.aggregationMethod.toLowerCase();
     // resolve conditional aggregation method

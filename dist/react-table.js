@@ -492,44 +492,50 @@ function resolvePartitionName(subtotalBy, row) {
  * @param subtotalBy
  */
 function resolveAggregationMethod(columnDef, subtotalBy) {
-    var result = "";
-    if (columnDef.aggregationMethod) {
-        result = columnDef.aggregationMethod;
-    }
+    var result;
+    if (typeof columnDef.aggregationFunction === 'function')
+        result = columnDef.aggregationFunction;
+    else if (typeof columnDef.aggregationMethod === 'string')
+        result = columnDef.aggregationMethod.toLowerCase();
     // resolve conditional aggregation method
-    if (columnDef.conditionalAggregationMethod && subtotalBy && subtotalBy.length == 1) {
+    else if (columnDef.conditionalAggregationMethod && subtotalBy && subtotalBy.length == 1) {
         var subtotalByColTag = subtotalBy[0].colTag;
         if (columnDef.conditionalAggregationMethod[subtotalByColTag])
-            result = columnDef.conditionalAggregationMethod[subtotalByColTag];
+            result = columnDef.conditionalAggregationMethod[subtotalByColTag].toLowerCase();
     }
-    return result.toLowerCase();
+    return result;
 }
 
 function aggregateColumn(partitionResult, columnDef, subtotalBy) {
     var result;
     var aggregationMethod = resolveAggregationMethod(columnDef, subtotalBy);
-    switch (aggregationMethod) {
-        case "sum":
-            result = _straightSumAggregation({data: partitionResult, columnDef: columnDef});
-            break;
-        case "average":
-            result = _average({data: partitionResult, columnDef: columnDef});
-            break;
-        case "count":
-            result = _count({data: partitionResult, columnDef: columnDef});
-            break;
-        case "count_distinct":
-            result = _countDistinct({data: partitionResult, columnDef: columnDef});
-            break;
-        case "count_and_distinct":
-            result = _countAndDistinct({data: partitionResult, columnDef: columnDef});
-            break;
-        case "most_data_points":
-            result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
-            break;
-        default :
-            result = "";
-    }
+
+    // call custom aggregation function or use one of the stock aggregation functions
+    if (typeof aggregationMethod === 'function')
+        result = aggregationMethod({data: partitionResult, columnDef: columnDef});
+    else
+        switch (aggregationMethod) {
+            case "sum":
+                result = _straightSumAggregation({data: partitionResult, columnDef: columnDef});
+                break;
+            case "average":
+                result = _average({data: partitionResult, columnDef: columnDef});
+                break;
+            case "count":
+                result = _count({data: partitionResult, columnDef: columnDef});
+                break;
+            case "count_distinct":
+                result = _countDistinct({data: partitionResult, columnDef: columnDef});
+                break;
+            case "count_and_distinct":
+                result = _countAndDistinct({data: partitionResult, columnDef: columnDef});
+                break;
+            case "most_data_points":
+                result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
+                break;
+            default :
+                result = "";
+        }
     return result;
 }
 
