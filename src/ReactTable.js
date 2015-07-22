@@ -409,6 +409,16 @@ var Row = React.createClass({
             var displayContent = columnDef.isLoading ?
                 "Loading ... " : displayInstructions.value;
 
+            //onDoubleClickCallback: React.PropTypes.func,
+
+            var doubleClickHandler = function (reactTable, columnDef, i) {
+                if (columnDef.onDoubleClick) {
+                    columnDef.onDoubleClick.bind(null, reactTable.props.data[columnDef.colTag], columnDef, i);
+                } else if (reactTable.props.filtering && reactTable.props.filtering.doubleClickCell) {
+                    reactTable.props.handleColumnFilter(null, columnDef);
+                }
+            };
+
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                 if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
@@ -424,13 +434,14 @@ var Row = React.createClass({
                     onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
                     style={displayInstructions.styles}
                     key={columnDef.colTag}
-                    onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
-                        this.props.handleColumnFilter(null, columnDef) : null}>
+                    onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                        this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                 </td>
             );
         }
         classes = cx({
+            //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
