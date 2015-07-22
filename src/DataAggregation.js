@@ -177,10 +177,35 @@ function _countDistinct(options) {
     return uniqData.length == 1 ? uniqData[0] : uniqData.length;
 }
 
-function _countAndDistinct(options) {
+function _countAndDistinctPureJS(options) {
     var count = _count(options);
     var distinctCount = _countDistinct(options);
     return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
+}
+
+function _countAndDistinctUnderscoreJS(options) {
+    var data = options.data, columnDef = options.columnDef;
+    const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
+        if (a === b)
+            return 0;
+        return a > b ? 1 : -1;
+    });
+    const uniqData = _.chain(sortedData).uniq(true).compact().value();
+    return "(" + (uniqData.length === 1 ? uniqData[0] : uniqData.length) + "/" + data.length + ")";
+}
+
+/**
+ * if underscorejs is included, we will use a much more efficient algo to aggregate and count
+ * otherwise a pure javascript approach is used but is slow for large number of rows
+ * @param options
+ * @return {*}
+ * @private
+ */
+function _countAndDistinct(options) {
+    if (typeof _ === 'function')
+        return _countAndDistinctUnderscoreJS(options);
+    else
+        return _countAndDistinctPureJS(options);
 }
 
 function _mostDataPoints(options) {

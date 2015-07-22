@@ -5,21 +5,6 @@ $(function () {
         {
             colTag: "last_name",
             text: "Last Name",
-            /**
-             * custom aggregation method - efficient count distinct by pre-sorting
-             * using underscore
-             * @param options
-             */
-            aggregationFunction: function (options) {
-                var data = options.data, columnDef = options.columnDef;
-                const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
-                    if (a === b)
-                        return 0;
-                    return a > b ? 1 : -1;
-                });
-                const uniqData = _.chain(sortedData).uniq(true).compact().value();
-                return uniqData.length === 1 ? uniqData[0] : uniqData.length;
-            },
             customMenuItems: function (table, columnDef) {
                 return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
             }
@@ -29,7 +14,8 @@ $(function () {
             colTag: "nationality", text: "Nationality",
             sort: function (a, b) {
                 return a.nationality.localeCompare(b.nationality);
-            }
+            },
+            aggregationMethod: "count_and_distinct"
         },
         {
             colTag: "superlong",
