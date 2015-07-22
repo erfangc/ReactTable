@@ -30,7 +30,7 @@ const dateSorter = {
         return new Date(a[this.colTag]) - new Date(b[this.colTag]);
     },
     desc: function (a, b) {
-        return -1 * dateSorter.asc.call(null, a, b);
+        return -1 * dateSorter.asc.call(this, a, b);
     }
 };
 
