@@ -847,70 +847,7 @@ function parseString(data, isPdf){
 
 
     return content_data;
-};/** @jsx React.DOM */
-
-function topPosition(domElt) {
-    if (!domElt) {
-        return 0;
-    }
-    return domElt.offsetTop + topPosition(domElt.offsetParent);
-}
-
-var InfiniteScroll = React.createClass({
-    displayName: 'InfiniteScroll',
-    propTypes: {
-        pageStart: React.PropTypes.number,
-        threshold: React.PropTypes.number,
-        loadMore: React.PropTypes.func.isRequired,
-        hasMore: React.PropTypes.bool
-    },
-    getDefaultProps: function () {
-        return {
-            pageStart: 0,
-            hasMore: false,
-            threshold: 250
-        };
-    },
-    componentDidMount: function () {
-        this.pageLoaded = this.props.pageStart;
-        this.attachScrollListener();
-    },
-    componentDidUpdate: function () {
-        this.attachScrollListener();
-    },
-    render: function () {
-        var props = this.props;
-        return React.DOM.div(null, props.children, props.hasMore && (props.loader || InfiniteScroll._defaultLoader));
-    },
-    scrollListener: function () {
-        var el = this.getDOMNode();
-        var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        if (topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight < Number(this.props.threshold)) {
-            this.detachScrollListener();
-            // call loadMore after detachScrollListener to allow
-            // for non-async loadMore functions
-            this.props.loadMore(this.pageLoaded += 1);
-        }
-    },
-    attachScrollListener: function () {
-        if (!this.props.hasMore) {
-            return;
-        }
-        window.addEventListener('scroll', this.scrollListener);
-        window.addEventListener('resize', this.scrollListener);
-        this.scrollListener();
-    },
-    detachScrollListener: function () {
-        window.removeEventListener('scroll', this.scrollListener);
-        window.removeEventListener('resize', this.scrollListener);
-    },
-    componentWillUnmount: function () {
-        this.detachScrollListener();
-    }
-});
-InfiniteScroll.setDefaultLoader = function (loader) {
-    InfiniteScroll._defaultLoader = loader;
-};;/**
+};/**
  * a addon menu item that displays additional text on hover, useful for displaying column definitions
  */
 const InfoBox = React.createClass({displayName: "InfoBox",
@@ -1412,6 +1349,27 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
+    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
+        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
+        for (var i = 0; i < this.state.currentFilters.length; i++) {
+            if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
+                this.state.currentFilters.splice(i, 1);
+                this.handleClearFilter(columnDefToFilterBy, true);
+                break;
+            }
+        }
+
+        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
+        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    },
+    removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
+        this.handleClearFilter(colDef, dontSet);
+    },
+    removeAllFilter: function () {
+        this.handleClearAllFilters();
+    },
     render: function () {
         const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
@@ -1486,18 +1444,18 @@ var Row = React.createClass({displayName: "Row",
                     style: displayInstructions.styles, 
                     key: columnDef.colTag, 
                     onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
-                                   this.props.handleColumnFilter(null, columnDef) : null}, 
+                        this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent
                 )
             );
         }
         classes = cx({
-            'selected': this.props.isSelected && this.props.data.isDetail,
+            //'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         // apply extra CSS if specified
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-                    className: classes, style: this.props.extraStyle}, cells));
+            className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -1528,12 +1486,12 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: prevClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: nextClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -1567,17 +1525,19 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
                     React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                           placeholder: "ex: 1,10,15"}), 
+                        placeholder: "ex: 1,10,15"}), 
                     React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                       onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                       className: "btn-link"}, "Ok")
+                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                        className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
             React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-                React.createElement("div", null, React.createElement("i", {className: "fa fa-plus"}), " Add Subtotal"), 
+                React.createElement("div", null, 
+                    React.createElement("i", {className: "fa fa-plus"}), 
+                "Add Subtotal"), 
                 subMenuAttachment
             )
         );
@@ -1623,7 +1583,7 @@ function rowMapper(row) {
         columnDefs: this.state.columnDefs, 
         filtering: this.props.filtering, 
         handleColumnFilter: this.handleColumnFilter.bind}
-        ));
+    ));
 }
 
 function docClick(e) {
@@ -2346,9 +2306,9 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
                 if (caseSensitive)
-                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
+                    uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
                 else
-                    uChild.hiddenByFilter = uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+                    uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
             }
         }
     }
