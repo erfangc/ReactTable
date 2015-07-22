@@ -431,7 +431,7 @@ var Row = React.createClass({
             );
         }
         classes = cx({
-            'selected': this.props.isSelected && this.props.data.isDetail,
+            //'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         // apply extra CSS if specified
