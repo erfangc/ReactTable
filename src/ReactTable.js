@@ -330,6 +330,27 @@ var ReactTable = React.createClass({
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
+    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
+        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
+        for (var i = 0; i < this.state.currentFilters.length; i++) {
+            if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
+                this.state.currentFilters.splice(i, 1);
+                this.handleClearFilter(columnDefToFilterBy, true);
+                break;
+            }
+        }
+
+        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
+        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
+        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
+        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    },
+    removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
+        this.handleClearFilter(colDef, dontSet);
+    },
+    removeAllFilter: function () {
+        this.handleClearAllFilters();
+    },
     render: function () {
         const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
@@ -404,7 +425,7 @@ var Row = React.createClass({
                     style={displayInstructions.styles}
                     key={columnDef.colTag}
                     onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
-                                   this.props.handleColumnFilter(null, columnDef) : null}>
+                        this.props.handleColumnFilter(null, columnDef) : null}>
                     {displayContent}
                 </td>
             );
@@ -415,7 +436,7 @@ var Row = React.createClass({
         });
         // apply extra CSS if specified
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                    className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -446,12 +467,12 @@ var PageNavigator = React.createClass({
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
                     <a className={prevClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
                     <a className={nextClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
@@ -485,17 +506,19 @@ var SubtotalControl = React.createClass({
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
                     <label style={{"display": "block"}}>Enter Bucket(s)</label>
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-                           placeholder="ex: 1,10,15"/>
+                        placeholder="ex: 1,10,15"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-                       className="btn-link">Ok</a>
+                        onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                        className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
             <div
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
-                <div><i className="fa fa-plus"></i> Add Subtotal</div>
+                <div>
+                    <i className="fa fa-plus"></i>
+                Add Subtotal</div>
                 {subMenuAttachment}
             </div>
         );
@@ -541,7 +564,7 @@ function rowMapper(row) {
         columnDefs={this.state.columnDefs}
         filtering={this.props.filtering}
         handleColumnFilter={this.handleColumnFilter.bind}
-        />);
+    />);
 }
 
 function docClick(e) {
