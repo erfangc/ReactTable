@@ -409,16 +409,6 @@ var Row = React.createClass({
             var displayContent = columnDef.isLoading ?
                 "Loading ... " : displayInstructions.value;
 
-            //onDoubleClickCallback: React.PropTypes.func,
-
-            var doubleClickHandler = function (reactTable, columnDef, i) {
-                if (columnDef.onDoubleClick) {
-                    columnDef.onDoubleClick.bind(null, reactTable.props.data[columnDef.colTag], columnDef, i);
-                } else if (reactTable.props.filtering && reactTable.props.filtering.doubleClickCell) {
-                    reactTable.props.handleColumnFilter(null, columnDef);
-                }
-            };
-
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                 if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
