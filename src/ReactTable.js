@@ -352,15 +352,7 @@ var ReactTable = React.createClass({
         this.handleClearAllFilters();
     },
     render: function () {
-        //if has subtotal add an additonal column as the first column
-        if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
-            this.state.columnDefs.unshift({
-                colTag: "subtotalBy",
-                text: "group"
-            });
-        } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
-            this.state.columnDefs.shift();
-        }
+        addExtraColumnForSubtotalBy.call(this);
 
         const rasterizedData = rasterizeTree({
             node: this.state.rootNode,

@@ -330,3 +330,18 @@ function buildFooter(table, paginationAttr) {
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
 }
+
+/**
+ *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
+ */
+function addExtraColumnForSubtotalBy(){
+
+    if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
+        this.state.columnDefs.unshift({
+            colTag: "subtotalBy",
+            text: "group"
+        });
+    } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
+        this.state.columnDefs.shift();
+    }
+}

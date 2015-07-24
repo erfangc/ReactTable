@@ -193,6 +193,17 @@ function buildMenu(options) {
                 )
             })
         ],
+
+        summarizeClearAll: [
+            React.createElement(SubMenu, {
+                onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
+                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
+                subMenu: 
+                    React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
+                    )
+                    })
+        ],
         remove: [
             React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, React.createElement("i", {
                 className: "fa fa-remove"}), " Remove Column")
@@ -207,7 +218,12 @@ function buildMenu(options) {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
         if (!(table.props.filtering && table.props.filtering.disable))
             addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        if(!isFirstColumn || table.state.subtotalBy.length == 0) {
+            addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        }else{
+            //if first column is the subtotal column, don't add 'addSubtotal'
+            addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
+        }
         if (!isFirstColumn)
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
@@ -268,6 +284,10 @@ function pressedKey(table, colTag, e) {
  * @returns {XML}
  */
 function buildHeaders(table) {
+    if(table.state.subtotalBy.length > 0){
+
+    }
+
     var columnDef = table.state.columnDefs[0], i, style = {};
     /**
      * sortDef tracks whether the current column is being sorted
@@ -288,9 +308,9 @@ function buildHeaders(table) {
         React.createElement("div", {className: "rt-headers-container"}, 
             React.createElement("div", {style: {textAlign: "center"}, onDoubleClick: table.handleSetSort.bind(null,columnDef, null), 
                  className: "rt-header-element", key: columnDef.colTag}, 
-                React.createElement("a", {href: "#", className: textClasses, 
+                React.createElement("a", {className: textClasses, 
                    onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
-                    buildFirstColumnLabel(table).join("/")
+                    buildFirstColumnLabel(table)
                 ), 
                 sortIcon, 
                 React.createElement("input", {style: ss, 
@@ -325,7 +345,7 @@ function buildHeaders(table) {
             React.createElement("div", {className: "rt-headers-container"}, 
                 React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef, null), style: style, 
                      className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
-                    React.createElement("a", {href: "#", className: textClasses, 
+                    React.createElement("a", {className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
                         React.createElement("span", null, columnDef.text, " ", columnDef.isLoading ?
                             React.createElement("i", {className: "fa fa-spinner fa-spin"}) : null)
@@ -429,7 +449,21 @@ function buildFooter(table, paginationAttr) {
             numPages: paginationAttr.pageEnd, 
             handleClick: table.handlePageClick})) : null;
 }
-;/**
+
+/**
+ *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
+ */
+function addExtraColumnForSubtotalBy(){
+
+    if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
+        this.state.columnDefs.unshift({
+            colTag: "subtotalBy",
+            text: "group"
+        });
+    } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
+        this.state.columnDefs.shift();
+    }
+};/**
  * find the right sector name for the current row for the given level of row grouping
  * this method can take partition subtotalBy columns that are numeric in nature and partition rows based on where they fall
  * in the partition
@@ -608,10 +642,35 @@ function _countDistinct(options) {
     return uniqData.length == 1 ? uniqData[0] : uniqData.length;
 }
 
-function _countAndDistinct(options) {
+function _countAndDistinctPureJS(options) {
     var count = _count(options);
     var distinctCount = _countDistinct(options);
     return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
+}
+
+function _countAndDistinctUnderscoreJS(options) {
+    var data = options.data, columnDef = options.columnDef;
+    const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
+        if (a === b)
+            return 0;
+        return a > b ? 1 : -1;
+    });
+    const uniqData = _.chain(sortedData).uniq(true).compact().value();
+    return "(" + (uniqData.length === 1 ? uniqData[0] : uniqData.length) + "/" + data.length + ")";
+}
+
+/**
+ * if underscorejs is included, we will use a much more efficient algo to aggregate and count
+ * otherwise a pure javascript approach is used but is slow for large number of rows
+ * @param options
+ * @return {*}
+ * @private
+ */
+function _countAndDistinct(options) {
+    if (typeof _ === 'function')
+        return _countAndDistinctUnderscoreJS(options);
+    else
+        return _countAndDistinctPureJS(options);
 }
 
 function _mostDataPoints(options) {
@@ -1371,6 +1430,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         this.handleClearAllFilters();
     },
     render: function () {
+        addExtraColumnForSubtotalBy.call(this);
+
         const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
@@ -1443,19 +1504,21 @@ var Row = React.createClass({displayName: "Row",
                     onContextMenu: this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
                     style: displayInstructions.styles, 
                     key: columnDef.colTag, 
-                    onDoubleClick: this.props.filtering && this.props.filtering.doubleClickCell ?
+                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                    onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                         this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent
                 )
             );
         }
         classes = cx({
+            //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail
         });
         // apply extra CSS if specified
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-            className: classes, style: this.props.extraStyle}, cells));
+                    className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -1486,12 +1549,12 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: prevClass, 
-                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+                       onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: nextClass, 
-                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                       onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -1525,10 +1588,10 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
                     React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                        placeholder: "ex: 1,10,15"}), 
+                           placeholder: "ex: 1,10,15"}), 
                     React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                        className: "btn-link"}, "Ok")
+                       onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                       className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
@@ -1537,7 +1600,8 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, 
                     React.createElement("i", {className: "fa fa-plus"}), 
-                "Add Subtotal"), 
+                    "Add Subtotal"
+                ), 
                 subMenuAttachment
             )
         );
@@ -1583,7 +1647,7 @@ function rowMapper(row) {
         columnDefs: this.state.columnDefs, 
         filtering: this.props.filtering, 
         handleColumnFilter: this.handleColumnFilter.bind}
-    ));
+        ));
 }
 
 function docClick(e) {
@@ -1870,7 +1934,7 @@ function ReactTableHandleClearSubtotal(event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     /**
      * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
      */
@@ -1913,7 +1977,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
     /**
@@ -1976,14 +2040,23 @@ function partitionNumberLine(partitions) {
     return floatBuckets;
 }
 
+/**
+ * create subtotalBy information in header, e.g. [ tradeName -> tranType ]
+ * @param table
+ * @returns {string}
+ */
 function buildFirstColumnLabel(table) {
-    var result = [];
-    if (table.state.subtotalBy) {
-        for (var i = 0; i < table.state.subtotalBy.length; i++)
-            result.push(table.state.subtotalBy[i].text);
+    if (table.state.subtotalBy.length > 0) {
+        var label = "[ ";
+        for (var i = 0; i < table.state.subtotalBy.length; i++) {
+            label += table.state.subtotalBy[i].text + " -> "
+        }
+
+        label = label.substring(0, label.length - 4) + " ]";
+        return label;
+    } else {
+        return table.state.columnDefs[0].text;
     }
-    result.push(table.state.columnDefs[0].text);
-    return result;
 }
 
 function getInitialSelections(selectedRows, selectedSummaryRows) {
@@ -2030,7 +2103,7 @@ const dateSorter = {
         return new Date(a[this.colTag]) - new Date(b[this.colTag]);
     },
     desc: function (a, b) {
-        return -1 * dateSorter.asc.call(null, a, b);
+        return -1 * dateSorter.asc.call(this, a, b);
     }
 };
 
@@ -2417,7 +2490,7 @@ function _rasterizeChildren(flatData, options) {
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++) {
-            if( !(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter) )
+            if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
         }
     }
@@ -2426,7 +2499,7 @@ function _rasterizeChildren(flatData, options) {
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if( !detailRow.hiddenByFilter ) {
+        if (!detailRow.hiddenByFilter) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             flatData.push(detailRow);
@@ -2441,6 +2514,7 @@ function _rasterizeDetailRows(node, flatData) {
 function _decorateRowData(node, firstColumn) {
     node.rowData.sectorPath = node.getSectorPath();
     node.rowData[firstColumn.colTag] = node.sectorTitle;
+    //why rowData need refer to tree node itself?
     node.rowData.treeNode = node;
     return node;
 }
