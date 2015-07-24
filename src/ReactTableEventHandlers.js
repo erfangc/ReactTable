@@ -152,7 +152,7 @@ function ReactTableHandleClearSubtotal(event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     /**
      * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
      */
@@ -195,7 +195,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    newState.firstColumnLabel = buildFirstColumnLabel(this);
+    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     newState.subtotalBy = subtotalBy;
     newState.rootNode = createNewRootNode(this.props, newState);
     /**
@@ -258,14 +258,23 @@ function partitionNumberLine(partitions) {
     return floatBuckets;
 }
 
+/**
+ * create subtotalBy information in header, e.g. [ tradeName -> tranType ]
+ * @param table
+ * @returns {string}
+ */
 function buildFirstColumnLabel(table) {
-    var result = [];
-    if (table.state.subtotalBy) {
-        for (var i = 0; i < table.state.subtotalBy.length; i++)
-            result.push(table.state.subtotalBy[i].text);
+    if (table.state.subtotalBy.length > 0) {
+        var label = "[ ";
+        for (var i = 0; i < table.state.subtotalBy.length; i++) {
+            label += table.state.subtotalBy[i].text + " -> "
+        }
+
+        label = label.substring(0, label.length - 4) + " ]";
+        return label;
+    } else {
+        return table.state.columnDefs[0].text;
     }
-    result.push(table.state.columnDefs[0].text);
-    return result;
 }
 
 function getInitialSelections(selectedRows, selectedSummaryRows) {

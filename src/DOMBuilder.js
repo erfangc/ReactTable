@@ -74,6 +74,17 @@ function buildMenu(options) {
                 </div>
             }></SubMenu>
         ],
+
+        summarizeClearAll: [
+            <SubMenu
+                onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
+                menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
+                subMenu={
+                    <div className="rt-header-menu" style={subMenuStyles}>
+                        <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
+                    </div>
+                    }></SubMenu>
+        ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}><i
                 className="fa fa-remove"></i> Remove Column</div>
@@ -88,7 +99,12 @@ function buildMenu(options) {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
         if (!(table.props.filtering && table.props.filtering.disable))
             addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        if(!isFirstColumn || table.state.subtotalBy.length == 0) {
+            addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        }else{
+            //if first column is the subtotal column, don't add 'addSubtotal'
+            addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
+        }
         if (!isFirstColumn)
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
@@ -149,6 +165,10 @@ function pressedKey(table, colTag, e) {
  * @returns {XML}
  */
 function buildHeaders(table) {
+    if(table.state.subtotalBy.length > 0){
+
+    }
+
     var columnDef = table.state.columnDefs[0], i, style = {};
     /**
      * sortDef tracks whether the current column is being sorted
@@ -169,9 +189,9 @@ function buildHeaders(table) {
         <div className="rt-headers-container">
             <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)}
                  className="rt-header-element" key={columnDef.colTag}>
-                <a href="#" className={textClasses}
+                <a className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                    {buildFirstColumnLabel(table).join("/")}
+                    {buildFirstColumnLabel(table)}
                 </a>
                 {sortIcon}
                 <input style={ss}
@@ -206,7 +226,7 @@ function buildHeaders(table) {
             <div className="rt-headers-container">
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a href="#" className={textClasses}
+                    <a className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         <span>{columnDef.text} {columnDef.isLoading ?
                             <i className="fa fa-spinner fa-spin"></i> : null}</span>

@@ -31,7 +31,7 @@ function _rasterizeChildren(flatData, options) {
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
         for (j = 0; j < intermediateResult.length; j++) {
-            if( !(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter) )
+            if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
         }
     }
@@ -40,7 +40,7 @@ function _rasterizeChildren(flatData, options) {
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if( !detailRow.hiddenByFilter ) {
+        if (!detailRow.hiddenByFilter) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             flatData.push(detailRow);
@@ -55,6 +55,7 @@ function _rasterizeDetailRows(node, flatData) {
 function _decorateRowData(node, firstColumn) {
     node.rowData.sectorPath = node.getSectorPath();
     node.rowData[firstColumn.colTag] = node.sectorTitle;
+    //why rowData need refer to tree node itself?
     node.rowData.treeNode = node;
     return node;
 }
