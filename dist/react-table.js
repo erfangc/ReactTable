@@ -53,6 +53,10 @@ function buildCellLookAndFeel(columnDef, row) {
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
+    //add group row background color
+    if(!row.isDetail){
+        results.classes = {'group-background': true};
+    }
     // invoke cell class callback
     if (columnDef.cellClassCallback)
         results.classes = columnDef.cellClassCallback(row);
@@ -428,7 +432,7 @@ function buildFirstCellForRow() {
     else {
         result =
             (
-                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
+                React.createElement("td", {style: firstCellStyle, key: firstColTag, className: "group-background"}, 
                     React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
                         data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
@@ -454,7 +458,6 @@ function buildFooter(table, paginationAttr) {
  *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
  */
 function addExtraColumnForSubtotalBy(){
-
     if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
         this.state.columnDefs.unshift({
             colTag: "subtotalBy",
