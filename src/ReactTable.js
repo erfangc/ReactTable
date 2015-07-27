@@ -436,8 +436,10 @@ var Row = React.createClass({
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
-            'summary-selected': this.props.isSelected && !this.props.data.isDetail
+            'summary-selected': this.props.isSelected && !this.props.data.isDetail,
+            'group-background': !this.props.data.isDetail
         });
+
         // apply extra CSS if specified
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
                     className={classes} style={this.props.extraStyle}>{cells}</tr>);

@@ -309,7 +309,7 @@ function buildFirstCellForRow() {
     else {
         result =
             (
-                <td style={firstCellStyle} key={firstColTag} className="group-background">
+                <td style={firstCellStyle} key={firstColTag} >
                     <a onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
                         {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
                     </a>

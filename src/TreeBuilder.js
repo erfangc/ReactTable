@@ -14,6 +14,10 @@ function createNewRootNode(props, state) {
     return rootNode;
 }
 
+function createSubtreeForAddingSubtotal(){
+
+}
+
 /**
  * Creates the TreeNode structure backed by props.data and grouped by columns specified in subtotalBy
  * @param props
@@ -36,6 +40,8 @@ function buildTreeSkeleton(props, state) {
  * @param node
  * @param tableProps
  */
+//TODO: 1. can use tree postorder traversal to optimize
+// 2. can postpone generate lower level subtotal information
 function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
     node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);
