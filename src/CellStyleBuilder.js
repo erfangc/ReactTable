@@ -53,6 +53,10 @@ function buildCellLookAndFeel(columnDef, row) {
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
+    //add group row background color
+    if(!row.isDetail){
+        results.classes = {'group-background': true};
+    }
     // invoke cell class callback
     if (columnDef.cellClassCallback)
         results.classes = columnDef.cellClassCallback(row);

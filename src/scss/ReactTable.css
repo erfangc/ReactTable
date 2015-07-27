@@ -8,9 +8,11 @@
 
 .rt-table-container .rt-table tr.summary-selected { background-color: #d1dbe1; }
 
-.rt-table-container .rt-table tr:hover { background-color: #f0f3f5; }
+.rt-table-container .rt-table tr:hover { background-color: #337ab7; color:#fff;}
 
 .rt-table-container .rt-table td { border-bottom: 1px solid #f0f3f5; padding: 2px 5px; min-width: 5px; border-right: 1px solid #f9f2f4; white-space: nowrap; }
+
+.group-background { background-color: #EDEDED}
 
 .rt-table-container .rt-scrollable { overflow-x: auto; }
 

@@ -309,7 +309,7 @@ function buildFirstCellForRow() {
     else {
         result =
             (
-                <td style={firstCellStyle} key={firstColTag}>
+                <td style={firstCellStyle} key={firstColTag} className="group-background">
                     <a onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
                         {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
                     </a>
@@ -335,7 +335,6 @@ function buildFooter(table, paginationAttr) {
  *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
  */
 function addExtraColumnForSubtotalBy(){
-
     if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
         this.state.columnDefs.unshift({
             colTag: "subtotalBy",
