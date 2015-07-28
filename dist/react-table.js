@@ -53,10 +53,6 @@ function buildCellLookAndFeel(columnDef, row) {
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
 
-    //add group row background color
-    if(!row.isDetail){
-        results.classes = {'group-background': true};
-    }
     // invoke cell class callback
     if (columnDef.cellClassCallback)
         results.classes = columnDef.cellClassCallback(row);
@@ -432,7 +428,7 @@ function buildFirstCellForRow() {
     else {
         result =
             (
-                React.createElement("td", {style: firstCellStyle, key: firstColTag, className: "group-background"}, 
+                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
                     React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
                         data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
@@ -486,7 +482,7 @@ function getSectorName(row, subtotalBy) {
 
 function aggregateSector(partitionResult, columnDefs, subtotalBy) {
     var result = {};
-    for (var i = 1; i < columnDefs.length; i++)
+    for (var i = 0; i < columnDefs.length; i++)
         result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy);
     return result;
 }
@@ -1517,8 +1513,10 @@ var Row = React.createClass({displayName: "Row",
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
-            'summary-selected': this.props.isSelected && !this.props.data.isDetail
+            'summary-selected': this.props.isSelected && !this.props.data.isDetail,
+            'group-background': !this.props.data.isDetail
         });
+
         // apply extra CSS if specified
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
                     className: classes, style: this.props.extraStyle}, cells));
@@ -1945,7 +1943,8 @@ function ReactTableHandleClearSubtotal(event) {
     while (subtotalBy.length > 0)
         subtotalBy.pop();
     newState.subtotalBy = subtotalBy;
-    newState.rootNode = createNewRootNode(this.props, newState);
+    destorySubtrees(newState);
+    //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
      */
@@ -1980,9 +1979,9 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     newState.subtotalBy = subtotalBy;
-    newState.rootNode = createNewRootNode(this.props, newState);
+    buildSubtreeForNewSubtotal(newState);
+    //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
      */
@@ -2169,14 +2168,91 @@ function findDefByColTag(columnDefs, colTag) {
  * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
-
+    var start = new Date().getTime();
     var rootNode = buildTreeSkeleton(props, state);
     recursivelyAggregateNodes(rootNode, state);
 
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
 
+    console.log("create new tree: " + (new Date().getTime() - start));
     return rootNode;
+}
+
+/**
+ * adding new subtotalBy, only create the deepest level subtree
+ * @param lrootNode
+ * @param newSubtotal
+ * @param state
+ */
+function buildSubtree(lrootNode, newSubtotal, state) {
+    if (lrootNode.children.length == 0 || (lrootNode.children.children && lrootNode.children.children.length == 0)) {
+        //find the leaf node
+        for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
+            //build subtree
+            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal);
+        }
+        for (var key in lrootNode._childrenSectorNameMap) {
+            //generate subtree's aggregation info
+            var node = lrootNode._childrenSectorNameMap[key];
+            node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
+        }
+    } else {
+        for (var i = 0; i < lrootNode.children.length; i++) {
+            buildSubtree(lrootNode.children[i], newSubtotal, state);
+        }
+    }
+}
+
+function buildSubtreeForNewSubtotal(state) {
+    var start = new Date().getTime();
+
+    var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
+    buildSubtree(state.rootNode, newSubtotal, state);
+    state.rootNode.sortRecursivelyBySortIndex();
+    state.rootNode.foldSubTree();
+
+    console.log("build Subtree: " + (new Date().getTime() - start));
+    return state.rootNode;
+}
+
+/**
+ * destory all subtree in root
+ * @param lroot
+ */
+function destorySubtreesRecursively(lroot) {
+    if (lroot.children.length == 0) {
+        return;
+    }
+
+    for (var i = 0; i < lroot.children.length; i++) {
+        destorySubtreesRecursively(lroot.children[i]);
+        lroot.children[i] = null;
+    }
+    lroot.children = [];
+    lroot._childrenSectorNameMap = {};
+}
+
+/**
+ * destory root's children
+ * @param state
+ */
+function destoryRootChildren(state){
+    for (var i = 0; i < state.rootNode.children.length; i++) {
+        state.rootNode.children[i] = null;
+    }
+    state.rootNode.children = [];
+    state.rootNode._childrenSectorNameMap = {};
+}
+
+/**
+ * destory root's subtrees to clear subtotals
+ * @param state
+ */
+function destorySubtrees(state) {
+    var start = new Date().getTime();
+    destorySubtreesRecursively(state.rootNode);
+    console.log("destory subtree: " + (new Date().getTime() - start));
 }
 
 /**
@@ -2201,6 +2277,8 @@ function buildTreeSkeleton(props, state) {
  * @param node
  * @param tableProps
  */
+//TODO: 1. can use tree postorder traversal to optimize
+// 2. can postpone generate lower level subtotal information
 function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
     node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);
@@ -2231,6 +2309,8 @@ function populateChildNodesForRow(rootNode, row, subtotalBy) {
             subtotalByColumnDef: subtotalBy[i]
         });
     }
+    // currentNode is the deepest level non leaf children
+    return currentNode;
 }
 ;/**
  * Represents a grouping of table rows with references to children that are also grouping

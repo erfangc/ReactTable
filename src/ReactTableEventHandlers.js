@@ -160,7 +160,8 @@ function ReactTableHandleClearSubtotal(event) {
     while (subtotalBy.length > 0)
         subtotalBy.pop();
     newState.subtotalBy = subtotalBy;
-    newState.rootNode = createNewRootNode(this.props, newState);
+    destorySubtrees(newState);
+    //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
      */
@@ -195,9 +196,9 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
-    //newState.firstColumnLabel = buildFirstColumnLabel(this);
     newState.subtotalBy = subtotalBy;
-    newState.rootNode = createNewRootNode(this.props, newState);
+    buildSubtreeForNewSubtotal(newState);
+    //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
      */
