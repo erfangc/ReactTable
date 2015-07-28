@@ -1435,7 +1435,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
-        });
+        }, this.state.subtotalBy.length > 0);
         // maxRows is referenced later during event handling to determine upperVisualBound
         this.state.maxRows = rasterizedData.length;
 
@@ -1519,7 +1519,7 @@ var Row = React.createClass({displayName: "Row",
 
         // apply extra CSS if specified
         return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-                    className: classes, style: this.props.extraStyle}, cells));
+            className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -1550,12 +1550,12 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: prevClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: nextClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -1589,10 +1589,10 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
                     React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                           placeholder: "ex: 1,10,15"}), 
+                        placeholder: "ex: 1,10,15"}), 
                     React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                       onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                       className: "btn-link"}, "Ok")
+                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                        className: "btn-link"}, "Ok")
                 )
             ) : null;
         return (
@@ -1601,7 +1601,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, 
                     React.createElement("i", {className: "fa fa-plus"}), 
-                    "Add Subtotal"
+                "Add Subtotal"
                 ), 
                 subMenuAttachment
             )
@@ -1648,7 +1648,7 @@ function rowMapper(row) {
         columnDefs: this.state.columnDefs, 
         filtering: this.props.filtering, 
         handleColumnFilter: this.handleColumnFilter.bind}
-        ));
+    ));
 }
 
 function docClick(e) {
@@ -2545,15 +2545,15 @@ function _hasSortIndex(node) {
  * @param rootNode
  * @return {Array}
  */
-function rasterizeTree(options) {
+function rasterizeTree(options,hasSubtotalBy) {
     var node = options.node, firstColumn = options.firstColumn;
 
-    node = _decorateRowData(node, firstColumn);
+    node = _decorateRowData(node, firstColumn,hasSubtotalBy);
     var flatData = node.display == false ? [] : [node.rowData];
 
     if (!node.collapsed) {
         if (node.children.length > 0)
-            _rasterizeChildren(flatData, options);
+            _rasterizeChildren(flatData, options,hasSubtotalBy);
         else
             _rasterizeDetailRows(node, flatData);
     }
@@ -2567,11 +2567,11 @@ function rasterizeTree(options) {
  * ----------------------------------------------------------------------
  */
 
-function _rasterizeChildren(flatData, options) {
+function _rasterizeChildren(flatData, options,hasSubtotalBy) {
     var node = options.node, firstColumn = options.firstColumn;
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
-        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn});
+        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn},hasSubtotalBy);
         for (j = 0; j < intermediateResult.length; j++) {
             if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
@@ -2594,9 +2594,11 @@ function _rasterizeDetailRows(node, flatData) {
  * enhances the `rowData` attribute of the give node with info
  * that will be useful for rendering/interactivity such as sectorPath
  */
-function _decorateRowData(node, firstColumn) {
+function _decorateRowData(node, firstColumn,hasSubtotalBy) {
     node.rowData.sectorPath = node.getSectorPath();
-    node.rowData[firstColumn.colTag] = node.sectorTitle;
+    if(hasSubtotalBy){
+        node.rowData[firstColumn.colTag] = node.sectorTitle;
+    }
     //why rowData need refer to tree node itself?
     node.rowData.treeNode = node;
     return node;

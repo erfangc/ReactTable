@@ -358,7 +358,7 @@ var ReactTable = React.createClass({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
-        });
+        }, this.state.subtotalBy.length > 0);
         // maxRows is referenced later during event handling to determine upperVisualBound
         this.state.maxRows = rasterizedData.length;
 
@@ -442,7 +442,7 @@ var Row = React.createClass({
 
         // apply extra CSS if specified
         return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                    className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -473,12 +473,12 @@ var PageNavigator = React.createClass({
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
                     <a className={prevClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
                     <a className={nextClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
@@ -512,10 +512,10 @@ var SubtotalControl = React.createClass({
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
                     <label style={{"display": "block"}}>Enter Bucket(s)</label>
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-                           placeholder="ex: 1,10,15"/>
+                        placeholder="ex: 1,10,15"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-                       className="btn-link">Ok</a>
+                        onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                        className="btn-link">Ok</a>
                 </div>
             ) : null;
         return (
@@ -524,7 +524,7 @@ var SubtotalControl = React.createClass({
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>
                     <i className="fa fa-plus"></i>
-                    Add Subtotal
+                Add Subtotal
                 </div>
                 {subMenuAttachment}
             </div>
@@ -571,7 +571,7 @@ function rowMapper(row) {
         columnDefs={this.state.columnDefs}
         filtering={this.props.filtering}
         handleColumnFilter={this.handleColumnFilter.bind}
-        />);
+    />);
 }
 
 function docClick(e) {
