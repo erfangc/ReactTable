@@ -18,7 +18,7 @@ function getSectorName(row, subtotalBy) {
 
 function aggregateSector(partitionResult, columnDefs, subtotalBy) {
     var result = {};
-    for (var i = 1; i < columnDefs.length; i++)
+    for (var i = 0; i < columnDefs.length; i++)
         result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy);
     return result;
 }

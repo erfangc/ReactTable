@@ -4,14 +4,91 @@
  * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
-
+    var start = new Date().getTime();
     var rootNode = buildTreeSkeleton(props, state);
     recursivelyAggregateNodes(rootNode, state);
 
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
 
+    console.log("create new tree: " + (new Date().getTime() - start));
     return rootNode;
+}
+
+/**
+ * adding new subtotalBy, only create the deepest level subtree
+ * @param lrootNode
+ * @param newSubtotal
+ * @param state
+ */
+function buildSubtree(lrootNode, newSubtotal, state) {
+    if (lrootNode.children.length == 0 || (lrootNode.children.children && lrootNode.children.children.length == 0)) {
+        //find the leaf node
+        for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
+            //build subtree
+            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal);
+        }
+        for (var key in lrootNode._childrenSectorNameMap) {
+            //generate subtree's aggregation info
+            var node = lrootNode._childrenSectorNameMap[key];
+            node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
+        }
+    } else {
+        for (var i = 0; i < lrootNode.children.length; i++) {
+            buildSubtree(lrootNode.children[i], newSubtotal, state);
+        }
+    }
+}
+
+function buildSubtreeForNewSubtotal(state) {
+    var start = new Date().getTime();
+
+    var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
+    buildSubtree(state.rootNode, newSubtotal, state);
+    state.rootNode.sortRecursivelyBySortIndex();
+    state.rootNode.foldSubTree();
+
+    console.log("build Subtree: " + (new Date().getTime() - start));
+    return state.rootNode;
+}
+
+/**
+ * destory all subtree in root
+ * @param lroot
+ */
+function destorySubtreesRecursively(lroot) {
+    if (lroot.children.length == 0) {
+        return;
+    }
+
+    for (var i = 0; i < lroot.children.length; i++) {
+        destorySubtreesRecursively(lroot.children[i]);
+        lroot.children[i] = null;
+    }
+    lroot.children = [];
+    lroot._childrenSectorNameMap = {};
+}
+
+/**
+ * destory root's children
+ * @param state
+ */
+function destoryRootChildren(state) {
+    for (var i = 0; i < state.rootNode.children.length; i++) {
+        state.rootNode.children[i] = null;
+    }
+    state.rootNode.children = [];
+    state.rootNode._childrenSectorNameMap = {};
+}
+
+/**
+ * destory root's subtrees to clear subtotals
+ * @param state
+ */
+function destorySubtrees(state) {
+    var start = new Date().getTime();
+    destorySubtreesRecursively(state.rootNode);
+    console.log("destory subtree: " + (new Date().getTime() - start));
 }
 
 /**
@@ -23,11 +100,12 @@ function createNewRootNode(props, state) {
 function buildTreeSkeleton(props, state) {
     var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
     if (props.disableGrandTotal)
-        rootNode.display = false
+        rootNode.display = false;
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
         populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
     }
+
     return rootNode
 }
 
@@ -36,6 +114,8 @@ function buildTreeSkeleton(props, state) {
  * @param node
  * @param tableProps
  */
+//TODO: 1. can use tree postorder traversal to optimize
+// 2. can postpone generate lower level subtotal information
 function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
     node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);
@@ -66,4 +146,6 @@ function populateChildNodesForRow(rootNode, row, subtotalBy) {
             subtotalByColumnDef: subtotalBy[i]
         });
     }
+    // currentNode is the deepest level non leaf children
+    return currentNode;
 }

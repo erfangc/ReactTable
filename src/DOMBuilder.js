@@ -74,6 +74,17 @@ function buildMenu(options) {
                 </div>
             }></SubMenu>
         ],
+
+        summarizeClearAll: [
+            <SubMenu
+                onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
+                menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
+                subMenu={
+                    <div className="rt-header-menu" style={subMenuStyles}>
+                        <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
+                    </div>
+                    }></SubMenu>
+        ],
         remove: [
             <div className="menu-item" onClick={table.handleRemove.bind(null, columnDef)}><i
                 className="fa fa-remove"></i> Remove Column</div>
@@ -88,7 +99,12 @@ function buildMenu(options) {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
         if (!(table.props.filtering && table.props.filtering.disable))
             addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        if(!isFirstColumn || table.state.subtotalBy.length == 0) {
+            addMenuItems(menuItems, availableDefaultMenuItems.summarize);
+        }else{
+            //if first column is the subtotal column, don't add 'addSubtotal'
+            addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
+        }
         if (!isFirstColumn)
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
     }
@@ -142,6 +158,33 @@ function pressedKey(table, colTag, e) {
         });
     }
 }
+
+function buildFilterList(table,columnDef){
+    if(!table.state.filterData){
+        return;
+    }
+    var filterData = table.state.filterData[columnDef.colTag];
+    if(!filterData){
+        return;
+    }
+    filterData.sort();
+    var filterList = [];
+    for(var i = 0; i< filterData.length; i++){
+        filterList.push(
+            <option value={filterData[i]}>{filterData[i]}</option>
+        );
+    }
+
+    return (
+        <select
+            className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
+            onChange={table.handleColumnFilter.bind(null, columnDef)}
+            onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
+            {filterList}
+        </select>
+        )
+}
+
 /**
  * creates the header row of the table
  * TODO too long needs refactoring big time I am not kidding
@@ -169,15 +212,12 @@ function buildHeaders(table) {
         <div className="rt-headers-container">
             <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)}
                  className="rt-header-element" key={columnDef.colTag}>
-                <a href="#" className={textClasses}
+                <a className={textClasses}
                    onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                    {buildFirstColumnLabel(table).join("/")}
+                    {buildFirstColumnLabel(table)}
                 </a>
                 {sortIcon}
-                <input style={ss}
-                       className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-                       onChange={table.handleColumnFilter.bind(null, columnDef)}
-                       onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
+                {buildFilterList(table,columnDef)}
             </div>
             <div className={numericPanelClasses}>
                 <NumericFilterPanel></NumericFilterPanel>
@@ -206,16 +246,13 @@ function buildHeaders(table) {
             <div className="rt-headers-container">
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
-                    <a href="#" className={textClasses}
+                    <a className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         <span>{columnDef.text} {columnDef.isLoading ?
                             <i className="fa fa-spinner fa-spin"></i> : null}</span>
                     </a>
                     {sortIcon}
-                    <input style={ss}
-                           className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-                           onChange={table.handleColumnFilter.bind(null, columnDef)}
-                           onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
+                    {buildFilterList(table,columnDef)}
                 </div>
                 <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}
@@ -289,7 +326,7 @@ function buildFirstCellForRow() {
     else {
         result =
             (
-                <td style={firstCellStyle} key={firstColTag}>
+                <td style={firstCellStyle} key={firstColTag} >
                     <a onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
                         {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
                     </a>
@@ -309,4 +346,18 @@ function buildFooter(table, paginationAttr) {
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
+}
+
+/**
+ *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
+ */
+function addExtraColumnForSubtotalBy(){
+    if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
+        this.state.columnDefs.unshift({
+            colTag: "subtotalBy",
+            text: "group"
+        });
+    } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
+        this.state.columnDefs.shift();
+    }
 }
