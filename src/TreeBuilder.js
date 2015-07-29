@@ -73,7 +73,7 @@ function destorySubtreesRecursively(lroot) {
  * destory root's children
  * @param state
  */
-function destoryRootChildren(state){
+function destoryRootChildren(state) {
     for (var i = 0; i < state.rootNode.children.length; i++) {
         state.rootNode.children[i] = null;
     }
@@ -100,11 +100,12 @@ function destorySubtrees(state) {
 function buildTreeSkeleton(props, state) {
     var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
     if (props.disableGrandTotal)
-        rootNode.display = false
+        rootNode.display = false;
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
         populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
     }
+
     return rootNode
 }
 

@@ -157,9 +157,9 @@ var ReactTable = React.createClass({
 
         var firstColumnLabel = buildFirstColumnLabel(this);
         $.each(this.props.columnDefs, function () {
-            if(this.colTag === 'subtotalBy'){
+            if (this.colTag === 'subtotalBy') {
                 objToExport.headers.push(firstColumnLabel);
-            }else{
+            } else {
                 objToExport.headers.push(this.text);
             }
         });
@@ -323,6 +323,13 @@ var ReactTable = React.createClass({
             $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
+
+        setTimeout(function(){
+            for (var i = 0; i < this.props.data.length; i++) {
+                buildFilterData(this.props.data[i], this.state,this.props);
+            }
+            convertFilterData(this.state.filterData);
+        }.bind(this));
     },
     componentWillMount: function () {
     },
@@ -707,5 +714,37 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     return {
         start: currentPage - leftAllocation - 1,
         end: currentPage + rightAllocation - 1
+    }
+}
+
+
+function buildFilterData(row, state,props) {
+    if (!state.filterData) {
+        state.filterData = {};
+    }
+
+    var columnDefs = state.columnDefs;
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].format == 'number' || columnDefs[i].colTag == props.rowKey) {
+            continue;
+        }
+
+        var key = columnDefs[i].colTag;
+        var hashmap = state.filterData[key] || {};
+        hashmap[row[key]] = true;
+        state.filterData[key] = hashmap;
+    }
+}
+
+function convertFilterData(filterData) {
+    for (var key in filterData) {
+        var map = filterData[key];
+        var arr = [];
+        for (var value in map) {
+            if (value != "") {
+                arr.push(value);
+            }
+        }
+        filterData[key] = arr;
     }
 }

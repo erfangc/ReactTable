@@ -158,6 +158,33 @@ function pressedKey(table, colTag, e) {
         });
     }
 }
+
+function buildFilterList(table,columnDef){
+    if(!table.state.filterData){
+        return;
+    }
+    var filterData = table.state.filterData[columnDef.colTag];
+    if(!filterData){
+        return;
+    }
+    filterData.sort();
+    var filterList = [];
+    for(var i = 0; i< filterData.length; i++){
+        filterList.push(
+            <option value={filterData[i]}>{filterData[i]}</option>
+        );
+    }
+
+    return (
+        <select
+            className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
+            onChange={table.handleColumnFilter.bind(null, columnDef)}
+            onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
+            {filterList}
+        </select>
+        )
+}
+
 /**
  * creates the header row of the table
  * TODO too long needs refactoring big time I am not kidding
@@ -190,10 +217,7 @@ function buildHeaders(table) {
                     {buildFirstColumnLabel(table)}
                 </a>
                 {sortIcon}
-                <input style={ss}
-                       className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-                       onChange={table.handleColumnFilter.bind(null, columnDef)}
-                       onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
+                {buildFilterList(table,columnDef)}
             </div>
             <div className={numericPanelClasses}>
                 <NumericFilterPanel></NumericFilterPanel>
@@ -228,10 +252,7 @@ function buildHeaders(table) {
                             <i className="fa fa-spinner fa-spin"></i> : null}</span>
                     </a>
                     {sortIcon}
-                    <input style={ss}
-                           className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-                           onChange={table.handleColumnFilter.bind(null, columnDef)}
-                           onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}/>
+                    {buildFilterList(table,columnDef)}
                 </div>
                 <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}

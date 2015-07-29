@@ -277,6 +277,33 @@ function pressedKey(table, colTag, e) {
         });
     }
 }
+
+function buildFilterList(table,columnDef){
+    if(!table.state.filterData){
+        return;
+    }
+    var filterData = table.state.filterData[columnDef.colTag];
+    if(!filterData){
+        return;
+    }
+    filterData.sort();
+    var filterList = [];
+    for(var i = 0; i< filterData.length; i++){
+        filterList.push(
+            React.createElement("option", {value: filterData[i]}, filterData[i])
+        );
+    }
+
+    return (
+        React.createElement("select", {
+            className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
+            onChange: table.handleColumnFilter.bind(null, columnDef), 
+            onKeyDown: pressedKey.bind(null, table, columnDef.colTag)}, 
+            filterList
+        )
+        )
+}
+
 /**
  * creates the header row of the table
  * TODO too long needs refactoring big time I am not kidding
@@ -309,10 +336,7 @@ function buildHeaders(table) {
                     buildFirstColumnLabel(table)
                 ), 
                 sortIcon, 
-                React.createElement("input", {style: ss, 
-                       className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
-                       onChange: table.handleColumnFilter.bind(null, columnDef), 
-                       onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
+                buildFilterList(table,columnDef)
             ), 
             React.createElement("div", {className: numericPanelClasses}, 
                 React.createElement(NumericFilterPanel, null)
@@ -347,10 +371,7 @@ function buildHeaders(table) {
                             React.createElement("i", {className: "fa fa-spinner fa-spin"}) : null)
                     ), 
                     sortIcon, 
-                    React.createElement("input", {style: ss, 
-                           className: ("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide"), 
-                           onChange: table.handleColumnFilter.bind(null, columnDef), 
-                           onKeyDown: pressedKey.bind(null, table, columnDef.colTag)})
+                    buildFilterList(table,columnDef)
                 ), 
                 React.createElement("div", {className: numericPanelClasses}, 
                     React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
@@ -1230,9 +1251,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 
         var firstColumnLabel = buildFirstColumnLabel(this);
         $.each(this.props.columnDefs, function () {
-            if(this.colTag === 'subtotalBy'){
+            if (this.colTag === 'subtotalBy') {
                 objToExport.headers.push(firstColumnLabel);
-            }else{
+            } else {
                 objToExport.headers.push(this.text);
             }
         });
@@ -1396,6 +1417,13 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             $node.find(".rt-headers").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
+
+        setTimeout(function(){
+            for (var i = 0; i < this.props.data.length; i++) {
+                buildFilterData(this.props.data[i], this.state,this.props);
+            }
+            convertFilterData(this.state.filterData);
+        }.bind(this));
     },
     componentWillMount: function () {
     },
@@ -1782,7 +1810,38 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
         end: currentPage + rightAllocation - 1
     }
 }
-;/**
+
+
+function buildFilterData(row, state,props) {
+    if (!state.filterData) {
+        state.filterData = {};
+    }
+
+    var columnDefs = state.columnDefs;
+    for (var i = 0; i < columnDefs.length; i++) {
+        if (columnDefs[i].format == 'number' || columnDefs[i].colTag == props.rowKey) {
+            continue;
+        }
+
+        var key = columnDefs[i].colTag;
+        var hashmap = state.filterData[key] || {};
+        hashmap[row[key]] = true;
+        state.filterData[key] = hashmap;
+    }
+}
+
+function convertFilterData(filterData) {
+    for (var key in filterData) {
+        var map = filterData[key];
+        var arr = [];
+        for (var value in map) {
+            if (value != "") {
+                arr.push(value);
+            }
+        }
+        filterData[key] = arr;
+    }
+};/**
  * - STOP -
  *
  * please do not add too many states to the table. Per react.js documentation for best practices, any value derivable from props alone should NOT be stored as a state
@@ -2238,7 +2297,7 @@ function destorySubtreesRecursively(lroot) {
  * destory root's children
  * @param state
  */
-function destoryRootChildren(state){
+function destoryRootChildren(state) {
     for (var i = 0; i < state.rootNode.children.length; i++) {
         state.rootNode.children[i] = null;
     }
@@ -2265,11 +2324,12 @@ function destorySubtrees(state) {
 function buildTreeSkeleton(props, state) {
     var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
     if (props.disableGrandTotal)
-        rootNode.display = false
+        rootNode.display = false;
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
         populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
     }
+
     return rootNode
 }
 
