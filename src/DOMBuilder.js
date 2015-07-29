@@ -165,10 +165,6 @@ function pressedKey(table, colTag, e) {
  * @returns {XML}
  */
 function buildHeaders(table) {
-    if(table.state.subtotalBy.length > 0){
-
-    }
-
     var columnDef = table.state.columnDefs[0], i, style = {};
     /**
      * sortDef tracks whether the current column is being sorted

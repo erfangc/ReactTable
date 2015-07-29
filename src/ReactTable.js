@@ -155,8 +155,13 @@ var ReactTable = React.createClass({
             selectedDetailRows: this.state.selectedDetailRows
         });
 
+        var firstColumnLabel = buildFirstColumnLabel(this);
         $.each(this.props.columnDefs, function () {
-            objToExport.headers.push(this.text);
+            if(this.colTag === 'subtotalBy'){
+                objToExport.headers.push(firstColumnLabel);
+            }else{
+                objToExport.headers.push(this.text);
+            }
         });
 
         $.each(rasterizedData, function () {

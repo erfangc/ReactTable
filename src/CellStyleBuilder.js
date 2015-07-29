@@ -48,7 +48,7 @@ function computeCellAlignment(alignment, row, columnDef) {
  */
 function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
-    var value = row[columnDef.colTag];
+    var value = row[columnDef.colTag]  || ""; // avoid undefined
 
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;

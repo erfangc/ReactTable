@@ -48,7 +48,7 @@ function computeCellAlignment(alignment, row, columnDef) {
  */
 function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
-    var value = row[columnDef.colTag];
+    var value = row[columnDef.colTag]  || ""; // avoid undefined
 
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
@@ -284,10 +284,6 @@ function pressedKey(table, colTag, e) {
  * @returns {XML}
  */
 function buildHeaders(table) {
-    if(table.state.subtotalBy.length > 0){
-
-    }
-
     var columnDef = table.state.columnDefs[0], i, style = {};
     /**
      * sortDef tracks whether the current column is being sorted
@@ -1232,8 +1228,13 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             selectedDetailRows: this.state.selectedDetailRows
         });
 
+        var firstColumnLabel = buildFirstColumnLabel(this);
         $.each(this.props.columnDefs, function () {
-            objToExport.headers.push(this.text);
+            if(this.colTag === 'subtotalBy'){
+                objToExport.headers.push(firstColumnLabel);
+            }else{
+                objToExport.headers.push(this.text);
+            }
         });
 
         $.each(rasterizedData, function () {
