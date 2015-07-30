@@ -324,9 +324,10 @@ var ReactTable = React.createClass({
         });
         bindHeadersToMenu($node);
 
-        setTimeout(function(){
+        // build dropdown list for column filter
+        setTimeout(function () {
             for (var i = 0; i < this.props.data.length; i++) {
-                buildFilterData(this.props.data[i], this.state,this.props);
+                buildFilterData(this.props.data[i], this.state, this.props);
             }
             convertFilterData(this.state.filterData);
         }.bind(this));
@@ -717,8 +718,13 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-
-function buildFilterData(row, state,props) {
+/**
+ * generate distinct values for each column
+ * @param row
+ * @param state
+ * @param props
+ */
+function buildFilterData(row, state, props) {
     if (!state.filterData) {
         state.filterData = {};
     }
@@ -736,6 +742,10 @@ function buildFilterData(row, state,props) {
     }
 }
 
+/**
+ * convert distinct values in map into an array
+ * @param filterData
+ */
 function convertFilterData(filterData) {
     for (var key in filterData) {
         var map = filterData[key];
