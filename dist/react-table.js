@@ -1418,9 +1418,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         });
         bindHeadersToMenu($node);
 
-        setTimeout(function(){
+        // build dropdown list for column filter
+        setTimeout(function () {
             for (var i = 0; i < this.props.data.length; i++) {
-                buildFilterData(this.props.data[i], this.state,this.props);
+                buildFilterData(this.props.data[i], this.state, this.props);
             }
             convertFilterData(this.state.filterData);
         }.bind(this));
@@ -1811,8 +1812,13 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-
-function buildFilterData(row, state,props) {
+/**
+ * generate distinct values for each column
+ * @param row
+ * @param state
+ * @param props
+ */
+function buildFilterData(row, state, props) {
     if (!state.filterData) {
         state.filterData = {};
     }
@@ -1830,6 +1836,10 @@ function buildFilterData(row, state,props) {
     }
 }
 
+/**
+ * convert distinct values in map into an array
+ * @param filterData
+ */
 function convertFilterData(filterData) {
     for (var key in filterData) {
         var map = filterData[key];
@@ -2264,6 +2274,11 @@ function buildSubtree(lrootNode, newSubtotal, state) {
     }
 }
 
+/**
+ * add a new subtotalBy, build subtrees in leaf nodes
+ * @param state
+ * @returns {*}
+ */
 function buildSubtreeForNewSubtotal(state) {
     var start = new Date().getTime();
 
@@ -2338,8 +2353,7 @@ function buildTreeSkeleton(props, state) {
  * @param node
  * @param tableProps
  */
-//TODO: 1. can use tree postorder traversal to optimize
-// 2. can postpone generate lower level subtotal information
+// can postpone generate lower level aggregation information to accelerate initial render
 function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
     node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);

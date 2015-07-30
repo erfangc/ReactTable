@@ -40,6 +40,11 @@ function buildSubtree(lrootNode, newSubtotal, state) {
     }
 }
 
+/**
+ * add a new subtotalBy, build subtrees in leaf nodes
+ * @param state
+ * @returns {*}
+ */
 function buildSubtreeForNewSubtotal(state) {
     var start = new Date().getTime();
 
@@ -114,8 +119,7 @@ function buildTreeSkeleton(props, state) {
  * @param node
  * @param tableProps
  */
-//TODO: 1. can use tree postorder traversal to optimize
-// 2. can postpone generate lower level subtotal information
+// can postpone generate lower level aggregation information to accelerate initial render
 function recursivelyAggregateNodes(node, state) {
     // aggregate the current node
     node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, state.subtotalBy);
