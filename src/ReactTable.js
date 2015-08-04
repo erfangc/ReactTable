@@ -435,14 +435,16 @@ var Row = React.createClass({
             cells.push(
                 <td
                     className={classes}
+                    ref={columnDef.colTag}
                     onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                    onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
+                    onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : openCellMenu.bind(this, columnDef)}
                     style={displayInstructions.styles}
                     key={columnDef.colTag}
                     //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
                     onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                         this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
+                    {this.props.cellRightClickMenu ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null}
                 </td>
             );
         }
@@ -584,6 +586,7 @@ function rowMapper(row) {
         columnDefs={this.state.columnDefs}
         filtering={this.props.filtering}
         handleColumnFilter={this.handleColumnFilter.bind}
+        cellRightClickMenu={this.props.cellRightClickMenu}
     />);
 }
 
@@ -757,4 +760,51 @@ function convertFilterData(filterData) {
         }
         filterData[key] = arr;
     }
+}
+
+function openCellMenu(columnDef, event) {
+    event.preventDefault();
+    var $cell = $(this.refs[columnDef.colTag].getDOMNode());
+    var cellPosition = $cell.position();
+    var $menu = $cell.find('.rt-cell-menu');
+    if (cellPosition.left !== 0) {
+        $menu.css("left", cellPosition.left + "px");
+    }
+    if (cellPosition.right !== 0) {
+        $menu.css("right", cellPosition.right + "px");
+    }
+    $menu.css('display', 'block');
+
+    $cell.hover(null, function hoveroutCell() {
+        $menu.css('display', 'none');
+    });
+
+    $menu.hover(null, function hoveroutMenu() {
+        $menu.css('display', 'none');
+    });
+}
+
+function buildCellMenu(cellMenu, rowData, columnDef) {
+    var menuItems = [];
+    var menuStyle = {};
+
+    if (cellMenu.style.textAlign === 'right') {
+        menuStyle.right = "0%";
+    }
+    else {
+        menuStyle.left = "0%";
+    }
+
+    cellMenu.menus.forEach(function (menu) {
+        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, columnDef)} >{menu.description}</div>);
+        if (menu.followingSeparator) {
+            menuItems.push(<div className="separator"/>);
+        }
+    });
+
+    return (
+        <div style={menuStyle} className="rt-cell-menu">
+            {menuItems}
+        </div>
+    )
 }
