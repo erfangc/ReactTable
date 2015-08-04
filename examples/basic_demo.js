@@ -59,20 +59,44 @@ $(function () {
         var testData = data;
         // first table
         var options = {
-            //filtering: {
-            //    disable: true
-            //},
-            disablePagination: true,
+            disableInfiniteScrolling: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
-            subtotalBy: [{
-                colTag: "nationality", text: "Nationality"
-            }],
             rowKey: 'id',
             data: testData,
-            onRightClick: function (row, event) {
+            onRightClick: function (row, columnDef, event) {
                 console.log(row);
-                console.log(state);
                 event.preventDefault();
+            },
+            cellRightClickMenu: {
+                style: {textAlign:'left'},
+                menus: [
+                    {
+                        description: 'Open in Google',
+                        callback: function (rowData, columnDef, event) {
+                            event.stopPropagation();
+                            console.log(rowData[columnDef.colTag]);
+                            window.open("https://www.google.com/#q=" + rowData[columnDef.colTag]);
+                        },
+                        followingSeparator: false
+                    },
+                    {
+                        description: 'Open in Bing',
+                        callback: function (rowData, columnDef, event) {
+                            event.stopPropagation();
+                            console.log(rowData[columnDef.colTag]);
+                            window.open("https://www.bing.com/search?q=" + rowData[columnDef.colTag]);
+                        },
+                        followingSeparator: true
+                    },
+                    {
+                        description: 'Open in Yahoo!',
+                        callback: function (rowData, columnDef, event) {
+                            event.stopPropagation();
+                            console.log(rowData[columnDef.colTag]);
+                        },
+                        followingSeparator: false
+                    }
+                ]
             },
             height: "750px",
             columnDefs: columnDefs,
