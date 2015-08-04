@@ -93,6 +93,7 @@ $(function () {
                         callback: function (rowData, columnDef, event) {
                             event.stopPropagation();
                             console.log(rowData[columnDef.colTag]);
+                            alert("don't know how to open in yahoo.");
                         },
                         followingSeparator: false
                     }
