@@ -444,7 +444,7 @@ var Row = React.createClass({
                     onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                         this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
-                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null}
+                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
                 </td>
             );
         }
@@ -784,7 +784,11 @@ function openCellMenu(columnDef, event) {
     });
 }
 
-function buildCellMenu(cellMenu, rowData, columnDef) {
+function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
+    if (!rowData[currentColumnDef.colTag]) {
+        return null;
+    }
+
     var menuItems = [];
     var menuStyle = {};
 
@@ -796,7 +800,7 @@ function buildCellMenu(cellMenu, rowData, columnDef) {
     }
 
     cellMenu.menus.forEach(function (menu) {
-        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, columnDef)} >{menu.description}</div>);
+        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
         if (menu.followingSeparator) {
             menuItems.push(<div className="separator"/>);
         }

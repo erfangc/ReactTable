@@ -75,27 +75,27 @@ $(function () {
                 menus: [
                     {
                         description: 'Open in Google',
-                        callback: function (rowData, columnDef, event) {
+                        callback: function (rowData, curColumnDef, columnDefs, event) {
                             event.stopPropagation();
-                            console.log(rowData[columnDef.colTag]);
-                            window.open("https://www.google.com/#q=" + rowData[columnDef.colTag]);
+                            console.log(rowData[curColumnDef.colTag]);
+                            window.open("https://www.google.com/#q=" + rowData[curColumnDef.colTag]);
                         },
                         followingSeparator: false
                     },
                     {
                         description: 'Open in Bing',
-                        callback: function (rowData, columnDef, event) {
+                        callback: function (rowData, curColumnDef,columnDefs, event) {
                             event.stopPropagation();
-                            console.log(rowData[columnDef.colTag]);
-                            window.open("https://www.bing.com/search?q=" + rowData[columnDef.colTag]);
+                            console.log(rowData[curColumnDef.colTag]);
+                            window.open("https://www.bing.com/search?q=" + rowData[curColumnDef.colTag]);
                         },
                         followingSeparator: true
                     },
                     {
                         description: 'Open in Yahoo!',
-                        callback: function (rowData, columnDef, event) {
+                        callback: function (rowData, curColumnDef,columnDefs, event) {
                             event.stopPropagation();
-                            console.log(rowData[columnDef.colTag]);
+                            console.log(rowData[curColumnDef.colTag]);
                             alert("don't know how to open in yahoo.");
                         },
                         followingSeparator: false
