@@ -59,20 +59,48 @@ $(function () {
         var testData = data;
         // first table
         var options = {
-            //filtering: {
-            //    disable: true
-            //},
-            disablePagination: true,
+            disableInfiniteScrolling: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
             subtotalBy: [{
                 colTag: "nationality", text: "Nationality"
             }],
             rowKey: 'id',
             data: testData,
-            onRightClick: function (row, event) {
+            onRightClick: function (row, columnDef, event) {
                 console.log(row);
-                console.log(state);
                 event.preventDefault();
+            },
+            cellRightClickMenu: {
+                style: {textAlign:'left'},
+                menus: [
+                    {
+                        description: 'Open in Google',
+                        callback: function (rowData, curColumnDef, columnDefs, event) {
+                            event.stopPropagation();
+                            console.log(rowData[curColumnDef.colTag]);
+                            window.open("https://www.google.com/#q=" + rowData[curColumnDef.colTag]);
+                        },
+                        followingSeparator: false
+                    },
+                    {
+                        description: 'Open in Bing',
+                        callback: function (rowData, curColumnDef,columnDefs, event) {
+                            event.stopPropagation();
+                            console.log(rowData[curColumnDef.colTag]);
+                            window.open("https://www.bing.com/search?q=" + rowData[curColumnDef.colTag]);
+                        },
+                        followingSeparator: true
+                    },
+                    {
+                        description: 'Open in Yahoo!',
+                        callback: function (rowData, curColumnDef,columnDefs, event) {
+                            event.stopPropagation();
+                            console.log(rowData[curColumnDef.colTag]);
+                            alert("don't know how to open in yahoo.");
+                        },
+                        followingSeparator: false
+                    }
+                ]
             },
             height: "750px",
             columnDefs: columnDefs,
@@ -94,7 +122,6 @@ $(function () {
             onSummarySelectCallback: function (result, state) {
                 console.log(result);
                 console.log(state);
-                console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
         table = React.render(React.createElement(ReactTable, options), document.getElementById("table"));

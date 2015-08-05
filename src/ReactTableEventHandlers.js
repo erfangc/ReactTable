@@ -267,9 +267,18 @@ function partitionNumberLine(partitions) {
 function buildFirstColumnLabel(table) {
     if (table.state.subtotalBy.length > 0) {
         var label = "[ ";
-        for (var i = 0; i < table.state.subtotalBy.length; i++) {
-            label += table.state.subtotalBy[i].text + " -> "
-        }
+
+        table.state.subtotalBy.forEach(function (subtotalBy) {
+            var column = table.state.columnDefs.filter(function (columnDef) {
+                return columnDef.colTag === subtotalBy.colTag;
+            });
+
+            if (column.length == 0) {
+                throw "subtotalBy field '" + subtotalBy.colTag + "' doesn't exist!";
+            }
+
+            label += column[0].text + " -> "
+        });
 
         label = label.substring(0, label.length - 4) + " ]";
         return label;

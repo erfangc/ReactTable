@@ -415,36 +415,41 @@ var ReactTable = React.createClass({
 var Row = React.createClass({
     render: function () {
         const cx = React.addons.classSet;
-        var cells = [buildFirstCellForRow.call(this)];
-        for (var i = 1; i < this.props.columnDefs.length; i++) {
-            var columnDef = this.props.columnDefs[i];
-            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var classes = cx(displayInstructions.classes);
-            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
-            var displayContent = columnDef.isLoading ?
-                "Loading ... " : displayInstructions.value;
+        var cells = [];
+        for (var i = 0; i < this.props.columnDefs.length; i++) {
+            if (i === 0 && !this.props.data.isDetail) {
+                cells.push(buildFirstCellForRow.call(this));
+            } else {
+                var columnDef = this.props.columnDefs[i];
+                var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
+                var classes = cx(displayInstructions.classes);
+                // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+                var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
 
-            // convert and format dates
-            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    displayContent = new Date(displayContent).toLocaleDateString();
-            }
-            // determine cell content, based on whether a cell templating callback was provided
-            if (columnDef.cellTemplate)
-                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-            cells.push(
-                <td
-                    className={classes}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                    onContextMenu={this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                    style={displayInstructions.styles}
-                    key={columnDef.colTag}
-                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                    onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                        this.props.handleColumnFilter(null, columnDef) : null }>
+                // convert and format dates
+                if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
+                    if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                        displayContent = new Date(displayContent).toLocaleDateString();
+                }
+                // determine cell content, based on whether a cell templating callback was provided
+                if (columnDef.cellTemplate)
+                    displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
+                cells.push(
+                    <td
+                        className={classes}
+                        ref={columnDef.colTag}
+                        onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
+                        onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
+                        style={displayInstructions.styles}
+                        key={columnDef.colTag}
+                        //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                        onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
-                </td>
-            );
+                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
+                    </td>
+                );
+            }
         }
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
@@ -584,6 +589,7 @@ function rowMapper(row) {
         columnDefs={this.state.columnDefs}
         filtering={this.props.filtering}
         handleColumnFilter={this.handleColumnFilter.bind}
+        cellRightClickMenu={this.props.cellRightClickMenu}
     />);
 }
 
@@ -757,4 +763,55 @@ function convertFilterData(filterData) {
         }
         filterData[key] = arr;
     }
+}
+
+function openCellMenu(columnDef, event) {
+    event.preventDefault();
+    var $cell = $(this.refs[columnDef.colTag].getDOMNode());
+    var cellPosition = $cell.position();
+    var $menu = $cell.find('.rt-cell-menu');
+    if (cellPosition.left !== 0) {
+        $menu.css("left", cellPosition.left + "px");
+    }
+    if (cellPosition.right !== 0) {
+        $menu.css("right", cellPosition.right + "px");
+    }
+    $menu.css('display', 'block');
+
+    $cell.hover(null, function hoveroutCell() {
+        $menu.css('display', 'none');
+    });
+
+    $menu.hover(null, function hoveroutMenu() {
+        $menu.css('display', 'none');
+    });
+}
+
+function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
+    if (!rowData[currentColumnDef.colTag]) {
+        return null;
+    }
+
+    var menuItems = [];
+    var menuStyle = {};
+
+    if (cellMenu.style && cellMenu.style.textAlign === 'right') {
+        menuStyle.right = "0%";
+    }
+    else {
+        menuStyle.left = "0%";
+    }
+
+    cellMenu.menus.forEach(function (menu) {
+        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
+        if (menu.followingSeparator) {
+            menuItems.push(<div className="separator"/>);
+        }
+    });
+
+    return (
+        <div style={menuStyle} className="rt-cell-menu">
+            {menuItems}
+        </div>
+    )
 }
