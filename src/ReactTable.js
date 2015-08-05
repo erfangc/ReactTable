@@ -415,38 +415,41 @@ var ReactTable = React.createClass({
 var Row = React.createClass({
     render: function () {
         const cx = React.addons.classSet;
-        var cells = [buildFirstCellForRow.call(this)];
-        for (var i = 1; i < this.props.columnDefs.length; i++) {
-            var columnDef = this.props.columnDefs[i];
-            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var classes = cx(displayInstructions.classes);
-            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
-            var displayContent = columnDef.isLoading ?
-                "Loading ... " : displayInstructions.value;
+        var cells = [];
+        for (var i = 0; i < this.props.columnDefs.length; i++) {
+            if (i === 0 && !this.props.data.isDetail) {
+                cells.push(buildFirstCellForRow.call(this));
+            } else {
+                var columnDef = this.props.columnDefs[i];
+                var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
+                var classes = cx(displayInstructions.classes);
+                // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+                var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
 
-            // convert and format dates
-            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    displayContent = new Date(displayContent).toLocaleDateString();
-            }
-            // determine cell content, based on whether a cell templating callback was provided
-            if (columnDef.cellTemplate)
-                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-            cells.push(
-                <td
-                    className={classes}
-                    ref={columnDef.colTag}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                    onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                    style={displayInstructions.styles}
-                    key={columnDef.colTag}
-                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                    onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                        this.props.handleColumnFilter(null, columnDef) : null }>
+                // convert and format dates
+                if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
+                    if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                        displayContent = new Date(displayContent).toLocaleDateString();
+                }
+                // determine cell content, based on whether a cell templating callback was provided
+                if (columnDef.cellTemplate)
+                    displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
+                cells.push(
+                    <td
+                        className={classes}
+                        ref={columnDef.colTag}
+                        onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
+                        onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
+                        style={displayInstructions.styles}
+                        key={columnDef.colTag}
+                        //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                        onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                     {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
-                </td>
-            );
+                    </td>
+                );
+            }
         }
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl

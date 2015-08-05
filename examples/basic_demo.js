@@ -122,7 +122,6 @@ $(function () {
             onSummarySelectCallback: function (result, state) {
                 console.log(result);
                 console.log(state);
-                console.log("Includes " + result.detailRows.length + " detail rows! state:" + state);
             }
         };
         table = React.render(React.createElement(ReactTable, options), document.getElementById("table"));

@@ -276,14 +276,6 @@ function buildFirstCellForRow() {
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
 
-    // if sectorPath is not available - return a normal cell
-    if (!data.sectorPath)
-        return <td key={firstColTag}
-                   onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
-                     this.props.handleColumnFilter(null, columnDef) : null}>
-            {data[firstColTag]}
-        </td>;
-
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
@@ -292,14 +284,7 @@ function buildFirstCellForRow() {
 
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
-    if (data.isDetail)
-        result = <td style={firstCellStyle} key={firstColTag}
-                     onDoubleClick={this.props.filtering && this.props.filtering.doubleClickCell ?
-                this.props.handleColumnFilter(null, columnDef) : null}>
-            {data[firstColTag]}</td>;
-    else {
-        result =
-            (
+    result =(
                 <td style={firstCellStyle} key={firstColTag} >
                     <a onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
                         {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
@@ -309,7 +294,6 @@ function buildFirstCellForRow() {
                     {userDefinedElement}
                 </td>
             );
-    }
     return result;
 }
 
