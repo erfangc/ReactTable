@@ -61,6 +61,9 @@ $(function () {
         var options = {
             disableInfiniteScrolling: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
+            subtotalBy: [{
+                colTag: "nationality", text: "Nationality"
+            }],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, columnDef, event) {

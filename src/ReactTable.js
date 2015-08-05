@@ -444,7 +444,7 @@ var Row = React.createClass({
                     onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                         this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
-                    {this.props.cellRightClickMenu ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null}
+                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null}
                 </td>
             );
         }

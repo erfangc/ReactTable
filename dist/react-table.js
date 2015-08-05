@@ -1538,7 +1538,7 @@ var Row = React.createClass({displayName: "Row",
                     onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                         this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
-                    this.props.cellRightClickMenu ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null
+                    this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef) : null
                 )
             );
         }
@@ -2170,9 +2170,18 @@ function partitionNumberLine(partitions) {
 function buildFirstColumnLabel(table) {
     if (table.state.subtotalBy.length > 0) {
         var label = "[ ";
-        for (var i = 0; i < table.state.subtotalBy.length; i++) {
-            label += table.state.subtotalBy[i].text + " -> "
-        }
+
+        table.state.subtotalBy.forEach(function (subtotalBy) {
+            var column = table.state.columnDefs.filter(function (columnDef) {
+                return columnDef.colTag === subtotalBy.colTag;
+            });
+
+            if (column.length == 0) {
+                throw "subtotalBy field '" + subtotalBy.colTag + "' doesn't exist!";
+            }
+
+            label += column[0].text + " -> "
+        });
 
         label = label.substring(0, label.length - 4) + " ]";
         return label;
