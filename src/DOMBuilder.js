@@ -192,64 +192,34 @@ function buildFilterList(table,columnDef){
  * @returns {XML}
  */
 function buildHeaders(table) {
-    var columnDef = table.state.columnDefs[0], i, style = {};
-    /**
-     * sortDef tracks whether the current column is being sorted
-     */
-    var sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
-    var sortIcon = null;
-    if (sortDef)
-        sortIcon =
-            <i className={"fa fa-sort-"+sortDef.sortType}></i>;
-    var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
-    var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
     var ss = {
         width: "100%",
         height: "13px",
         padding: "0"
     };
-    var firstColumn = (
-        <div className="rt-headers-container">
-            <div style={{textAlign: "center"}} onDoubleClick={table.handleSetSort.bind(null,columnDef, null)}
-                 className="rt-header-element" key={columnDef.colTag}>
-                <a className={textClasses}
-                   onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                    {buildFirstColumnLabel(table)}
-                </a>
-                {sortIcon}
-                {buildFilterList(table,columnDef)}
-            </div>
-            <div className={numericPanelClasses}>
-                <NumericFilterPanel></NumericFilterPanel>
-            </div>
-            {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({
-                table: table,
-                columnDef: columnDef,
-                style: {textAlign: "left"},
-                isFirstColumn: true
-            })}
-        </div>
-    );
-    var headerColumns = [firstColumn];
-    for (i = 1; i < table.state.columnDefs.length; i++) {
-        columnDef = table.state.columnDefs[i];
-        sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
-        sortIcon = null;
-        if (sortDef)
-            sortIcon =
-                <i className={"fa fa-sort-"+sortDef.sortType}></i>;
+    var headerColumns = [];
+    for (var i = 0; i < table.state.columnDefs.length; i++) {
+        var isFirstColumn = (i===0);
+        var columnDef = table.state.columnDefs[i];
+        /**
+         * sortDef tracks whether the current column is being sorted
+         */
+        var sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
+        var sortIcon = null;
+        if (sortDef) {
+            sortIcon = <i className={"fa fa-sort-" + sortDef.sortType}></i>;
+        }
+        var style = {textAlign: "center"};
+        var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
+        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
 
-        style = {textAlign: "center"};
-        numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
-        textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
         headerColumns.push(
             <div className="rt-headers-container">
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                        <span>{columnDef.text} {columnDef.isLoading ?
-                            <i className="fa fa-spinner fa-spin"></i> : null}</span>
+                    {buildHeaderLabel(table, columnDef, isFirstColumn)}
                     </a>
                     {sortIcon}
                     {buildFilterList(table,columnDef)}
@@ -264,7 +234,7 @@ function buildHeaders(table) {
                     table: table,
                     columnDef: columnDef,
                     style: style,
-                    isFirstColumn: false
+                    isFirstColumn: isFirstColumn
                 })}
             </div>
         );
@@ -277,8 +247,7 @@ function buildHeaders(table) {
         classString = "btn-link rt-corner-image";
     }
 
-
-    // the plus sign at the end
+    // the plus sign at the end to add columns
     headerColumns.push(
         <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
             <a className={classString} onClick={table.props.disableAddColumn ? null : table.handleAdd}>
@@ -293,6 +262,11 @@ function buildHeaders(table) {
         </div>
     );
 }
+
+function buildHeaderLabel(table, columnDef, isFirstColumn){
+    return isFirstColumn ? buildFirstColumnLabel(table) : (<span>{columnDef.text} {columnDef.isLoading ? <i className="fa fa-spinner fa-spin"></i> : null}</span>);
+}
+
 /**
  * create the first cell for each row, append the proper ident level based on the cell's depth in the subtotaling tree
  * @returns {*}
