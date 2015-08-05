@@ -788,7 +788,7 @@ function buildCellMenu(cellMenu, rowData, columnDef) {
     var menuItems = [];
     var menuStyle = {};
 
-    if (cellMenu.style.textAlign === 'right') {
+    if (cellMenu.style && cellMenu.style.textAlign === 'right') {
         menuStyle.right = "0%";
     }
     else {
