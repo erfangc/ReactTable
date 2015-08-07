@@ -300,7 +300,14 @@ function buildHeaders(table) {
         var sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
         var sortIcon = null;
         if (sortDef) {
-            sortIcon = <i className={"fa fa-sort-" + sortDef.sortType}></i>;
+            var type = sortDef.sortType === 'asc' ? 'up' : 'down';
+            var idx = 0;
+            table.state.sortBy.forEach(function(sort, index){
+                if(sort.colTag == columnDef.colTag){
+                    idx = index + 1;
+                }
+            });
+            sortIcon = (<span style={{marginLeft:'3px'}}><i style={{marginTop:'2px'}} className={"fa fa-long-arrow-" + type}></i><sup style={{marginLeft: '2px'}}>{idx}</sup></span>);
         }
         var style = {textAlign: "center"};
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
@@ -320,7 +327,7 @@ function buildHeaders(table) {
                         {buildHeaderLabel(table, columnDef, isFirstColumn)}
                     </a>
                     {sortIcon}
-                    <i className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
+                    <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
                 </div>
                 <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}
