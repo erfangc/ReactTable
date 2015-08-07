@@ -248,7 +248,7 @@ function buildFilterList(table,columnDef){
                selectedFilters.push(
                    <div style={{display: 'block',  width:'inherit', marginTop:'2px'}}>
                        <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
-                           type="text" value={filter} />
+                           type="text" value={filter} readOnly />
                        <i  style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}} className={"fa fa-minus"}
                            onClick={removeFilter.bind(null,table , columnDef,index)}>
                        </i>

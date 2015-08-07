@@ -79,6 +79,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     }
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
         $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
@@ -106,6 +107,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     }
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
         this.setState({

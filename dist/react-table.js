@@ -367,7 +367,7 @@ function buildFilterList(table,columnDef){
                selectedFilters.push(
                    React.createElement("div", {style: {display: 'block',  width:'inherit', marginTop:'2px'}}, 
                        React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
-                           type: "text", value: filter}), 
+                           type: "text", value: filter, readOnly: true}), 
                        React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, className: "fa fa-minus", 
                            onClick: removeFilter.bind(null,table , columnDef,index)}
                        )
@@ -1483,12 +1483,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         bindHeadersToMenu($node);
 
         // build dropdown list for column filter
-        setTimeout(function () {
-            for (var i = 0; i < this.props.data.length; i++) {
-                buildFilterData(this.props.data[i], this.state, this.props);
-            }
-            convertFilterData(this.state.filterData);
-        }.bind(this));
+        buildFilterData.call(this,false);
     },
     componentWillMount: function () {
     },
@@ -1882,13 +1877,32 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
+function buildFilterData(isUpdate){
+    setTimeout(function () {
+        var start = new Date().getTime();
+        if(isUpdate){
+            this.state.filterData = {};
+        }
+        for (var i = 0; i < this.props.data.length; i++) {
+            buildFilterDataHelper(this.props.data[i], this.state, this.props);
+        }
+        convertFilterData(this.state.filterData);
+        console.log("generate filter data: "+(new Date().getTime() -  start));
+    }.bind(this));
+
+}
+
 /**
  * generate distinct values for each column
  * @param row
  * @param state
  * @param props
  */
-function buildFilterData(row, state, props) {
+function buildFilterDataHelper(row, state, props) {
+    if(row.hiddenByFilter == true){
+        return;
+    }
+
     if (!state.filterData) {
         state.filterData = {};
     }
@@ -2053,6 +2067,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     }
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
         $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
@@ -2080,6 +2095,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     }
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
         this.setState({
