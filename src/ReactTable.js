@@ -418,7 +418,7 @@ var Row = React.createClass({
         var cells = [];
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForRow.call(this));
+                cells.push(buildFirstCellForSubtotalRow.call(this));
             } else {
                 var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);

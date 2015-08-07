@@ -123,6 +123,21 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+function filterInArray(filterArr, columnDef, row, caseSensitive) {
+    var ret = null;
+    if (caseSensitive) {
+        ret = filterArr.some(function (filterText) {
+            return buildCellLookAndFeel(columnDef, row).value.toString().search(filterText) !== -1;
+        });
+    } else {
+        ret = filterArr.some(function (filterText) {
+            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(filterText.toUpperCase()) !== -1;
+        });
+    }
+
+    return !ret;
+}
+
 TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {
     // Filter aggregations
     for (var i = 0; i < this.children.length; i++) {
@@ -147,10 +162,7 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
-                if (caseSensitive)
-                    uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().search(textToFilterBy) === -1;
-                else
-                    uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(textToFilterBy.toUpperCase()) === -1;
+                uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || filterInArray(textToFilterBy, columnDef, row, caseSensitive);
             }
         }
     }
