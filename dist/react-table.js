@@ -2109,6 +2109,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
+    buildFilterData.call(this,true);
     this.setState({
         filterInPlace: {},
         rootNode: this.state.rootNode,
