@@ -169,12 +169,23 @@ function addFilter(table,columnDef,event){
     var filterValue = event.target.value;
 
     var filterData = null;
+    var isAdded = false;
     table.state.currentFilters.forEach(function(filter){
         if(filter.colDef === columnDef){
-            filter.filterText.push(filterValue);
-            filterData = filter.filterText;
+            isAdded = filter.filterText.some(function(addedFilter){
+                return addedFilter === filterValue;
+            });
+
+            if(!isAdded){
+                filter.filterText.push(filterValue);
+                filterData = filter.filterText;
+            }
         }
     });
+
+    if(isAdded){
+        return;
+    }
 
     if(!filterData){
         table.state.currentFilters.push({
@@ -185,11 +196,32 @@ function addFilter(table,columnDef,event){
     }
 
     table.setState({});
-    table.handleColumnFilter.call(null, columnDef,filterData);
 }
 
-function removeFilter(){
+function filter(table,columnDef){
+    var filterData = null;
+    table.state.currentFilters.forEach(function(filter){
+        if(filter.colDef === columnDef){
+            filterData = filter.filterText;
+        }
+    });
 
+    table.handleColumnFilter.call(null, columnDef, filterData);
+
+    //hide filter dropdown
+    //$('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+}
+
+function removeFilter(table, columnDef,index,event){
+    event.preventDefault();
+
+    table.state.currentFilters.forEach(function(filter){
+        if(filter.colDef === columnDef){
+            filter.filterText.splice(index,1);
+        }
+    });
+
+    table.setState({});
 }
 
 function buildFilterList(table,columnDef){
@@ -212,13 +244,13 @@ function buildFilterList(table,columnDef){
     var selectedFilters = [];
     table.state.currentFilters.forEach(function(filter){
        if(filter.colDef === columnDef){
-           filter.filterText.forEach(function(filter){
+           filter.filterText.forEach(function(filter, index){
                selectedFilters.push(
-                   <div style={{display: 'block',  width:'inherit', marginTop:'5px'}}>
-                       <input className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                   <div style={{display: 'block',  width:'inherit', marginTop:'2px'}}>
+                       <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
                            type="text" value={filter} />
-                       <i  style={{float: 'right', 'margin-top':'5px;'}} className={("fa fa-minus") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
-                           onClick={removeFilter.bind(this)}>
+                       <i  style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}} className={"fa fa-minus"}
+                           onClick={removeFilter.bind(null,table , columnDef,index)}>
                        </i>
                    </div>
                )
@@ -227,17 +259,20 @@ function buildFilterList(table,columnDef){
     });
 
     return (
-        <div className="rt-select-filter-container ">
-            <div style={{display: 'block',  width:'inherit'}}>
-                <select style={{width:'85%'}}
-                    className={("rt-" + columnDef.colTag + "-filter-select rt-filter-select") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+        <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}>
+            <div style={{display: 'block',  width:'inherit', marginBottom:'2px'}}>
+                <select
+                    className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
                     onChange={addFilter.bind(null,table , columnDef)}
                     onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
                     {filterList}
                 </select>
+                <i style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}}
+                    className="fa fa-filter" onClick={filter.bind(null, table,columnDef)}></i>
             </div>
+            <div className={("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}></div>
             <div style={{display: 'block',  width:'inherit'}}>
-            {selectedFilters}
+                {selectedFilters}
             </div>
         </div>
         )
@@ -271,6 +306,11 @@ function buildHeaders(table) {
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
+        var isFiltered = table.state.currentFilters.some(function(filter){
+            return filter.colDef === columnDef;
+        });
+
+
         headerColumns.push(
             <div className="rt-headers-container">
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
@@ -280,6 +320,7 @@ function buildHeaders(table) {
                         {buildHeaderLabel(table, columnDef, isFirstColumn)}
                     </a>
                     {sortIcon}
+                    <i className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
                 </div>
                 <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}

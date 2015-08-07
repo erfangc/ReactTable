@@ -90,11 +90,13 @@
 .rt-cell-menu .separator { margin: 0 5px; border-radius: 2px; border: 1px solid #d1dbe1; }
 
 /*multi selection filter*/
-.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-select-filter-container { position: absolute; padding: 2px 2px 2px 10px; text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; width: inherit; z-index: 3;}
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-select-filter-container { position: absolute; padding-top: 5px; padding-bottom: 5px;  text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; width: inherit; z-index: 3;}
 /*select in header*/
 
 .rt-select-filter-container > input{border:0;}
 
-.rt-filter-input{margin: 0; padding: 0; width: 84%; border:1px solid #d1dbe1;}
+.rt-filter-input{margin-left: 2%; padding: 0; width: 80%; border:1px solid #d1dbe1;}
 
-.rt-filter-select{margin: 0; padding: 0; border: 1px solid #d1dbe1;}
+.rt-filter-select{margin-left: 2%; padding: 0; width: 81%; border: 1px solid #d1dbe1;}
+
+.rt-select-filter-container .separator{ margin: 2px 5px; border-radius: 2px; border: 1px solid #d1dbe1; }
