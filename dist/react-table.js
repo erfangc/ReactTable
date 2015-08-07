@@ -284,8 +284,8 @@ function selectFilters (table, columnDefToFilterBy, e){
     table.handleColumnFilter.call(null, columnDefToFilterBy);
 }
 
-function addFilter(table,columnDef,selectClass){
-    var filterValue = $(selectClass).val();
+function addFilter(table,columnDef,event){
+    var filterValue = event.target.value;
 
     var filterData = null;
     table.state.currentFilters.forEach(function(filter){
@@ -303,8 +303,8 @@ function addFilter(table,columnDef,selectClass){
         filterData = [filterValue];
     }
 
+    table.setState({});
     table.handleColumnFilter.call(null, columnDef,filterData);
-    //table.setState({});
 }
 
 function removeFilter(){
@@ -350,11 +350,9 @@ function buildFilterList(table,columnDef){
             React.createElement("div", {style: {display: 'block',  width:'inherit'}}, 
                 React.createElement("select", {style: {width:'85%'}, 
                     className: ("rt-" + columnDef.colTag + "-filter-select rt-filter-select") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                    onChange: addFilter.bind(null,table , columnDef), 
                     onKeyDown: pressedKey.bind(null, table, columnDef.colTag)}, 
                     filterList
-                ), 
-                React.createElement("i", {style: {float: 'right', 'margin-top':'5px;'}, className: ("fa fa-plus") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
-                    onClick: addFilter.bind(null,table ,columnDef,".rt-" + columnDef.colTag + "-filter-select")}
                 )
             ), 
             React.createElement("div", {style: {display: 'block',  width:'inherit'}}, 
@@ -2596,19 +2594,26 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+/**
+ *
+ * @param filterArr
+ * @param columnDef
+ * @param row
+ * @param caseSensitive
+ * @returns {boolean} to indicate hide this row or not
+ */
 function filterInArray(filterArr, columnDef, row, caseSensitive) {
-    var ret = null;
+    var found = null;
     if (caseSensitive) {
-        ret = filterArr.some(function (filterText) {
+        found = filterArr.some(function (filterText) {
             return buildCellLookAndFeel(columnDef, row).value.toString().search(filterText) !== -1;
         });
     } else {
-        ret = filterArr.some(function (filterText) {
+        found = filterArr.some(function (filterText) {
             return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(filterText.toUpperCase()) !== -1;
         });
     }
-
-    return !ret;
+    return !found;
 }
 
 TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {

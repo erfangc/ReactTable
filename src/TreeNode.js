@@ -123,19 +123,26 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+/**
+ *
+ * @param filterArr
+ * @param columnDef
+ * @param row
+ * @param caseSensitive
+ * @returns {boolean} to indicate hide this row or not
+ */
 function filterInArray(filterArr, columnDef, row, caseSensitive) {
-    var ret = null;
+    var found = null;
     if (caseSensitive) {
-        ret = filterArr.some(function (filterText) {
+        found = filterArr.some(function (filterText) {
             return buildCellLookAndFeel(columnDef, row).value.toString().search(filterText) !== -1;
         });
     } else {
-        ret = filterArr.some(function (filterText) {
+        found = filterArr.some(function (filterText) {
             return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(filterText.toUpperCase()) !== -1;
         });
     }
-
-    return !ret;
+    return !found;
 }
 
 TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {

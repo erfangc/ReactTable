@@ -165,8 +165,8 @@ function selectFilters (table, columnDefToFilterBy, e){
     table.handleColumnFilter.call(null, columnDefToFilterBy);
 }
 
-function addFilter(table,columnDef,selectClass){
-    var filterValue = $(selectClass).val();
+function addFilter(table,columnDef,event){
+    var filterValue = event.target.value;
 
     var filterData = null;
     table.state.currentFilters.forEach(function(filter){
@@ -184,8 +184,8 @@ function addFilter(table,columnDef,selectClass){
         filterData = [filterValue];
     }
 
+    table.setState({});
     table.handleColumnFilter.call(null, columnDef,filterData);
-    //table.setState({});
 }
 
 function removeFilter(){
@@ -231,12 +231,10 @@ function buildFilterList(table,columnDef){
             <div style={{display: 'block',  width:'inherit'}}>
                 <select style={{width:'85%'}}
                     className={("rt-" + columnDef.colTag + "-filter-select rt-filter-select") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                    onChange={addFilter.bind(null,table , columnDef)}
                     onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
                     {filterList}
                 </select>
-                <i  style={{float: 'right', 'margin-top':'5px;'}} className={("fa fa-plus") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
-                    onClick={addFilter.bind(null,table ,columnDef,".rt-" + columnDef.colTag + "-filter-select")}>
-                </i>
             </div>
             <div style={{display: 'block',  width:'inherit'}}>
             {selectedFilters}
