@@ -57,8 +57,8 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
-    var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
 
+    var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
     if (!dontSet) {
         // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
         for (var i = 0; i < this.state.currentFilters.length; i++) {
@@ -70,13 +70,16 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         }
     }
 
-    var customFilterer;
-    if (this.props.filtering && this.props.filtering.customFilterer) {
-        customFilterer = this.props.filtering.customFilterer;
+    if (filterData.length != 0) {
+        var customFilterer;
+        if (this.props.filtering && this.props.filtering.customFilterer) {
+            customFilterer = this.props.filtering.customFilterer;
+        }
+        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
     }
-    this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
         $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
@@ -104,6 +107,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     }
 
     if (!dontSet) {
+        buildFilterData.call(this,true);
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
         this.setState({
@@ -117,6 +121,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
+    buildFilterData.call(this,true);
     this.setState({
         filterInPlace: {},
         rootNode: this.state.rootNode,

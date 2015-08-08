@@ -159,12 +159,78 @@ function pressedKey(table, colTag, e) {
     }
 }
 
+function selectFilters (table, columnDefToFilterBy, e){
+    table.state.selectedFilters = $(e.target).val();
+    table.setState({});
+    table.handleColumnFilter.call(null, columnDefToFilterBy);
+}
+
+function addFilter(table,columnDef,event){
+    var filterValue = event.target.value;
+
+    var filterData = null;
+    var isAdded = false;
+    table.state.currentFilters.forEach(function(filter){
+        if(filter.colDef === columnDef){
+            isAdded = filter.filterText.some(function(addedFilter){
+                return addedFilter === filterValue;
+            });
+
+            if(!isAdded){
+                filter.filterText.push(filterValue);
+                filterData = filter.filterText;
+            }
+        }
+    });
+
+    if(isAdded){
+        return;
+    }
+
+    if(!filterData){
+        table.state.currentFilters.push({
+            colDef : columnDef,
+            filterText: [filterValue]
+        });
+        filterData = [filterValue];
+    }
+
+    table.setState({});
+}
+
+function filter(table,columnDef){
+    var filterData = null;
+    table.state.currentFilters.forEach(function(filter){
+        if(filter.colDef === columnDef){
+            filterData = filter.filterText;
+        }
+    });
+
+    table.handleColumnFilter.call(null, columnDef, filterData);
+
+    //hide filter dropdown
+    //$('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+}
+
+function removeFilter(table, columnDef,index,event){
+    event.preventDefault();
+
+    table.state.currentFilters.forEach(function(filter){
+        if(filter.colDef === columnDef){
+            filter.filterText.splice(index,1);
+        }
+    });
+
+    table.setState({});
+}
+
 function buildFilterList(table,columnDef){
     if(!table.state.filterData){
         return;
     }
+
     var filterData = table.state.filterData[columnDef.colTag];
-    if(!filterData){
+    if(!filterData || (filterData.length == 1 && filterData[0] == 'undefined')){
         return;
     }
     filterData.sort();
@@ -175,13 +241,40 @@ function buildFilterList(table,columnDef){
         );
     }
 
+    var selectedFilters = [];
+    table.state.currentFilters.forEach(function(filter){
+       if(filter.colDef === columnDef){
+           filter.filterText.forEach(function(filter, index){
+               selectedFilters.push(
+                   <div style={{display: 'block',  width:'inherit', marginTop:'2px'}}>
+                       <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
+                           type="text" value={filter} readOnly />
+                       <i  style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}} className={"fa fa-minus"}
+                           onClick={removeFilter.bind(null,table , columnDef,index)}>
+                       </i>
+                   </div>
+               )
+           });
+       }
+    });
+
     return (
-        <select
-            className={("rt-" + columnDef.colTag + "-filter-input rt-filter-input") + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? "" : " rt-hide")}
-            onChange={table.handleColumnFilter.bind(null, columnDef)}
-            onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
-            {filterList}
-        </select>
+        <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}>
+            <div style={{display: 'block',  width:'inherit', marginBottom:'2px'}}>
+                <select
+                    className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
+                    onChange={addFilter.bind(null,table , columnDef)}
+                    onKeyDown={pressedKey.bind(null, table, columnDef.colTag)}>
+                    {filterList}
+                </select>
+                <i style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}}
+                    className="fa fa-filter" onClick={filter.bind(null, table,columnDef)}></i>
+            </div>
+            <div className={("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}></div>
+            <div style={{display: 'block',  width:'inherit'}}>
+                {selectedFilters}
+            </div>
+        </div>
         )
 }
 
@@ -207,11 +300,23 @@ function buildHeaders(table) {
         var sortDef = findDefByColTag(table.state.sortBy, columnDef.colTag);
         var sortIcon = null;
         if (sortDef) {
-            sortIcon = <i className={"fa fa-sort-" + sortDef.sortType}></i>;
+            var type = sortDef.sortType === 'asc' ? 'up' : 'down';
+            var idx = 0;
+            table.state.sortBy.forEach(function(sort, index){
+                if(sort.colTag == columnDef.colTag){
+                    idx = index + 1;
+                }
+            });
+            sortIcon = (<span style={{marginLeft:'3px'}}><i style={{marginTop:'2px'}} className={"fa fa-long-arrow-" + type}></i><sup style={{marginLeft: '2px'}}>{idx}</sup></span>);
         }
         var style = {textAlign: "center"};
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
-        var textClasses = "btn-link rt-header-anchor-text" + (table.state.filterInPlace[columnDef.colTag] && columnDef.format !== "number" ? " rt-hide" : "");
+        var textClasses = "btn-link rt-header-anchor-text";
+
+        var isFiltered = table.state.currentFilters.some(function(filter){
+            return filter.colDef === columnDef;
+        });
+
 
         headerColumns.push(
             <div className="rt-headers-container">
@@ -219,10 +324,10 @@ function buildHeaders(table) {
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
-                    {buildHeaderLabel(table, columnDef, isFirstColumn)}
+                        {buildHeaderLabel(table, columnDef, isFirstColumn)}
                     </a>
                     {sortIcon}
-                    {buildFilterList(table,columnDef)}
+                    <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
                 </div>
                 <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}
@@ -230,6 +335,7 @@ function buildHeaders(table) {
                                         colDef={columnDef}
                                         currentFilters={table.state.currentFilters}></NumericFilterPanel>
                 </div>
+                {buildFilterList(table,columnDef)}
                 {table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({
                     table: table,
                     columnDef: columnDef,
@@ -271,7 +377,7 @@ function buildHeaderLabel(table, columnDef, isFirstColumn){
  * create the first cell for each row, append the proper ident level based on the cell's depth in the subtotaling tree
  * @returns {*}
  */
-function buildFirstCellForRow() {
+function buildFirstCellForSubtotalRow() {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;

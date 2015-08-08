@@ -325,12 +325,7 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($node);
 
         // build dropdown list for column filter
-        setTimeout(function () {
-            for (var i = 0; i < this.props.data.length; i++) {
-                buildFilterData(this.props.data[i], this.state, this.props);
-            }
-            convertFilterData(this.state.filterData);
-        }.bind(this));
+        buildFilterData.call(this,false);
     },
     componentWillMount: function () {
     },
@@ -418,7 +413,7 @@ var Row = React.createClass({
         var cells = [];
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForRow.call(this));
+                cells.push(buildFirstCellForSubtotalRow.call(this));
             } else {
                 var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -724,13 +719,32 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
+function buildFilterData(isUpdate){
+    setTimeout(function () {
+        var start = new Date().getTime();
+        if(isUpdate){
+            this.state.filterData = {};
+        }
+        for (var i = 0; i < this.props.data.length; i++) {
+            buildFilterDataHelper(this.props.data[i], this.state, this.props);
+        }
+        convertFilterData(this.state.filterData);
+        console.log("generate filter data: "+(new Date().getTime() -  start));
+    }.bind(this));
+
+}
+
 /**
  * generate distinct values for each column
  * @param row
  * @param state
  * @param props
  */
-function buildFilterData(row, state, props) {
+function buildFilterDataHelper(row, state, props) {
+    if(row.hiddenByFilter == true){
+        return;
+    }
+
     if (!state.filterData) {
         state.filterData = {};
     }
