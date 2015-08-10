@@ -108,6 +108,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 
     if (!dontSet) {
         buildFilterData.call(this,true);
+        colDef.isFiltered = false;
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
         this.setState({
@@ -122,6 +123,10 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
     buildFilterData.call(this,true);
+    this.state.columnDefs.forEach(function(colDef){
+       colDef.isFiltered = false;
+    });
+
     this.setState({
         filterInPlace: {},
         rootNode: this.state.rootNode,

@@ -90,7 +90,7 @@
 .rt-cell-menu .separator { margin: 0 5px; border-radius: 2px; border: 1px solid #d1dbe1; }
 
 /*multi selection filter*/
-.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-select-filter-container { position: absolute; padding-top: 5px; padding-bottom: 5px;  text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; width: inherit; z-index: 3;}
+.rt-table-container > .rt-headers-grand-container > .rt-headers > .rt-headers-container > .rt-select-filter-container { position: absolute; padding-top: 5px; padding-bottom: 5px;  text-shadow: none; color: #4a5564; border-radius: 2px; background-color: #f0f3f5; width: inherit; min-width: 100px; z-index: 3;}
 /*select in header*/
 
 .rt-select-filter-container > input{border:0;}
