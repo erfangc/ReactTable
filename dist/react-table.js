@@ -325,10 +325,11 @@ function filter(table,columnDef){
         }
     });
 
+    columnDef.isFiltered = true;
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
-    //$('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+    $('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
 }
 
 function removeFilter(table, columnDef,index,event){
@@ -337,6 +338,9 @@ function removeFilter(table, columnDef,index,event){
     table.state.currentFilters.forEach(function(filter){
         if(filter.colDef === columnDef){
             filter.filterText.splice(index,1);
+            if(filter.filterText.length == 0){
+                table.handleClearFilter(columnDef);
+            }
         }
     });
 
@@ -432,9 +436,10 @@ function buildHeaders(table) {
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
-        var isFiltered = table.state.currentFilters.some(function(filter){
-            return filter.colDef === columnDef;
-        });
+        //var isFiltered = table.state.currentFilters.some(function(filter){
+        //    return filter.colDef === columnDef;
+        //});
+        var isFiltered = columnDef.isFiltered ? true: false;
 
 
         headerColumns.push(
@@ -2096,6 +2101,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 
     if (!dontSet) {
         buildFilterData.call(this,true);
+        colDef.isFiltered = false;
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
         this.setState({
@@ -2110,6 +2116,10 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
     buildFilterData.call(this,true);
+    this.state.columnDefs.forEach(function(colDef){
+       colDef.isFiltered = false;
+    });
+
     this.setState({
         filterInPlace: {},
         rootNode: this.state.rootNode,
