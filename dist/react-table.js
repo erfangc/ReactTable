@@ -275,7 +275,14 @@ function addMenuItems(master, children) {
 
 function toggleFilterBox(table, colTag) {
     var fip = table.state.filterInPlace;
+    //open current filter drop down, close others
     fip[colTag] = !fip[colTag];
+    for(var key in fip){
+        if(key !== colTag) {
+            fip[key] = false;
+        }
+    }
+
     table.setState({
         filterInPlace: fip
     });
@@ -395,7 +402,7 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container')}, 
+            React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}, 
                 React.createElement("div", {style: {display: 'block',  width:'inherit', marginBottom:'2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
