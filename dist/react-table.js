@@ -459,8 +459,8 @@ function buildHeaders(table) {
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
+        // to determine if a column has been filtered. need update accordingly.
         var isFiltered = columnDef.isFiltered ? true: false;
-
 
         headerColumns.push(
             React.createElement("div", {className: "rt-headers-container"}, 
@@ -2703,11 +2703,11 @@ function filterInArray(filterArr, columnDef, row, caseSensitive) {
     var found = null;
     if (caseSensitive) {
         found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString().search(filterText) !== -1;
+            return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
         });
     } else {
         found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase().search(filterText.toUpperCase()) !== -1;
+            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
         });
     }
     return !found;

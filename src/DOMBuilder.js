@@ -340,8 +340,8 @@ function buildHeaders(table) {
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
+        // to determine if a column has been filtered. need update accordingly.
         var isFiltered = columnDef.isFiltered ? true: false;
-
 
         headerColumns.push(
             <div className="rt-headers-container">
