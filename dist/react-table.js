@@ -135,6 +135,13 @@ function buildCustomMenuItems(table, columnDef) {
         return columnDef.customMenuItems;
 }
 
+function clickFilterMenu(table,columnDef){
+    if(!(table.props.filtering && table.props.filtering.disable)){
+        toggleFilterBox.call(null, table, columnDef.colTag);
+        table.setState({});
+    }
+}
+
 function buildMenu(options) {
     var table = options.table,
         columnDef = options.columnDef,
@@ -178,9 +185,18 @@ function buildMenu(options) {
             )
         ],
         filter: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"),
-            React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters"),
-            React.createElement("div", {className: "separator"})
+            React.createElement(SubMenu, {
+                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                subMenu: 
+                    React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                        React.createElement("div", {className: "menu-item", onClick: clickFilterMenu.bind(null,table,columnDef)}, 
+                            React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                        React.createElement("div", {className: "separator"}), 
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"), 
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
+                    )
+                }
+            )
         ],
         summarize: [
             React.createElement(SubMenu, {
@@ -191,12 +207,12 @@ function buildMenu(options) {
                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
-            })
+            }
+            )
         ],
 
         summarizeClearAll: [
             React.createElement(SubMenu, {
-                onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
                 menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
                 subMenu: 
                     React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
@@ -246,7 +262,7 @@ function buildMenu(options) {
     }
 
     return (
-        React.createElement("div", {style: menuStyle, className: "rt-header-menu"}, 
+        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag]? " rt-hide":"")}, 
             menuItems
         )
     );
@@ -262,9 +278,6 @@ function toggleFilterBox(table, colTag) {
     fip[colTag] = !fip[colTag];
     table.setState({
         filterInPlace: fip
-    });
-    setTimeout(function () {
-        $("input.rt-" + colTag + "-filter-input").focus();
     });
 }
 
@@ -326,6 +339,7 @@ function filter(table,columnDef){
     });
 
     columnDef.isFiltered = true;
+    table.state.filterInPlace[columnDef.colTag] = false;
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
@@ -380,10 +394,9 @@ function buildFilterList(table,columnDef){
            });
        }
     });
-
     return (
-        React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}, 
-            React.createElement("div", {style: {display: 'block',  width:'inherit', marginBottom:'2px'}}, 
+            React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container')}, 
+                React.createElement("div", {style: {display: 'block',  width:'inherit', marginBottom:'2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
                     onChange: addFilter.bind(null,table , columnDef), 
@@ -436,9 +449,6 @@ function buildHeaders(table) {
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
-        //var isFiltered = table.state.currentFilters.some(function(filter){
-        //    return filter.colDef === columnDef;
-        //});
         var isFiltered = columnDef.isFiltered ? true: false;
 
 
@@ -453,14 +463,14 @@ function buildHeaders(table) {
                     sortIcon, 
                     React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")})
                 ), 
-                React.createElement("div", {className: numericPanelClasses}, 
+                 columnDef.format !== "number" ? null : React.createElement("div", {className: numericPanelClasses}, 
                     React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
                                         addFilter: table.handleColumnFilter, 
                                         colDef: columnDef, 
                                         currentFilters: table.state.currentFilters})
                 ), 
-                buildFilterList(table,columnDef), 
-                table.state.filterInPlace[columnDef.colTag] ? null : buildMenu({
+                table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null, 
+                buildMenu({
                     table: table,
                     columnDef: columnDef,
                     style: style,
