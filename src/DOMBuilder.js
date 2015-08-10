@@ -121,8 +121,11 @@ function buildMenu(options) {
             //if first column is the subtotal column, don't add 'addSubtotal'
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
-        if (!isFirstColumn)
+        if (!isFirstColumn){
+            menuItems.push(<div className="separator"/>);
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
+        }
+
     }
 
     var customMenuItems = buildCustomMenuItems(table, columnDef);
@@ -271,7 +274,7 @@ function buildFilterList(table,columnDef){
        if(filter.colDef === columnDef){
            filter.filterText.forEach(function(filter, index){
                selectedFilters.push(
-                   <div style={{display: 'block',  width:'inherit', marginTop:'2px'}}>
+                   <div style={{display: 'block', marginTop:'2px'}}>
                        <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
                            type="text" value={filter} readOnly />
                        <i  style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}} className={"fa fa-minus"}
@@ -284,7 +287,7 @@ function buildFilterList(table,columnDef){
     });
     return (
             <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}>
-                <div style={{display: 'block',  width:'inherit', marginBottom:'2px'}}>
+                <div style={{display: 'block', marginBottom:'2px'}}>
                 <select
                     className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
                     onChange={addFilter.bind(null,table , columnDef)}
@@ -295,7 +298,7 @@ function buildFilterList(table,columnDef){
                     className="fa fa-filter" onClick={filter.bind(null, table,columnDef)}></i>
             </div>
             <div className={("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}></div>
-            <div style={{display: 'block',  width:'inherit'}}>
+            <div style={{display: 'block'}}>
                 {selectedFilters}
             </div>
         </div>

@@ -240,8 +240,11 @@ function buildMenu(options) {
             //if first column is the subtotal column, don't add 'addSubtotal'
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
-        if (!isFirstColumn)
+        if (!isFirstColumn){
+            menuItems.push(React.createElement("div", {className: "separator"}));
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
+        }
+
     }
 
     var customMenuItems = buildCustomMenuItems(table, columnDef);
@@ -390,7 +393,7 @@ function buildFilterList(table,columnDef){
        if(filter.colDef === columnDef){
            filter.filterText.forEach(function(filter, index){
                selectedFilters.push(
-                   React.createElement("div", {style: {display: 'block',  width:'inherit', marginTop:'2px'}}, 
+                   React.createElement("div", {style: {display: 'block', marginTop:'2px'}}, 
                        React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
                            type: "text", value: filter, readOnly: true}), 
                        React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, className: "fa fa-minus", 
@@ -403,7 +406,7 @@ function buildFilterList(table,columnDef){
     });
     return (
             React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}, 
-                React.createElement("div", {style: {display: 'block',  width:'inherit', marginBottom:'2px'}}, 
+                React.createElement("div", {style: {display: 'block', marginBottom:'2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
                     onChange: addFilter.bind(null,table , columnDef), 
@@ -414,7 +417,7 @@ function buildFilterList(table,columnDef){
                     className: "fa fa-filter", onClick: filter.bind(null, table,columnDef)})
             ), 
             React.createElement("div", {className: ("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}), 
-            React.createElement("div", {style: {display: 'block',  width:'inherit'}}, 
+            React.createElement("div", {style: {display: 'block'}}, 
                 selectedFilters
             )
         )
