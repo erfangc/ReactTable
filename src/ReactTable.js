@@ -701,6 +701,13 @@ function getPaginationAttr(table, data) {
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+        if(result.lowerVisualBound > result.upperVisualBound){
+            // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
+            table.state.currentPage = 1;
+            result.lowerVisualBound = 0;
+            result.upperVisualBound = Math.min(result.pageSize - 1, data.length);
+        }
     }
 
     return result;

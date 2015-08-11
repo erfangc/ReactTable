@@ -1523,13 +1523,13 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
         // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
-        for (var i = 0; i < this.state.currentFilters.length; i++) {
-            if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
-                this.state.currentFilters.splice(i, 1);
-                this.handleClearFilter(columnDefToFilterBy, true);
-                break;
-            }
-        }
+        //for (var i = 0; i < this.state.currentFilters.length; i++) {
+        //    if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
+        //        this.state.currentFilters.splice(i, 1);
+        //        this.handleClearFilter(columnDefToFilterBy, true);
+        //        break;
+        //    }
+        //}
 
         this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
@@ -1884,6 +1884,13 @@ function getPaginationAttr(table, data) {
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+        if(result.lowerVisualBound > result.upperVisualBound){
+            // after filter, data length has reduced, go to first page
+            table.state.currentPage = 1;
+            result.lowerVisualBound = 0;
+            result.upperVisualBound = Math.min(result.pageSize - 1, data.length);
+        }
     }
 
     return result;
