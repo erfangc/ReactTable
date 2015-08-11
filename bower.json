@@ -6,7 +6,7 @@
     "erfangc <erfangc@gmail.com>"
   ],
   "description": "Multi-function interactive HTML table implemented in react.js",
-  "main": "react-table.js",
+  "main": ["dist/react-table.js", "dist/react-table.css"],
   "keywords": [
     "react",
     "table",
