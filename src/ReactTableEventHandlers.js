@@ -53,10 +53,16 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
+    //
+    columnDefToFilterBy.isFiltered = true;
+
     if (typeof dontSet !== "boolean")
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
+    if(!Array.isArray(filterData)){
+        filterData = [filterData];
+    }
 
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
     if (!dontSet) {
@@ -84,6 +90,8 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
+
+    this.props.afterFilterCallback(columnDefToFilterBy,filterData);
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
