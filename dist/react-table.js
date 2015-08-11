@@ -1208,6 +1208,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         sortBy: React.PropTypes.arrayOf(React.PropTypes.object),
         selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
         rowKey: React.PropTypes.string,
+        cellRightClickMenu: React.PropTypes.object,
         /**
          * callbacks that the table accept
          */
@@ -1216,6 +1217,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         onSelectCallback: React.PropTypes.func,
         onSummarySelectCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
+        afterFilterCallback: React.PropTypes.func,
         /**
          * props to selectively disable table features
          */
@@ -1522,19 +1524,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         bindHeadersToMenu($(this.getDOMNode()));
     },
     addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
-        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
-        //for (var i = 0; i < this.state.currentFilters.length; i++) {
-        //    if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
-        //        this.state.currentFilters.splice(i, 1);
-        //        this.handleClearFilter(columnDefToFilterBy, true);
-        //        break;
-        //    }
-        //}
-
-        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
-        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
-        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
         this.handleClearFilter(colDef, dontSet);
@@ -1886,7 +1876,7 @@ function getPaginationAttr(table, data) {
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
         if(result.lowerVisualBound > result.upperVisualBound){
-            // after filter, data length has reduced, go to first page
+            // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
             table.state.currentPage = 1;
             result.lowerVisualBound = 0;
             result.upperVisualBound = Math.min(result.pageSize - 1, data.length);
@@ -2073,10 +2063,16 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
+    //
+    columnDefToFilterBy.isFiltered = true;
+
     if (typeof dontSet !== "boolean")
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
+    if(!Array.isArray(filterData)){
+        filterData = [filterData];
+    }
 
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
     if (!dontSet) {
@@ -2104,6 +2100,8 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
+
+    this.props.afterFilterCallback(columnDefToFilterBy,filterData);
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
