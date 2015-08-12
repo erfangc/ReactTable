@@ -90,7 +90,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 
-    this.props.afterFilterCallback(columnDefToFilterBy,filterData);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy,filterData);
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
@@ -125,7 +125,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
         });
     }
 
-    this.props.afterFilterCallback(colDef,[]);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef,[]);
 }
 
 function ReactTableHandleRemoveAllFilters() {
@@ -137,7 +137,7 @@ function ReactTableHandleRemoveAllFilters() {
     });
 
     this.state.currentFilters.forEach(function(filter){
-        this.props.afterFilterCallback(filter.colDef,[]);
+        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef,[]);
     },this);
 
     // setState() does not immediately mutate this.state but creates a pending state transition.
