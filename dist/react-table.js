@@ -1523,14 +1523,14 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
+    addFilter: function (columnDefToFilterBy, filterData) {
         this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter(colDef, dontSet);
+        this.handleClearFilter.call(this,colDef, dontSet);
     },
     removeAllFilter: function () {
-        this.handleClearAllFilters();
+        this.handleClearAllFilters.call(this);
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
@@ -2097,7 +2097,6 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     if (!dontSet) {
         buildFilterData.call(this,true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 
@@ -2134,23 +2133,31 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
             rootNode: this.state.rootNode,
             currentFilters: this.state.currentFilters
         });
-        $("input.rt-" + colDef.colTag + "-filter-input").val("");
     }
+
+    this.props.afterFilterCallback(colDef,[]);
 }
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
     buildFilterData.call(this,true);
+    //remove filter icon in header
     this.state.columnDefs.forEach(function(colDef){
-       colDef.isFiltered = false;
+        colDef.isFiltered = false;
     });
 
+    this.state.currentFilters.forEach(function(filter){
+        this.props.afterFilterCallback(filter.colDef,[]);
+    },this);
+
+    // setState() does not immediately mutate this.state but creates a pending state transition.
+    // Accessing this.state after calling this method can potentially return the existing value.
+    // To avoid currentFilters haven't been changed when next time access it.
+    this.state.currentFilters = [];
     this.setState({
         filterInPlace: {},
-        rootNode: this.state.rootNode,
-        currentFilters: []
+        rootNode: this.state.rootNode
     });
-    $("input.rt-filter-input").val("");
 }
 
 function recursivelyClearFilters(node) {
