@@ -340,14 +340,14 @@ var ReactTable = React.createClass({
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
+    addFilter: function (columnDefToFilterBy, filterData) {
         this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter(colDef, dontSet);
+        this.handleClearFilter.call(this,colDef, dontSet);
     },
     removeAllFilter: function () {
-        this.handleClearAllFilters();
+        this.handleClearAllFilters.call(this);
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
