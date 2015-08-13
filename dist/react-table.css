@@ -53,7 +53,7 @@
 
 .rt-table-container a.disabled { pointer-events: none; }
 
-.rt-table-container > .rt-scrollable { overflow-y: scroll; max-height: 750px; }
+.rt-table-container > .rt-scrollable { overflow-y: hidden; }
 
 .rt-corner-image { padding-left: 2px; }
 

@@ -376,8 +376,8 @@ var ReactTable = React.createClass({
 
         var containerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0){
-            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 17);
-            containerStyle.height = (rowNum * 17 - 8) + 'px';
+            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
+            containerStyle.height = (rowNum * 18) + 'px';
         }
 
         if (this.props.disableScrolling)
@@ -684,7 +684,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 17)) -1;
+        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
