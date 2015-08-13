@@ -50,7 +50,7 @@ var NumericFilterPanel = React.createClass({
             "width": "70px"
         };
         return (
-            <div className={"number-filter-" + this.props.colDef.colTag}>
+            <div>
                 <input data-order="0" className="rt-numeric-checkbox" type="checkbox" checked={this.state.entry0.checked} onChange={this.changeCheckbox}/>
                 <select data-order="0" className="rt-numeric-dropdown">
                     <option value="gt">Greater Than</option>

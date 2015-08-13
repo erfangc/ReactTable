@@ -286,17 +286,24 @@ function toggleFilterBox(table, columnDef) {
         }
     }
 
-    setTimeout(function(){
+    table.setState({
+        filterInPlace: fip
+    });
+
+    setTimeout(function(fip){
+        if(!fip[columnDef.colTag]){
+            return;
+        }
+
         //move filter panel to right position
         var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
         var headerPosition = $header.position();
         var $filterDropDown = null;
 
         if(columnDef.format == 'number'){
-            //$filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode())  number-filter-
-            $filterDropDown = $header.find('.number-filter-'+columnDef.colTag);
+            $filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode());
         }else{
-            $filterDropDown = $header.find('.rt-'+columnDef.colTag+'-filter-container');
+            $filterDropDown = $(this.refs['select-filter-' + columnDef.colTag].getDOMNode())
         }
 
         if (headerPosition.left !== 0) {
@@ -305,11 +312,7 @@ function toggleFilterBox(table, columnDef) {
         if (headerPosition.right !== 0) {
             $filterDropDown.css("right", headerPosition.right + "px");
         }
-    }.bind(this));
-
-    table.setState({
-        filterInPlace: fip
-    });
+    }.bind(this,fip));
 }
 
 function pressedKey(table, colTag, e) {
@@ -374,7 +377,7 @@ function filter(table,columnDef){
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
-    $('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+    $(this.refs['select-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
 }
 
 function removeFilter(table, columnDef,index,event){
@@ -432,8 +435,8 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")
-                }, 
+            React.createElement("div", {className: ("rt-select-filter-container ") +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                 ref: 'select-filter-' + columnDef.colTag}, 
                 React.createElement("div", {style: {display: 'block', marginBottom:'2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
@@ -442,7 +445,7 @@ function buildFilterList(table,columnDef){
                     filterList
                 ), 
                 React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, 
-                    className: "fa fa-filter", onClick: filter.bind(null, table,columnDef)})
+                    className: "fa fa-filter", onClick: filter.bind(table, table,columnDef)})
             ), 
             React.createElement("div", {className: ("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}), 
             React.createElement("div", {style: {display: 'block'}}, 
@@ -502,13 +505,12 @@ function buildHeaders(table) {
                     )
                 ), 
                  table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
-                    (React.createElement("div", {className: numericPanelClasses}, 
+                    (React.createElement("div", {className: numericPanelClasses, ref: "numericFilterPanel-" + columnDef.colTag}, 
                         React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
                                         addFilter: table.handleColumnFilter, 
                                         colDef: columnDef, 
-                                        currentFilters: table.state.currentFilters, 
-                                        ref: "numericFilterPanel-" + columnDef.colTag
-                        })
+                                        currentFilters: table.state.currentFilters}
+                        )
                     )) : null, 
                 table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null, 
                 buildMenu({
@@ -1187,7 +1189,7 @@ var NumericFilterPanel = React.createClass({
             "width": "70px"
         };
         return (
-            React.createElement("div", {className: "number-filter-" + this.props.colDef.colTag}, 
+            React.createElement("div", null, 
                 React.createElement("input", {"data-order": "0", className: "rt-numeric-checkbox", type: "checkbox", checked: this.state.entry0.checked, onChange: this.changeCheckbox}), 
                 React.createElement("select", {"data-order": "0", className: "rt-numeric-dropdown"}, 
                     React.createElement("option", {value: "gt"}, "Greater Than"), 

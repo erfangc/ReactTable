@@ -167,17 +167,24 @@ function toggleFilterBox(table, columnDef) {
         }
     }
 
-    setTimeout(function(){
+    table.setState({
+        filterInPlace: fip
+    });
+
+    setTimeout(function(fip){
+        if(!fip[columnDef.colTag]){
+            return;
+        }
+
         //move filter panel to right position
         var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
         var headerPosition = $header.position();
         var $filterDropDown = null;
 
         if(columnDef.format == 'number'){
-            //$filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode())  number-filter-
-            $filterDropDown = $header.find('.number-filter-'+columnDef.colTag);
+            $filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode());
         }else{
-            $filterDropDown = $header.find('.rt-'+columnDef.colTag+'-filter-container');
+            $filterDropDown = $(this.refs['select-filter-' + columnDef.colTag].getDOMNode())
         }
 
         if (headerPosition.left !== 0) {
@@ -186,11 +193,7 @@ function toggleFilterBox(table, columnDef) {
         if (headerPosition.right !== 0) {
             $filterDropDown.css("right", headerPosition.right + "px");
         }
-    }.bind(this));
-
-    table.setState({
-        filterInPlace: fip
-    });
+    }.bind(this,fip));
 }
 
 function pressedKey(table, colTag, e) {
@@ -255,7 +258,7 @@ function filter(table,columnDef){
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
-    $('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+    $(this.refs['select-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
 }
 
 function removeFilter(table, columnDef,index,event){
@@ -313,8 +316,8 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
-                >
+            <div className={("rt-select-filter-container ") +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                 ref={'select-filter-' + columnDef.colTag}>
                 <div style={{display: 'block', marginBottom:'2px'}}>
                 <select
                     className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
@@ -323,7 +326,7 @@ function buildFilterList(table,columnDef){
                     {filterList}
                 </select>
                 <i style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}}
-                    className="fa fa-filter" onClick={filter.bind(null, table,columnDef)}></i>
+                    className="fa fa-filter" onClick={filter.bind(table, table,columnDef)}></i>
             </div>
             <div className={("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}></div>
             <div style={{display: 'block'}}>
@@ -383,13 +386,12 @@ function buildHeaders(table) {
                     </a>
                 </div>
                 { table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
-                    (<div className={numericPanelClasses}>
+                    (<div className={numericPanelClasses} ref={"numericFilterPanel-" + columnDef.colTag}>
                         <NumericFilterPanel clearFilter={table.handleClearFilter}
                                         addFilter={table.handleColumnFilter}
                                         colDef={columnDef}
-                                        currentFilters={table.state.currentFilters}
-                                        ref={"numericFilterPanel-" + columnDef.colTag}
-                        ></NumericFilterPanel>
+                                        currentFilters={table.state.currentFilters}>
+                        </NumericFilterPanel>
                     </div>) : null }
                 {table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null}
                 {buildMenu({
