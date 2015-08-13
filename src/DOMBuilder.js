@@ -85,7 +85,7 @@ function buildMenu(options) {
                 menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
                 subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
-                   <SubtotalControl table={table} columnDef={columnDef}/>
+                    <SubtotalControl table={table} columnDef={columnDef}/>
                     <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
                 </div>}
             >
@@ -350,9 +350,9 @@ function buildHeaders(table) {
                     <a className={textClasses}
                        onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
                         {buildHeaderLabel(table, columnDef, isFirstColumn)}
+                        {sortIcon}
+                        <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")}></i>
                     </a>
-                    {sortIcon}
-                    <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
                 </div>
                 { columnDef.format !== "number" ? null : <div className={numericPanelClasses}>
                     <NumericFilterPanel clearFilter={table.handleClearFilter}

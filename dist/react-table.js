@@ -468,10 +468,10 @@ function buildHeaders(table) {
                      className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {className: textClasses, 
                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
-                        buildHeaderLabel(table, columnDef, isFirstColumn)
-                    ), 
-                    sortIcon, 
-                    React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")})
+                        buildHeaderLabel(table, columnDef, isFirstColumn), 
+                        sortIcon, 
+                        React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")})
+                    )
                 ), 
                  columnDef.format !== "number" ? null : React.createElement("div", {className: numericPanelClasses}, 
                     React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
@@ -1791,6 +1791,8 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            // add more space for sort and filter icon
+            headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;

@@ -526,8 +526,7 @@ var SubtotalControl = React.createClass({
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>
-                    <i className="fa fa-plus"></i>
-                Add Subtotal
+                    <i className="fa fa-plus"></i> Add Subtotal
                 </div>
                 {subMenuAttachment}
             </div>
@@ -608,6 +607,8 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            // add more space for sort and filter icon
+            headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;
