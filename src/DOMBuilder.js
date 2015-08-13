@@ -461,13 +461,22 @@ function buildFirstCellForSubtotalRow() {
     return result;
 }
 
-function buildFooter(table, paginationAttr) {
+function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
         (<PageNavigator
             items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
+}
+
+function buildFooter(paginationAttr){
+    return (
+        <div>
+            <p className='rt-display-inline rt-footer-count'> count : {this.props.data.length }</p>
+            {this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null}
+        </div>
+    )
 }
 
 /**

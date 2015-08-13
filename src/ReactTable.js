@@ -50,7 +50,7 @@ var ReactTable = React.createClass({
     },
     getDefaultProps: function () {
         return {
-            pageSize: 50,
+
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -363,6 +363,9 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
+        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
+        rasterizedData.splice(0,1);
+
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
             rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
@@ -372,8 +375,10 @@ var ReactTable = React.createClass({
         var headers = buildHeaders(this);
 
         var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0)
-            containerStyle.height = this.props.height;
+        if (this.props.height && parseInt(this.props.height) > 0){
+            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 17);
+            containerStyle.height = (rowNum * 17 - 8) + 'px';
+        }
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
@@ -385,10 +390,11 @@ var ReactTable = React.createClass({
                     <table className="rt-table">
                         <tbody>
                         {rowsToDisplay}
+                        {grandTotal}
                         </tbody>
                     </table>
                 </div>
-                {this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null}
+                {buildFooter.call(this,paginationAttr)}
             </div>
         );
     }
@@ -472,6 +478,7 @@ var PageNavigator = React.createClass({
                 </li>
             )
         });
+
         return (
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
@@ -677,7 +684,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = table.props.pageSize || 50;
+        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 17)) -1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;

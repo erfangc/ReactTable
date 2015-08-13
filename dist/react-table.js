@@ -580,13 +580,22 @@ function buildFirstCellForSubtotalRow() {
     return result;
 }
 
-function buildFooter(table, paginationAttr) {
+function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
         (React.createElement(PageNavigator, {
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
             handleClick: table.handlePageClick})) : null;
+}
+
+function buildFooter(paginationAttr){
+    return (
+        React.createElement("div", null, 
+            React.createElement("p", {className: "rt-display-inline rt-footer-count"}, " count : ", this.props.data.length), 
+            this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null
+        )
+    )
 }
 
 /**
@@ -1579,6 +1588,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
+        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
+        rasterizedData.splice(0,1);
+
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
             rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
@@ -1600,11 +1612,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
                 React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
                     React.createElement("table", {className: "rt-table"}, 
                         React.createElement("tbody", null, 
-                        rowsToDisplay
+                        rowsToDisplay, 
+                        grandTotal
                         )
                     )
                 ), 
-                this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null
+                buildFooter.call(this,paginationAttr)
             )
         );
     }
@@ -1688,6 +1701,7 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
                 )
             )
         });
+
         return (
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
@@ -1893,7 +1907,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = table.props.pageSize || 50;
+        result.pageSize = table.props.pageSize - 1 || 50;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
