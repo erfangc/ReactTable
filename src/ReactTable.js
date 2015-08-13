@@ -755,8 +755,10 @@ function buildFilterDataHelper(row, state, props) {
 
         var key = columnDefs[i].colTag;
         var hashmap = state.filterData[key] || {};
-        hashmap[row[key]] = true;
-        state.filterData[key] = hashmap;
+        if(row[key]){
+            hashmap[row[key]] = true;
+            state.filterData[key] = hashmap;
+        }
     }
 }
 
