@@ -204,7 +204,7 @@ function buildMenu(options) {
                 menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
                 subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                   React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
             }
@@ -1709,8 +1709,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, 
-                    React.createElement("i", {className: "fa fa-plus"}), 
-                "Add Subtotal"
+                    React.createElement("span", null, React.createElement("i", {className: "fa fa-plus"}), " Add Subtotal")
                 ), 
                 subMenuAttachment
             )
