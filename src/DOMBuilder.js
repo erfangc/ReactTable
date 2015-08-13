@@ -18,7 +18,7 @@ function buildCustomMenuItems(table, columnDef) {
 
 function clickFilterMenu(table,columnDef){
     if(!(table.props.filtering && table.props.filtering.disable)){
-        toggleFilterBox.call(null, table, columnDef.colTag);
+        toggleFilterBox.call(table, table, columnDef);
         table.setState({});
     }
 }
@@ -157,15 +157,36 @@ function addMenuItems(master, children) {
         master.push(children[j])
 }
 
-function toggleFilterBox(table, colTag) {
+function toggleFilterBox(table, columnDef) {
     var fip = table.state.filterInPlace;
     //open current filter drop down, close others
-    fip[colTag] = !fip[colTag];
+    fip[columnDef.colTag] = !fip[columnDef.colTag];
     for(var key in fip){
-        if(key !== colTag) {
+        if(key !== columnDef.colTag) {
             fip[key] = false;
         }
     }
+
+    setTimeout(function(){
+        //move filter panel to right position
+        var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+        var $filterDropDown = null;
+
+        if(columnDef.format == 'number'){
+            //$filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode())  number-filter-
+            $filterDropDown = $header.find('.number-filter-'+columnDef.colTag);
+        }else{
+            $filterDropDown = $header.find('.rt-'+columnDef.colTag+'-filter-container');
+        }
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this));
 
     table.setState({
         filterInPlace: fip
@@ -252,6 +273,12 @@ function removeFilter(table, columnDef,index,event){
     table.setState({});
 }
 
+/**
+ * build filter drop down list
+ * @param table
+ * @param columnDef
+ * @returns {XML}
+ */
 function buildFilterList(table,columnDef){
     if(!table.state.filterData){
         return;
@@ -286,7 +313,8 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}>
+            <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                >
                 <div style={{display: 'block', marginBottom:'2px'}}>
                 <select
                     className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
@@ -344,22 +372,25 @@ function buildHeaders(table) {
         var isFiltered = columnDef.isFiltered ? true: false;
 
         headerColumns.push(
-            <div className="rt-headers-container">
+            <div className="rt-headers-container" ref={"header-"+ columnDef.colTag}>
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
-                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
+                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(table, table, columnDef)}>
                         {buildHeaderLabel(table, columnDef, isFirstColumn)}
                         {sortIcon}
                         <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")}></i>
                     </a>
                 </div>
-                { columnDef.format !== "number" ? null : <div className={numericPanelClasses}>
-                    <NumericFilterPanel clearFilter={table.handleClearFilter}
+                { table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
+                    (<div className={numericPanelClasses}>
+                        <NumericFilterPanel clearFilter={table.handleClearFilter}
                                         addFilter={table.handleColumnFilter}
                                         colDef={columnDef}
-                                        currentFilters={table.state.currentFilters}></NumericFilterPanel>
-                </div>}
+                                        currentFilters={table.state.currentFilters}
+                                        ref={"numericFilterPanel-" + columnDef.colTag}
+                        ></NumericFilterPanel>
+                    </div>) : null }
                 {table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null}
                 {buildMenu({
                     table: table,
