@@ -61,9 +61,9 @@ $(function () {
         var options = {
             disableInfiniteScrolling: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
-            subtotalBy: [{
-                colTag: "nationality", text: "Nationality"
-            }],
+            //subtotalBy: [{
+            //    colTag: "nationality", text: "Nationality"
+            //}],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, columnDef, event) {
@@ -102,7 +102,8 @@ $(function () {
                     }
                 ]
             },
-            height: "750px",
+            height: "500px",
+            pageSize:50,
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {

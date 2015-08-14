@@ -1275,7 +1275,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     getDefaultProps: function () {
         return {
-
+            pageSize: 50,
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -1601,8 +1601,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 
         var containerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0){
-            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
-            containerStyle.height = (rowNum * 18) + 'px';
+            containerStyle.height = this.props.height;
+            //containerStyle.display = 'block';
+            //containerStyle.width = $('.rt-table-container').width() + 'px';
         }
 
         if (this.props.disableScrolling)
@@ -1614,8 +1615,14 @@ var ReactTable = React.createClass({displayName: "ReactTable",
                 React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
                     React.createElement("table", {className: "rt-table"}, 
                         React.createElement("tbody", null, 
-                        rowsToDisplay, 
-                        grandTotal
+                            rowsToDisplay
+                        )
+                    )
+                ), 
+                React.createElement("div", {className: "rt-grand-total"}, 
+                    React.createElement("table", {className: "rt-table"}, 
+                        React.createElement("tfoot", null, 
+                            grandTotal
                         )
                     )
                 ), 
@@ -1667,6 +1674,28 @@ var Row = React.createClass({displayName: "Row",
                 );
             }
         }
+
+        if(!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total'){
+            //cells
+            var corner;
+            var classString = "btn-link rt-plus-sign";
+            //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
+            //    corner = <img src={table.props.cornerIcon}/>;
+                classString = "btn-link rt-corner-image";
+            //}
+
+            // the plus sign at the end to add columns
+            cells.push(
+                React.createElement("td", null, 
+                    React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+                     React.createElement("a", {className: classString}, 
+                         React.createElement("strong", null, React.createElement("i", {className: "fa fa-plus"}))
+                     )
+                    )
+                )
+            );
+        }
+
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
@@ -1827,13 +1856,17 @@ function adjustHeaders(adjustCount) {
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
+    var headerContainerWidth = $('.rt-headers-grand-container').width();
+    var grandTotalFooter = $('#'+ id+' .rt-grand-total tfoot');
+    grandTotalFooter.width(headerContainerWidth);
+    var grandTotalFooterCells = grandTotalFooter.find('td');
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
     var adjustedSomething = false;
 
     headerElems.each(function () {
         var currentHeader = $(this);
-        var width = $('#' + id + ' .rt-table tr:last td:eq(' + counter + ')').outerWidth() - 1;
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
         if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
@@ -1843,10 +1876,16 @@ function adjustHeaders(adjustCount) {
             headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px"); outerWidth( value )
+            //$(grandTotalFooterCells[counter]).outerWidth(headerTextWidthWithPadding);
+
             adjustedSomething = true;
         }
         if (width !== currentHeader.width()) {
             currentHeader.width(width);
+            $(grandTotalFooterCells[counter]).css("width", (width) + "px");
+            //$(grandTotalFooterCells[counter]).outerWidth(headerTextWidthWithPadding);
+
             adjustedSomething = true;
         }
         counter++;
@@ -1909,7 +1948,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
+        result.pageSize = (table.props.pageSize || 50) -1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;

@@ -50,7 +50,7 @@ var ReactTable = React.createClass({
     },
     getDefaultProps: function () {
         return {
-
+            pageSize: 50,
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -327,7 +327,7 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($node);
 
         // build dropdown list for column filter
-        buildFilterData.call(this,false);
+        buildFilterData.call(this, false);
     },
     componentWillMount: function () {
     },
@@ -341,10 +341,10 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($(this.getDOMNode()));
     },
     addFilter: function (columnDefToFilterBy, filterData) {
-        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
+        this.handleColumnFilter.call(this, columnDefToFilterBy, filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter.call(this,colDef, dontSet);
+        this.handleClearFilter.call(this, colDef, dontSet);
     },
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
@@ -363,8 +363,8 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
-        rasterizedData.splice(0,1);
+        var grandTotal = rasterizedData.slice(0, 1).map(rowMapper, this);
+        rasterizedData.splice(0, 1);
 
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
@@ -375,9 +375,10 @@ var ReactTable = React.createClass({
         var headers = buildHeaders(this);
 
         var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0){
-            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
-            containerStyle.height = (rowNum * 18) + 'px';
+        if (this.props.height && parseInt(this.props.height) > 0) {
+            containerStyle.height = this.props.height;
+            //containerStyle.display = 'block';
+            //containerStyle.width = $('.rt-table-container').width() + 'px';
         }
 
         if (this.props.disableScrolling)
@@ -387,14 +388,20 @@ var ReactTable = React.createClass({
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
                 <div style={containerStyle} className="rt-scrollable">
-                    <table className="rt-table">
+                    <table className="rt-table"  >
                         <tbody>
-                        {rowsToDisplay}
-                        {grandTotal}
+                            {rowsToDisplay}
                         </tbody>
                     </table>
                 </div>
-                {buildFooter.call(this,paginationAttr)}
+                <div className="rt-grand-total">
+                    <table className="rt-table">
+                        <tfoot>
+                            {grandTotal}
+                        </tfoot>
+                    </table>
+                </div>
+                {buildFooter.call(this, paginationAttr)}
             </div>
         );
     }
@@ -442,6 +449,30 @@ var Row = React.createClass({
                 );
             }
         }
+
+        if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
+            //cells
+            var corner;
+            var classString = "btn-link rt-plus-sign";
+            //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
+            //    corner = <img src={table.props.cornerIcon}/>;
+            classString = "btn-link rt-corner-image";
+            //}
+
+            // the plus sign at the end to add columns
+            cells.push(
+                <td>
+                    <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+                        <a className={classString}>
+                            <strong>
+                                <i className="fa fa-plus"/>
+                            </strong>
+                        </a>
+                    </span>
+                </td>
+            );
+        }
+
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
@@ -533,7 +564,9 @@ var SubtotalControl = React.createClass({
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>
-                    <span><i className="fa fa-plus"></i> Add Subtotal</span>
+                    <span>
+                        <i className="fa fa-plus"></i>
+                    Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -602,28 +635,46 @@ function adjustHeaders(adjustCount) {
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
+    var headerContainerWidth = $('.rt-headers-grand-container').width();
+    var grandTotalFooter = $('#' + id + ' .rt-grand-total tfoot');
+    grandTotalFooter.width(headerContainerWidth);
+    var grandTotalFooterCells = grandTotalFooter.find('td');
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
     var adjustedSomething = false;
 
     headerElems.each(function () {
         var currentHeader = $(this);
-        var width = $('#' + id + ' .rt-table tr:last td:eq(' + counter + ')').outerWidth() - 1;
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
         if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+        var footerCellWidthWithPadding = $(grandTotalFooterCells[counter]).outerWidth();
+
+        if (!(width == headerTextWidthWithPadding && width == footerCellWidthWithPadding)) {
+            var maxWidth = Math.max(width, headerTextWidthWithPadding, footerCellWidthWithPadding);
             // add more space for sort and filter icon
-            headerTextWidthWithPadding += 20;
-            currentHeader.css("width", headerTextWidthWithPadding + "px");
-            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            maxWidth += 20;
+            currentHeader.css("width", maxWidth + "px");
+            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("width", (maxWidth) + "px");
+            $(grandTotalFooterCells[counter]).css("width", (maxWidth) + "px");
             adjustedSomething = true;
         }
-        if (width !== currentHeader.width()) {
-            currentHeader.width(width);
-            adjustedSomething = true;
-        }
+
+        //if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+        //    // add more space for sort and filter icon
+        //    headerTextWidthWithPadding += 20;
+        //    currentHeader.css("width", headerTextWidthWithPadding + "px");
+        //    $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+        //    $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
+        //    adjustedSomething = true;
+        //}
+        //if (width !== currentHeader.width()) {
+        //    currentHeader.width(width);
+        //    $(grandTotalFooterCells[counter]).css("width", (width) + "px");
+        //    adjustedSomething = true;
+        //}
         counter++;
     });
 
@@ -684,7 +735,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
+        result.pageSize = (table.props.pageSize || 50) - 1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
@@ -700,7 +751,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
-        if(result.lowerVisualBound > result.upperVisualBound){
+        if (result.lowerVisualBound > result.upperVisualBound) {
             // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
             table.state.currentPage = 1;
             result.lowerVisualBound = 0;
@@ -724,17 +775,17 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-function buildFilterData(isUpdate){
+function buildFilterData(isUpdate) {
     setTimeout(function () {
         var start = new Date().getTime();
-        if(isUpdate){
+        if (isUpdate) {
             this.state.filterData = {};
         }
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
         convertFilterData(this.state.filterData);
-        console.log("generate filter data: "+(new Date().getTime() -  start));
+        console.log("generate filter data: " + (new Date().getTime() - start));
     }.bind(this));
 
 }
@@ -746,7 +797,7 @@ function buildFilterData(isUpdate){
  * @param props
  */
 function buildFilterDataHelper(row, state, props) {
-    if(row.hiddenByFilter == true){
+    if (row.hiddenByFilter == true) {
         return;
     }
 
@@ -762,7 +813,7 @@ function buildFilterDataHelper(row, state, props) {
 
         var key = columnDefs[i].colTag;
         var hashmap = state.filterData[key] || {};
-        if(row[key]){
+        if (row[key]) {
             hashmap[row[key]] = true;
             state.filterData[key] = hashmap;
         }

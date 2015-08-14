@@ -19,7 +19,7 @@
 /* background color when hover over a subtotal row */
 .group-background:hover { background-color: #ABABAB !important; color: #4a5564 !important;}
 
-.rt-table-container .rt-scrollable { overflow-x: auto; }
+.rt-table-container .rt-scrollable { overflow-x: auto;  overflow-y: scroll; max-height: 750px; }
 
 .rt-table-container > .rt-headers-grand-container { position: relative; }
 
@@ -52,8 +52,6 @@
 .rt-table-container a.btn-link { color: inherit; text-decoration: none; cursor: pointer; }
 
 .rt-table-container a.disabled { pointer-events: none; }
-
-.rt-table-container > .rt-scrollable { overflow-y: hidden; }
 
 .rt-corner-image { padding-left: 2px; }
 
@@ -105,3 +103,4 @@
 
 /* footer */
 .rt-footer-count{ color: #4a5564; font-weight: bold; margin-bottom: 5px;}
+/*.rt-grand-total > table{table-layout: fixed}*/
