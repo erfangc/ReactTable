@@ -137,7 +137,7 @@ function buildCustomMenuItems(table, columnDef) {
 
 function clickFilterMenu(table,columnDef){
     if(!(table.props.filtering && table.props.filtering.disable)){
-        toggleFilterBox.call(null, table, columnDef.colTag);
+        toggleFilterBox.call(table, table, columnDef);
         table.setState({});
     }
 }
@@ -204,7 +204,7 @@ function buildMenu(options) {
                 menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
                 subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                   React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
             }
@@ -276,12 +276,12 @@ function addMenuItems(master, children) {
         master.push(children[j])
 }
 
-function toggleFilterBox(table, colTag) {
+function toggleFilterBox(table, columnDef) {
     var fip = table.state.filterInPlace;
     //open current filter drop down, close others
-    fip[colTag] = !fip[colTag];
+    fip[columnDef.colTag] = !fip[columnDef.colTag];
     for(var key in fip){
-        if(key !== colTag) {
+        if(key !== columnDef.colTag) {
             fip[key] = false;
         }
     }
@@ -289,6 +289,30 @@ function toggleFilterBox(table, colTag) {
     table.setState({
         filterInPlace: fip
     });
+
+    setTimeout(function(fip){
+        if(!fip[columnDef.colTag]){
+            return;
+        }
+
+        //move filter panel to right position
+        var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+        var $filterDropDown = null;
+
+        if(columnDef.format == 'number'){
+            $filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode());
+        }else{
+            $filterDropDown = $(this.refs['select-filter-' + columnDef.colTag].getDOMNode())
+        }
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this,fip));
 }
 
 function pressedKey(table, colTag, e) {
@@ -353,7 +377,7 @@ function filter(table,columnDef){
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
-    $('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+    $(this.refs['select-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
 }
 
 function removeFilter(table, columnDef,index,event){
@@ -371,6 +395,12 @@ function removeFilter(table, columnDef,index,event){
     table.setState({});
 }
 
+/**
+ * build filter drop down list
+ * @param table
+ * @param columnDef
+ * @returns {XML}
+ */
 function buildFilterList(table,columnDef){
     if(!table.state.filterData){
         return;
@@ -405,7 +435,8 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            React.createElement("div", {className: ("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}, 
+            React.createElement("div", {className: ("rt-select-filter-container ") +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+                 ref: 'select-filter-' + columnDef.colTag}, 
                 React.createElement("div", {style: {display: 'block', marginBottom:'2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
@@ -414,7 +445,7 @@ function buildFilterList(table,columnDef){
                     filterList
                 ), 
                 React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, 
-                    className: "fa fa-filter", onClick: filter.bind(null, table,columnDef)})
+                    className: "fa fa-filter", onClick: filter.bind(table, table,columnDef)})
             ), 
             React.createElement("div", {className: ("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}), 
             React.createElement("div", {style: {display: 'block'}}, 
@@ -463,22 +494,24 @@ function buildHeaders(table) {
         var isFiltered = columnDef.isFiltered ? true: false;
 
         headerColumns.push(
-            React.createElement("div", {className: "rt-headers-container"}, 
+            React.createElement("div", {className: "rt-headers-container", ref: "header-"+ columnDef.colTag}, 
                 React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef, null), style: style, 
                      className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {className: textClasses, 
-                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}, 
-                        buildHeaderLabel(table, columnDef, isFirstColumn)
-                    ), 
-                    sortIcon, 
-                    React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")})
+                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(table, table, columnDef)}, 
+                        buildHeaderLabel(table, columnDef, isFirstColumn), 
+                        sortIcon, 
+                        React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")})
+                    )
                 ), 
-                 columnDef.format !== "number" ? null : React.createElement("div", {className: numericPanelClasses}, 
-                    React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
+                 table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
+                    (React.createElement("div", {className: numericPanelClasses, ref: "numericFilterPanel-" + columnDef.colTag}, 
+                        React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
                                         addFilter: table.handleColumnFilter, 
                                         colDef: columnDef, 
-                                        currentFilters: table.state.currentFilters})
-                ), 
+                                        currentFilters: table.state.currentFilters}
+                        )
+                    )) : null, 
                 table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null, 
                 buildMenu({
                     table: table,
@@ -547,13 +580,22 @@ function buildFirstCellForSubtotalRow() {
     return result;
 }
 
-function buildFooter(table, paginationAttr) {
+function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
         (React.createElement(PageNavigator, {
             items: paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end), 
             activeItem: table.state.currentPage, 
             numPages: paginationAttr.pageEnd, 
             handleClick: table.handlePageClick})) : null;
+}
+
+function buildFooter(paginationAttr){
+    return (
+        React.createElement("div", null, 
+            React.createElement("p", {className: "rt-display-inline rt-footer-count"}, " count : ", this.props.data.length), 
+            this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null
+        )
+    )
 }
 
 /**
@@ -1208,6 +1250,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         sortBy: React.PropTypes.arrayOf(React.PropTypes.object),
         selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
         rowKey: React.PropTypes.string,
+        cellRightClickMenu: React.PropTypes.object,
         /**
          * callbacks that the table accept
          */
@@ -1216,6 +1259,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         onSelectCallback: React.PropTypes.func,
         onSummarySelectCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
+        afterFilterCallback: React.PropTypes.func,
         /**
          * props to selectively disable table features
          */
@@ -1231,7 +1275,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     getDefaultProps: function () {
         return {
-            pageSize: 50,
+
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -1521,26 +1565,14 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
-        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
-        for (var i = 0; i < this.state.currentFilters.length; i++) {
-            if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
-                this.state.currentFilters.splice(i, 1);
-                this.handleClearFilter(columnDefToFilterBy, true);
-                break;
-            }
-        }
-
-        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
-        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
-        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    addFilter: function (columnDefToFilterBy, filterData) {
+        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter(colDef, dontSet);
+        this.handleClearFilter.call(this,colDef, dontSet);
     },
     removeAllFilter: function () {
-        this.handleClearAllFilters();
+        this.handleClearAllFilters.call(this);
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
@@ -1556,6 +1588,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
+        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
+        rasterizedData.splice(0,1);
+
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
             rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
@@ -1565,8 +1600,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var headers = buildHeaders(this);
 
         var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0)
-            containerStyle.height = this.props.height;
+        if (this.props.height && parseInt(this.props.height) > 0){
+            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
+            containerStyle.height = (rowNum * 18) + 'px';
+        }
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
@@ -1577,11 +1614,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
                 React.createElement("div", {style: containerStyle, className: "rt-scrollable"}, 
                     React.createElement("table", {className: "rt-table"}, 
                         React.createElement("tbody", null, 
-                        rowsToDisplay
+                        rowsToDisplay, 
+                        grandTotal
                         )
                     )
                 ), 
-                this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null
+                buildFooter.call(this,paginationAttr)
             )
         );
     }
@@ -1665,6 +1703,7 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
                 )
             )
         });
+
         return (
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
@@ -1719,8 +1758,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, 
-                    React.createElement("i", {className: "fa fa-plus"}), 
-                "Add Subtotal"
+                    React.createElement("span", null, React.createElement("i", {className: "fa fa-plus"}), " Add Subtotal")
                 ), 
                 subMenuAttachment
             )
@@ -1801,6 +1839,8 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            // add more space for sort and filter icon
+            headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;
@@ -1869,7 +1909,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = table.props.pageSize || 50;
+        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
@@ -1884,6 +1924,13 @@ function getPaginationAttr(table, data) {
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+        if(result.lowerVisualBound > result.upperVisualBound){
+            // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
+            table.state.currentPage = 1;
+            result.lowerVisualBound = 0;
+            result.upperVisualBound = Math.min(result.pageSize - 1, data.length);
+        }
     }
 
     return result;
@@ -1940,8 +1987,10 @@ function buildFilterDataHelper(row, state, props) {
 
         var key = columnDefs[i].colTag;
         var hashmap = state.filterData[key] || {};
-        hashmap[row[key]] = true;
-        state.filterData[key] = hashmap;
+        if(row[key]){
+            hashmap[row[key]] = true;
+            state.filterData[key] = hashmap;
+        }
     }
 }
 
@@ -2066,10 +2115,16 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
+    //
+    columnDefToFilterBy.isFiltered = true;
+
     if (typeof dontSet !== "boolean")
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
+    if(!Array.isArray(filterData)){
+        filterData = [filterData];
+    }
 
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
     if (!dontSet) {
@@ -2094,9 +2149,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     if (!dontSet) {
         buildFilterData.call(this,true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
+
+    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy,filterData);
+
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
@@ -2129,23 +2186,31 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
             rootNode: this.state.rootNode,
             currentFilters: this.state.currentFilters
         });
-        $("input.rt-" + colDef.colTag + "-filter-input").val("");
     }
+
+    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef,[]);
 }
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
     buildFilterData.call(this,true);
+    //remove filter icon in header
     this.state.columnDefs.forEach(function(colDef){
-       colDef.isFiltered = false;
+        colDef.isFiltered = false;
     });
 
+    this.state.currentFilters.forEach(function(filter){
+        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef,[]);
+    },this);
+
+    // setState() does not immediately mutate this.state but creates a pending state transition.
+    // Accessing this.state after calling this method can potentially return the existing value.
+    // To avoid currentFilters haven't been changed when next time access it.
+    this.state.currentFilters = [];
     this.setState({
         filterInPlace: {},
-        rootNode: this.state.rootNode,
-        currentFilters: []
+        rootNode: this.state.rootNode
     });
-    $("input.rt-filter-input").val("");
 }
 
 function recursivelyClearFilters(node) {

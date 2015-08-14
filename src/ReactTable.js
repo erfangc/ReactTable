@@ -25,6 +25,7 @@ var ReactTable = React.createClass({
         sortBy: React.PropTypes.arrayOf(React.PropTypes.object),
         selectedRows: React.PropTypes.arrayOf(React.PropTypes.string),
         rowKey: React.PropTypes.string,
+        cellRightClickMenu: React.PropTypes.object,
         /**
          * callbacks that the table accept
          */
@@ -33,6 +34,7 @@ var ReactTable = React.createClass({
         onSelectCallback: React.PropTypes.func,
         onSummarySelectCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
+        afterFilterCallback: React.PropTypes.func,
         /**
          * props to selectively disable table features
          */
@@ -48,7 +50,7 @@ var ReactTable = React.createClass({
     },
     getDefaultProps: function () {
         return {
-            pageSize: 50,
+
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -338,26 +340,14 @@ var ReactTable = React.createClass({
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
-    addFilter: function (columnDefToFilterBy, filterData, caseSensitive, customFilterer) {
-        // Find if this column has already been filtered.  If it is, we need to remove it before filtering again
-        for (var i = 0; i < this.state.currentFilters.length; i++) {
-            if (this.state.currentFilters[i].colDef === columnDefToFilterBy) {
-                this.state.currentFilters.splice(i, 1);
-                this.handleClearFilter(columnDefToFilterBy, true);
-                break;
-            }
-        }
-
-        this.state.rootNode.filterByColumn(columnDefToFilterBy, filterData, caseSensitive, customFilterer);
-        this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        $("input.rt-" + columnDefToFilterBy.colTag + "-filter-input").val(filterData);
-        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+    addFilter: function (columnDefToFilterBy, filterData) {
+        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter(colDef, dontSet);
+        this.handleClearFilter.call(this,colDef, dontSet);
     },
     removeAllFilter: function () {
-        this.handleClearAllFilters();
+        this.handleClearAllFilters.call(this);
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
@@ -373,6 +363,9 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
+        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
+        rasterizedData.splice(0,1);
+
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
             rowsToDisplay = rasterizedData.slice(paginationAttr.lowerVisualBound, paginationAttr.upperVisualBound + 1).map(rowMapper, this);
@@ -382,8 +375,10 @@ var ReactTable = React.createClass({
         var headers = buildHeaders(this);
 
         var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0)
-            containerStyle.height = this.props.height;
+        if (this.props.height && parseInt(this.props.height) > 0){
+            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
+            containerStyle.height = (rowNum * 18) + 'px';
+        }
 
         if (this.props.disableScrolling)
             containerStyle.overflowY = "hidden";
@@ -395,10 +390,11 @@ var ReactTable = React.createClass({
                     <table className="rt-table">
                         <tbody>
                         {rowsToDisplay}
+                        {grandTotal}
                         </tbody>
                     </table>
                 </div>
-                {this.props.disableInfiniteScrolling ? buildFooter(this, paginationAttr) : null}
+                {buildFooter.call(this,paginationAttr)}
             </div>
         );
     }
@@ -482,6 +478,7 @@ var PageNavigator = React.createClass({
                 </li>
             )
         });
+
         return (
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
@@ -536,8 +533,7 @@ var SubtotalControl = React.createClass({
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>
-                    <i className="fa fa-plus"></i>
-                Add Subtotal
+                    <span><i className="fa fa-plus"></i> Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -618,6 +614,8 @@ function adjustHeaders(adjustCount) {
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            // add more space for sort and filter icon
+            headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             adjustedSomething = true;
@@ -686,7 +684,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = table.props.pageSize || 50;
+        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
@@ -701,6 +699,13 @@ function getPaginationAttr(table, data) {
 
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
+
+        if(result.lowerVisualBound > result.upperVisualBound){
+            // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
+            table.state.currentPage = 1;
+            result.lowerVisualBound = 0;
+            result.upperVisualBound = Math.min(result.pageSize - 1, data.length);
+        }
     }
 
     return result;
@@ -757,8 +762,10 @@ function buildFilterDataHelper(row, state, props) {
 
         var key = columnDefs[i].colTag;
         var hashmap = state.filterData[key] || {};
-        hashmap[row[key]] = true;
-        state.filterData[key] = hashmap;
+        if(row[key]){
+            hashmap[row[key]] = true;
+            state.filterData[key] = hashmap;
+        }
     }
 }
 

@@ -18,7 +18,7 @@ function buildCustomMenuItems(table, columnDef) {
 
 function clickFilterMenu(table,columnDef){
     if(!(table.props.filtering && table.props.filtering.disable)){
-        toggleFilterBox.call(null, table, columnDef.colTag);
+        toggleFilterBox.call(table, table, columnDef);
         table.setState({});
     }
 }
@@ -85,7 +85,7 @@ function buildMenu(options) {
                 menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
                 subMenu={
                 <div className="rt-header-menu" style={subMenuStyles}>
-                   <SubtotalControl table={table} columnDef={columnDef}/>
+                    <SubtotalControl table={table} columnDef={columnDef}/>
                     <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
                 </div>}
             >
@@ -157,12 +157,12 @@ function addMenuItems(master, children) {
         master.push(children[j])
 }
 
-function toggleFilterBox(table, colTag) {
+function toggleFilterBox(table, columnDef) {
     var fip = table.state.filterInPlace;
     //open current filter drop down, close others
-    fip[colTag] = !fip[colTag];
+    fip[columnDef.colTag] = !fip[columnDef.colTag];
     for(var key in fip){
-        if(key !== colTag) {
+        if(key !== columnDef.colTag) {
             fip[key] = false;
         }
     }
@@ -170,6 +170,30 @@ function toggleFilterBox(table, colTag) {
     table.setState({
         filterInPlace: fip
     });
+
+    setTimeout(function(fip){
+        if(!fip[columnDef.colTag]){
+            return;
+        }
+
+        //move filter panel to right position
+        var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+        var $filterDropDown = null;
+
+        if(columnDef.format == 'number'){
+            $filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode());
+        }else{
+            $filterDropDown = $(this.refs['select-filter-' + columnDef.colTag].getDOMNode())
+        }
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this,fip));
 }
 
 function pressedKey(table, colTag, e) {
@@ -234,7 +258,7 @@ function filter(table,columnDef){
     table.handleColumnFilter.call(null, columnDef, filterData);
 
     //hide filter dropdown
-    $('.rt-'+columnDef.colTag+'-filter-container').addClass('rt-hide');
+    $(this.refs['select-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
 }
 
 function removeFilter(table, columnDef,index,event){
@@ -252,6 +276,12 @@ function removeFilter(table, columnDef,index,event){
     table.setState({});
 }
 
+/**
+ * build filter drop down list
+ * @param table
+ * @param columnDef
+ * @returns {XML}
+ */
 function buildFilterList(table,columnDef){
     if(!table.state.filterData){
         return;
@@ -286,7 +316,8 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            <div className={("rt-select-filter-container ")+('rt-'+columnDef.colTag+'-filter-container') +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}>
+            <div className={("rt-select-filter-container ") +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
+                 ref={'select-filter-' + columnDef.colTag}>
                 <div style={{display: 'block', marginBottom:'2px'}}>
                 <select
                     className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
@@ -295,7 +326,7 @@ function buildFilterList(table,columnDef){
                     {filterList}
                 </select>
                 <i style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}}
-                    className="fa fa-filter" onClick={filter.bind(null, table,columnDef)}></i>
+                    className="fa fa-filter" onClick={filter.bind(table, table,columnDef)}></i>
             </div>
             <div className={("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}></div>
             <div style={{display: 'block'}}>
@@ -344,22 +375,24 @@ function buildHeaders(table) {
         var isFiltered = columnDef.isFiltered ? true: false;
 
         headerColumns.push(
-            <div className="rt-headers-container">
+            <div className="rt-headers-container" ref={"header-"+ columnDef.colTag}>
                 <div onDoubleClick={table.handleSetSort.bind(null,columnDef, null)} style={style}
                      className="rt-header-element rt-info-header" key={columnDef.colTag}>
                     <a className={textClasses}
-                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(null, table, columnDef.colTag)}>
+                       onClick={table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(table, table, columnDef)}>
                         {buildHeaderLabel(table, columnDef, isFirstColumn)}
+                        {sortIcon}
+                        <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")}></i>
                     </a>
-                    {sortIcon}
-                    <i style={{marginLeft:'4px'}} className={("fa fa-filter fa-inverse")+(isFiltered ? "": " rt-hide")}></i>
                 </div>
-                { columnDef.format !== "number" ? null : <div className={numericPanelClasses}>
-                    <NumericFilterPanel clearFilter={table.handleClearFilter}
+                { table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
+                    (<div className={numericPanelClasses} ref={"numericFilterPanel-" + columnDef.colTag}>
+                        <NumericFilterPanel clearFilter={table.handleClearFilter}
                                         addFilter={table.handleColumnFilter}
                                         colDef={columnDef}
-                                        currentFilters={table.state.currentFilters}></NumericFilterPanel>
-                </div>}
+                                        currentFilters={table.state.currentFilters}>
+                        </NumericFilterPanel>
+                    </div>) : null }
                 {table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null}
                 {buildMenu({
                     table: table,
@@ -428,13 +461,22 @@ function buildFirstCellForSubtotalRow() {
     return result;
 }
 
-function buildFooter(table, paginationAttr) {
+function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
         (<PageNavigator
             items={paginationAttr.allPages.slice(paginationAttr.pageDisplayRange.start, paginationAttr.pageDisplayRange.end)}
             activeItem={table.state.currentPage}
             numPages={paginationAttr.pageEnd}
             handleClick={table.handlePageClick}/>) : null;
+}
+
+function buildFooter(paginationAttr){
+    return (
+        <div>
+            <p className='rt-display-inline rt-footer-count'> count : {this.props.data.length }</p>
+            {this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null}
+        </div>
+    )
 }
 
 /**
