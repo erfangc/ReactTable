@@ -2252,7 +2252,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
-    if(!Array.isArray(filterData)){
+    if (!Array.isArray(filterData)) {
         filterData = [filterData];
     }
 
@@ -2277,13 +2277,24 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     }
 
     if (!dontSet) {
-        buildFilterData.call(this,true);
+        buildFilterData.call(this, true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 
-    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy,filterData);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy, filterData);
 
+}
+
+/**
+ * reset all treeNode hiddenByFilter to false
+ * @param lrootNode
+ */
+function resetHiddenForAllTreeNodes(lrootNode) {
+    lrootNode.hiddenByFilter = false;
+    for (var i = 0; i < lrootNode.children.length; i++) {
+        resetHiddenForAllTreeNodes(lrootNode.children[i]);
+    }
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
@@ -2294,6 +2305,8 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     for (var i = 0; i < this.state.rootNode.ultimateChildren.length; i++) {
         this.state.rootNode.ultimateChildren[i].hiddenByFilter = false;
     }
+    resetHiddenForAllTreeNodes(this.state.rootNode);
+
     // Remove filter from list of current filters
     for (i = 0; i < this.state.currentFilters.length; i++) {
         if (this.state.currentFilters[i].colDef === colDef) {
@@ -2307,7 +2320,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     }
 
     if (!dontSet) {
-        buildFilterData.call(this,true);
+        buildFilterData.call(this, true);
         colDef.isFiltered = false;
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
@@ -2318,20 +2331,20 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
         });
     }
 
-    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef,[]);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef, []);
 }
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
-    buildFilterData.call(this,true);
+    buildFilterData.call(this, true);
     //remove filter icon in header
-    this.state.columnDefs.forEach(function(colDef){
+    this.state.columnDefs.forEach(function (colDef) {
         colDef.isFiltered = false;
     });
 
-    this.state.currentFilters.forEach(function(filter){
-        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef,[]);
-    },this);
+    this.state.currentFilters.forEach(function (filter) {
+        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef, []);
+    }, this);
 
     // setState() does not immediately mutate this.state but creates a pending state transition.
     // Accessing this.state after calling this method can potentially return the existing value.
