@@ -363,8 +363,8 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        var grandTotal = rasterizedData.slice(0, 1).map(rowMapper, this);
-        rasterizedData.splice(0, 1);
+        //var grandTotal = buildGrandTotal.call(this, rasterizedData.splice(0, 1));
+        var grandTotal = rasterizedData.splice(0, 1).map(rowMapper, this);
 
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
@@ -377,8 +377,6 @@ var ReactTable = React.createClass({
         var containerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0) {
             containerStyle.height = this.props.height;
-            //containerStyle.display = 'block';
-            //containerStyle.width = $('.rt-table-container').width() + 'px';
         }
 
         if (this.props.disableScrolling)
@@ -394,14 +392,8 @@ var ReactTable = React.createClass({
                         </tbody>
                     </table>
                 </div>
-                <div className="rt-grand-total">
-                    <table className="rt-table">
-                        <tfoot>
-                            {grandTotal}
-                        </tfoot>
-                    </table>
-                </div>
-                {buildFooter.call(this, paginationAttr)}
+                {grandTotal}
+                {buildFooter.call(this, paginationAttr, rasterizedData.length)}
             </div>
         );
     }
@@ -414,9 +406,14 @@ var Row = React.createClass({
     render: function () {
         const cx = React.addons.classSet;
         var cells = [];
+        var isGrandTotal = false;
+        if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
+            isGrandTotal = true;
+        }
+
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForSubtotalRow.call(this));
+                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
             } else {
                 var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -432,45 +429,33 @@ var Row = React.createClass({
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-                cells.push(
-                    <td
-                        className={classes}
-                        ref={columnDef.colTag}
-                        onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                        onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                        style={displayInstructions.styles}
-                        key={columnDef.colTag}
-                        //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                        onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                            this.props.handleColumnFilter(null, columnDef) : null }>
+                if (isGrandTotal) {
+                    cells.push(
+                            <div className={classes + " rt-grand-total-cell"} style={displayInstructions.styles}>
+                                <div className="rt-grand-total-cell-content">
+                                    {displayContent ? displayContent : <span>&nbsp;</span>}
+                                </div>
+                            </div>
+                    );
+                }
+                else {
+                    cells.push(
+                        <td
+                            className={classes}
+                            ref={columnDef.colTag}
+                            onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
+                            onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
+                            style={displayInstructions.styles}
+                            key={columnDef.colTag}
+                            //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                                this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                     {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
-                    </td>
-                );
+                        </td>
+                    );
+                }
             }
-        }
-
-        if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
-            //cells
-            var corner;
-            var classString = "btn-link rt-plus-sign";
-            //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
-            //    corner = <img src={table.props.cornerIcon}/>;
-            classString = "btn-link rt-corner-image";
-            //}
-
-            // the plus sign at the end to add columns
-            cells.push(
-                <td>
-                    <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-                        <a className={classString}>
-                            <strong>
-                                <i className="fa fa-plus"/>
-                            </strong>
-                        </a>
-                    </span>
-                </td>
-            );
         }
 
         classes = cx({
@@ -480,9 +465,14 @@ var Row = React.createClass({
             'group-background': !this.props.data.isDetail
         });
 
+        if (isGrandTotal) {
+            return (<div className="rt-grand-total">
+                        {cells}
+            </div>)
+        } else
         // apply extra CSS if specified
-        return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-            className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
+                className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -636,9 +626,9 @@ function adjustHeaders(adjustCount) {
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var headerContainerWidth = $('.rt-headers-grand-container').width();
-    var grandTotalFooter = $('#' + id + ' .rt-grand-total tfoot');
+    var grandTotalFooter = $('#' + id + ' .rt-grand-total');
     grandTotalFooter.width(headerContainerWidth);
-    var grandTotalFooterCells = grandTotalFooter.find('td');
+    var grandTotalFooterCells = grandTotalFooter.find('.rt-grand-total-cell');
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
     var adjustedSomething = false;
@@ -650,31 +640,24 @@ function adjustHeaders(adjustCount) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        var footerCellWidthWithPadding = $(grandTotalFooterCells[counter]).outerWidth();
-
-        if (!(width == headerTextWidthWithPadding && width == footerCellWidthWithPadding)) {
-            var maxWidth = Math.max(width, headerTextWidthWithPadding, footerCellWidthWithPadding);
-            // add more space for sort and filter icon
-            maxWidth += 20;
-            currentHeader.css("width", maxWidth + "px");
-            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("width", (maxWidth) + "px");
-            $(grandTotalFooterCells[counter]).css("width", (maxWidth) + "px");
-            adjustedSomething = true;
+        var footerCellWidthWithPadding = $(grandTotalFooterCells[counter]).width();
+        if(footerCellWidthWithPadding > headerTextWidthWithPadding){
+            headerTextWidthWithPadding = footerCellWidthWithPadding;
         }
 
-        //if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-        //    // add more space for sort and filter icon
-        //    headerTextWidthWithPadding += 20;
-        //    currentHeader.css("width", headerTextWidthWithPadding + "px");
-        //    $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-        //    $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
-        //    adjustedSomething = true;
-        //}
-        //if (width !== currentHeader.width()) {
-        //    currentHeader.width(width);
-        //    $(grandTotalFooterCells[counter]).css("width", (width) + "px");
-        //    adjustedSomething = true;
-        //}
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            currentHeader.css("width", headerTextWidthWithPadding + "px");
+            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            if(counter != (grandTotalFooterCells.length -1)) {
+                $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
+            }
+            adjustedSomething = true;
+        }
+        if (width !== currentHeader.width()) {
+            currentHeader.width(width);
+            $(grandTotalFooterCells[counter]).width(width);
+            adjustedSomething = true;
+        }
         counter++;
     });
 
@@ -735,7 +718,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || 50) - 1;
+        result.pageSize = (table.props.pageSize || 50);
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;

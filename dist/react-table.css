@@ -102,5 +102,22 @@
 .rt-display-inline{ display: inline-block }
 
 /* footer */
-.rt-footer-count{ color: #4a5564; font-weight: bold; margin-bottom: 5px;}
-/*.rt-grand-total > table{table-layout: fixed}*/
+.rt-footer-count{ color: #4a5564; margin-top: 10px;}
+
+.rt-grand-total {
+    color: #fff;
+    background-color: #4a5564;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.rt-grand-total-cell{
+    display: inline-block;
+    border-right: 1px solid #f9f2f4;
+}
+
+.rt-grand-total-cell-content{
+   padding: 0 5px;
+}
+

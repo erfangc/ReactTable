@@ -554,7 +554,7 @@ function buildHeaderLabel(table, columnDef, isFirstColumn){
  * create the first cell for each row, append the proper ident level based on the cell's depth in the subtotaling tree
  * @returns {*}
  */
-function buildFirstCellForSubtotalRow() {
+function buildFirstCellForSubtotalRow(isGrandTotal) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
@@ -568,17 +568,107 @@ function buildFirstCellForSubtotalRow() {
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
     result =(
-                React.createElement("td", {style: firstCellStyle, key: firstColTag}, 
-                    React.createElement("a", {onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
+                React.createElement("td", {key: firstColTag}, 
+                    React.createElement("div", null, 
+                    React.createElement("a", {style: firstCellStyle, onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
                         data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
                     "  ", 
                     React.createElement("strong", null, data[firstColTag]), 
                     userDefinedElement
+                        )
                 )
             );
+    if(isGrandTotal){
+        result =(
+                React.createElement("div", {key: firstColTag, className: "rt-grand-total-cell"}, 
+                    React.createElement("div", {className: "rt-grand-total-cell-content"}, 
+                    " ", 
+                    React.createElement("strong", {style: firstCellStyle}, data[firstColTag]), 
+                        userDefinedElement
+                    )
+                )
+        );
+    }
     return result;
 }
+
+function buildGrandTotal(grandTotalRow){
+    const cx = React.addons.classSet;
+    var cells = [];
+    for (var i = 0; i < this.props.columnDefs.length; i++) {
+        if (i === 0 && !this.props.data.isDetail) {
+            cells.push(buildFirstCellForSubtotalRow.call(this));
+        } else {
+            var columnDef = this.props.columnDefs[i];
+            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
+            var classes = cx(displayInstructions.classes);
+            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
+            var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
+
+            // convert and format dates
+            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
+                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+                    displayContent = new Date(displayContent).toLocaleDateString();
+            }
+            // determine cell content, based on whether a cell templating callback was provided
+            if (columnDef.cellTemplate)
+                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
+            cells.push(
+                React.createElement("td", {
+                    className: classes, 
+                    ref: columnDef.colTag, 
+                    onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null, 
+                    onContextMenu: this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
+                    style: displayInstructions.styles, 
+                    key: columnDef.colTag, 
+                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                    onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                        this.props.handleColumnFilter(null, columnDef) : null}, 
+                    displayContent, 
+                    this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
+                )
+            );
+        }
+    }
+
+    if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
+        //cells
+        var corner;
+        var classString = "btn-link rt-plus-sign";
+        //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
+        //    corner = <img src={table.props.cornerIcon}/>;
+        classString = "btn-link rt-corner-image";
+        //}
+
+        // the plus sign at the end to add columns
+        cells.push(
+            React.createElement("td", null, 
+                React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+                    React.createElement("a", {className: classString}, 
+                        React.createElement("strong", null, 
+                            React.createElement("i", {className: "fa fa-plus"})
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    classes = cx({
+        //TODO: to hightlight a selected row, need press ctrl
+        //'selected': this.props.isSelected && this.props.data.isDetail,
+        'summary-selected': this.props.isSelected && !this.props.data.isDetail,
+        'group-background': !this.props.data.isDetail
+    });
+
+    // apply extra CSS if specified
+    return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
+        className: classes, style: this.props.extraStyle}, cells));
+}
+
+
+
 
 function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
@@ -589,10 +679,16 @@ function buildPageNavigator(table, paginationAttr) {
             handleClick: table.handlePageClick})) : null;
 }
 
-function buildFooter(paginationAttr){
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function buildFooter(paginationAttr, rowNum){
     return (
         React.createElement("div", null, 
-            React.createElement("p", {className: "rt-display-inline rt-footer-count"}, " count : ", this.props.data.length), 
+            React.createElement("p", {className: "rt-display-inline rt-footer-count"}, 
+                "Showing " + paginationAttr.lowerVisualBound + " to " +paginationAttr.upperVisualBound + " rows out of "+ numberWithCommas(rowNum) + " rows."
+            ), 
             this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null
         )
     )
@@ -1552,7 +1648,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         bindHeadersToMenu($node);
 
         // build dropdown list for column filter
-        buildFilterData.call(this,false);
+        buildFilterData.call(this, false);
     },
     componentWillMount: function () {
     },
@@ -1566,10 +1662,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         bindHeadersToMenu($(this.getDOMNode()));
     },
     addFilter: function (columnDefToFilterBy, filterData) {
-        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
+        this.handleColumnFilter.call(this, columnDefToFilterBy, filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter.call(this,colDef, dontSet);
+        this.handleClearFilter.call(this, colDef, dontSet);
     },
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
@@ -1588,8 +1684,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
-        rasterizedData.splice(0,1);
+        //var grandTotal = buildGrandTotal.call(this, rasterizedData.splice(0, 1));
+        var grandTotal = rasterizedData.splice(0, 1).map(rowMapper, this);
 
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
@@ -1600,10 +1696,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var headers = buildHeaders(this);
 
         var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0){
+        if (this.props.height && parseInt(this.props.height) > 0) {
             containerStyle.height = this.props.height;
-            //containerStyle.display = 'block';
-            //containerStyle.width = $('.rt-table-container').width() + 'px';
         }
 
         if (this.props.disableScrolling)
@@ -1619,14 +1713,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
                         )
                     )
                 ), 
-                React.createElement("div", {className: "rt-grand-total"}, 
-                    React.createElement("table", {className: "rt-table"}, 
-                        React.createElement("tfoot", null, 
-                            grandTotal
-                        )
-                    )
-                ), 
-                buildFooter.call(this,paginationAttr)
+                grandTotal, 
+                buildFooter.call(this, paginationAttr, rasterizedData.length)
             )
         );
     }
@@ -1639,9 +1727,14 @@ var Row = React.createClass({displayName: "Row",
     render: function () {
         const cx = React.addons.classSet;
         var cells = [];
+        var isGrandTotal = false;
+        if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
+            isGrandTotal = true;
+        }
+
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForSubtotalRow.call(this));
+                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
             } else {
                 var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -1657,43 +1750,33 @@ var Row = React.createClass({displayName: "Row",
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-                cells.push(
-                    React.createElement("td", {
-                        className: classes, 
-                        ref: columnDef.colTag, 
-                        onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null, 
-                        onContextMenu: this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
-                        style: displayInstructions.styles, 
-                        key: columnDef.colTag, 
-                        //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                        onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                            this.props.handleColumnFilter(null, columnDef) : null}, 
+                if (isGrandTotal) {
+                    cells.push(
+                            React.createElement("div", {className: classes + " rt-grand-total-cell", style: displayInstructions.styles}, 
+                                React.createElement("div", {className: "rt-grand-total-cell-content"}, 
+                                    displayContent ? displayContent : React.createElement("span", null, " ")
+                                )
+                            )
+                    );
+                }
+                else {
+                    cells.push(
+                        React.createElement("td", {
+                            className: classes, 
+                            ref: columnDef.colTag, 
+                            onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null, 
+                            onContextMenu: this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
+                            style: displayInstructions.styles, 
+                            key: columnDef.colTag, 
+                            //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                                this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
                     this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
-                    )
-                );
+                        )
+                    );
+                }
             }
-        }
-
-        if(!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total'){
-            //cells
-            var corner;
-            var classString = "btn-link rt-plus-sign";
-            //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
-            //    corner = <img src={table.props.cornerIcon}/>;
-                classString = "btn-link rt-corner-image";
-            //}
-
-            // the plus sign at the end to add columns
-            cells.push(
-                React.createElement("td", null, 
-                    React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-                     React.createElement("a", {className: classString}, 
-                         React.createElement("strong", null, React.createElement("i", {className: "fa fa-plus"}))
-                     )
-                    )
-                )
-            );
         }
 
         classes = cx({
@@ -1703,9 +1786,14 @@ var Row = React.createClass({displayName: "Row",
             'group-background': !this.props.data.isDetail
         });
 
+        if (isGrandTotal) {
+            return (React.createElement("div", {className: "rt-grand-total"}, 
+                        cells
+            ))
+        } else
         // apply extra CSS if specified
-        return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-            className: classes, style: this.props.extraStyle}, cells));
+            return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
+                className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -1787,7 +1875,9 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
                 style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
                 React.createElement("div", null, 
-                    React.createElement("span", null, React.createElement("i", {className: "fa fa-plus"}), " Add Subtotal")
+                    React.createElement("span", null, 
+                        React.createElement("i", {className: "fa fa-plus"}), 
+                    "Add Subtotal")
                 ), 
                 subMenuAttachment
             )
@@ -1857,9 +1947,9 @@ function adjustHeaders(adjustCount) {
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var headerContainerWidth = $('.rt-headers-grand-container').width();
-    var grandTotalFooter = $('#'+ id+' .rt-grand-total tfoot');
+    var grandTotalFooter = $('#' + id + ' .rt-grand-total');
     grandTotalFooter.width(headerContainerWidth);
-    var grandTotalFooterCells = grandTotalFooter.find('td');
+    var grandTotalFooterCells = grandTotalFooter.find('.rt-grand-total-cell');
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
     var adjustedSomething = false;
@@ -1871,21 +1961,22 @@ function adjustHeaders(adjustCount) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
+        var footerCellWidthWithPadding = $(grandTotalFooterCells[counter]).width();
+        if(footerCellWidthWithPadding > headerTextWidthWithPadding){
+            headerTextWidthWithPadding = footerCellWidthWithPadding;
+        }
+
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-            // add more space for sort and filter icon
-            headerTextWidthWithPadding += 20;
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px"); outerWidth( value )
-            //$(grandTotalFooterCells[counter]).outerWidth(headerTextWidthWithPadding);
-
+            if(counter != (grandTotalFooterCells.length -1)) {
+                $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
+            }
             adjustedSomething = true;
         }
         if (width !== currentHeader.width()) {
             currentHeader.width(width);
-            $(grandTotalFooterCells[counter]).css("width", (width) + "px");
-            //$(grandTotalFooterCells[counter]).outerWidth(headerTextWidthWithPadding);
-
+            $(grandTotalFooterCells[counter]).width(width);
             adjustedSomething = true;
         }
         counter++;
@@ -1948,7 +2039,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || 50) -1;
+        result.pageSize = (table.props.pageSize || 50);
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
@@ -1964,7 +2055,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
-        if(result.lowerVisualBound > result.upperVisualBound){
+        if (result.lowerVisualBound > result.upperVisualBound) {
             // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
             table.state.currentPage = 1;
             result.lowerVisualBound = 0;
@@ -1988,17 +2079,17 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-function buildFilterData(isUpdate){
+function buildFilterData(isUpdate) {
     setTimeout(function () {
         var start = new Date().getTime();
-        if(isUpdate){
+        if (isUpdate) {
             this.state.filterData = {};
         }
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
         convertFilterData(this.state.filterData);
-        console.log("generate filter data: "+(new Date().getTime() -  start));
+        console.log("generate filter data: " + (new Date().getTime() - start));
     }.bind(this));
 
 }
@@ -2010,7 +2101,7 @@ function buildFilterData(isUpdate){
  * @param props
  */
 function buildFilterDataHelper(row, state, props) {
-    if(row.hiddenByFilter == true){
+    if (row.hiddenByFilter == true) {
         return;
     }
 
@@ -2026,7 +2117,7 @@ function buildFilterDataHelper(row, state, props) {
 
         var key = columnDefs[i].colTag;
         var hashmap = state.filterData[key] || {};
-        if(row[key]){
+        if (row[key]) {
             hashmap[row[key]] = true;
             state.filterData[key] = hashmap;
         }
