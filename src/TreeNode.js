@@ -145,22 +145,30 @@ function filterInArray(filterArr, columnDef, row, caseSensitive) {
     return !found;
 }
 
+/**
+ * filter data and recursively check if hidden parent tree node
+ * @param columnDef
+ * @param textToFilterBy
+ * @param caseSensitive
+ * @param customFilterer
+ */
 TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, caseSensitive, customFilterer) {
-    // Filter aggregations
-    for (var i = 0; i < this.children.length; i++) {
-        // Call recursively to filter leaf nodes first
-        this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
-        // Check to see if all children are hidden, then hide parent if so
+
+    if (this.hasChild()) {
+        // Filter aggregations
         var allChildrenHidden = true;
-        for (var j = 0; j < this.children[i].ultimateChildren.length; j++) {
-            if (!this.children[i].ultimateChildren[j].hiddenByFilter) {
+        for (var i = 0; i < this.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            this.children[i].filterByColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
+            // Check to see if all children are hidden, then hide parent if so
+            if (this.children[i].hiddenByFilter == false) {
                 allChildrenHidden = false;
-                break;
             }
         }
-        this.children[i].hiddenByFilter = allChildrenHidden;
-    }
-    if (!this.hasChild()) {
+        this.hiddenByFilter = allChildrenHidden;
+    } else {
+        // filter ultimateChildren
+        var showAtLeastOneChild = false;
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
             if (customFilterer) {
@@ -171,26 +179,29 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
                 row[columnDef.colTag] = uChild[columnDef.colTag];
                 uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || filterInArray(textToFilterBy, columnDef, row, caseSensitive);
             }
+            showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
         }
+        this.hiddenByFilter = !showAtLeastOneChild;
     }
 };
 
 TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
-    // Filter aggregations
-    for (var i = 0; i < this.children.length; i++) {
-        // Call recursively to filter leaf nodes first
-        this.children[i].filterByNumericColumn(columnDef, filterData);
-        // Check to see if all children are hidden, then hide parent if so
+
+    if (this.hasChild()) {
+        // Filter aggregations
         var allChildrenHidden = true;
-        for (var j = 0; j < this.children[i].ultimateChildren.length; j++) {
-            if (!this.children[i].ultimateChildren[j].hiddenByFilter) {
+        for (var i = 0; i < this.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            this.children[i].filterByNumericColumn(columnDef, filterData);
+            // Check to see if all children are hidden, then hide parent if so
+            if (this.children[i].hiddenByFilter == false) {
                 allChildrenHidden = false;
-                break;
             }
         }
-        this.children[i].hiddenByFilter = allChildrenHidden;
-    }
-    if (!this.hasChild()) {
+        this.hiddenByFilter = allChildrenHidden;
+    } else {
+        // filter ultimateChildren
+        var showAtLeastOneChild = false;
         for (var i = 0; i < this.ultimateChildren.length; i++) {
             var uChild = this.ultimateChildren[i];
             var row = {};
@@ -214,7 +225,9 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
             }
 
             uChild.hiddenByFilter = filterOutNode;
+            showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
         }
+        this.hiddenByFilter = !showAtLeastOneChild;
     }
 };
 
