@@ -209,6 +209,39 @@ function ReactTableHandleClearSubtotal(event) {
     this.setState(newState);
 }
 
+/**
+ * check if a tree node needs to be hidden. if a tree node has no children to show, hide it.
+ * @param columnDef
+ * @param textToFilterBy
+ * @param caseSensitive
+ * @param customFilterer
+ */
+function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
+    if (lrootNode.hasChild()) {
+        // Filter aggregations
+        var allChildrenHidden = true;
+        for (var i = 0; i < lrootNode.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            hideTreeNodeWhenNoChildrenToShow(lrootNode.children[i]);
+            // Check to see if all children are hidden, then hide parent if so
+            if (lrootNode.children[i].hiddenByFilter == false) {
+                allChildrenHidden = false;
+            }
+        }
+        lrootNode.hiddenByFilter = allChildrenHidden;
+    } else {
+        var hasAtLeastOneChildToShow = false;
+        for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
+            var uChild = lrootNode.ultimateChildren[j];
+            if (uChild.hiddenByFilter == false) {
+                hasAtLeastOneChildToShow = true;
+                break;
+            }
+        }
+        lrootNode.hiddenByFilter = !hasAtLeastOneChildToShow;
+    }
+};
+
 function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     event.stopPropagation();
     const subtotalBy = this.state.subtotalBy || [];
@@ -223,10 +256,6 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (columnDef != null && columnDef.constructor.name != 'SyntheticMouseEvent')
         subtotalBy.push(columnDef);
-
-    // TODO Chris - what is this?
-    if (this.state.currentFilters.length > 0)
-        applyAllFilters.call(this);
 
     /**
      * extend the current state to derive new state after subtotal operation, then create a new rootNode
@@ -243,6 +272,13 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (this.state.sortBy.length > 0)
         newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
+
+    // subtotaling break filter also, because of create one more level of treeNode.
+    // need hide treeNode which has no children to show
+    if (this.state.currentFilters.length > 0) {
+        hideTreeNodeWhenNoChildrenToShow(this.state.rootNode);
+    }
+
     this.setState(newState);
 }
 
