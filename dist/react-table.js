@@ -413,9 +413,9 @@ function buildFilterList(table,columnDef){
     filterData.sort();
     var filterList = [];
     //if(filterData.length > 1){
-    //    filterList.push(
-    //        <option selected style={{display:'none'}}>select filter</option>
-    //    );
+        filterList.push(
+            React.createElement("option", {value: "default", style: {display:'none'}})
+        );
     //}
     for(var i = 0; i< filterData.length; i++){
         filterList.push(
@@ -447,7 +447,7 @@ function buildFilterList(table,columnDef){
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
                     onChange: addFilter.bind(null,table , columnDef), 
                     onKeyDown: pressedKey.bind(null, table, columnDef.colTag), 
-                    defaultValue: filterData.length > 1 ? "":filterData[0]}, 
+                    value: filterData.length > 1 ? "default" : filterData[0]}, 
                     filterList
                 ), 
                 React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, 
