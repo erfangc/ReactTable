@@ -430,12 +430,16 @@ var Row = React.createClass({
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
                 if (isGrandTotal) {
+                    var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
+                    if (displayContent) {
+                        grandTotalCellStyle.width = displayContent.length + "em";
+                    }
                     cells.push(
-                            <div className={classes + " rt-grand-total-cell"} style={displayInstructions.styles}>
-                                <div className="rt-grand-total-cell-content">
+                        <div className={classes + " rt-grand-total-cell"} >
+                            <div className="rt-grand-total-cell-content" style={grandTotalCellStyle}>
                                     {displayContent ? displayContent : <span>&nbsp;</span>}
-                                </div>
                             </div>
+                        </div>
                     );
                 }
                 else {
@@ -626,11 +630,13 @@ function adjustHeaders(adjustCount) {
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
     var headerContainerWidth = $('.rt-headers-grand-container').width();
+    var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
+    padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+
     var grandTotalFooter = $('#' + id + ' .rt-grand-total');
     grandTotalFooter.width(headerContainerWidth);
     var grandTotalFooterCells = grandTotalFooter.find('.rt-grand-total-cell');
-    var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
-    padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+    var grandTotalFooterCellContents = grandTotalFooter.find('.rt-grand-total-cell-content');
     var adjustedSomething = false;
 
     headerElems.each(function () {
@@ -640,19 +646,19 @@ function adjustHeaders(adjustCount) {
             width += 1;
         }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        var footerCellWidthWithPadding = $(grandTotalFooterCells[counter]).width();
-        if(footerCellWidthWithPadding > headerTextWidthWithPadding){
-            headerTextWidthWithPadding = footerCellWidthWithPadding;
-        }
+        var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
+        headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
 
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            if(counter != (grandTotalFooterCells.length -1)) {
+            if (counter != (grandTotalFooterCells.length - 1)) {
                 $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
             }
             adjustedSomething = true;
         }
+
         if (width !== currentHeader.width()) {
             currentHeader.width(width);
             $(grandTotalFooterCells[counter]).width(width);

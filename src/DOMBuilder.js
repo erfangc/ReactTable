@@ -461,12 +461,13 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
                 </td>
             );
     if(isGrandTotal){
+        if(data[firstColTag]) {
+            firstCellStyle.width = data[firstColTag].length + "em";
+        }
         result =(
                 <div  key={firstColTag} className="rt-grand-total-cell">
-                    <div className="rt-grand-total-cell-content">
-                    &nbsp;
-                    <strong style={firstCellStyle}>{data[firstColTag]}</strong>
-                        {userDefinedElement}
+                    <div style={firstCellStyle} className="rt-grand-total-cell-content">
+                        {data[firstColTag] ? data[firstColTag] : <span>&nbsp;</span>}
                     </div>
                 </div>
         );
