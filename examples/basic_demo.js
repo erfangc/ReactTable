@@ -102,7 +102,8 @@ $(function () {
                     }
                 ]
             },
-            height: "750px",
+            height: "500px",
+            pageSize:50,
             columnDefs: columnDefs,
             customMenuItems: {
                 Description: {

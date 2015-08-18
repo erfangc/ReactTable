@@ -35,6 +35,7 @@ var ReactTable = React.createClass({
         onSummarySelectCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
+        buildFiltersCallback: React.PropTypes.func,
         /**
          * props to selectively disable table features
          */
@@ -50,7 +51,7 @@ var ReactTable = React.createClass({
     },
     getDefaultProps: function () {
         return {
-
+            pageSize: 50,
             extraStyle: {
                 "cursor": "pointer"
             },
@@ -247,7 +248,7 @@ var ReactTable = React.createClass({
         if (idx)
             columnDefs.splice(idx + 1, 0, columnDef);
         else
-            columnDefs.push(columnDef)
+            columnDefs.push(columnDef);
         /**
          * we will want to perform an aggregation
          */
@@ -327,7 +328,7 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($node);
 
         // build dropdown list for column filter
-        buildFilterData.call(this,false);
+        buildFilterData.call(this, false);
     },
     componentWillMount: function () {
     },
@@ -341,10 +342,10 @@ var ReactTable = React.createClass({
         bindHeadersToMenu($(this.getDOMNode()));
     },
     addFilter: function (columnDefToFilterBy, filterData) {
-        this.handleColumnFilter.call(this,columnDefToFilterBy,filterData);
+        this.handleColumnFilter.call(this, columnDefToFilterBy, filterData);
     },
     removeFilter: function ReactTableHandleRemoveFilter(colDef, dontSet) {
-        this.handleClearFilter.call(this,colDef, dontSet);
+        this.handleClearFilter.call(this, colDef, dontSet);
     },
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
@@ -363,8 +364,8 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        var grandTotal = rasterizedData.slice(0,1).map(rowMapper,this);
-        rasterizedData.splice(0,1);
+        //var grandTotal = buildGrandTotal.call(this, rasterizedData.splice(0, 1));
+        var grandTotal = rasterizedData.splice(0, 1).map(rowMapper, this);
 
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
@@ -374,27 +375,26 @@ var ReactTable = React.createClass({
 
         var headers = buildHeaders(this);
 
-        var containerStyle = {};
-        if (this.props.height && parseInt(this.props.height) > 0){
-            var rowNum = this.props.pageSize || Math.floor(parseInt(this.props.height,10) / 18);
-            containerStyle.height = (rowNum * 18) + 'px';
+        var tableBodyContainerStyle = {};
+        if (this.props.height && parseInt(this.props.height) > 0) {
+            tableBodyContainerStyle.height = this.props.height;
         }
 
         if (this.props.disableScrolling)
-            containerStyle.overflowY = "hidden";
+            tableBodyContainerStyle.overflowY = "hidden";
 
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div style={containerStyle} className="rt-scrollable">
-                    <table className="rt-table">
+                <div style={tableBodyContainerStyle} className="rt-scrollable">
+                    <table className="rt-table"  >
                         <tbody>
-                        {rowsToDisplay}
-                        {grandTotal}
+                            {rowsToDisplay}
                         </tbody>
                     </table>
                 </div>
-                {buildFooter.call(this,paginationAttr)}
+                {grandTotal}
+                {buildFooter.call(this, paginationAttr, rasterizedData.length)}
             </div>
         );
     }
@@ -407,9 +407,14 @@ var Row = React.createClass({
     render: function () {
         const cx = React.addons.classSet;
         var cells = [];
+        var isGrandTotal = false;
+        if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
+            isGrandTotal = true;
+        }
+
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForSubtotalRow.call(this));
+                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
             } else {
                 var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
@@ -425,23 +430,39 @@ var Row = React.createClass({
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-                cells.push(
-                    <td
-                        className={classes}
-                        ref={columnDef.colTag}
-                        onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                        onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                        style={displayInstructions.styles}
-                        key={columnDef.colTag}
-                        //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                        onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                            this.props.handleColumnFilter(null, columnDef) : null }>
+                if (isGrandTotal) {
+                    var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
+                    if (displayContent) {
+                        grandTotalCellStyle.width = displayContent.length + "em";
+                    }
+                    cells.push(
+                        <div className={classes + " rt-grand-total-cell"} >
+                            <div className="rt-grand-total-cell-content" style={grandTotalCellStyle}>
+                                    {displayContent ? displayContent : <span>&nbsp;</span>}
+                            </div>
+                        </div>
+                    );
+                }
+                else {
+                    cells.push(
+                        <td
+                            className={classes}
+                            ref={columnDef.colTag}
+                            onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
+                            onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
+                            style={displayInstructions.styles}
+                            key={columnDef.colTag}
+                            //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
+                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                                this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                     {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
-                    </td>
-                );
+                        </td>
+                    );
+                }
             }
         }
+
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
             //'selected': this.props.isSelected && this.props.data.isDetail,
@@ -449,9 +470,14 @@ var Row = React.createClass({
             'group-background': !this.props.data.isDetail
         });
 
+        if (isGrandTotal) {
+            return (<div className="rt-grand-total">
+                        {cells}
+            </div>)
+        } else
         // apply extra CSS if specified
-        return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-            className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
+                className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -533,7 +559,9 @@ var SubtotalControl = React.createClass({
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
                 style={{"position": "relative"}} className="menu-item menu-item-hoverable">
                 <div>
-                    <span><i className="fa fa-plus"></i> Add Subtotal</span>
+                    <span>
+                        <i className="fa fa-plus"></i>
+                    &nbsp;Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -602,29 +630,52 @@ function adjustHeaders(adjustCount) {
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
+    var headerContainerWidth = $('.rt-headers-grand-container').width();
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
+
+    var grandTotalFooter = $('#' + id + ' .rt-grand-total');
+    grandTotalFooter.width(headerContainerWidth);
+    var grandTotalFooterCells = grandTotalFooter.find('.rt-grand-total-cell');
+    var grandTotalFooterCellContents = grandTotalFooter.find('.rt-grand-total-cell-content');
     var adjustedSomething = false;
 
     headerElems.each(function () {
         var currentHeader = $(this);
-        var width = $('#' + id + ' .rt-table tr:last td:eq(' + counter + ')').outerWidth() - 1;
-        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
-            width += 1;
+        if(counter == headerElems.length - 1 ){
+            // give a space for plus column sign
+            var lastColumnWidth = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+            if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
+                lastColumnWidth += 1;
+            }
+            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth+2) + "px");
+            lastColumnWidth -= 21;
+            currentHeader.css("width", lastColumnWidth + "px");
+        }else {
+            var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
+            var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
+            headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
+
+            if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+                currentHeader.css("width", headerTextWidthWithPadding + "px");
+                $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+                if (counter != (grandTotalFooterCells.length - 1)) {
+                    $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
+                }
+                adjustedSomething = true;
+            }
+
+            var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+            if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
+                width += 1;
+            }
+            if (width !== currentHeader.width()) {
+                currentHeader.width(width);
+                $(grandTotalFooterCells[counter]).width(width);
+                adjustedSomething = true;
+            }
+            counter++;
         }
-        var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-            // add more space for sort and filter icon
-            headerTextWidthWithPadding += 20;
-            currentHeader.css("width", headerTextWidthWithPadding + "px");
-            $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-            adjustedSomething = true;
-        }
-        if (width !== currentHeader.width()) {
-            currentHeader.width(width);
-            adjustedSomething = true;
-        }
-        counter++;
     });
 
     if (!adjustedSomething)
@@ -684,7 +735,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = 0;
         result.upperVisualBound = data.length
     } else {
-        result.pageSize = (table.props.pageSize || Math.floor(parseInt(table.props.height,10) / 18)) -1;
+        result.pageSize = (table.props.pageSize || 50);
         result.maxDisplayedPages = table.props.maxDisplayedPages || 10;
 
         result.pageStart = 1;
@@ -700,7 +751,7 @@ function getPaginationAttr(table, data) {
         result.lowerVisualBound = (table.state.currentPage - 1) * result.pageSize;
         result.upperVisualBound = Math.min(table.state.currentPage * result.pageSize - 1, data.length);
 
-        if(result.lowerVisualBound > result.upperVisualBound){
+        if (result.lowerVisualBound > result.upperVisualBound) {
             // after filter, data length has reduced. if lowerVisualBound is larger than the upperVisualBound, go to first page
             table.state.currentPage = 1;
             result.lowerVisualBound = 0;
@@ -724,19 +775,20 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
     }
 }
 
-function buildFilterData(isUpdate){
+function buildFilterData(isUpdate) {
     setTimeout(function () {
-        var start = new Date().getTime();
-        if(isUpdate){
+        if (isUpdate) {
+            this.state.filterDataCount = {};
             this.state.filterData = {};
         }
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
-        convertFilterData(this.state.filterData);
-        console.log("generate filter data: "+(new Date().getTime() -  start));
+        convertFilterData(this.state.filterDataCount,this.state);
+        if(isUpdate){
+            this.props.buildFiltersCallback && this.props.buildFiltersCallback(this.state.filterDataCount);
+        }
     }.bind(this));
-
 }
 
 /**
@@ -746,12 +798,12 @@ function buildFilterData(isUpdate){
  * @param props
  */
 function buildFilterDataHelper(row, state, props) {
-    if(row.hiddenByFilter == true){
+    if (row.hiddenByFilter == true) {
         return;
     }
 
-    if (!state.filterData) {
-        state.filterData = {};
+    if (!state.filterDataCount) {
+        state.filterDataCount = {};
     }
 
     var columnDefs = state.columnDefs;
@@ -761,10 +813,10 @@ function buildFilterDataHelper(row, state, props) {
         }
 
         var key = columnDefs[i].colTag;
-        var hashmap = state.filterData[key] || {};
-        if(row[key]){
-            hashmap[row[key]] = true;
-            state.filterData[key] = hashmap;
+        if (row[key]) {
+            var hashmap = state.filterDataCount[key] || {};
+            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ?  1 : hashmap[row[key]] + 1;
+            state.filterDataCount[key] = hashmap;
         }
     }
 }
@@ -773,16 +825,17 @@ function buildFilterDataHelper(row, state, props) {
  * convert distinct values in map into an array
  * @param filterData
  */
-function convertFilterData(filterData) {
-    for (var key in filterData) {
-        var map = filterData[key];
+function convertFilterData(filterDataCount,state) {
+    state.filterData = {};
+    for (var key in filterDataCount) {
+        var map = filterDataCount[key];
         var arr = [];
         for (var value in map) {
             if (value != "") {
                 arr.push(value);
             }
         }
-        filterData[key] = arr;
+        state.filterData[key] = arr;
     }
 }
 

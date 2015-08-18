@@ -60,7 +60,7 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
         dontSet = undefined;
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
-    if(!Array.isArray(filterData)){
+    if (!Array.isArray(filterData)) {
         filterData = [filterData];
     }
 
@@ -85,13 +85,23 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     }
 
     if (!dontSet) {
-        buildFilterData.call(this,true);
+        buildFilterData.call(this, true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
         this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
     }
 
-    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy,filterData);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy, filterData);
+}
 
+/**
+ * reset all treeNode hiddenByFilter to false
+ * @param lrootNode
+ */
+function resetHiddenForAllTreeNodes(lrootNode) {
+    lrootNode.hiddenByFilter = false;
+    for (var i = 0; i < lrootNode.children.length; i++) {
+        resetHiddenForAllTreeNodes(lrootNode.children[i]);
+    }
 }
 
 function ReactTableHandleRemoveFilter(colDef, dontSet) {
@@ -102,6 +112,8 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     for (var i = 0; i < this.state.rootNode.ultimateChildren.length; i++) {
         this.state.rootNode.ultimateChildren[i].hiddenByFilter = false;
     }
+    resetHiddenForAllTreeNodes(this.state.rootNode);
+
     // Remove filter from list of current filters
     for (i = 0; i < this.state.currentFilters.length; i++) {
         if (this.state.currentFilters[i].colDef === colDef) {
@@ -115,7 +127,7 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
     }
 
     if (!dontSet) {
-        buildFilterData.call(this,true);
+        buildFilterData.call(this, true);
         colDef.isFiltered = false;
         var fip = this.state.filterInPlace;
         delete fip[colDef.colTag];
@@ -126,20 +138,20 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
         });
     }
 
-    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef,[]);
+    this.props.afterFilterCallback && this.props.afterFilterCallback(colDef, []);
 }
 
 function ReactTableHandleRemoveAllFilters() {
     recursivelyClearFilters(this.state.rootNode);
-    buildFilterData.call(this,true);
+    buildFilterData.call(this, true);
     //remove filter icon in header
-    this.state.columnDefs.forEach(function(colDef){
+    this.state.columnDefs.forEach(function (colDef) {
         colDef.isFiltered = false;
     });
 
-    this.state.currentFilters.forEach(function(filter){
-        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef,[]);
-    },this);
+    this.state.currentFilters.forEach(function (filter) {
+        this.props.afterFilterCallback && this.props.afterFilterCallback(filter.colDef, []);
+    }, this);
 
     // setState() does not immediately mutate this.state but creates a pending state transition.
     // Accessing this.state after calling this method can potentially return the existing value.
@@ -196,6 +208,39 @@ function ReactTableHandleClearSubtotal(event) {
     this.setState(newState);
 }
 
+/**
+ * check if a tree node needs to be hidden. if a tree node has no children to show, hide it.
+ * @param columnDef
+ * @param textToFilterBy
+ * @param caseSensitive
+ * @param customFilterer
+ */
+function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
+    if (lrootNode.hasChild()) {
+        // Filter aggregations
+        var allChildrenHidden = true;
+        for (var i = 0; i < lrootNode.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            hideTreeNodeWhenNoChildrenToShow(lrootNode.children[i]);
+            // Check to see if all children are hidden, then hide parent if so
+            if (lrootNode.children[i].hiddenByFilter == false) {
+                allChildrenHidden = false;
+            }
+        }
+        lrootNode.hiddenByFilter = allChildrenHidden;
+    } else {
+        var hasAtLeastOneChildToShow = false;
+        for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
+            var uChild = lrootNode.ultimateChildren[j];
+            if (uChild.hiddenByFilter == false) {
+                hasAtLeastOneChildToShow = true;
+                break;
+            }
+        }
+        lrootNode.hiddenByFilter = !hasAtLeastOneChildToShow;
+    }
+};
+
 function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     event.stopPropagation();
     const subtotalBy = this.state.subtotalBy || [];
@@ -210,10 +255,6 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (columnDef != null && columnDef.constructor.name != 'SyntheticMouseEvent')
         subtotalBy.push(columnDef);
-
-    // TODO Chris - what is this?
-    if (this.state.currentFilters.length > 0)
-        applyAllFilters.call(this);
 
     /**
      * extend the current state to derive new state after subtotal operation, then create a new rootNode
@@ -230,6 +271,13 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (this.state.sortBy.length > 0)
         newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
+
+    // subtotaling break filter also, because of create one more level of treeNode.
+    // need hide treeNode which has no children to show
+    if (this.state.currentFilters.length > 0) {
+        hideTreeNodeWhenNoChildrenToShow(this.state.rootNode);
+    }
+
     this.setState(newState);
 }
 

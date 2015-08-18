@@ -4,14 +4,12 @@
  * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
-    var start = new Date().getTime();
     var rootNode = buildTreeSkeleton(props, state);
     recursivelyAggregateNodes(rootNode, state);
 
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
 
-    console.log("create new tree: " + (new Date().getTime() - start));
     return rootNode;
 }
 
@@ -46,14 +44,11 @@ function buildSubtree(lrootNode, newSubtotal, state) {
  * @returns {*}
  */
 function buildSubtreeForNewSubtotal(state) {
-    var start = new Date().getTime();
-
     var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
     buildSubtree(state.rootNode, newSubtotal, state);
     state.rootNode.sortRecursivelyBySortIndex();
     state.rootNode.foldSubTree();
 
-    console.log("build Subtree: " + (new Date().getTime() - start));
     return state.rootNode;
 }
 
@@ -91,9 +86,7 @@ function destoryRootChildren(state) {
  * @param state
  */
 function destorySubtrees(state) {
-    var start = new Date().getTime();
     destorySubtreesRecursively(state.rootNode);
-    console.log("destory subtree: " + (new Date().getTime() - start));
 }
 
 /**
