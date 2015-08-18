@@ -684,10 +684,13 @@ function numberWithCommas(x) {
 }
 
 function buildFooter(paginationAttr, rowNum){
+    var start = paginationAttr.lowerVisualBound + 1;
+    var end = Math.min(paginationAttr.upperVisualBound+1,rowNum);
+
     return (
         React.createElement("div", null, 
             React.createElement("p", {className: "rt-display-inline rt-footer-count"}, 
-                "Showing " + paginationAttr.lowerVisualBound + " to " +paginationAttr.upperVisualBound + " rows out of "+ numberWithCommas(rowNum) + " rows."
+                "Showing " + start + " to " + end + " rows out of "+ numberWithCommas(rowNum) + " rows"
             ), 
             this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null
         )
@@ -1568,7 +1571,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         if (idx)
             columnDefs.splice(idx + 1, 0, columnDef);
         else
-            columnDefs.push(columnDef)
+            columnDefs.push(columnDef);
         /**
          * we will want to perform an aggregation
          */

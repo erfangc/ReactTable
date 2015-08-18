@@ -565,10 +565,13 @@ function numberWithCommas(x) {
 }
 
 function buildFooter(paginationAttr, rowNum){
+    var start = paginationAttr.lowerVisualBound + 1;
+    var end = Math.min(paginationAttr.upperVisualBound+1,rowNum);
+
     return (
         <div>
             <p className='rt-display-inline rt-footer-count'>
-                {"Showing " + paginationAttr.lowerVisualBound + " to " +paginationAttr.upperVisualBound + " rows out of "+ numberWithCommas(rowNum) + " rows."}
+                {"Showing " + start + " to " + end + " rows out of "+ numberWithCommas(rowNum) + " rows"}
             </p>
             {this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null}
         </div>

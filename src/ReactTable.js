@@ -247,7 +247,7 @@ var ReactTable = React.createClass({
         if (idx)
             columnDefs.splice(idx + 1, 0, columnDef);
         else
-            columnDefs.push(columnDef)
+            columnDefs.push(columnDef);
         /**
          * we will want to perform an aggregation
          */
