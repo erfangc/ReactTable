@@ -35,6 +35,7 @@ var ReactTable = React.createClass({
         onSummarySelectCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
+        buildFiltersCallback: React.PropTypes.func,
         /**
          * props to selectively disable table features
          */
@@ -380,7 +381,7 @@ var ReactTable = React.createClass({
 
         var tableBodyContainerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0) {
-            tableBodyContainerStyle.height =  this.props.height;
+            tableBodyContainerStyle.height = this.props.height;
         }
 
         if (this.props.disableScrolling)
@@ -564,7 +565,7 @@ var SubtotalControl = React.createClass({
                 <div>
                     <span>
                         <i className="fa fa-plus"></i>
-                    Add Subtotal</span>
+                    &nbsp;Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -769,17 +770,20 @@ function computePageDisplayRange(currentPage, maxDisplayedPages) {
 
 function buildFilterData(isUpdate) {
     setTimeout(function () {
-        var start = new Date().getTime();
+        console.time("generate filter data:");
         if (isUpdate) {
+            this.state.filterDataCount = {};
             this.state.filterData = {};
         }
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
-        convertFilterData(this.state.filterData);
-        console.log("generate filter data: " + (new Date().getTime() - start));
+        convertFilterData(this.state.filterDataCount,this.state);
+        console.timeEnd("generate filter data:");
+        if(isUpdate){
+            this.props.buildFiltersCallback && this.props.buildFiltersCallback(this.state.filterDataCount);
+        }
     }.bind(this));
-
 }
 
 /**
@@ -793,8 +797,8 @@ function buildFilterDataHelper(row, state, props) {
         return;
     }
 
-    if (!state.filterData) {
-        state.filterData = {};
+    if (!state.filterDataCount) {
+        state.filterDataCount = {};
     }
 
     var columnDefs = state.columnDefs;
@@ -804,10 +808,10 @@ function buildFilterDataHelper(row, state, props) {
         }
 
         var key = columnDefs[i].colTag;
-        var hashmap = state.filterData[key] || {};
         if (row[key]) {
-            hashmap[row[key]] = true;
-            state.filterData[key] = hashmap;
+            var hashmap = state.filterDataCount[key] || {};
+            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ?  1 : hashmap[row[key]] + 1;
+            state.filterDataCount[key] = hashmap;
         }
     }
 }
@@ -816,16 +820,17 @@ function buildFilterDataHelper(row, state, props) {
  * convert distinct values in map into an array
  * @param filterData
  */
-function convertFilterData(filterData) {
-    for (var key in filterData) {
-        var map = filterData[key];
+function convertFilterData(filterDataCount,state) {
+    state.filterData = {};
+    for (var key in filterDataCount) {
+        var map = filterDataCount[key];
         var arr = [];
         for (var value in map) {
             if (value != "") {
                 arr.push(value);
             }
         }
-        filterData[key] = arr;
+        state.filterData[key] = arr;
     }
 }
 

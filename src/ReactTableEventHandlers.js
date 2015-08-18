@@ -91,7 +91,6 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     }
 
     this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy, filterData);
-
 }
 
 /**
