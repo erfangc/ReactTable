@@ -311,7 +311,9 @@ var ReactTable = React.createClass({
         if (!this.props.disableInfiniteScrolling)
             $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
         setTimeout(function () {
+            console.time("adjust header");
             adjustHeaders.call(this);
+            console.timeEnd("adjust header");
         }.bind(this), 0);
         setTimeout(function () {
             adjustHeaders.call(this);
@@ -337,7 +339,9 @@ var ReactTable = React.createClass({
             $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
     },
     componentDidUpdate: function () {
+        console.time("adjust header update");
         adjustHeaders.call(this);
+        console.timeEnd("adjust header update");
         bindHeadersToMenu($(this.getDOMNode()));
     },
     addFilter: function (columnDefToFilterBy, filterData) {
@@ -641,16 +645,11 @@ function adjustHeaders(adjustCount) {
 
     headerElems.each(function () {
         var currentHeader = $(this);
-        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
-            width += 1;
-        }
         var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
         var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
         headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
 
         if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-
             currentHeader.css("width", headerTextWidthWithPadding + "px");
             $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
             if (counter != (grandTotalFooterCells.length - 1)) {
@@ -659,6 +658,10 @@ function adjustHeaders(adjustCount) {
             adjustedSomething = true;
         }
 
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
+            width += 1;
+        }
         if (width !== currentHeader.width()) {
             currentHeader.width(width);
             $(grandTotalFooterCells[counter]).width(width);
