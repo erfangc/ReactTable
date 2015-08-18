@@ -378,18 +378,18 @@ var ReactTable = React.createClass({
 
         var headers = buildHeaders(this);
 
-        var containerStyle = {};
+        var tableBodyContainerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0) {
-            containerStyle.height = this.props.height;
+            tableBodyContainerStyle.height =  this.props.height;
         }
 
         if (this.props.disableScrolling)
-            containerStyle.overflowY = "hidden";
+            tableBodyContainerStyle.overflowY = "hidden";
 
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div style={containerStyle} className="rt-scrollable">
+                <div style={tableBodyContainerStyle} className="rt-scrollable">
                     <table className="rt-table"  >
                         <tbody>
                             {rowsToDisplay}
