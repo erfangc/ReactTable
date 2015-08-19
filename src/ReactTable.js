@@ -350,12 +350,19 @@ var ReactTable = React.createClass({
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
     },
-    exportTreeStructureToFlatTable: function () {
-       return rasterizeTree({
+    exportDataWithSubtotaling: function () {
+        return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true);
+    },
+    exportDataWithoutSubtotaling: function () {
+        return rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        }, this.state.subtotalBy.length > 0, true,true);
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
