@@ -350,6 +350,13 @@ var ReactTable = React.createClass({
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
     },
+    exportTreeStructureToFlatTable: function () {
+       return rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        }, this.state.subtotalBy.length > 0, true);
+    },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
 
@@ -625,6 +632,11 @@ function docClick(e) {
 }
 
 function adjustHeaders(adjustCount) {
+    if(this.state.maxRows == 1){
+        //if table has no data, don't change column width
+        return;
+    }
+
     var id = this.state.uniqueId;
     if (!(adjustCount >= 0))
         adjustCount = 0;
@@ -640,18 +652,19 @@ function adjustHeaders(adjustCount) {
     var grandTotalFooterCellContents = grandTotalFooter.find('.rt-grand-total-cell-content');
     var adjustedSomething = false;
 
+    var table = this;
     headerElems.each(function () {
         var currentHeader = $(this);
-        if(counter == headerElems.length - 1 ){
+        if (counter == headerElems.length - 1 && !table.props.disableAddColumn) {
             // give a space for plus column sign
             var lastColumnWidth = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
             if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
                 lastColumnWidth += 1;
             }
-            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth+2) + "px");
+            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth + 2) + "px");
             lastColumnWidth -= 21; // minus plus sign width
             currentHeader.css("width", lastColumnWidth + "px");
-        }else {
+        } else {
             var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
             var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
             headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
@@ -784,8 +797,8 @@ function buildFilterData(isUpdate) {
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
-        convertFilterData(this.state.filterDataCount,this.state);
-        if(isUpdate){
+        convertFilterData(this.state.filterDataCount, this.state);
+        if (isUpdate) {
             this.props.buildFiltersCallback && this.props.buildFiltersCallback(this.state.filterDataCount);
         }
     }.bind(this));
@@ -815,7 +828,7 @@ function buildFilterDataHelper(row, state, props) {
         var key = columnDefs[i].colTag;
         if (row[key]) {
             var hashmap = state.filterDataCount[key] || {};
-            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ?  1 : hashmap[row[key]] + 1;
+            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ? 1 : hashmap[row[key]] + 1;
             state.filterDataCount[key] = hashmap;
         }
     }
@@ -825,7 +838,7 @@ function buildFilterDataHelper(row, state, props) {
  * convert distinct values in map into an array
  * @param filterData
  */
-function convertFilterData(filterDataCount,state) {
+function convertFilterData(filterDataCount, state) {
     state.filterData = {};
     for (var key in filterDataCount) {
         var map = filterDataCount[key];

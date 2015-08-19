@@ -531,18 +531,19 @@ function buildHeaders(table) {
 
     var corner;
     var classString = "btn-link rt-plus-sign";
-    if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
+    if (!table.props.disableAddColumn && table.props.cornerIcon) {
         corner = React.createElement("img", {src: table.props.cornerIcon});
         classString = "btn-link rt-corner-image";
     }
 
     // the plus sign at the end to add columns
-    headerColumns.push(
-        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-            React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
-                React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : React.createElement("i", {className: "fa fa-plus"})))
-            )
-        ));
+        headerColumns.push(
+            React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+                React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
+                    React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : React.createElement("i", {className: "fa fa-plus"})))
+                )
+            ));
+
     return (
         React.createElement("div", {className: "rt-headers-grand-container"}, 
             React.createElement("div", {key: "header", className: "rt-headers"}, 
@@ -599,83 +600,6 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     }
     return result;
 }
-
-function buildGrandTotal(grandTotalRow){
-    const cx = React.addons.classSet;
-    var cells = [];
-    for (var i = 0; i < this.props.columnDefs.length; i++) {
-        if (i === 0 && !this.props.data.isDetail) {
-            cells.push(buildFirstCellForSubtotalRow.call(this));
-        } else {
-            var columnDef = this.props.columnDefs[i];
-            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var classes = cx(displayInstructions.classes);
-            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
-            var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
-
-            // convert and format dates
-            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    displayContent = new Date(displayContent).toLocaleDateString();
-            }
-            // determine cell content, based on whether a cell templating callback was provided
-            if (columnDef.cellTemplate)
-                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-            cells.push(
-                React.createElement("td", {
-                    className: classes, 
-                    ref: columnDef.colTag, 
-                    onClick: columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null, 
-                    onContextMenu: this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null, 
-                    style: displayInstructions.styles, 
-                    key: columnDef.colTag, 
-                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                    onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                        this.props.handleColumnFilter(null, columnDef) : null}, 
-                    displayContent, 
-                    this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
-                )
-            );
-        }
-    }
-
-    if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
-        //cells
-        var corner;
-        var classString = "btn-link rt-plus-sign";
-        //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
-        //    corner = <img src={table.props.cornerIcon}/>;
-        classString = "btn-link rt-corner-image";
-        //}
-
-        // the plus sign at the end to add columns
-        cells.push(
-            React.createElement("td", null, 
-                React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-                    React.createElement("a", {className: classString}, 
-                        React.createElement("strong", null, 
-                            React.createElement("i", {className: "fa fa-plus"})
-                        )
-                    )
-                )
-            )
-        );
-    }
-
-    classes = cx({
-        //TODO: to hightlight a selected row, need press ctrl
-        //'selected': this.props.isSelected && this.props.data.isDetail,
-        'summary-selected': this.props.isSelected && !this.props.data.isDetail,
-        'group-background': !this.props.data.isDetail
-    });
-
-    // apply extra CSS if specified
-    return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-        className: classes, style: this.props.extraStyle}, cells));
-}
-
-
-
 
 function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
@@ -1681,6 +1605,13 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     removeAllFilter: function () {
         this.handleClearAllFilters.call(this);
     },
+    exportTreeStructureToFlatTable: function () {
+       return rasterizeTree({
+            node: this.state.rootNode,
+            firstColumn: this.state.columnDefs[0],
+            selectedDetailRows: this.state.selectedDetailRows
+        }, this.state.subtotalBy.length > 0, true);
+    },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
 
@@ -1956,6 +1887,11 @@ function docClick(e) {
 }
 
 function adjustHeaders(adjustCount) {
+    if(this.state.maxRows == 1){
+        //if table has no data, don't change column width
+        return;
+    }
+
     var id = this.state.uniqueId;
     if (!(adjustCount >= 0))
         adjustCount = 0;
@@ -1971,18 +1907,19 @@ function adjustHeaders(adjustCount) {
     var grandTotalFooterCellContents = grandTotalFooter.find('.rt-grand-total-cell-content');
     var adjustedSomething = false;
 
+    var table = this;
     headerElems.each(function () {
         var currentHeader = $(this);
-        if(counter == headerElems.length - 1 ){
+        if (counter == headerElems.length - 1 && !table.props.disableAddColumn) {
             // give a space for plus column sign
             var lastColumnWidth = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
             if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
                 lastColumnWidth += 1;
             }
-            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth+2) + "px");
+            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth + 2) + "px");
             lastColumnWidth -= 21; // minus plus sign width
             currentHeader.css("width", lastColumnWidth + "px");
-        }else {
+        } else {
             var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
             var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
             headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
@@ -2115,8 +2052,8 @@ function buildFilterData(isUpdate) {
         for (var i = 0; i < this.props.data.length; i++) {
             buildFilterDataHelper(this.props.data[i], this.state, this.props);
         }
-        convertFilterData(this.state.filterDataCount,this.state);
-        if(isUpdate){
+        convertFilterData(this.state.filterDataCount, this.state);
+        if (isUpdate) {
             this.props.buildFiltersCallback && this.props.buildFiltersCallback(this.state.filterDataCount);
         }
     }.bind(this));
@@ -2146,7 +2083,7 @@ function buildFilterDataHelper(row, state, props) {
         var key = columnDefs[i].colTag;
         if (row[key]) {
             var hashmap = state.filterDataCount[key] || {};
-            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ?  1 : hashmap[row[key]] + 1;
+            hashmap[row[key]] = typeof hashmap[row[key]] === 'undefined' ? 1 : hashmap[row[key]] + 1;
             state.filterDataCount[key] = hashmap;
         }
     }
@@ -2156,7 +2093,7 @@ function buildFilterDataHelper(row, state, props) {
  * convert distinct values in map into an array
  * @param filterData
  */
-function convertFilterData(filterDataCount,state) {
+function convertFilterData(filterDataCount, state) {
     state.filterData = {};
     for (var key in filterDataCount) {
         var map = filterDataCount[key];
@@ -3092,19 +3029,45 @@ function _hasSortIndex(node) {
     return (node != null && node.sortIndex != null && !isNaN(node.sortIndex))
 }
 ;/**
+ * export tree structure to flat data
+ * @param options
+ * @param hasSubtotalBy
+ * @returns {Array}
+ */
+//function exportTreeData(options, hasSubtotalBy) {
+//    var node = options.node, firstColumn = options.firstColumn;
+//
+//    node = _decorateRowData(node, firstColumn, hasSubtotalBy);
+//    var flatData = node.display == false ? [] : [node.rowData];
+//
+//    if (node.children.length > 0)
+//        _rasterizeChildren(flatData, options, hasSubtotalBy);
+//    else
+//        _rasterizeDetailRows(node, flatData);
+//
+//    return flatData;
+//}
+
+/**
  * Converts the table state from a tree format to a array of rows for rendering
  * @param rootNode
  * @return {Array}
  */
-function rasterizeTree(options,hasSubtotalBy) {
+function rasterizeTree(options, hasSubtotalBy,exportAll) {
     var node = options.node, firstColumn = options.firstColumn;
 
-    node = _decorateRowData(node, firstColumn,hasSubtotalBy);
+    node = _decorateRowData(node, firstColumn, hasSubtotalBy);
     var flatData = node.display == false ? [] : [node.rowData];
 
-    if (!node.collapsed) {
+    if(exportAll){
         if (node.children.length > 0)
-            _rasterizeChildren(flatData, options,hasSubtotalBy);
+            _rasterizeChildren(flatData, options, hasSubtotalBy,exportAll);
+        else
+            _rasterizeDetailRows(node, flatData);
+    }
+    else if (!node.collapsed) {
+        if (node.children.length > 0)
+            _rasterizeChildren(flatData, options, hasSubtotalBy,exportAll);
         else
             _rasterizeDetailRows(node, flatData);
     }
@@ -3118,11 +3081,11 @@ function rasterizeTree(options,hasSubtotalBy) {
  * ----------------------------------------------------------------------
  */
 
-function _rasterizeChildren(flatData, options,hasSubtotalBy) {
+function _rasterizeChildren(flatData, options, hasSubtotalBy,exportAll) {
     var node = options.node, firstColumn = options.firstColumn;
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
-        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn},hasSubtotalBy);
+        intermediateResult = rasterizeTree({node: node.children[i], firstColumn: firstColumn}, hasSubtotalBy,exportAll);
         for (j = 0; j < intermediateResult.length; j++) {
             if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
@@ -3145,9 +3108,9 @@ function _rasterizeDetailRows(node, flatData) {
  * enhances the `rowData` attribute of the give node with info
  * that will be useful for rendering/interactivity such as sectorPath
  */
-function _decorateRowData(node, firstColumn,hasSubtotalBy) {
+function _decorateRowData(node, firstColumn, hasSubtotalBy) {
     node.rowData.sectorPath = node.getSectorPath();
-    if(hasSubtotalBy){
+    if (hasSubtotalBy) {
         node.rowData[firstColumn.colTag] = node.sectorTitle;
     }
     //why rowData need refer to tree node itself?

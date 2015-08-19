@@ -412,18 +412,19 @@ function buildHeaders(table) {
 
     var corner;
     var classString = "btn-link rt-plus-sign";
-    if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
+    if (!table.props.disableAddColumn && table.props.cornerIcon) {
         corner = <img src={table.props.cornerIcon}/>;
         classString = "btn-link rt-corner-image";
     }
 
     // the plus sign at the end to add columns
-    headerColumns.push(
-        <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-            <a className={classString} onClick={table.props.disableAddColumn ? null : table.handleAdd}>
-                <strong>{corner ? corner : (table.props.disableAddColumn ? '' : <i className="fa fa-plus"/>)}</strong>
-            </a>
-        </span>);
+        headerColumns.push(
+            <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
+                <a className={classString} onClick={table.props.disableAddColumn ? null : table.handleAdd}>
+                    <strong>{corner ? corner : (table.props.disableAddColumn ? '' : <i className="fa fa-plus"/>)}</strong>
+                </a>
+            </span>);
+
     return (
         <div className="rt-headers-grand-container">
             <div key="header" className="rt-headers">
@@ -480,83 +481,6 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     }
     return result;
 }
-
-function buildGrandTotal(grandTotalRow){
-    const cx = React.addons.classSet;
-    var cells = [];
-    for (var i = 0; i < this.props.columnDefs.length; i++) {
-        if (i === 0 && !this.props.data.isDetail) {
-            cells.push(buildFirstCellForSubtotalRow.call(this));
-        } else {
-            var columnDef = this.props.columnDefs[i];
-            var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
-            var classes = cx(displayInstructions.classes);
-            // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
-            var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
-
-            // convert and format dates
-            if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    displayContent = new Date(displayContent).toLocaleDateString();
-            }
-            // determine cell content, based on whether a cell templating callback was provided
-            if (columnDef.cellTemplate)
-                displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
-            cells.push(
-                <td
-                    className={classes}
-                    ref={columnDef.colTag}
-                    onClick={columnDef.onCellSelect ? columnDef.onCellSelect.bind(null, this.props.data[columnDef.colTag], columnDef, i) : null}
-                    onContextMenu={this.props.cellRightClickMenu ? openCellMenu.bind(this, columnDef) : this.props.onRightClick ? this.props.onRightClick.bind(null, this.props.data, columnDef) : null}
-                    style={displayInstructions.styles}
-                    key={columnDef.colTag}
-                    //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                    onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
-                        this.props.handleColumnFilter(null, columnDef) : null }>
-                    {displayContent}
-                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
-                </td>
-            );
-        }
-    }
-
-    if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
-        //cells
-        var corner;
-        var classString = "btn-link rt-plus-sign";
-        //if (!table.props.disableAddColumnIcon && table.props.cornerIcon) {
-        //    corner = <img src={table.props.cornerIcon}/>;
-        classString = "btn-link rt-corner-image";
-        //}
-
-        // the plus sign at the end to add columns
-        cells.push(
-            <td>
-                <span className="rt-header-element rt-add-column" style={{"textAlign": "center"}}>
-                    <a className={classString}>
-                        <strong>
-                            <i className="fa fa-plus"/>
-                        </strong>
-                    </a>
-                </span>
-            </td>
-        );
-    }
-
-    classes = cx({
-        //TODO: to hightlight a selected row, need press ctrl
-        //'selected': this.props.isSelected && this.props.data.isDetail,
-        'summary-selected': this.props.isSelected && !this.props.data.isDetail,
-        'group-background': !this.props.data.isDetail
-    });
-
-    // apply extra CSS if specified
-    return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-        className={classes} style={this.props.extraStyle}>{cells}</tr>);
-}
-
-
-
 
 function buildPageNavigator(table, paginationAttr) {
     return table.props.columnDefs.length > 0 && !table.props.disablePagination ?
