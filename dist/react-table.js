@@ -1577,8 +1577,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         window.addEventListener('resize', adjustHeaders.bind(this));
         var $node = $(this.getDOMNode());
         $node.find(".rt-scrollable").bind('scroll', function () {
+            //when scroll table body horizontally, scroll header and footer also
             $node.find(".rt-headers").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
             $node.find(".rt-headers").css({'overflow': 'hidden'});
+
+            $node.find(".rt-grand-total").css({'overflow': 'auto'}).scrollLeft($(this).scrollLeft());
+            $node.find(".rt-grand-total").css({'overflow': 'hidden'});
         });
         bindHeadersToMenu($node);
 
@@ -1742,7 +1746,7 @@ var Row = React.createClass({displayName: "Row",
         if (isGrandTotal) {
             return (React.createElement("div", {className: "rt-grand-total"}, 
                         cells
-            ))
+                    ))
         } else
         // apply extra CSS if specified
             return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
