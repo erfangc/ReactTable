@@ -1944,7 +1944,7 @@ function rowMapper(row) {
 }
 
 function docClick(e) {
-    adjustHeaders.call(this);
+    //adjustHeaders.call(this);
     // Remove filter-in-place boxes if they are open and they weren't clicked on
     if (!jQuery.isEmptyObject(this.state.filterInPlace)) {
         if (!($(e.target).hasClass("rt-headers-container") || $(e.target).parents(".rt-headers-container").length > 0)) {
@@ -1961,7 +1961,7 @@ function adjustHeaders(adjustCount) {
         adjustCount = 0;
     var counter = 0;
     var headerElems = $("#" + id + " .rt-headers-container");
-    var headerContainerWidth = $('.rt-headers-grand-container').width();
+    var headerContainerWidth = $("#" + id + ' .rt-headers-grand-container').width();
     var padding = parseInt(headerElems.first().find(".rt-header-element").css("padding-left"));
     padding += parseInt(headerElems.first().find(".rt-header-element").css("padding-right"));
 
@@ -1980,7 +1980,7 @@ function adjustHeaders(adjustCount) {
                 lastColumnWidth += 1;
             }
             $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth+2) + "px");
-            lastColumnWidth -= 21;
+            lastColumnWidth -= 21; // minus plus sign width
             currentHeader.css("width", lastColumnWidth + "px");
         }else {
             var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
