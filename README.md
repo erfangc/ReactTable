@@ -25,6 +25,8 @@ Capabilities Include:
 
 Run the following `bower` command, this will install [react.js](https://github.com/facebook/react) and [jQuery](http://jquery.com/download/) as a dependecy.
 
+###You MUST use `react-with-addons.js` instead of `react.js`
+
     > bower install ReactTable
 
 ## Usage
