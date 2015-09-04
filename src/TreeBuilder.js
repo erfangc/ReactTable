@@ -1,6 +1,7 @@
 /**
  * Transform the current props into a tree structure representing the complex state
  * @param props
+ * @param state
  * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
@@ -70,18 +71,6 @@ function destorySubtreesRecursively(lroot) {
 }
 
 /**
- * destory root's children
- * @param state
- */
-function destoryRootChildren(state) {
-    for (var i = 0; i < state.rootNode.children.length; i++) {
-        state.rootNode.children[i] = null;
-    }
-    state.rootNode.children = [];
-    state.rootNode._childrenSectorNameMap = {};
-}
-
-/**
  * destory root's subtrees to clear subtotals
  * @param state
  */
@@ -110,7 +99,7 @@ function buildTreeSkeleton(props, state) {
 /**
  * Populate an existing skeleton (represented by the root node) with summary level data
  * @param node
- * @param tableProps
+ * @param state
  */
 // can postpone generate lower level aggregation information to accelerate initial render
 function recursivelyAggregateNodes(node, state) {

@@ -210,10 +210,7 @@ function ReactTableHandleClearSubtotal(event) {
 
 /**
  * check if a tree node needs to be hidden. if a tree node has no children to show, hide it.
- * @param columnDef
- * @param textToFilterBy
- * @param caseSensitive
- * @param customFilterer
+ * @param lrootNode
  */
 function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
     if (lrootNode.hasChild()) {
