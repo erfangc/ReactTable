@@ -5,7 +5,7 @@
  * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
  */
-function getSectorName(row, subtotalBy) {
+function classifyRow(row, subtotalBy) {
     var sectorName = "", sortIndex = null;
     if (subtotalBy.format == "number" || subtotalBy.format == "currency") {
         var result = resolvePartitionName(subtotalBy, row);

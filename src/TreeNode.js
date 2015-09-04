@@ -52,12 +52,15 @@ TreeNode.prototype.expandRecursively = function () {
 
 /**
  * Appends the given row into the ultimateChildren of the specified child node of the current node
- * @param childSectorName
- * @param childRow
  * @returns the child TreeNode that the data was appended to
+ * @param options
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, subtotalByColumnDef = options.subtotalByColumnDef;
+    var childSectorName = options.childSectorName,
+        childRow = options.childRow,
+        sortIndex = options.sortIndex,
+        subtotalByColumnDef = options.subtotalByColumnDef;
+
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
