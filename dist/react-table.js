@@ -2503,6 +2503,31 @@ function partitionNumberLine(partitions) {
     return floatBuckets;
 }
 
+function expandSubtotalLevelHelper(currentLevel, clickLevel, lTreeNode) {
+    if (lTreeNode == null) {
+        return;
+    }
+    if (currentLevel <= clickLevel) {
+        lTreeNode.collapsed = false;
+    } else {
+        lTreeNode.collapsed = true;
+    }
+    for (var i = 0; i < lTreeNode.children.length; i++) {
+        expandSubtotalLevelHelper(currentLevel + 1, clickLevel, lTreeNode.children[i]);
+    }
+}
+
+/**
+ * when click a subtotal level, expand this level
+ * @param levelIndex
+ * @param event
+ */
+function expandSubtotalLevel(levelIndex, event) {
+    event.stopPropagation();
+    expandSubtotalLevelHelper(0, levelIndex, this.state.rootNode);
+    this.setState({});
+}
+
 /**
  * create subtotalBy information in header, e.g. [ tradeName -> tranType ]
  * @param table
@@ -2510,9 +2535,9 @@ function partitionNumberLine(partitions) {
  */
 function buildFirstColumnLabel(table) {
     if (table.state.subtotalBy.length > 0) {
-        var label = "[ ";
 
-        table.state.subtotalBy.forEach(function (subtotalBy) {
+        var subtotalHierarchy = [];
+        table.state.subtotalBy.forEach(function (subtotalBy, index) {
             var column = table.state.columnDefs.filter(function (columnDef) {
                 return columnDef.colTag === subtotalBy.colTag;
             });
@@ -2521,11 +2546,13 @@ function buildFirstColumnLabel(table) {
                 throw "subtotalBy field '" + subtotalBy.colTag + "' doesn't exist!";
             }
 
-            label += column[0].text + " -> "
+            var arrow = index == table.state.subtotalBy.length - 1 ? "" : " -> ";
+            subtotalHierarchy.push(React.createElement("span", {onClick: expandSubtotalLevel.bind(table, index)}, column[0].text + arrow));
         });
 
-        label = label.substring(0, label.length - 4) + " ]";
-        return label;
+        return (
+            React.createElement("span", null, " [ ", subtotalHierarchy, " ] ")
+        )
     } else {
         return table.state.columnDefs[0].text;
     }
