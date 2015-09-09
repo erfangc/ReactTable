@@ -451,10 +451,11 @@ var Row = React.createClass({
                 if (isGrandTotal) {
                     var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
                     if (displayContent) {
-                        grandTotalCellStyle.width = displayContent.length + "em";
+
+                        grandTotalCellStyle.width =  displayContent.length/2 + 2 + "em";
                     }
                     cells.push(
-                        <div className={classes + " rt-grand-total-cell"} >
+                        <div className={classes + " rt-grand-total-cell"} key={columnDef.colTag} >
                             <div className="rt-grand-total-cell-content" style={grandTotalCellStyle}>
                                     {displayContent ? displayContent : <span>&nbsp;</span>}
                             </div>
@@ -471,7 +472,7 @@ var Row = React.createClass({
                             style={displayInstructions.styles}
                             key={columnDef.colTag}
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell && columnDef.format != 'number'?
                                 this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                     {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}

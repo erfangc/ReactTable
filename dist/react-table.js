@@ -1706,10 +1706,11 @@ var Row = React.createClass({displayName: "Row",
                 if (isGrandTotal) {
                     var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
                     if (displayContent) {
-                        grandTotalCellStyle.width = displayContent.length + "em";
+
+                        grandTotalCellStyle.width =  displayContent.length/2 + 2 + "em";
                     }
                     cells.push(
-                        React.createElement("div", {className: classes + " rt-grand-total-cell"}, 
+                        React.createElement("div", {className: classes + " rt-grand-total-cell", key: columnDef.colTag}, 
                             React.createElement("div", {className: "rt-grand-total-cell-content", style: grandTotalCellStyle}, 
                                     displayContent ? displayContent : React.createElement("span", null, " ")
                             )
@@ -1726,7 +1727,7 @@ var Row = React.createClass({displayName: "Row",
                             style: displayInstructions.styles, 
                             key: columnDef.colTag, 
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell && columnDef.format != 'number'?
                                 this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
                     this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
