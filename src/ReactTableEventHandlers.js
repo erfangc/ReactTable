@@ -377,7 +377,7 @@ function buildFirstColumnLabel(table) {
             }
 
             var arrow = index == table.state.subtotalBy.length - 1 ? "" : " -> ";
-            subtotalHierarchy.push(<span onClick={expandSubtotalLevel.bind(table, index)}>{column[0].text + arrow}</span>);
+            subtotalHierarchy.push(<span className="rt-header-clickable" onClick={expandSubtotalLevel.bind(table, index)}> {column[0].text} <span style={{color:'white'}}>{arrow}</span></span>);
         });
 
         return (

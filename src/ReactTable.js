@@ -76,7 +76,12 @@ var ReactTable = React.createClass({
         var newState = {
             sortBy: sortBy
         };
-        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+
+        if(columnDef.colTag === 'subtotalBy'){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy,sortType);
+        }else{
+            this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+        }
         newState.rootNode = this.state.rootNode;
         this.setState(newState);
 

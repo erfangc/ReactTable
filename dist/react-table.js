@@ -1331,7 +1331,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var newState = {
             sortBy: sortBy
         };
-        this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+
+        if(columnDef.colTag === 'subtotalBy'){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy,sortType);
+        }else{
+            this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
+        }
         newState.rootNode = this.state.rootNode;
         this.setState(newState);
 
@@ -2547,7 +2552,7 @@ function buildFirstColumnLabel(table) {
             }
 
             var arrow = index == table.state.subtotalBy.length - 1 ? "" : " -> ";
-            subtotalHierarchy.push(React.createElement("span", {onClick: expandSubtotalLevel.bind(table, index)}, column[0].text + arrow));
+            subtotalHierarchy.push(React.createElement("span", {className: "rt-header-clickable", onClick: expandSubtotalLevel.bind(table, index)}, " ", column[0].text, " ", React.createElement("span", {style: {color:'white'}}, arrow)));
         });
 
         return (
@@ -2614,15 +2619,26 @@ const dateSorter = {
  * @param sortType 'asc' or 'desc'
  * @returns {function}
  */
-function getSortFunction(columnDef, sortType) {
+function getSortFunction(columnDef, sortType, subtotalColumnDef) {
     const format = columnDef.format || "";
-    var sorter = lexicalSorter[sortType].bind(columnDef);
-    // if the user provided a custom sort function for the column, use that instead
-    if (columnDef.sort && columnDef[sortType])
-        sorter = columnDef.sort[sortType].bind(columnDef);
-    else if (format === "date")
-        sorter = dateSorter[sortType].bind(columnDef);
-    return sorter;
+    var sorter = null;
+    if (subtotalColumnDef) {
+        sorter = lexicalSorter[sortType].bind(subtotalColumnDef);
+        // if the user provided a custom sort function for the column, use that instead
+        if (columnDef.sort && columnDef[sortType])
+            sorter = columnDef.sort[sortType].bind(subtotalColumnDef);
+        else if (format === "date")
+            sorter = dateSorter[sortType].bind(subtotalColumnDef);
+        return sorter;
+    } else {
+        sorter = lexicalSorter[sortType].bind(columnDef);
+        // if the user provided a custom sort function for the column, use that instead
+        if (columnDef.sort && columnDef[sortType])
+            sorter = columnDef.sort[sortType].bind(columnDef);
+        else if (format === "date")
+            sorter = dateSorter[sortType].bind(columnDef);
+        return sorter;
+    }
 }
 
 /**
@@ -2909,6 +2925,37 @@ function buildCompositeSorter(funcs, isSummaryRow) {
         return sortOutcome;
     }
 }
+
+/**
+ * recursively sort the
+ * @param subtotalByArr
+ * @param sortType
+ * @param lrootNode
+ * @param level
+ * @param sortFuncs
+ */
+function sortTreeBySubtotalsHelper(subtotalByArr, sortType, lrootNode, level) {
+    if (level >= subtotalByArr.length) {
+        return;
+    }
+    var columnDef = subtotalByArr[level];
+    var subtotalColumnDef = {colTag: 'subtotalBy', formatConfig: columnDef.formatConfig};
+    var sortFunc = getSortFunction(columnDef, sortType, subtotalColumnDef);
+
+    if (lrootNode.hasChild()) {
+        lrootNode.children.sort(function (a, b) {
+            return sortFunc(a.rowData, b.rowData);
+        });
+
+        lrootNode.children.forEach(function (child) {
+            sortTreeBySubtotalsHelper(subtotalByArr, sortType, child, level + 1);
+        });
+    }
+}
+
+TreeNode.prototype.sortTreeBySubtotals = function (subtotalByArr, sortType) {
+    sortTreeBySubtotalsHelper(subtotalByArr, sortType, this, 0);
+};
 
 /**
  * Sort the child nodes of this node recursively according to the array of sort functions passed into sortFuncs

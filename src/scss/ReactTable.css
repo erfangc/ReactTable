@@ -122,3 +122,10 @@
    padding: 0 5px;
 }
 
+.rt-header-clickable{
+    color:lightblue;
+}
+
+.rt-header-clickable:hover{
+    color:Violet;
+}

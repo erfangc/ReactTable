@@ -102,6 +102,37 @@ function buildCompositeSorter(funcs, isSummaryRow) {
 }
 
 /**
+ * recursively sort the
+ * @param subtotalByArr
+ * @param sortType
+ * @param lrootNode
+ * @param level
+ * @param sortFuncs
+ */
+function sortTreeBySubtotalsHelper(subtotalByArr, sortType, lrootNode, level) {
+    if (level >= subtotalByArr.length) {
+        return;
+    }
+    var columnDef = subtotalByArr[level];
+    var subtotalColumnDef = {colTag: 'subtotalBy', formatConfig: columnDef.formatConfig};
+    var sortFunc = getSortFunction(columnDef, sortType, subtotalColumnDef);
+
+    if (lrootNode.hasChild()) {
+        lrootNode.children.sort(function (a, b) {
+            return sortFunc(a.rowData, b.rowData);
+        });
+
+        lrootNode.children.forEach(function (child) {
+            sortTreeBySubtotalsHelper(subtotalByArr, sortType, child, level + 1);
+        });
+    }
+}
+
+TreeNode.prototype.sortTreeBySubtotals = function (subtotalByArr, sortType) {
+    sortTreeBySubtotalsHelper(subtotalByArr, sortType, this, 0);
+};
+
+/**
  * Sort the child nodes of this node recursively according to the array of sort functions passed into sortFuncs
  * @param sortFuncs
  */
