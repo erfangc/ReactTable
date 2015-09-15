@@ -1,12 +1,12 @@
 {
   "name": "react-table",
-  "version": "v3.0.0-beta",
+  "version": "v3.0.1",
   "homepage": "https://github.com/erfangc/ReactTable",
   "authors": [
     "erfangc <erfangc@gmail.com>"
   ],
   "description": "Multi-function interactive HTML table implemented in react.js",
-  "main": "react-table.js",
+  "main": "dist/react-table.js",
   "keywords": [
     "react",
     "table",
@@ -30,5 +30,12 @@
   },
   "devDependencies": {
     "underscore": "~1.8.3"
-  }
+  },
+  "overrides": {
+	  "react": {
+		  "main": [
+			"react-with-addons.js"
+		  ]
+		}
+   }
 }
