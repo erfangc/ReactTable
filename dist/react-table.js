@@ -1332,9 +1332,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             sortBy: sortBy
         };
 
-        if(columnDef.colTag === 'subtotalBy'){
-            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy,sortType);
-        }else{
+        if (columnDef.colTag === 'subtotalBy') {
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, sortType);
+        } else {
             this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
         }
         newState.rootNode = this.state.rootNode;
@@ -1605,6 +1605,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
+    /*******public API, called outside react table*/
     addFilter: function (columnDefToFilterBy, filterData) {
         this.handleColumnFilter.call(this, columnDefToFilterBy, filterData);
     },
@@ -1626,7 +1627,16 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
             selectedDetailRows: this.state.selectedDetailRows
-        }, this.state.subtotalBy.length > 0, true,true);
+        }, this.state.subtotalBy.length > 0, true, true);
+    },
+    refresh: function () {
+        this.setState({});
+    },
+    getSubtotals: function () {
+        return this.state.subtotalBy;
+    },
+    getSorts: function () {
+        return this.state.sortBy;
     },
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
@@ -1712,7 +1722,7 @@ var Row = React.createClass({displayName: "Row",
                     var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
                     if (displayContent) {
 
-                        grandTotalCellStyle.width =  displayContent.length/2 + 2 + "em";
+                        grandTotalCellStyle.width = displayContent.length / 2 + 2 + "em";
                     }
                     cells.push(
                         React.createElement("div", {className: classes + " rt-grand-total-cell", key: columnDef.colTag}, 
@@ -1732,7 +1742,7 @@ var Row = React.createClass({displayName: "Row",
                             style: displayInstructions.styles, 
                             key: columnDef.colTag, 
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell?
+                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
                                 this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
                     this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
@@ -1752,7 +1762,7 @@ var Row = React.createClass({displayName: "Row",
         if (isGrandTotal) {
             return (React.createElement("div", {className: "rt-grand-total"}, 
                         cells
-                    ))
+            ))
         } else
         // apply extra CSS if specified
             return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
@@ -1904,7 +1914,7 @@ function docClick(e) {
 }
 
 function adjustHeaders(adjustCount) {
-    if(this.state.maxRows == 1){
+    if (this.state.maxRows == 1) {
         //if table has no data, don't change column width
         return;
     }
