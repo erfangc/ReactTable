@@ -238,8 +238,8 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
             var filterOutNode = false;
-            var multiplier = buildLAFConfigObject(columnDef).multiplier;
-            var value = row[columnDef.colTag] * parseFloat(multiplier);
+            var formatConfig = buildLAFConfigObject(columnDef);
+            var value = row[columnDef.colTag] * parseFloat(formatConfig.multiplier);
             for (var j = 0; j < filterData.length; j++) {
                 if (filterData[j].gt !== undefined) {
                     if (!(value > filterData[j].gt))
@@ -250,8 +250,12 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                         filterOutNode = true;
                 }
                 else if (filterData[j].eq !== undefined) {
-                    if (!(value == filterData[j].eq))
+                    // rounding
+                    value = value.toFixed(formatConfig.roundTo);
+                    var filterValue = filterData[j].eq.replace(/,/g,'');
+                    if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
+                    }
                 }
             }
 

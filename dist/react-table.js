@@ -1732,7 +1732,7 @@ var Row = React.createClass({displayName: "Row",
                             style: displayInstructions.styles, 
                             key: columnDef.colTag, 
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell && columnDef.format != 'number'?
+                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell?
                                 this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
                     this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
@@ -2228,7 +2228,6 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
-    //
     columnDefToFilterBy.isFiltered = true;
 
     if (typeof dontSet !== "boolean")
@@ -2236,7 +2235,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
     if (!Array.isArray(filterData)) {
-        filterData = [filterData];
+        if(columnDefToFilterBy.format == 'number'){
+            filterData = [{eq: filterData}];
+        }else{
+            filterData = [filterData];
+        }
     }
 
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
@@ -3063,8 +3066,8 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
             var filterOutNode = false;
-            var multiplier = buildLAFConfigObject(columnDef).multiplier;
-            var value = row[columnDef.colTag] * parseFloat(multiplier);
+            var formatConfig = buildLAFConfigObject(columnDef);
+            var value = row[columnDef.colTag] * parseFloat(formatConfig.multiplier);
             for (var j = 0; j < filterData.length; j++) {
                 if (filterData[j].gt !== undefined) {
                     if (!(value > filterData[j].gt))
@@ -3075,8 +3078,12 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                         filterOutNode = true;
                 }
                 else if (filterData[j].eq !== undefined) {
-                    if (!(value == filterData[j].eq))
+                    // rounding
+                    value = value.toFixed(formatConfig.roundTo);
+                    var filterValue = filterData[j].eq.replace(/,/g,'');
+                    if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
+                    }
                 }
             }
 

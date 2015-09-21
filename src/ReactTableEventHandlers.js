@@ -53,7 +53,6 @@ function ReactTableHandleSelect(selectedRow) {
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
-    //
     columnDefToFilterBy.isFiltered = true;
 
     if (typeof dontSet !== "boolean")
@@ -61,7 +60,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
     if (!Array.isArray(filterData)) {
-        filterData = [filterData];
+        if(columnDefToFilterBy.format == 'number'){
+            filterData = [{eq: filterData}];
+        }else{
+            filterData = [filterData];
+        }
     }
 
     var caseSensitive = !(this.props.filtering && this.props.filtering.caseSensitive === false);
