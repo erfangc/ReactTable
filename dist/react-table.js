@@ -1372,10 +1372,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
          * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
          */
         const sortBy = this.state.sortBy;
-        while (sortBy.length > 0)
-            sortBy.pop();
+        sortBy.length = 0;
         newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
+
         this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
@@ -2700,7 +2700,39 @@ function createNewRootNode(props, state) {
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
 
+    if (state.currentFilters.length > 0 && state.subtotalBy.length > 0) {
+        hideSubtotalRow(rootNode);
+    }
+
     return rootNode;
+}
+
+/**
+ * hide subtotal rows which children has been hidden.
+ * @param treeNode
+ */
+function hideSubtotalRow(treeNode) {
+    if (treeNode.hasChild()) {
+        // Filter aggregations
+        var allChildrenHidden = true;
+        for (var i = 0; i < treeNode.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            hideSubtotalRow(treeNode.children[i]);
+            // Check to see if all children are hidden, then hide parent if so
+            if (treeNode.children[i].hiddenByFilter == false) {
+                allChildrenHidden = false;
+            }
+        }
+        treeNode.hiddenByFilter = allChildrenHidden;
+    } else {
+        // filter ultimateChildren
+        var showAtLeastOneChild = false;
+        for (var j = 0; j < treeNode.ultimateChildren.length; j++) {
+            var uChild = treeNode.ultimateChildren[j];
+            showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
+        }
+        treeNode.hiddenByFilter = !showAtLeastOneChild;
+    }
 }
 
 /**

@@ -117,10 +117,10 @@ var ReactTable = React.createClass({
          * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
          */
         const sortBy = this.state.sortBy;
-        while (sortBy.length > 0)
-            sortBy.pop();
+        sortBy.length = 0;
         newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
+
         this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
