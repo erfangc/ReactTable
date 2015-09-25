@@ -3122,7 +3122,7 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                 else if (filterData[j].eq !== undefined) {
                     // rounding
                     value = value.toFixed(formatConfig.roundTo);
-                    var filterValue = filterData[j].eq.replace(/,/g,'');
+                    var filterValue = filterData[j].eq.toString().replace(/,/g,'');
                     if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
                     }
