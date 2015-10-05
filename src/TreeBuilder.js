@@ -13,6 +13,48 @@ function createNewRootNode(props, state) {
 
     return rootNode;
 }
+/*
+ this.sectorTitle = sectorTitle;
+ this.parent = parent;
+ this.subtotalByColumnDef = {};
+ this.rowData = null;
+ this.display = true;
+ this.children = [];
+ this.ultimateChildren = [];
+ this.collapsed = true
+ */
+function createNewNodeFromStrucutre(treeData, titleKey, parent){
+    var node = new TreeNode( parent ? treeData[titleKey] : "Grand Total", parent);
+    _.each(treeData.children, function(child){
+        if( child.children.length > 0 )
+            node.children.push(createNewNodeFromStrucutre(child, titleKey, node));
+        else
+            node.ultimateChildren.push(createNewNodeFromStrucutre(child, titleKey, node));
+    });
+    if( node.ultimateChildren.length == 0 )
+        node.isDetail = true;
+    else
+        setupChildrenMap(node);
+    _.each(treeData, function(value, key){
+        if( !_.isObject(value) ) {
+            if( !node.rowData )
+                node.rowData = {};
+            if( node.ultimateChildren.length == 0 )
+                node[key] = value;
+            else
+                node.rowData[key] = value;
+        }
+    });
+
+    return node;
+}
+
+function setupChildrenMap(node){
+    _.each(node.children, function(child){
+        node.ultimateChildren = node.ultimateChildren.concat(child.ultimateChildren);
+        node._childrenSectorNameMap[child.sectorTitle] = child;
+    });
+}
 
 /**
  * adding new subtotalBy, only create the deepest level subtree

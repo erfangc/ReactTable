@@ -1,0 +1,6006 @@
+{
+  "CUSIP": null,
+  
+  "children": [
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "03064TAE3",
+          "Description": "AMCAR_11-5       C",
+          "children": [],
+          "Market Value": 3524316.902333333
+        },
+        {
+          "CUSIP": "03063WAE7",
+          "Description": "AMCAR_12-2       C",
+          "children": [],
+          "Market Value": 3016913.819316667
+        },
+        {
+          "CUSIP": "03061UAE3",
+          "Description": "AMCAR_12-3       C",
+          "children": [],
+          "Market Value": 2857025.812088889
+        },
+        {
+          "CUSIP": "03063XAE5",
+          "Description": "AMCAR_12-4       B",
+          "children": [],
+          "Market Value": 1718144.3842
+        },
+        {
+          "CUSIP": "03063XAF2",
+          "Description": "AMCAR_12-4       C",
+          "children": [],
+          "Market Value": 2698882.971233333
+        },
+        {
+          "CUSIP": "03065CAD1",
+          "Description": "AMCAR_13-4       B",
+          "children": [],
+          "Market Value": 1087900.6668
+        },
+        {
+          "CUSIP": "03065CAE9",
+          "Description": "AMCAR_13-4       C",
+          "children": [],
+          "Market Value": 671919.0265333332
+        },
+        {
+          "CUSIP": "03065CAF6",
+          "Description": "AMCAR_13-4       D",
+          "children": [],
+          "Market Value": 1578498.564683334
+        },
+        {
+          "CUSIP": "03065EAE5",
+          "Description": "AMCAR_13-5       B",
+          "children": [],
+          "Market Value": 1118684.576177778
+        },
+        {
+          "CUSIP": "03065EAF2",
+          "Description": "AMCAR_13-5       C",
+          "children": [],
+          "Market Value": 595444.9363722223
+        },
+        {
+          "CUSIP": "03064LAD2",
+          "Description": "AMCAR_14-1       B",
+          "children": [],
+          "Market Value": 1899939.430263333
+        },
+        {
+          "CUSIP": "03062AAG1",
+          "Description": "AMCAR_14-3       D",
+          "children": [],
+          "Market Value": 4442231.987111111
+        },
+        {
+          "CUSIP": "07131RAA5",
+          "Description": "BATLN_13-4A     A1 144A",
+          "children": [],
+          "Market Value": 3949452.460943889
+        },
+        {
+          "CUSIP": "09626RAC9",
+          "Description": "BLUEM_12-2A     B1 144A",
+          "children": [],
+          "Market Value": 2839008.10195
+        },
+        {
+          "CUSIP": "08179XAA3",
+          "Description": "BSP_13-IIA      A1 144A",
+          "children": [],
+          "Market Value": 1832239.060816667
+        },
+        {
+          "CUSIP": "22533FAA4",
+          "Description": "CAALT_13-1A      A 144A",
+          "children": [],
+          "Market Value": 2286628.593333334
+        },
+        {
+          "CUSIP": "22533NAA7",
+          "Description": "CAALT_13-2A      A 144A",
+          "children": [],
+          "Market Value": 2064667.066666667
+        },
+        {
+          "CUSIP": "22533PAA2",
+          "Description": "CAALT_14-1A      A 144A",
+          "children": [],
+          "Market Value": 4329612.397505556
+        },
+        {
+          "CUSIP": "22533PAC8",
+          "Description": "CAALT_14-1A      B 144A",
+          "children": [],
+          "Market Value": 1196293.367316667
+        },
+        {
+          "CUSIP": "22533QAA0",
+          "Description": "CAALT_14-2A      A 144A",
+          "children": [],
+          "Market Value": 4096456
+        },
+        {
+          "CUSIP": "22533CAA1",
+          "Description": "CAALT_2012-2     A 144A",
+          "children": [],
+          "Market Value": 3891916.566527778
+        },
+        {
+          "CUSIP": "17119VAE3",
+          "Description": "CCART_13-BA      B 144A",
+          "children": [],
+          "Market Value": 1035176.873844445
+        },
+        {
+          "CUSIP": "17119VAF0",
+          "Description": "CCART_13-BA      C 144A",
+          "children": [],
+          "Market Value": 1055465.812333333
+        },
+        {
+          "CUSIP": "17119VAB9",
+          "Description": "CCART_13-BA     A2 144A",
+          "children": [],
+          "Market Value": 2189752.478019539
+        },
+        {
+          "CUSIP": "17119VAC7",
+          "Description": "CCART_13-BA     A3 144A",
+          "children": [],
+          "Market Value": 3232321.613583333
+        },
+        {
+          "CUSIP": "17119VAD5",
+          "Description": "CCART_13-BA     A4 144A",
+          "children": [],
+          "Market Value": 2234977.280711111
+        },
+        {
+          "CUSIP": "17119XAE9",
+          "Description": "CCART_14-AA      B 144A",
+          "children": [],
+          "Market Value": 1006379.073283333
+        },
+        {
+          "CUSIP": "17119XAF6",
+          "Description": "CCART_14-AA      C 144A",
+          "children": [],
+          "Market Value": 1293822.7
+        },
+        {
+          "CUSIP": "17119YAC1",
+          "Description": "CCART_14-BA     A3 144A",
+          "children": [],
+          "Market Value": 2879784.308333334
+        },
+        {
+          "CUSIP": "165182BB1",
+          "Description": "CF_12-1A         B 144A",
+          "children": [],
+          "Market Value": 2646635.112133333
+        },
+        {
+          "CUSIP": "165182BC9",
+          "Description": "CF_12-1A         C 144A",
+          "children": [],
+          "Market Value": 1702135.483933334
+        },
+        {
+          "CUSIP": "14309YAA2",
+          "Description": "CGMS_12-4A       A 144A",
+          "children": [],
+          "Market Value": 6092142.47418
+        },
+        {
+          "CUSIP": "12548CAA5",
+          "Description": "CIFC_14-2A     A1L 144A",
+          "children": [],
+          "Market Value": 1692178.354903056
+        },
+        {
+          "CUSIP": "Z91BP3XV1",
+          "Description": "COMP_12-2        A RegS",
+          "children": [],
+          "Market Value": 2085723.569137387
+        },
+        {
+          "CUSIP": "23336PAD3",
+          "Description": "DTAOT_12-1A      D 144A",
+          "children": [],
+          "Market Value": 3132873.614794811
+        },
+        {
+          "CUSIP": "23336TAC7",
+          "Description": "DTAOT_12-2A      C 144A",
+          "children": [],
+          "Market Value": 131749.3302467008
+        },
+        {
+          "CUSIP": "34528QCB8",
+          "Description": "FORDF_12-5       C",
+          "children": [],
+          "Market Value": 2109657.379116667
+        },
+        {
+          "CUSIP": "36248MAA5",
+          "Description": "GTLNF_13-1A      A 144A",
+          "children": [],
+          "Market Value": 4308426.765126667
+        },
+        {
+          "CUSIP": "44890GAG0",
+          "Description": "HART_12-A        D",
+          "children": [],
+          "Market Value": 2491371.8016
+        },
+        {
+          "CUSIP": "448961AA0",
+          "Description": "IFCS_97-1        A 144A",
+          "children": [],
+          "Market Value": 99264.93455274307
+        },
+        {
+          "CUSIP": "44987EAA2",
+          "Description": "INGIM_13-3A     A1 144A",
+          "children": [],
+          "Market Value": 2180475.495075
+        },
+        {
+          "CUSIP": "48249VAA9",
+          "Description": "KKR_13-1A       A1 144A",
+          "children": [],
+          "Market Value": 3918508.657089999
+        },
+        {
+          "CUSIP": "62431UAC6",
+          "Description": "MVW_13-1A        A 144A",
+          "children": [],
+          "Market Value": 7421549.850000001
+        },
+        {
+          "CUSIP": "63938HAA5",
+          "Description": "NAVSL_14-CT      A 144A",
+          "children": [],
+          "Market Value": 2701275.267601465
+        },
+        {
+          "CUSIP": "64032LAD3",
+          "Description": "NELS_08-3       A4",
+          "children": [],
+          "Market Value": 5578146.8403
+        },
+        {
+          "CUSIP": "64033HAA7",
+          "Description": "NSLT_06-1       A6 144A",
+          "children": [],
+          "Market Value": 2235543.745625
+        },
+        {
+          "CUSIP": "64033LAC4",
+          "Description": "NSLT_14-2A      A3 144A",
+          "children": [],
+          "Market Value": 2285587.084275
+        },
+        {
+          "CUSIP": "67590BAA8",
+          "Description": "OCT16_13-1A      A 144A",
+          "children": [],
+          "Market Value": 4496558.76951
+        },
+        {
+          "CUSIP": "67104LAA5",
+          "Description": "OHALF_13-2A      A 144A",
+          "children": [],
+          "Market Value": 4477862.62271111
+        },
+        {
+          "CUSIP": "68267YAA8",
+          "Description": "OMFIT_14-1A      A 144A",
+          "children": [],
+          "Market Value": 8207005.675000001
+        },
+        {
+          "CUSIP": "68268BAA7",
+          "Description": "OMFIT_14-2A      A 144A",
+          "children": [],
+          "Market Value": 5479968.771111111
+        },
+        {
+          "CUSIP": "68268BAB5",
+          "Description": "OMFIT_14-2A      B 144A",
+          "children": [],
+          "Market Value": 751383.4166666666
+        },
+        {
+          "CUSIP": "67108BAA3",
+          "Description": "OZLMF_12-2A     A1 144A",
+          "children": [],
+          "Market Value": 6931555.54192
+        },
+        {
+          "CUSIP": "67108FAA4",
+          "Description": "OZLMF_13-4A     A1 144A",
+          "children": [],
+          "Market Value": 7748675.796843333
+        },
+        {
+          "CUSIP": "74112WAC3",
+          "Description": "PART_13-1A      A2 144A",
+          "children": [],
+          "Market Value": 1764505.331531512
+        },
+        {
+          "CUSIP": "74112WAE9",
+          "Description": "PART_13-1A      A3 144A",
+          "children": [],
+          "Market Value": 2228044.350066666
+        },
+        {
+          "CUSIP": "74113AAC0",
+          "Description": "PART_14-1A      A2 144A",
+          "children": [],
+          "Market Value": 2709721.190741235
+        },
+        {
+          "CUSIP": "69335PBV6",
+          "Description": "PFSFC_14-BA      A 144A",
+          "children": [],
+          "Market Value": 6255000
+        },
+        {
+          "CUSIP": "69340FAA8",
+          "Description": "PFS_14-1         N",
+          "children": [],
+          "Market Value": 2548538.767043418
+        },
+        {
+          "CUSIP": "86359AME0",
+          "Description": "SASC_03-AL1      A 144A",
+          "children": [],
+          "Market Value": 833850.8181426983
+        },
+        {
+          "CUSIP": "83162CGX5",
+          "Description": "SBAP_96        20H",
+          "children": [],
+          "Market Value": 64049.82735203038
+        },
+        {
+          "CUSIP": "83162CHA4",
+          "Description": "SBAP_96        20J",
+          "children": [],
+          "Market Value": 46082.98763943536
+        },
+        {
+          "CUSIP": "83162CHC0",
+          "Description": "SBAP_96        20K",
+          "children": [],
+          "Market Value": 204419.0032273564
+        },
+        {
+          "CUSIP": "83162CGN7",
+          "Description": "SBAP_96-20B      1",
+          "children": [],
+          "Market Value": 75511.35724571804
+        },
+        {
+          "CUSIP": "83162CHG1",
+          "Description": "SBAP_97-20B      1",
+          "children": [],
+          "Market Value": 179188.1862119909
+        },
+        {
+          "CUSIP": "83162CHN6",
+          "Description": "SBAP_97-20F      1",
+          "children": [],
+          "Market Value": 51286.44558335479
+        },
+        {
+          "CUSIP": "83162CHQ9",
+          "Description": "SBAP_97-20G      1",
+          "children": [],
+          "Market Value": 317676.453417591
+        },
+        {
+          "CUSIP": "80705TAA4",
+          "Description": "SCHOL_11-A       A 144A",
+          "children": [],
+          "Market Value": 6765637.261178825
+        },
+        {
+          "CUSIP": "80282VAE2",
+          "Description": "SDART_12-2       C",
+          "children": [],
+          "Market Value": 1553963.169388889
+        },
+        {
+          "CUSIP": "80282XAE8",
+          "Description": "SDART_12-4       C",
+          "children": [],
+          "Market Value": 5241837.663183333
+        },
+        {
+          "CUSIP": "80282UAD6",
+          "Description": "SDART_12-5       B",
+          "children": [],
+          "Market Value": 4155619.807966667
+        },
+        {
+          "CUSIP": "80283CAD5",
+          "Description": "SDART_12-6       B",
+          "children": [],
+          "Market Value": 3289851.844444444
+        },
+        {
+          "CUSIP": "80283CAE3",
+          "Description": "SDART_12-6       C",
+          "children": [],
+          "Market Value": 3438346.057555555
+        },
+        {
+          "CUSIP": "80283BAD7",
+          "Description": "SDART_12-AA      B 144A",
+          "children": [],
+          "Market Value": 8219266.599422223
+        },
+        {
+          "CUSIP": "80283DAD3",
+          "Description": "SDART_13-2       B",
+          "children": [],
+          "Market Value": 7919134.071444443
+        },
+        {
+          "CUSIP": "80283GAD6",
+          "Description": "SDART_13-3       B",
+          "children": [],
+          "Market Value": 7113350.978022222
+        },
+        {
+          "CUSIP": "80281CAE5",
+          "Description": "SDART_13-5       B",
+          "children": [],
+          "Market Value": 8653777.605038889
+        },
+        {
+          "CUSIP": "80281CAF2",
+          "Description": "SDART_13-5       C",
+          "children": [],
+          "Market Value": 4127918.56125
+        },
+        {
+          "CUSIP": "80283JAD0",
+          "Description": "SDART_13-A       B 144A",
+          "children": [],
+          "Market Value": 4994304.201599999
+        },
+        {
+          "CUSIP": "80283JAE8",
+          "Description": "SDART_13-A       C 144A",
+          "children": [],
+          "Market Value": 1961591.1619
+        },
+        {
+          "CUSIP": "80283JAF5",
+          "Description": "SDART_13-A       D 144A",
+          "children": [],
+          "Market Value": 1302576.5628
+        },
+        {
+          "CUSIP": "80283NAE9",
+          "Description": "SDART_14-1       B",
+          "children": [],
+          "Market Value": 1252402.3052
+        },
+        {
+          "CUSIP": "80283WAE9",
+          "Description": "SDART_14-2       B",
+          "children": [],
+          "Market Value": 4217736.264
+        },
+        {
+          "CUSIP": "80283WAF6",
+          "Description": "SDART_14-2       C",
+          "children": [],
+          "Market Value": 5697018.400933333
+        },
+        {
+          "CUSIP": "80283XAE7",
+          "Description": "SDART_14-3       B",
+          "children": [],
+          "Market Value": 1317970.845573333
+        },
+        {
+          "CUSIP": "80283XAG2",
+          "Description": "SDART_14-3       D",
+          "children": [],
+          "Market Value": 4018404.191111111
+        },
+        {
+          "CUSIP": "80283YAE5",
+          "Description": "SDART_14-4       B",
+          "children": [],
+          "Market Value": 5691823.874100002
+        },
+        {
+          "CUSIP": "80283YAF2",
+          "Description": "SDART_14-4       C",
+          "children": [],
+          "Market Value": 5847413.688711111
+        },
+        {
+          "CUSIP": "80283PAA2",
+          "Description": "SDART_14-S1      R 144A",
+          "children": [],
+          "Market Value": 582064.0220455402
+        },
+        {
+          "CUSIP": "80283QAA0",
+          "Description": "SDART_14-S2      R 144A",
+          "children": [],
+          "Market Value": 1176298.816659536
+        },
+        {
+          "CUSIP": "80283RAA8",
+          "Description": "SDART_14-S3-R    R 144A",
+          "children": [],
+          "Market Value": 667611.161789182
+        },
+        {
+          "CUSIP": "80283TAA4",
+          "Description": "SDART_14-S4-R    R 144A",
+          "children": [],
+          "Market Value": 1018201.51549855
+        },
+        {
+          "CUSIP": "80283UAA1",
+          "Description": "SDART_14-S5-R    R 144A",
+          "children": [],
+          "Market Value": 1072040.167399419
+        },
+        {
+          "CUSIP": "80283VAA9",
+          "Description": "SDART_14-S6      R 144A",
+          "children": [],
+          "Market Value": 2307310.697670684
+        },
+        {
+          "CUSIP": "784419AE3",
+          "Description": "SLCLT_06-A      A5",
+          "children": [],
+          "Market Value": 7172918.552956675
+        },
+        {
+          "CUSIP": "78444VAB7",
+          "Description": "SLCLT_10-B      A2 144A",
+          "children": [],
+          "Market Value": 2843249.325624386
+        },
+        {
+          "CUSIP": "83149UAB7",
+          "Description": "SLMA _11-B      A2 144A",
+          "children": [],
+          "Market Value": 1350370.831644444
+        },
+        {
+          "CUSIP": "78448DAA5",
+          "Description": "SLMA _14-A      A1 144A",
+          "children": [],
+          "Market Value": 2377863.283465283
+        },
+        {
+          "CUSIP": "78443CAB0",
+          "Description": "SLMA_02-A       A2",
+          "children": [],
+          "Market Value": 3190258.221256458
+        },
+        {
+          "CUSIP": "78443CAM6",
+          "Description": "SLMA_03-B       A2",
+          "children": [],
+          "Market Value": 3030438.377618923
+        },
+        {
+          "CUSIP": "78443CBM5",
+          "Description": "SLMA_04-B       A2",
+          "children": [],
+          "Market Value": 4707609.497553789
+        },
+        {
+          "CUSIP": "78443CBZ6",
+          "Description": "SLMA_05-B       A2",
+          "children": [],
+          "Market Value": 5402079.144268927
+        },
+        {
+          "CUSIP": "78443CCJ1",
+          "Description": "SLMA_06-A       A4",
+          "children": [],
+          "Market Value": 7893568.507202777
+        },
+        {
+          "CUSIP": "78443JAD1",
+          "Description": "SLMA_06-C       A4",
+          "children": [],
+          "Market Value": 694964.764752659
+        },
+        {
+          "CUSIP": "78444YAD7",
+          "Description": "SLMA_08-5       A4",
+          "children": [],
+          "Market Value": 6469871.447699999
+        },
+        {
+          "CUSIP": "78446DAC3",
+          "Description": "SLMA_11-A       A3 144A",
+          "children": [],
+          "Market Value": 3324990.771627778
+        },
+        {
+          "CUSIP": "78446TAB0",
+          "Description": "SLMA_11-C      A2A 144A",
+          "children": [],
+          "Market Value": 2229574.180805556
+        },
+        {
+          "CUSIP": "78446TAC8",
+          "Description": "SLMA_11-C      A2B 144A",
+          "children": [],
+          "Market Value": 4326256.615344444
+        },
+        {
+          "CUSIP": "78446VAA7",
+          "Description": "SLMA_12-A       A1 144A",
+          "children": [],
+          "Market Value": 6522885.815679224
+        },
+        {
+          "CUSIP": "78447BAA0",
+          "Description": "SLMA_12-C       A1 144A",
+          "children": [],
+          "Market Value": 3976362.534469474
+        },
+        {
+          "CUSIP": "78447BAB8",
+          "Description": "SLMA_12-C       A2 144A",
+          "children": [],
+          "Market Value": 10579041.83027778
+        },
+        {
+          "CUSIP": "78447FAA1",
+          "Description": "SLMA_12-E       A1 144A",
+          "children": [],
+          "Market Value": 2888406.348461908
+        },
+        {
+          "CUSIP": "78447FAC7",
+          "Description": "SLMA_12-E      A2B 144A",
+          "children": [],
+          "Market Value": 1033711.924444444
+        },
+        {
+          "CUSIP": "78447RAD9",
+          "Description": "SLMA_13-A        B 144A",
+          "children": [],
+          "Market Value": 418242.1039833334
+        },
+        {
+          "CUSIP": "78447RAA5",
+          "Description": "SLMA_13-A       A1 144A",
+          "children": [],
+          "Market Value": 3088050.879083275
+        },
+        {
+          "CUSIP": "78447RAB3",
+          "Description": "SLMA_13-A      A2A 144A",
+          "children": [],
+          "Market Value": 14840820.89583333
+        },
+        {
+          "CUSIP": "78447RAC1",
+          "Description": "SLMA_13-A      A2B 144A",
+          "children": [],
+          "Market Value": 10163173.78393333
+        },
+        {
+          "CUSIP": "78447VAD0",
+          "Description": "SLMA_13-B        B 144A",
+          "children": [],
+          "Market Value": 569844.5766
+        },
+        {
+          "CUSIP": "78447VAA6",
+          "Description": "SLMA_13-B       A1 144A",
+          "children": [],
+          "Market Value": 1836566.266507828
+        },
+        {
+          "CUSIP": "78447VAB4",
+          "Description": "SLMA_13-B      A2A 144A",
+          "children": [],
+          "Market Value": 15291974.98897778
+        },
+        {
+          "CUSIP": "78447XAB0",
+          "Description": "SLMA_13-C      A2A 144A",
+          "children": [],
+          "Market Value": 5409398.8025
+        },
+        {
+          "CUSIP": "83149UAC5",
+          "Description": "SLMA_2011-B     A3 144A",
+          "children": [],
+          "Market Value": 2045398.608426667
+        },
+        {
+          "CUSIP": "83608LAC9",
+          "Description": "SNDPT_13-3A      A 144A",
+          "children": [],
+          "Market Value": 1496501.89108
+        },
+        {
+          "CUSIP": "92557PAA6",
+          "Description": "VIBR_12-1A      A1 144A",
+          "children": [],
+          "Market Value": 12461021.2659
+        },
+        {
+          "CUSIP": "92557PAC2",
+          "Description": "VIBR_12-1A      A2 144A",
+          "children": [],
+          "Market Value": 2843714.028933334
+        },
+        {
+          "CUSIP": "981464CL2",
+          "Description": "WFNMT_10-A       B",
+          "children": [],
+          "Market Value": 3668070.7965
+        },
+        {
+          "CUSIP": "981464DG2",
+          "Description": "WFNMT_12-C       A",
+          "children": [],
+          "Market Value": 8356972.373888889
+        },
+        {
+          "CUSIP": "981464DM9",
+          "Description": "WFNMT_12-D       A",
+          "children": [],
+          "Market Value": 10091287.67218889
+        },
+        {
+          "CUSIP": "66859JAC5",
+          "Description": "WOODS_12-9A      A 144A",
+          "children": [],
+          "Market Value": 3900938.858405
+        }
+      ],
+      "Description": "ABS",
+      "Market Value": 454907859.1677225
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "3128QTJW5",
+          "Description": "FH 5/1   12M LIBOR ARM",
+          "children": [],
+          "Market Value": 63634.40143498433
+        },
+        {
+          "CUSIP": "3128UGL47",
+          "Description": "FH 5/1 12M LIBOR ARM",
+          "children": [],
+          "Market Value": 1815106.207082196
+        },
+        {
+          "CUSIP": "31406HLJ4",
+          "Description": "FN 5/1 12M LIB ARM",
+          "children": [],
+          "Market Value": 849405.9924465192
+        },
+        {
+          "CUSIP": "3138A74A3",
+          "Description": "FN 5/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 987997.6984610842
+        },
+        {
+          "CUSIP": "3138ABBJ7",
+          "Description": "FN 5/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 1211196.98752136
+        },
+        {
+          "CUSIP": "3138MDTK8",
+          "Description": "FN 5/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 3983592.139550347
+        },
+        {
+          "CUSIP": "31415LMA2",
+          "Description": "FN 7/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 448366.0214884887
+        },
+        {
+          "CUSIP": "3138EHZU9",
+          "Description": "FN 7/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 3698982.499527259
+        },
+        {
+          "CUSIP": "31419A2H9",
+          "Description": "FN 7/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 2255176.608079729
+        },
+        {
+          "CUSIP": "3138EHJ29",
+          "Description": "FN 7/1 12M Libor ARM",
+          "children": [],
+          "Market Value": 4744428.598525336
+        }
+      ],
+      "Description": "ARM",
+      "Market Value": 20057887.1541173
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "00287YAM1",
+          "Description": "ABBVIE INC",
+          "children": [],
+          "Market Value": 2306025.563754445
+        },
+        {
+          "CUSIP": "00507UAC5",
+          "Description": "ACTAVIS FUNDING SCS        144A",
+          "children": [],
+          "Market Value": 3701666.3916622223
+        },
+        {
+          "CUSIP": "00507UAE1",
+          "Description": "ACTAVIS FUNDING SCS        144A",
+          "children": [],
+          "Market Value": 6166296.148906667
+        },
+        {
+          "CUSIP": "00817YAP3",
+          "Description": "AETNA INC",
+          "children": [],
+          "Market Value": 794272.4452322223
+        },
+        {
+          "CUSIP": "02209SAS2",
+          "Description": "ALTRIA GROUP INC",
+          "children": [],
+          "Market Value": 2077072.3066444448
+        },
+        {
+          "CUSIP": "02364WBC8",
+          "Description": "AMERICA MOVIL SAB DE CV",
+          "children": [],
+          "Market Value": 6846762.411111111
+        },
+        {
+          "CUSIP": "0258M0DP1",
+          "Description": "AMERICAN EXPRESS CREDIT CORPORATIO MTN",
+          "children": [],
+          "Market Value": 2838850.7059
+        },
+        {
+          "CUSIP": "0258M0DM8",
+          "Description": "AMERICAN EXPRESS CREDIT CORPORATIO MTN",
+          "children": [],
+          "Market Value": 4779562.9652
+        },
+        {
+          "CUSIP": "026874CZ8",
+          "Description": "AMERICAN INTERNATIONAL GROUP INC",
+          "children": [],
+          "Market Value": 2589257.3910777783
+        },
+        {
+          "CUSIP": "026874CX3",
+          "Description": "AMERICAN INTERNATIONAL GROUP INC",
+          "children": [],
+          "Market Value": 5162013.28606
+        },
+        {
+          "CUSIP": "026874DA2",
+          "Description": "AMERICAN INTERNATIONAL GROUP INC",
+          "children": [],
+          "Market Value": 2265459.306
+        },
+        {
+          "CUSIP": "026874BS5",
+          "Description": "AMERICAN INTERNATIONAL GROUP INC",
+          "children": [],
+          "Market Value": 3700815.0625
+        },
+        {
+          "CUSIP": "02687QBW7",
+          "Description": "AMERICAN INTERNATIONAL GROUP INC MTN",
+          "children": [],
+          "Market Value": 4414305.558255556
+        },
+        {
+          "CUSIP": "03027XAE0",
+          "Description": "AMERICAN TOWER CORPORATION",
+          "children": [],
+          "Market Value": 2552216.203166667
+        },
+        {
+          "CUSIP": "03073EAK1",
+          "Description": "AMERISOURCEBERGEN CORPORATION",
+          "children": [],
+          "Market Value": 7768772.329644444
+        },
+        {
+          "CUSIP": "031162BH2",
+          "Description": "AMGEN INC",
+          "children": [],
+          "Market Value": 1925926.3150111113
+        },
+        {
+          "CUSIP": "031162BV1",
+          "Description": "AMGEN INC",
+          "children": [],
+          "Market Value": 5299815.574372223
+        },
+        {
+          "CUSIP": "031162BK5",
+          "Description": "AMGEN INC",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "032511BK2",
+          "Description": "ANADARKO PETROLEUM CORP",
+          "children": [],
+          "Market Value": 1189541.91885
+        },
+        {
+          "CUSIP": "032511BJ5",
+          "Description": "ANADARKO PETROLEUM CORP",
+          "children": [],
+          "Market Value": 1440228.5103333334
+        },
+        {
+          "CUSIP": "037411BA2",
+          "Description": "APACHE CORP",
+          "children": [],
+          "Market Value": 871258.5057777778
+        },
+        {
+          "CUSIP": "037411AR6",
+          "Description": "APACHE CORPORATION",
+          "children": [],
+          "Market Value": 2179252.595466667
+        },
+        {
+          "CUSIP": "037833AQ3",
+          "Description": "APPLE INC",
+          "children": [],
+          "Market Value": 8934572.310166666
+        },
+        {
+          "CUSIP": "037833AR1",
+          "Description": "APPLE INC",
+          "children": [],
+          "Market Value": 2748053.6835999996
+        },
+        {
+          "CUSIP": "06051GFG9",
+          "Description": "BANK OF AMERICA CORP",
+          "children": [],
+          "Market Value": 764762.8189833334
+        },
+        {
+          "CUSIP": "060505DP6",
+          "Description": "BANK OF AMERICA CORP",
+          "children": [],
+          "Market Value": 4835390.551944445
+        },
+        {
+          "CUSIP": "06051GEX3",
+          "Description": "BANK OF AMERICA CORP",
+          "children": [],
+          "Market Value": 10801774.49818445
+        },
+        {
+          "CUSIP": "06051GFH7",
+          "Description": "BANK OF AMERICA CORP MTN",
+          "children": [],
+          "Market Value": 3316832.4830000005
+        },
+        {
+          "CUSIP": "06051GFD6",
+          "Description": "BANK OF AMERICA CORP MTN",
+          "children": [],
+          "Market Value": 15568297.69528889
+        },
+        {
+          "CUSIP": "06406HCP2",
+          "Description": "BANK OF NEW YORK MELLON CORP/THE MTN",
+          "children": [],
+          "Market Value": 2571617.2657333342
+        },
+        {
+          "CUSIP": "064159FL5",
+          "Description": "BANK OF NOVA SCOTIA",
+          "children": [],
+          "Market Value": 5222434.728777778
+        },
+        {
+          "CUSIP": "064159FK7",
+          "Description": "BANK OF NOVA SCOTIA",
+          "children": [],
+          "Market Value": 8096074.094055557
+        },
+        {
+          "CUSIP": "06738EAC9",
+          "Description": "BARCLAYS PLC",
+          "children": [],
+          "Market Value": 837780.6512222221
+        },
+        {
+          "CUSIP": "101137AM9",
+          "Description": "BOSTON SCIENTIFIC CORP",
+          "children": [],
+          "Market Value": 3439035.8785088887
+        },
+        {
+          "CUSIP": "05565QCR7",
+          "Description": "BP CAPITAL MARKETS PLC",
+          "children": [],
+          "Market Value": 10078683.505355556
+        },
+        {
+          "CUSIP": "05565QBZ0",
+          "Description": "BP CAPITAL MARKETS PLC",
+          "children": [],
+          "Market Value": 2483572.5535888886
+        },
+        {
+          "CUSIP": "07330NAD7",
+          "Description": "BRANCH BANKING AND TRUST COMPANY",
+          "children": [],
+          "Market Value": 1417863.426466667
+        },
+        {
+          "CUSIP": "105756BV1",
+          "Description": "BRAZIL FEDERATIVE REPUBLIC OF (GO",
+          "children": [],
+          "Market Value": 5244166.875
+        },
+        {
+          "CUSIP": "110122AX6",
+          "Description": "BRISTOL-MYERS SQUIBB CO",
+          "children": [],
+          "Market Value": 4982923.44652
+        },
+        {
+          "CUSIP": "12189LAM3",
+          "Description": "BURLINGTON NORTHERN SANTA FE LLC",
+          "children": [],
+          "Market Value": 1695605.2175
+        },
+        {
+          "CUSIP": "12189LAR2",
+          "Description": "BURLINGTON NORTHERN SANTA FE LLC",
+          "children": [],
+          "Market Value": 617363.8645666668
+        },
+        {
+          "CUSIP": "13063BJC7",
+          "Description": "CALIFORNIA ST",
+          "children": [],
+          "Market Value": 4329777.849766667
+        },
+        {
+          "CUSIP": "14170TAL5",
+          "Description": "CAREFUSION CORP",
+          "children": [],
+          "Market Value": 1546595.028294444
+        },
+        {
+          "CUSIP": "149123CE9",
+          "Description": "CATERPILLAR INC",
+          "children": [],
+          "Market Value": 979098.1282888888
+        },
+        {
+          "CUSIP": "124857AK9",
+          "Description": "CBS CORP",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "124857AL7",
+          "Description": "CBS CORP",
+          "children": [],
+          "Market Value": 1734681.9834666667
+        },
+        {
+          "CUSIP": "925524AU4",
+          "Description": "CBS CORPORATION",
+          "children": [],
+          "Market Value": 1528445.74032
+        },
+        {
+          "CUSIP": "15189XAN8",
+          "Description": "CENTERPOINT ENERGY HOUSTON ELECTRI",
+          "children": [],
+          "Market Value": 1787024.3928
+        },
+        {
+          "CUSIP": "17275RAR3",
+          "Description": "CISCO SYSTEMS INC",
+          "children": [],
+          "Market Value": 2810403.717461111
+        },
+        {
+          "CUSIP": "172967HS3",
+          "Description": "CITIGROUP INC",
+          "children": [],
+          "Market Value": 1915175.056994444
+        },
+        {
+          "CUSIP": "172967HU8",
+          "Description": "CITIGROUP INC",
+          "children": [],
+          "Market Value": 7672048.119888891
+        },
+        {
+          "CUSIP": "172967HC8",
+          "Description": "CITIGROUP INC",
+          "children": [],
+          "Market Value": 2894024.6349277785
+        },
+        {
+          "CUSIP": "172967FW6",
+          "Description": "CITIGROUP INC",
+          "children": [],
+          "Market Value": 2066043.7692211112
+        },
+        {
+          "CUSIP": "186108CE4",
+          "Description": "CLEVELAND ELECTRIC ILLUMINATING CO",
+          "children": [],
+          "Market Value": 1541656.926461111
+        },
+        {
+          "CUSIP": "186108CH7",
+          "Description": "CLEVELAND ELECTRIC ILLUMINATING CO",
+          "children": [],
+          "Market Value": 1407703.3360811113
+        },
+        {
+          "CUSIP": "125896BM1",
+          "Description": "CMS ENERGY CORP",
+          "children": [],
+          "Market Value": 1041025.8026133332
+        },
+        {
+          "CUSIP": "195325BQ7",
+          "Description": "COLOMBIA (REPUBLIC OF)",
+          "children": [],
+          "Market Value": 3204988.888888889
+        },
+        {
+          "CUSIP": "00209TAB1",
+          "Description": "COMCAST CABLE COMMUNICATIONS HOLDI",
+          "children": [],
+          "Market Value": 3267629.6860055546
+        },
+        {
+          "CUSIP": "202795JD3",
+          "Description": "COMMONWEALTH EDISON CO",
+          "children": [],
+          "Market Value": 2564477.957411111
+        },
+        {
+          "CUSIP": "212015AQ4",
+          "Description": "CONTINENTAL RESOURCES INC",
+          "children": [],
+          "Market Value": 948941.9260000001
+        },
+        {
+          "CUSIP": "224044BV8",
+          "Description": "COX COMMUNICATIONS INC     144A",
+          "children": [],
+          "Market Value": 3908285.03112
+        },
+        {
+          "CUSIP": "126650CD0",
+          "Description": "CVS CAREMARK CORP",
+          "children": [],
+          "Market Value": 810489.1839266667
+        },
+        {
+          "CUSIP": "25459HAW5",
+          "Description": "DIRECTV HOLDINGS LLC",
+          "children": [],
+          "Market Value": 4203409.058560001
+        },
+        {
+          "CUSIP": "25466AAB7",
+          "Description": "DISCOVER BANK",
+          "children": [],
+          "Market Value": 523891.9439911112
+        },
+        {
+          "CUSIP": "254709AJ7",
+          "Description": "DISCOVER FINANCIAL SERVICES",
+          "children": [],
+          "Market Value": 2467974.5804444444
+        },
+        {
+          "CUSIP": "25746UBN8",
+          "Description": "DOMINION RESOURCES INC",
+          "children": [],
+          "Market Value": 5408712.57905
+        },
+        {
+          "CUSIP": "233331AS6",
+          "Description": "DTE ENERGY CO",
+          "children": [],
+          "Market Value": 2681454.307
+        },
+        {
+          "CUSIP": "26442CAM6",
+          "Description": "DUKE ENERGY CAROLINAS LLC",
+          "children": [],
+          "Market Value": 3684120.707766667
+        },
+        {
+          "CUSIP": "26441CAN5",
+          "Description": "DUKE ENERGY CORP",
+          "children": [],
+          "Market Value": 587738.4403499999
+        },
+        {
+          "CUSIP": "277432AL4",
+          "Description": "EASTMAN CHEMICAL CO",
+          "children": [],
+          "Market Value": 1975357.1502833334
+        },
+        {
+          "CUSIP": "29273RAS8",
+          "Description": "ENERGY TRANSFER PARTNERS LP",
+          "children": [],
+          "Market Value": 4019116.75965
+        },
+        {
+          "CUSIP": "29364DAS9",
+          "Description": "ENTERGY ARKANSAS INC",
+          "children": [],
+          "Market Value": 3537053.850611111
+        },
+        {
+          "CUSIP": "26875PAL5",
+          "Description": "EOG RESOURCES INC",
+          "children": [],
+          "Market Value": 4636761.262935556
+        },
+        {
+          "CUSIP": "30219GAJ7",
+          "Description": "EXPRESS SCRIPTS HOLDING CO",
+          "children": [],
+          "Market Value": 1464587.6216500006
+        },
+        {
+          "CUSIP": "30231GAD4",
+          "Description": "EXXON MOBIL CORP",
+          "children": [],
+          "Market Value": 7039193.25775
+        },
+        {
+          "CUSIP": "31428XAW6",
+          "Description": "FEDEX CORP",
+          "children": [],
+          "Market Value": 1234089.919426667
+        },
+        {
+          "CUSIP": "31428XAX4",
+          "Description": "FEDEX CORP",
+          "children": [],
+          "Market Value": 2098777.670233333
+        },
+        {
+          "CUSIP": "3137EAAY5",
+          "Description": "FHLMC REFERENCE NOTES MTN",
+          "children": [],
+          "Market Value": 3977926.804444444
+        },
+        {
+          "CUSIP": "3137EACA5",
+          "Description": "FHLMC REFERENCE NOTES MTN",
+          "children": [],
+          "Market Value": 11798269.23121667
+        },
+        {
+          "CUSIP": "341081FC6",
+          "Description": "FLORIDA POWER AND LIGHT CO",
+          "children": [],
+          "Market Value": 452855.21036
+        },
+        {
+          "CUSIP": "341099CB3",
+          "Description": "FLORIDA POWER CORPORATION",
+          "children": [],
+          "Market Value": 847009.3045000001
+        },
+        {
+          "CUSIP": "31359MGK3",
+          "Description": "FNMA BENCHMARK NOTES",
+          "children": [],
+          "Market Value": 2215881.146666666
+        },
+        {
+          "CUSIP": "345397VT7",
+          "Description": "FORD MOTOR CREDIT CO LLC",
+          "children": [],
+          "Market Value": 2780191.161121111
+        },
+        {
+          "CUSIP": "345397WR0",
+          "Description": "FORD MOTOR CREDIT COMPANY LLC",
+          "children": [],
+          "Market Value": 9536023.537155557
+        },
+        {
+          "CUSIP": "345838AA4",
+          "Description": "FOREST LABORATORIES INC    144A",
+          "children": [],
+          "Market Value": 2566379.6154666664
+        },
+        {
+          "CUSIP": "36962G4B7",
+          "Description": "GENERAL ELECTRIC CAPITAL CORP MTN",
+          "children": [],
+          "Market Value": 1065589.1903277778
+        },
+        {
+          "CUSIP": "369604BH5",
+          "Description": "GENERAL ELECTRIC CO",
+          "children": [],
+          "Market Value": 2011150.48785
+        },
+        {
+          "CUSIP": "37247DAP1",
+          "Description": "GENWORTH FINANCIAL INC",
+          "children": [],
+          "Market Value": 8038714.600766668
+        },
+        {
+          "CUSIP": "37247DAN6",
+          "Description": "GENWORTH FINANCIAL INC.",
+          "children": [],
+          "Market Value": 3637931.6047
+        },
+        {
+          "CUSIP": "373334JV4",
+          "Description": "GEORGIA POWER CO",
+          "children": [],
+          "Market Value": 4207106.567706667
+        },
+        {
+          "CUSIP": "38141GFD1",
+          "Description": "GOLDMAN SACHS GROUP INC",
+          "children": [],
+          "Market Value": 2745952.59925
+        },
+        {
+          "CUSIP": "38141GCU6",
+          "Description": "GOLDMAN SACHS GROUP INC",
+          "children": [],
+          "Market Value": 2651301.389283334
+        },
+        {
+          "CUSIP": "38143USC6",
+          "Description": "GOLDMAN SACHS GROUP INC/THE",
+          "children": [],
+          "Market Value": 2236601.1053055553
+        },
+        {
+          "CUSIP": "38145XAA1",
+          "Description": "GOLDMAN SACHS GROUP INC/THE",
+          "children": [],
+          "Market Value": 4522290.7355
+        },
+        {
+          "CUSIP": "38147MAA3",
+          "Description": "GOLDMAN SACHS GROUP INC/THE",
+          "children": [],
+          "Market Value": 4230532.527
+        },
+        {
+          "CUSIP": "38141GGS7",
+          "Description": "GOLDMAN SACHS GROUP INC/THE",
+          "children": [],
+          "Market Value": 2409445.024961111
+        },
+        {
+          "CUSIP": "38141GGM0",
+          "Description": "GOLDMAN SACHS GROUP INC/THE",
+          "children": [],
+          "Market Value": 1053942.9924666667
+        },
+        {
+          "CUSIP": "42809HAF4",
+          "Description": "HESS CORP",
+          "children": [],
+          "Market Value": 40224.63982222222
+        },
+        {
+          "CUSIP": "437076BF8",
+          "Description": "HOME DEPOT INC",
+          "children": [],
+          "Market Value": 871965.8324444445
+        },
+        {
+          "CUSIP": "40432TAA8",
+          "Description": "HSBC BANK BRASIL S.A. MTN 144A",
+          "children": [],
+          "Market Value": 14909113.33333333
+        },
+        {
+          "CUSIP": "404280AG4",
+          "Description": "HSBC HOLDINGS PLC",
+          "children": [],
+          "Market Value": 2906962.5695555555
+        },
+        {
+          "CUSIP": "404280AS8",
+          "Description": "HSBC HOLDINGS PLC",
+          "children": [],
+          "Market Value": 1600450.9375
+        },
+        {
+          "CUSIP": "452151LF8",
+          "Description": "ILLINOIS ST",
+          "children": [],
+          "Market Value": 2679772.697
+        },
+        {
+          "CUSIP": "455780BP0",
+          "Description": "INDONESIA REPUBLIC OF (GOVERNMENT MTN 144A",
+          "children": [],
+          "Market Value": 4739464.149305556
+        },
+        {
+          "CUSIP": "459200HU8",
+          "Description": "INTERNATIONAL BUSINESS MACHINES CO",
+          "children": [],
+          "Market Value": 2475068.650231111
+        },
+        {
+          "CUSIP": "460146CK7",
+          "Description": "INTERNATIONAL PAPER CO",
+          "children": [],
+          "Market Value": 1499441.1583833334
+        },
+        {
+          "CUSIP": "460690BL3",
+          "Description": "INTERPUBLIC GROUP OF COMPANIES INC",
+          "children": [],
+          "Market Value": 325146.28690333327
+        },
+        {
+          "CUSIP": "462613AG5",
+          "Description": "IPALCO ENTERPRISES INC",
+          "children": [],
+          "Market Value": 7861437.5
+        },
+        {
+          "CUSIP": "476556DA0",
+          "Description": "JERSEY CENTRAL POWER & LIGHT COMPA",
+          "children": [],
+          "Market Value": 3138969.48579
+        },
+        {
+          "CUSIP": "24422ESP5",
+          "Description": "JOHN DEERE CAPITAL CORP MTN",
+          "children": [],
+          "Market Value": 3083039.2885111114
+        },
+        {
+          "CUSIP": "46625HJY7",
+          "Description": "JP MORGAN AND CO INC",
+          "children": [],
+          "Market Value": 7346674.177205553
+        },
+        {
+          "CUSIP": "46625HCE8",
+          "Description": "JPMORGAN CHASE & CO",
+          "children": [],
+          "Market Value": 3761532.85
+        },
+        {
+          "CUSIP": "46625HJU5",
+          "Description": "JPMORGAN CHASE & CO",
+          "children": [],
+          "Market Value": 1694072.2652055554
+        },
+        {
+          "CUSIP": "46625HJH4",
+          "Description": "JPMORGAN CHASE & CO",
+          "children": [],
+          "Market Value": 1289380.13492
+        },
+        {
+          "CUSIP": "46623EJY6",
+          "Description": "JPMORGAN CHASE & CO MTN",
+          "children": [],
+          "Market Value": 7823839.1148
+        },
+        {
+          "CUSIP": "494368BN2",
+          "Description": "KIMBERLY-CLARK CORPORATION",
+          "children": [],
+          "Market Value": 3220049.3030111114
+        },
+        {
+          "CUSIP": "494550BS4",
+          "Description": "KINDER MORGAN ENERGY PARTNERS LP",
+          "children": [],
+          "Market Value": 4130420.776417779
+        },
+        {
+          "CUSIP": "494550BW5",
+          "Description": "KINDER MORGAN ENERGY PARTNERS LP",
+          "children": [],
+          "Market Value": 1786325.598
+        },
+        {
+          "CUSIP": "494550BT2",
+          "Description": "KINDER MORGAN ENERGY PARTNERS LP",
+          "children": [],
+          "Market Value": 5210957.176944444
+        },
+        {
+          "CUSIP": "494550BV7",
+          "Description": "KINDER MORGAN ENERGY PARTNERS LP",
+          "children": [],
+          "Market Value": 911254.5540444445
+        },
+        {
+          "CUSIP": "502413BC0",
+          "Description": "L-3 COMMUNICATIONS CORP",
+          "children": [],
+          "Market Value": 848608.2549999999
+        },
+        {
+          "CUSIP": "524ESC7M6",
+          "Description": "LEHMAN BROS HLDG INC ESC 5249087M6",
+          "children": [],
+          "Market Value": 1.44
+        },
+        {
+          "CUSIP": "524ESCXA3",
+          "Description": "LEHMAN BROS HLDG INC ESC 524908XA3",
+          "children": [],
+          "Market Value": 0.163
+        },
+        {
+          "CUSIP": "54438CNZ1",
+          "Description": "LOS ANGELES CALIF CMNTY COLLEGE DI",
+          "children": [],
+          "Market Value": 848785.35
+        },
+        {
+          "CUSIP": "548661DA2",
+          "Description": "LOWES CO INC",
+          "children": [],
+          "Market Value": 964836.7952222222
+        },
+        {
+          "CUSIP": "548661DE4",
+          "Description": "LOWES COMPANIES INC",
+          "children": [],
+          "Market Value": 848889.6524
+        },
+        {
+          "CUSIP": "552081AG6",
+          "Description": "LYONDELLBASELL INDUSTRIES NV",
+          "children": [],
+          "Market Value": 3649653.98754
+        },
+        {
+          "CUSIP": "55608PAE4",
+          "Description": "MACQUARIE BANK LTD MTN 144A",
+          "children": [],
+          "Market Value": 1874916.490966667
+        },
+        {
+          "CUSIP": "56501RAA4",
+          "Description": "MANULIFE FINANCIAL CORP",
+          "children": [],
+          "Market Value": 4079821.115333333
+        },
+        {
+          "CUSIP": "56585AAH5",
+          "Description": "MARATHON PETROLEUM CORP",
+          "children": [],
+          "Market Value": 812980.95075
+        },
+        {
+          "CUSIP": "57629WBU3",
+          "Description": "MASSMUTUAL GLOBAL FUNDING II 144A",
+          "children": [],
+          "Market Value": 3185009.9121166663
+        },
+        {
+          "CUSIP": "57636QAA2",
+          "Description": "MASTERCARD INC",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "57636QAB0",
+          "Description": "MASTERCARD INC",
+          "children": [],
+          "Market Value": 1823852.1114299998
+        },
+        {
+          "CUSIP": "585055BC9",
+          "Description": "MEDTRONIC INC",
+          "children": [],
+          "Market Value": 1653105.1776166663
+        },
+        {
+          "CUSIP": "591560AA5",
+          "Description": "METLIFE CAPITAL TRUST IV   144A",
+          "children": [],
+          "Market Value": 1666684.53125
+        },
+        {
+          "CUSIP": "59217GBH1",
+          "Description": "METROPOLITAN LIFE GLOBAL FUNDING I 144A",
+          "children": [],
+          "Market Value": 10753499.0216
+        },
+        {
+          "CUSIP": "59217GBF5",
+          "Description": "METROPOLITAN LIFE GLOBAL FUNDING I 144A",
+          "children": [],
+          "Market Value": 4436568.421866666
+        },
+        {
+          "CUSIP": "59259YGF0",
+          "Description": "METROPOLITAN TRANSN AUTH N Y REV F",
+          "children": [],
+          "Market Value": 863665.5950444444
+        },
+        {
+          "CUSIP": "91086QBC1",
+          "Description": "MEXICO (UNITED MEXICAN STATES) (GO MTN",
+          "children": [],
+          "Market Value": 7978239.444444444
+        },
+        {
+          "CUSIP": "59562VAR8",
+          "Description": "MIDAMERICAN ENERGY HLDGS",
+          "children": [],
+          "Market Value": 1249429.216946667
+        },
+        {
+          "CUSIP": "61746BDQ6",
+          "Description": "MORGAN STANLEY",
+          "children": [],
+          "Market Value": 3342847.203788889
+        },
+        {
+          "CUSIP": "61746BDJ2",
+          "Description": "MORGAN STANLEY",
+          "children": [],
+          "Market Value": 3591503.33434
+        },
+        {
+          "CUSIP": "617446C23",
+          "Description": "MORGAN STANLEY MTN",
+          "children": [],
+          "Market Value": 8014404.627722223
+        },
+        {
+          "CUSIP": "6174467Y9",
+          "Description": "MORGAN STANLEY MTN",
+          "children": [],
+          "Market Value": 2635565.092633334
+        },
+        {
+          "CUSIP": "61747YCJ2",
+          "Description": "MORGAN STANLEY MTN",
+          "children": [],
+          "Market Value": 3133080.99275
+        },
+        {
+          "CUSIP": "6174467X1",
+          "Description": "MORGAN STANLEY MTN",
+          "children": [],
+          "Market Value": 2211720.932844444
+        },
+        {
+          "CUSIP": "626207YF5",
+          "Description": "MUNICIPAL ELEC AUTH GA",
+          "children": [],
+          "Market Value": 667913.4189
+        },
+        {
+          "CUSIP": "626717AE2",
+          "Description": "MURPHY OIL CORPORATION",
+          "children": [],
+          "Market Value": 5353825.037382222
+        },
+        {
+          "CUSIP": "63946BAJ9",
+          "Description": "NBCUNIVERSAL MEDIA LLC",
+          "children": [],
+          "Market Value": 1675514.809762222
+        },
+        {
+          "CUSIP": "64972FY34",
+          "Description": "NEW YORK N Y CITY MUN FIN AUTH WTR",
+          "children": [],
+          "Market Value": 779614.0538111113
+        },
+        {
+          "CUSIP": "64972FZ74",
+          "Description": "NEW YORK N Y CITY MUN WTR FIN",
+          "children": [],
+          "Market Value": 5922737.508333333
+        },
+        {
+          "CUSIP": "64972FZ66",
+          "Description": "NEW YORK N Y CITY MUN WTR FIN AUTH",
+          "children": [],
+          "Market Value": 4918662.572222223
+        },
+        {
+          "CUSIP": "6499022F9",
+          "Description": "NEW YORK ST DORM AUTH ST PERS INCO",
+          "children": [],
+          "Market Value": 717129.8691388889
+        },
+        {
+          "CUSIP": "651639AN6",
+          "Description": "NEWMONT MINING CORP",
+          "children": [],
+          "Market Value": 2484996.670266667
+        },
+        {
+          "CUSIP": "652482AX8",
+          "Description": "NEWS AMERICA INC",
+          "children": [],
+          "Market Value": 1016562.076825556
+        },
+        {
+          "CUSIP": "65334HAE2",
+          "Description": "NEXEN INC",
+          "children": [],
+          "Market Value": 256913.9943333334
+        },
+        {
+          "CUSIP": "646139W35",
+          "Description": "NJ ST TPK AUTH",
+          "children": [],
+          "Market Value": 1112406.15654
+        },
+        {
+          "CUSIP": "655044AG0",
+          "Description": "NOBLE ENERGY INC",
+          "children": [],
+          "Market Value": 3168194.15104
+        },
+        {
+          "CUSIP": "655044AE5",
+          "Description": "NOBLE ENERGY INC",
+          "children": [],
+          "Market Value": 3435516.1992533333
+        },
+        {
+          "CUSIP": "655044AD7",
+          "Description": "NOBLE ENERGY INC",
+          "children": [],
+          "Market Value": 2711555.16886
+        },
+        {
+          "CUSIP": "65504LAJ6",
+          "Description": "NOBLE HOLDING INTERNATIONAL LTD",
+          "children": [],
+          "Market Value": 5021371.984833335
+        },
+        {
+          "CUSIP": "66989HAD0",
+          "Description": "NOVARTIS CAPITAL CORP",
+          "children": [],
+          "Market Value": 2273579.483444444
+        },
+        {
+          "CUSIP": "68389XBA2",
+          "Description": "ORACLE CORPORATION",
+          "children": [],
+          "Market Value": 7466895.359297778
+        },
+        {
+          "CUSIP": "68389XAV7",
+          "Description": "ORACLE CORPORATION",
+          "children": [],
+          "Market Value": 1761158.61785
+        },
+        {
+          "CUSIP": "694308HH3",
+          "Description": "PACIFIC GAS AND ELECTRIC CO",
+          "children": [],
+          "Market Value": 1085360.7744911113
+        },
+        {
+          "CUSIP": "695114CR7",
+          "Description": "PACIFICORP",
+          "children": [],
+          "Market Value": 7210598.9067
+        },
+        {
+          "CUSIP": "695114CG1",
+          "Description": "PACIFICORP",
+          "children": [],
+          "Market Value": 6120788.8374677785
+        },
+        {
+          "CUSIP": "715638AS1",
+          "Description": "PERU (REPUBLIC OF)",
+          "children": [],
+          "Market Value": 2327182.895833333
+        },
+        {
+          "CUSIP": "717081DM2",
+          "Description": "PFIZER INC",
+          "children": [],
+          "Market Value": 1432892.8904355562
+        },
+        {
+          "CUSIP": "717081DE0",
+          "Description": "PFIZER INC",
+          "children": [],
+          "Market Value": 2128538.620644444
+        },
+        {
+          "CUSIP": "717081DK6",
+          "Description": "PFIZER INC",
+          "children": [],
+          "Market Value": 1568705.2801277775
+        },
+        {
+          "CUSIP": "69331CAF5",
+          "Description": "PG&E CORP",
+          "children": [],
+          "Market Value": 1350287.28318
+        },
+        {
+          "CUSIP": "718172AS8",
+          "Description": "PHILIP MORRIS INTERNATIONAL INC",
+          "children": [],
+          "Market Value": 2649848.0431500003
+        },
+        {
+          "CUSIP": "718172BD0",
+          "Description": "PHILIP MORRIS INTERNATIONAL INC",
+          "children": [],
+          "Market Value": 1573709.514296667
+        },
+        {
+          "CUSIP": "73358WRP1",
+          "Description": "PORT AUTH N Y & N J",
+          "children": [],
+          "Market Value": 1124899.523533333
+        },
+        {
+          "CUSIP": "743263AQ8",
+          "Description": "PROGRESS ENERGY INC",
+          "children": [],
+          "Market Value": 405875.84535333334
+        },
+        {
+          "CUSIP": "74432QBJ3",
+          "Description": "PRUDENTIAL FINANCIAL INC",
+          "children": [],
+          "Market Value": 3908205.973777778
+        },
+        {
+          "CUSIP": "74432QBP9",
+          "Description": "PRUDENTIAL FINANCIAL INC MTN",
+          "children": [],
+          "Market Value": 5576992.354189999
+        },
+        {
+          "CUSIP": "74432QCA1",
+          "Description": "PRUDENTIAL FINANCIAL INC MTN",
+          "children": [],
+          "Market Value": 2147926.068644445
+        },
+        {
+          "CUSIP": "74432QBM6",
+          "Description": "PRUDENTIAL FINANCIAL INC MTN",
+          "children": [],
+          "Market Value": 4175533.55878
+        },
+        {
+          "CUSIP": "74432QBG9",
+          "Description": "PRUDENTIAL FINANCIAL INC MTN",
+          "children": [],
+          "Market Value": 3578411.294503334
+        },
+        {
+          "CUSIP": "76116EFS4",
+          "Description": "RESOLUTION FUNDING CORP",
+          "children": [],
+          "Market Value": 4335293.058
+        },
+        {
+          "CUSIP": "76116ECK4",
+          "Description": "RESOLUTION FUNDING CORP",
+          "children": [],
+          "Market Value": 4310062.3905
+        },
+        {
+          "CUSIP": "761713AT3",
+          "Description": "REYNOLDS AMERICAN INC",
+          "children": [],
+          "Market Value": 1450780.481005556
+        },
+        {
+          "CUSIP": "761713AX4",
+          "Description": "REYNOLDS AMERICAN INC",
+          "children": [],
+          "Market Value": 1416067.3944444447
+        },
+        {
+          "CUSIP": "761713AW6",
+          "Description": "REYNOLDS AMERICAN INC",
+          "children": [],
+          "Market Value": 1107566.368333333
+        },
+        {
+          "CUSIP": "771196BB7",
+          "Description": "ROCHE HOLDINGS INC         144A",
+          "children": [],
+          "Market Value": 1469078.073722222
+        },
+        {
+          "CUSIP": "78355HJX8",
+          "Description": "RYDER SYSTEM INC MTN",
+          "children": [],
+          "Market Value": 2791297.1551222224
+        },
+        {
+          "CUSIP": "806854AH8",
+          "Description": "SCHLUMBERGER INVESTMENT SA",
+          "children": [],
+          "Market Value": 950174.93692
+        },
+        {
+          "CUSIP": "831594AG1",
+          "Description": "SLOVENIA (REPUBLIC OF)     144A",
+          "children": [],
+          "Market Value": 570526.6495675036
+        },
+        {
+          "CUSIP": "831594AF3",
+          "Description": "SLOVENIA (REPUBLIC OF)     144A",
+          "children": [],
+          "Market Value": 637170.8694541727
+        },
+        {
+          "CUSIP": "85748DAA7",
+          "Description": "STATE STREET CAPITAL TRUST IV",
+          "children": [],
+          "Market Value": 638025.1183333334
+        },
+        {
+          "CUSIP": "85771PAP7",
+          "Description": "STATOIL ASA",
+          "children": [],
+          "Market Value": 5498165.683577779
+        },
+        {
+          "CUSIP": "872287AF4",
+          "Description": "TCI COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 3791848.4231000002
+        },
+        {
+          "CUSIP": "88165FAF9",
+          "Description": "TEVA PHARMACEUTICAL FINANCE BV",
+          "children": [],
+          "Market Value": 1657554.69
+        },
+        {
+          "CUSIP": "883556BG6",
+          "Description": "THERMO FISHER SCIENTIFIC INC",
+          "children": [],
+          "Market Value": 420134.03977777774
+        },
+        {
+          "CUSIP": "88732JAJ7",
+          "Description": "TIME WARNER CABLE INC",
+          "children": [],
+          "Market Value": 4453737.378955556
+        },
+        {
+          "CUSIP": "88732JAP3",
+          "Description": "TIME WARNER CABLE INC",
+          "children": [],
+          "Market Value": 1547812.0538555556
+        },
+        {
+          "CUSIP": "887317AT2",
+          "Description": "TIME WARNER INC",
+          "children": [],
+          "Market Value": 3857733.066666667
+        },
+        {
+          "CUSIP": "89153VAP4",
+          "Description": "TOTAL CAPITAL INTERNATIONAL SA",
+          "children": [],
+          "Market Value": 1945062.2929166672
+        },
+        {
+          "CUSIP": "89236TBJ3",
+          "Description": "TOYOTA MOTOR CREDIT CORP MTN",
+          "children": [],
+          "Market Value": 5310107.580477778
+        },
+        {
+          "CUSIP": "89352HAM1",
+          "Description": "TRANSCANADA PIPELINES LIMITED",
+          "children": [],
+          "Market Value": 1960044.2862388887
+        },
+        {
+          "CUSIP": "893830AT6",
+          "Description": "TRANSOCEAN INC",
+          "children": [],
+          "Market Value": 816129.2611822223
+        },
+        {
+          "CUSIP": "912810RH3",
+          "Description": "TREASURY BOND (OTR)",
+          "children": [],
+          "Market Value": 118406754.53920785
+        },
+        {
+          "CUSIP": "912828D98",
+          "Description": "TREASURY NOTE (OLD)",
+          "children": [],
+          "Market Value": -28516.243093967438
+        },
+        {
+          "CUSIP": "912828F39",
+          "Description": "TREASURY NOTE (OTR)",
+          "children": [],
+          "Market Value": 142517484.81661153
+        },
+        {
+          "CUSIP": "912828F54",
+          "Description": "TREASURY NOTE (OTR)",
+          "children": [],
+          "Market Value": 252702611.2709
+        },
+        {
+          "CUSIP": "912828F21",
+          "Description": "TREASURY NOTE (OTR)",
+          "children": [],
+          "Market Value": 186861090.82948264
+        },
+        {
+          "CUSIP": "912828F47",
+          "Description": "TREASURY NOTE (OTR)",
+          "children": [],
+          "Market Value": 103634902.1408387
+        },
+        {
+          "CUSIP": "912828D56",
+          "Description": "TREASURY NOTE (OTR)",
+          "children": [],
+          "Market Value": 173399407.25278264
+        },
+        {
+          "CUSIP": "900123CF5",
+          "Description": "TURKEY (REPUBLIC OF)",
+          "children": [],
+          "Market Value": 5930163.75
+        },
+        {
+          "CUSIP": "907825AA1",
+          "Description": "UNION PACIFIC RAILROAD CO",
+          "children": [],
+          "Market Value": 2223250.460422222
+        },
+        {
+          "CUSIP": "913017BT5",
+          "Description": "UNITED TECHNOLOGIES CORPORATION",
+          "children": [],
+          "Market Value": 743664.1757999999
+        },
+        {
+          "CUSIP": "91324PBT8",
+          "Description": "UNITEDHEALTH GROUP INC",
+          "children": [],
+          "Market Value": 1500190.51365
+        },
+        {
+          "CUSIP": "91412GHA6",
+          "Description": "UNIVERSITY CALIF REVS FOR PREV",
+          "children": [],
+          "Market Value": 564266.7875166667
+        },
+        {
+          "CUSIP": "92343VBG8",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 6573065.04497
+        },
+        {
+          "CUSIP": "92343VBR4",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 2662268.9876355557
+        },
+        {
+          "CUSIP": "92343VBP8",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 5541611.229561111
+        },
+        {
+          "CUSIP": "92343VBQ6",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 2649887.04216
+        },
+        {
+          "CUSIP": "92343VCC6",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 2659636.7750000004
+        },
+        {
+          "CUSIP": "92343VBZ6",
+          "Description": "VERIZON COMMUNICATIONS INC",
+          "children": [],
+          "Market Value": 4876372.8896
+        },
+        {
+          "CUSIP": "92343VCL6",
+          "Description": "VERIZON COMMUNICATIONS INC 144A",
+          "children": [],
+          "Market Value": 1776523.510333334
+        },
+        {
+          "CUSIP": "92343VCG7",
+          "Description": "VERIZON COMMUNICATIONS INC 144A",
+          "children": [],
+          "Market Value": 4838869.349
+        },
+        {
+          "CUSIP": "92343VCJ1",
+          "Description": "VERIZON COMMUNICATIONS INC 144A",
+          "children": [],
+          "Market Value": 1781718.098055556
+        },
+        {
+          "CUSIP": "927804FQ2",
+          "Description": "VIRGINIA ELECTRIC AND POWER CO",
+          "children": [],
+          "Market Value": 591615.9767333333
+        },
+        {
+          "CUSIP": "92857WBC3",
+          "Description": "VODAFONE GROUP PLC",
+          "children": [],
+          "Market Value": 1047835.083557778
+        },
+        {
+          "CUSIP": "92857WAZ3",
+          "Description": "VODAFONE GROUP PLC",
+          "children": [],
+          "Market Value": 1091339.6445955557
+        },
+        {
+          "CUSIP": "931142DG5",
+          "Description": "WAL-MART STORES INC",
+          "children": [],
+          "Market Value": 3026943.3536599996
+        },
+        {
+          "CUSIP": "942683AF0",
+          "Description": "WATSON PHARMACEUTICALS INC",
+          "children": [],
+          "Market Value": 3272242.9634722224
+        },
+        {
+          "CUSIP": "94707VAD2",
+          "Description": "WEATHERFORD INTERNATIONAL LTD (BER",
+          "children": [],
+          "Market Value": 2121347.574233333
+        },
+        {
+          "CUSIP": "94973VBE6",
+          "Description": "WELLPOINT INC",
+          "children": [],
+          "Market Value": 4189059.218775556
+        },
+        {
+          "CUSIP": "94973VBC0",
+          "Description": "WELLPOINT INC",
+          "children": [],
+          "Market Value": 5293766.4288099995
+        },
+        {
+          "CUSIP": "94973VBA4",
+          "Description": "WELLPOINT INC",
+          "children": [],
+          "Market Value": 1360039.8385833339
+        },
+        {
+          "CUSIP": "94973VBK2",
+          "Description": "WELLPOINT INC",
+          "children": [],
+          "Market Value": 3545737.39905
+        },
+        {
+          "CUSIP": "949746RG8",
+          "Description": "WELLS FARGO & CO",
+          "children": [],
+          "Market Value": 2110889.7972222227
+        },
+        {
+          "CUSIP": "94974BFP0",
+          "Description": "WELLS FARGO & COMPANY",
+          "children": [],
+          "Market Value": 2224253.676277778
+        },
+        {
+          "CUSIP": "94974BFE5",
+          "Description": "WELLS FARGO & COMPANY",
+          "children": [],
+          "Market Value": 1945265.81
+        },
+        {
+          "CUSIP": "94974BFU9",
+          "Description": "WELLS FARGO & COMPANY MTN",
+          "children": [],
+          "Market Value": 7373644.771827777
+        },
+        {
+          "CUSIP": "94974BFY1",
+          "Description": "WELLS FARGO & COMPANY MTN",
+          "children": [],
+          "Market Value": 2877966.1623888887
+        },
+        {
+          "CUSIP": "96950FAQ7",
+          "Description": "WILLIAMS PARTNERS LP",
+          "children": [],
+          "Market Value": 4107272.063066666
+        },
+        {
+          "CUSIP": "96950FAN4",
+          "Description": "WILLIAMS PARTNERS LP",
+          "children": [],
+          "Market Value": 1161431.3753
+        },
+        {
+          "CUSIP": "98372PAJ7",
+          "Description": "XL CAPITAL LTD",
+          "children": [],
+          "Market Value": 3958456.111111111
+        },
+        {
+          "CUSIP": "98420EAA3",
+          "Description": "XLIT LTD",
+          "children": [],
+          "Market Value": 1412206.468686667
+        },
+        {
+          "CUSIP": "98420EAB1",
+          "Description": "XLIT LTD",
+          "children": [],
+          "Market Value": 692930.85756
+        }
+      ],
+      "Description": "BND",
+      "Market Value": 1710069404.289716
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "ARS_CCASH",
+          "Description": "ARS CASH(Committed)",
+          "children": [],
+          "Market Value": 580.0718915733648
+        },
+        {
+          "CUSIP": "AUD_CCASH",
+          "Description": "AUD CASH(Committed)",
+          "children": [],
+          "Market Value": 202827.8470560001
+        },
+        {
+          "CUSIP": "BRSPHX90P",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 1872024.96
+        },
+        {
+          "CUSIP": "BRSPHX90R",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -1994360.004
+        },
+        {
+          "CUSIP": "BRSPTQT5P",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 3054400.054873303
+        },
+        {
+          "CUSIP": "BRSPTQN6P",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 3054400.054873303
+        },
+        {
+          "CUSIP": "BRSPTQT5R",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -3174981.8562
+        },
+        {
+          "CUSIP": "BRSPTQT3P",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 3053532.0810015
+        },
+        {
+          "CUSIP": "BRSPTQQDP",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 3054400.054873303
+        },
+        {
+          "CUSIP": "BRSP35RYP",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -1872024.96
+        },
+        {
+          "CUSIP": "BRSP35RYR",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 1996995.6
+        },
+        {
+          "CUSIP": "BRSPRPM1R",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": 24972962.5408974
+        },
+        {
+          "CUSIP": "BRSPTQQDR",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -3181569.7761
+        },
+        {
+          "CUSIP": "BRSPTQN6R",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -3180401.82
+        },
+        {
+          "CUSIP": "BRSPRPM1P",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -23960680.85921969
+        },
+        {
+          "CUSIP": "BRSPTQT3R",
+          "Description": "AUD/USD",
+          "children": [],
+          "Market Value": -3178477.82
+        },
+        {
+          "CUSIP": "CAD_CCASH",
+          "Description": "CAD CASH(Committed)",
+          "children": [],
+          "Market Value": 81616.03895813787
+        },
+        {
+          "CUSIP": "USD_ICASH",
+          "Description": "CASH",
+          "children": [],
+          "Market Value": -4301011.683227062
+        },
+        {
+          "CUSIP": "CSHBASU25",
+          "Description": "CASH COLLATERAL USD BAS",
+          "children": [],
+          "Market Value": 13000.28888888889
+        },
+        {
+          "CUSIP": "CSHDMGSW1",
+          "Description": "CASH COLLATERAL USD DMGSW",
+          "children": [],
+          "Market Value": 700015.5555555555
+        },
+        {
+          "CUSIP": "CSHJPMU25",
+          "Description": "CASH COLLATERAL USD JPM",
+          "children": [],
+          "Market Value": -684015.2
+        },
+        {
+          "CUSIP": "CSHJPMSW2",
+          "Description": "CASH COLLATERAL USD JPMSW",
+          "children": [],
+          "Market Value": 510011.3333333333
+        },
+        {
+          "CUSIP": "CSHMSUS20",
+          "Description": "CASH COLLATERAL USD MS",
+          "children": [],
+          "Market Value": -13000.28888888889
+        },
+        {
+          "CUSIP": "CSHUBSFT0",
+          "Description": "CASH COLLATERAL USD UBSFT",
+          "children": [],
+          "Market Value": 4513000
+        },
+        {
+          "CUSIP": "CXBARCUS2",
+          "Description": "CASH COLLATERAL USD XBARC",
+          "children": [],
+          "Market Value": 1070999.989995823
+        },
+        {
+          "CUSIP": "MARGIBCE4",
+          "Description": "DERIV EUR BALANCE WITH R93537 ICE",
+          "children": [],
+          "Market Value": 438312.2191051079
+        },
+        {
+          "CUSIP": "MARGCBIJ3",
+          "Description": "DERIV JPY BALANCE WITH R93537 CME",
+          "children": [],
+          "Market Value": -680100.3567622666
+        },
+        {
+          "CUSIP": "MARGCBCU4",
+          "Description": "DERIV USD BALANCE WITH R93537 CMD",
+          "children": [],
+          "Market Value": 890502.0477753741
+        },
+        {
+          "CUSIP": "MARGCBIU8",
+          "Description": "DERIV USD BALANCE WITH R93537 CME",
+          "children": [],
+          "Market Value": 825609.4559897474
+        },
+        {
+          "CUSIP": "MARGIBCU8",
+          "Description": "DERIV USD BALANCE WITH R93537 ICE",
+          "children": [],
+          "Market Value": -1718.21
+        },
+        {
+          "CUSIP": "EUR_CCASH",
+          "Description": "EUR CASH(Committed)",
+          "children": [],
+          "Market Value": 1246.160948000565
+        },
+        {
+          "CUSIP": "BRSQ4X5TP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 568295.9999999997
+        },
+        {
+          "CUSIP": "BRSQ3RJKP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -711001.4399999996
+        },
+        {
+          "CUSIP": "BRSQ3RMWP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -511466.3999999997
+        },
+        {
+          "CUSIP": "BRSQ3M8HP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 1847593.439999999
+        },
+        {
+          "CUSIP": "BRSQ4X5RR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 283461.7023406907
+        },
+        {
+          "CUSIP": "BRSQ3RMWR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 511566.4630428978
+        },
+        {
+          "CUSIP": "BRSQ3RDLP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -56829.59999999997
+        },
+        {
+          "CUSIP": "BRSQ3M8HR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -1856475.842159132
+        },
+        {
+          "CUSIP": "BRSQ4X5TR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -570803.6667853327
+        },
+        {
+          "CUSIP": "BRSQ3RJKR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 714439.450575531
+        },
+        {
+          "CUSIP": "BRSQ4X5RP",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": -284147.9999999998
+        },
+        {
+          "CUSIP": "BRSQ3RDLR",
+          "Description": "EUR/MXN",
+          "children": [],
+          "Market Value": 56822.342248131
+        },
+        {
+          "CUSIP": "BRSQ2GWGP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -14360345.91000001
+        },
+        {
+          "CUSIP": "BRSPQLYTR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -82429727.60000001
+        },
+        {
+          "CUSIP": "BRSP3RK0P",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -81631615.50000004
+        },
+        {
+          "CUSIP": "BRSPYYDMR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 14534601.082
+        },
+        {
+          "CUSIP": "BRSQ0JDVR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -12619330.76
+        },
+        {
+          "CUSIP": "BRSPQJABP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -1262670.000000001
+        },
+        {
+          "CUSIP": "BRSPRPLGR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 22842547.56
+        },
+        {
+          "CUSIP": "BRSPQJABR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 1288690
+        },
+        {
+          "CUSIP": "BRSPXKT5R",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -22442137.2
+        },
+        {
+          "CUSIP": "BRSPXT8ZP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -23951976.68414745
+        },
+        {
+          "CUSIP": "BRSQ0JDVP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 12606303.51797234
+        },
+        {
+          "CUSIP": "BRSQ2GWGR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 14305232.352
+        },
+        {
+          "CUSIP": "BRSPXKT5P",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 22282083.5728489
+        },
+        {
+          "CUSIP": "BRSPQLYTP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 80558346.00000004
+        },
+        {
+          "CUSIP": "BRSP3RK0R",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 87485866.95
+        },
+        {
+          "CUSIP": "BRSPRPLGP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -22282083.5728489
+        },
+        {
+          "CUSIP": "BRSPXT8ZR",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": 24132747.78
+        },
+        {
+          "CUSIP": "BRSPYYDMP",
+          "Description": "EUR/USD",
+          "children": [],
+          "Market Value": -14448732.81000001
+        },
+        {
+          "CUSIP": "MARGNAUD2",
+          "Description": "FUTURES AUD MARGIN BALANCE",
+          "children": [],
+          "Market Value": 133286.9484015
+        },
+        {
+          "CUSIP": "MARGNEUR3",
+          "Description": "FUTURES EUR MARGIN BALANCE",
+          "children": [],
+          "Market Value": -32221.552
+        },
+        {
+          "CUSIP": "MARGNUSD1",
+          "Description": "FUTURES USD MARGIN BALANCE",
+          "children": [],
+          "Market Value": -101065.39777
+        },
+        {
+          "CUSIP": "GBP_CCASH",
+          "Description": "GBP CASH(Committed)",
+          "children": [],
+          "Market Value": 2869.024027999999
+        },
+        {
+          "CUSIP": "BRSPXNCAR",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": 13763145.41619645
+        },
+        {
+          "CUSIP": "BRSPV9FAR",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": -27361321.8533873
+        },
+        {
+          "CUSIP": "BRSPV9FAP",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": 27291137.47104936
+        },
+        {
+          "CUSIP": "BRSPXNCAP",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": -13644767.70419298
+        },
+        {
+          "CUSIP": "BRSPXKT7R",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": 13762534.15964201
+        },
+        {
+          "CUSIP": "BRSPXKT7P",
+          "Description": "GBP/EUR",
+          "children": [],
+          "Market Value": -13646369.76685638
+        },
+        {
+          "CUSIP": "BRSQ3QEJR",
+          "Description": "GBP/USD",
+          "children": [],
+          "Market Value": -1616028.7
+        },
+        {
+          "CUSIP": "BRSQ3QEJP",
+          "Description": "GBP/USD",
+          "children": [],
+          "Market Value": 1602850
+        },
+        {
+          "CUSIP": "BRSPW62PP",
+          "Description": "GBP/USD",
+          "children": [],
+          "Market Value": -1602850
+        },
+        {
+          "CUSIP": "BRSPW62PR",
+          "Description": "GBP/USD",
+          "children": [],
+          "Market Value": 1635050
+        },
+        {
+          "CUSIP": "BRSQ4S4DP",
+          "Description": "INR/USD",
+          "children": [],
+          "Market Value": -1392514.481520764
+        },
+        {
+          "CUSIP": "BRSQ4S4ER",
+          "Description": "INR/USD",
+          "children": [],
+          "Market Value": -1422624.030450081
+        },
+        {
+          "CUSIP": "BRSQ4S4EP",
+          "Description": "INR/USD",
+          "children": [],
+          "Market Value": 1419778.085991678
+        },
+        {
+          "CUSIP": "BRSQ4S4DR",
+          "Description": "INR/USD",
+          "children": [],
+          "Market Value": 1395305.776097733
+        },
+        {
+          "CUSIP": "JPY_CCASH",
+          "Description": "JPY CASH(Committed)",
+          "children": [],
+          "Market Value": 1099444.47945142
+        },
+        {
+          "CUSIP": "MXN_CCASH",
+          "Description": "MXN CASH(Committed)",
+          "children": [],
+          "Market Value": 58471.28514877246
+        },
+        {
+          "CUSIP": "NOK_CCASH",
+          "Description": "NOK CASH(Committed)",
+          "children": [],
+          "Market Value": 6.603563559875021
+        },
+        {
+          "CUSIP": "NZD_CCASH",
+          "Description": "NZD CASH(Committed)",
+          "children": [],
+          "Market Value": 0.6028715000000002
+        },
+        {
+          "CUSIP": "PLN_CCASH",
+          "Description": "PLN CASH(Committed)",
+          "children": [],
+          "Market Value": 50643.52705169007
+        },
+        {
+          "CUSIP": "BRSNPYMT1",
+          "Description": "RRP TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": -24969852.26666667
+        },
+        {
+          "CUSIP": "BRSMY18F1",
+          "Description": "RRP TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": -9812891.854611112
+        },
+        {
+          "CUSIP": "BRSPHY4H1",
+          "Description": "RRP TREASURY (CPI) NOTES",
+          "children": [],
+          "Market Value": -12581471.37635417
+        },
+        {
+          "CUSIP": "BRSPF9WL8",
+          "Description": "RRP TREASURY BOND",
+          "children": [],
+          "Market Value": -74166776.06770833
+        },
+        {
+          "CUSIP": "BRSQ4BL68",
+          "Description": "RRP TREASURY NOTE",
+          "children": [],
+          "Market Value": -198814770
+        },
+        {
+          "CUSIP": "BRSQ4BKX0",
+          "Description": "RRP TREASURY NOTE",
+          "children": [],
+          "Market Value": -10012500
+        },
+        {
+          "CUSIP": "BRSQ1CYH1",
+          "Description": "RRP TREASURY NOTE",
+          "children": [],
+          "Market Value": -60063318.75
+        },
+        {
+          "CUSIP": "SEK_CCASH",
+          "Description": "SEK CASH(Committed)",
+          "children": [],
+          "Market Value": 0.5336946602881397
+        },
+        {
+          "CUSIP": "SGD_CCASH",
+          "Description": "SGD CASH(Committed)",
+          "children": [],
+          "Market Value": 643.1189420397914
+        },
+        {
+          "CUSIP": "USD_CCASH",
+          "Description": "USD CASH(Committed)",
+          "children": [],
+          "Market Value": -51164421.69000025
+        },
+        {
+          "CUSIP": "BRSQ3H3TR",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": 224727.9059343965
+        },
+        {
+          "CUSIP": "BRSQ2HTZR",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": -457471.4047503335
+        },
+        {
+          "CUSIP": "BRSQ333XR",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": 227030.157113737
+        },
+        {
+          "CUSIP": "BRSQ2HTZP",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": 456000
+        },
+        {
+          "CUSIP": "BRSQ3H3TP",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": -228000
+        },
+        {
+          "CUSIP": "BRSQ333XP",
+          "Description": "USD/BRL",
+          "children": [],
+          "Market Value": -228000
+        },
+        {
+          "CUSIP": "BRSPRPJMR",
+          "Description": "USD/CAD",
+          "children": [],
+          "Market Value": -11118382.30574643
+        },
+        {
+          "CUSIP": "BRSPTL0NR",
+          "Description": "USD/CAD",
+          "children": [],
+          "Market Value": 11153981.29752049
+        },
+        {
+          "CUSIP": "BRSPRPJMP",
+          "Description": "USD/CAD",
+          "children": [],
+          "Market Value": 11295000
+        },
+        {
+          "CUSIP": "BRSPTL0NP",
+          "Description": "USD/CAD",
+          "children": [],
+          "Market Value": -11295000
+        },
+        {
+          "CUSIP": "BRSPYX0HP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 1373000
+        },
+        {
+          "CUSIP": "BRSPZ1KBR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -965161.0279714988
+        },
+        {
+          "CUSIP": "BRSPXS1MR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 383026.1484455407
+        },
+        {
+          "CUSIP": "BRSPXS1MP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -380000
+        },
+        {
+          "CUSIP": "BRSPZ1KBP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 951000
+        },
+        {
+          "CUSIP": "BRSQ00HHR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -641020.9338884958
+        },
+        {
+          "CUSIP": "BRSQ01BTP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 380000
+        },
+        {
+          "CUSIP": "BRSQ00HHP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 634000
+        },
+        {
+          "CUSIP": "BRSPT44SR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": 2974593.409866345
+        },
+        {
+          "CUSIP": "BRSPYX0HR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -1391598.10681075
+        },
+        {
+          "CUSIP": "BRSQ01BTR",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -383505.3304494342
+        },
+        {
+          "CUSIP": "BRSPT44SP",
+          "Description": "USD/CLP",
+          "children": [],
+          "Market Value": -2958000
+        },
+        {
+          "CUSIP": "BRSQ47P6P",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -431000
+        },
+        {
+          "CUSIP": "BRSPY889P",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 572000
+        },
+        {
+          "CUSIP": "BRSPT44PR",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -1737351.949330318
+        },
+        {
+          "CUSIP": "BRSPWP8NR",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 315972.3891126881
+        },
+        {
+          "CUSIP": "BRSPZ1K5P",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -630000
+        },
+        {
+          "CUSIP": "BRSPWP8NP",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -325000
+        },
+        {
+          "CUSIP": "BRSPU8LVP",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 325000
+        },
+        {
+          "CUSIP": "BRSPZ1K5R",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 621542.048918698
+        },
+        {
+          "CUSIP": "BRSPT44PP",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 1790060
+        },
+        {
+          "CUSIP": "BRSQ47P6R",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": 427047.1824527461
+        },
+        {
+          "CUSIP": "BRSPU8LVR",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -313866.1487968094
+        },
+        {
+          "CUSIP": "BRSPY889R",
+          "Description": "USD/COP",
+          "children": [],
+          "Market Value": -562916.3465436582
+        },
+        {
+          "CUSIP": "BRSQ3U3VP",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -495325.48
+        },
+        {
+          "CUSIP": "BRSQ3U09P",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -795000
+        },
+        {
+          "CUSIP": "BRSQ3U61R",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 493769.6176666397
+        },
+        {
+          "CUSIP": "BRSPECLKR",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -1419778.085991678
+        },
+        {
+          "CUSIP": "BRSP0HC5P",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -1410000
+        },
+        {
+          "CUSIP": "BRSQ3TTRP",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -802214.43
+        },
+        {
+          "CUSIP": "BRSQ3TWBP",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -817202.73
+        },
+        {
+          "CUSIP": "BRSQ3U09R",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 792095.4777949176
+        },
+        {
+          "CUSIP": "BRSP0HC5R",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 1392514.481520764
+        },
+        {
+          "CUSIP": "BRSQ3TTRR",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 799544.0726378179
+        },
+        {
+          "CUSIP": "BRSQ3U3VR",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 493837.5330356418
+        },
+        {
+          "CUSIP": "BRSQ3U61P",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": -495257.36
+        },
+        {
+          "CUSIP": "BRSPECLKP",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 1410000
+        },
+        {
+          "CUSIP": "BRSQ3TWBR",
+          "Description": "USD/INR",
+          "children": [],
+          "Market Value": 814482.4805943007
+        },
+        {
+          "CUSIP": "BRSQ15EUP",
+          "Description": "USD/JPY",
+          "children": [],
+          "Market Value": -14139000
+        },
+        {
+          "CUSIP": "BRSQ0YJHR",
+          "Description": "USD/JPY",
+          "children": [],
+          "Market Value": -14158212.93715208
+        },
+        {
+          "CUSIP": "BRSQ15EUR",
+          "Description": "USD/JPY",
+          "children": [],
+          "Market Value": 14212047.95700357
+        },
+        {
+          "CUSIP": "BRSQ0YJHP",
+          "Description": "USD/JPY",
+          "children": [],
+          "Market Value": 14085000
+        },
+        {
+          "CUSIP": "BRSPSD7YR",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": -1256644.600144963
+        },
+        {
+          "CUSIP": "BRSPRNE4R",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": 1503310.944672626
+        },
+        {
+          "CUSIP": "BRSPXKT8R",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": -448156.3157210028
+        },
+        {
+          "CUSIP": "BRSPRNE4P",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": -1530000
+        },
+        {
+          "CUSIP": "BRSPS9QGP",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": 105000
+        },
+        {
+          "CUSIP": "BRSPVDBXP",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": -301000
+        },
+        {
+          "CUSIP": "BRSPS9QGR",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": -103677.0879525572
+        },
+        {
+          "CUSIP": "BRSPSD7YP",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": 1274000
+        },
+        {
+          "CUSIP": "BRSPXKT8P",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": 452000
+        },
+        {
+          "CUSIP": "BRSPVDBXR",
+          "Description": "USD/MXN",
+          "children": [],
+          "Market Value": 295523.407735053
+        },
+        {
+          "CUSIP": "BRSPQHQ2P",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -7642000
+        },
+        {
+          "CUSIP": "BRSPJT3FR",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -5359452.720748213
+        },
+        {
+          "CUSIP": "BRSPJT3EP",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -5955000
+        },
+        {
+          "CUSIP": "BRSPQHQ2R",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 7070297.287665389
+        },
+        {
+          "CUSIP": "BRSPJT33R",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -10880221.171013
+        },
+        {
+          "CUSIP": "BRSPJT33P",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 11942000
+        },
+        {
+          "CUSIP": "BRSPQHVUR",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 1207772.179235977
+        },
+        {
+          "CUSIP": "BRSPJT3ER",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 5352318.189192782
+        },
+        {
+          "CUSIP": "BRSP3PNEP",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 5955000
+        },
+        {
+          "CUSIP": "BRSP3PNER",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -5276098.46814415
+        },
+        {
+          "CUSIP": "BRSPPVANR",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 8285383.312462877
+        },
+        {
+          "CUSIP": "BRSPJT3FP",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": 5955000
+        },
+        {
+          "CUSIP": "BRSPQHVUP",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -1305000
+        },
+        {
+          "CUSIP": "BRSPPVANP",
+          "Description": "USD/RUB",
+          "children": [],
+          "Market Value": -8950000
+        },
+        {
+          "CUSIP": "BRSQ17JWR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 257724.4013505762
+        },
+        {
+          "CUSIP": "BRSQ1TUKR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -255309.363734723
+        },
+        {
+          "CUSIP": "BRSQ17JUP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -271000
+        },
+        {
+          "CUSIP": "BRSPZYJTR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -1652665.33274623
+        },
+        {
+          "CUSIP": "BRSQ3R5LP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -338000
+        },
+        {
+          "CUSIP": "BRSQ17JUR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 274111.9007089292
+        },
+        {
+          "CUSIP": "BRSQ1TUKP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 250000
+        },
+        {
+          "CUSIP": "BRSQ423KR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 482960.4406854945
+        },
+        {
+          "CUSIP": "BRSQ3R5LR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 337043.8079168308
+        },
+        {
+          "CUSIP": "BRSQ17JWP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -255000
+        },
+        {
+          "CUSIP": "BRSPYNSBP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 424000
+        },
+        {
+          "CUSIP": "BRSQ3QFMP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -338000
+        },
+        {
+          "CUSIP": "BRSQ1T21P",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 400000
+        },
+        {
+          "CUSIP": "BRSQ1T21R",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -406267.9846340369
+        },
+        {
+          "CUSIP": "BRSQ423KP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -489000
+        },
+        {
+          "CUSIP": "BRSPZYJTP",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 1623000
+        },
+        {
+          "CUSIP": "BRSPYNSBR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": -431724.0209469406
+        },
+        {
+          "CUSIP": "BRSQ3QFMR",
+          "Description": "USD/ZAR",
+          "children": [],
+          "Market Value": 340734.1128909608
+        },
+        {
+          "CUSIP": "ZAR_CCASH",
+          "Description": "ZAR CASH(Committed)",
+          "children": [],
+          "Market Value": 131421.5597342642
+        }
+      ],
+      "Description": "CASH",
+      "Market Value": -431013859.6500287
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "02665UAA3",
+          "Description": "AH4R_14-SFR2     A 144A",
+          "children": [],
+          "Market Value": 1466035.3365
+        },
+        {
+          "CUSIP": "059497BA4",
+          "Description": "BACM_07-1     AMFX",
+          "children": [],
+          "Market Value": 542513.5716915
+        },
+        {
+          "CUSIP": "059512AE3",
+          "Description": "BACM_07-3       A4",
+          "children": [],
+          "Market Value": 1703248.67265
+        },
+        {
+          "CUSIP": "059512AG8",
+          "Description": "BACM_07-3      A1A",
+          "children": [],
+          "Market Value": 5907644.721427139
+        },
+        {
+          "CUSIP": "05538UAL7",
+          "Description": "BBUBS_12-SHOW     XA 144A",
+          "children": [],
+          "Market Value": 3610668.03475
+        },
+        {
+          "CUSIP": "05490AAA1",
+          "Description": "BBUBS_12-TFT     A 144A",
+          "children": [],
+          "Market Value": 4411738.4192
+        },
+        {
+          "CUSIP": "07388RAF4",
+          "Description": "BSCMS_07-PW15    A1A",
+          "children": [],
+          "Market Value": 4581838.646398022
+        },
+        {
+          "CUSIP": "07388QAF6",
+          "Description": "BSCMS_07-PW17    A1A",
+          "children": [],
+          "Market Value": 4002651.664766991
+        },
+        {
+          "CUSIP": "12514AAH4",
+          "Description": "CD_07-CD5      AMA",
+          "children": [],
+          "Market Value": 601327.773
+        },
+        {
+          "CUSIP": "17319WAC3",
+          "Description": "CGCMT_13-SMP    XA 144A",
+          "children": [],
+          "Market Value": 1961079.108778621
+        },
+        {
+          "CUSIP": "17322FAA9",
+          "Description": "CGCMT_14-388G      A 144A",
+          "children": [],
+          "Market Value": 5684881.471111111
+        },
+        {
+          "CUSIP": "20173WAE8",
+          "Description": "CMLT_08-LS1    A4B",
+          "children": [],
+          "Market Value": 3789822.526077846
+        },
+        {
+          "CUSIP": "12621RAB0",
+          "Description": "COMM_10-RR1    GEB 144A",
+          "children": [],
+          "Market Value": 2179422.1375
+        },
+        {
+          "CUSIP": "12624NAC4",
+          "Description": "COMM_12-LTRT    A2 144A",
+          "children": [],
+          "Market Value": 3448028.054
+        },
+        {
+          "CUSIP": "12624XAE8",
+          "Description": "COMM_13-CR6     XA",
+          "children": [],
+          "Market Value": 3399184.564837895
+        },
+        {
+          "CUSIP": "12628QAA7",
+          "Description": "COMM_13-FL3      A 144A",
+          "children": [],
+          "Market Value": 4152634.122839282
+        },
+        {
+          "CUSIP": "12624UAC8",
+          "Description": "COMM_13-GAM     A2 144A",
+          "children": [],
+          "Market Value": 2902908.5031
+        },
+        {
+          "CUSIP": "20048EAZ4",
+          "Description": "COMM_13-LC6     XA",
+          "children": [],
+          "Market Value": 4833474.242585834
+        },
+        {
+          "CUSIP": "225458VU9",
+          "Description": "CSFB_05-C3      AJ",
+          "children": [],
+          "Market Value": 3900903.9091
+        },
+        {
+          "CUSIP": "22546NAB0",
+          "Description": "CSMC_08-C1      A2",
+          "children": [],
+          "Market Value": 2801276.244829326
+        },
+        {
+          "CUSIP": "12643KAQ6",
+          "Description": "CSMC_10-RR2     2A 144A",
+          "children": [],
+          "Market Value": 8810446.835535895
+        },
+        {
+          "CUSIP": "19075DAH4",
+          "Description": "CWCI_07-C3      AM",
+          "children": [],
+          "Market Value": 2939504.291441251
+        },
+        {
+          "CUSIP": "23305WAA1",
+          "Description": "DBRR_11-C32    A3A 144A",
+          "children": [],
+          "Market Value": 3001531.754375
+        },
+        {
+          "CUSIP": "23306DAA2",
+          "Description": "DMARC_13-EZ3     A 144A",
+          "children": [],
+          "Market Value": 3017542.58716466
+        },
+        {
+          "CUSIP": "30225ABC6",
+          "Description": "ESA_13-ESH5      C 144A",
+          "children": [],
+          "Market Value": 2460611.6175
+        },
+        {
+          "CUSIP": "30225ABJ1",
+          "Description": "ESA_13-ESH7    A27 144A",
+          "children": [],
+          "Market Value": 3547797.417325
+        },
+        {
+          "CUSIP": "3137B7YY9",
+          "Description": "FHMS-K037       A2",
+          "children": [],
+          "Market Value": 791446.5496022223
+        },
+        {
+          "CUSIP": "3137BBBE9",
+          "Description": "FHMS_K038       X1",
+          "children": [],
+          "Market Value": 2133351.379857156
+        },
+        {
+          "CUSIP": "31396PGT2",
+          "Description": "FNMA_06-M2     A2A",
+          "children": [],
+          "Market Value": 18907323.72324562
+        },
+        {
+          "CUSIP": "3136AC4H1",
+          "Description": "FNMA_13-M4      X1",
+          "children": [],
+          "Market Value": 4986796.072159179
+        },
+        {
+          "CUSIP": "3136ADZZ5",
+          "Description": "FNMA_13-M5      X2",
+          "children": [],
+          "Market Value": 1322842.394344758
+        },
+        {
+          "CUSIP": "20173VAG5",
+          "Description": "GCCFC_07-GG11     AM",
+          "children": [],
+          "Market Value": 2765528.01
+        },
+        {
+          "CUSIP": "20173QAB7",
+          "Description": "GCCFC_07-GG9    A2",
+          "children": [],
+          "Market Value": 5753215.964707485
+        },
+        {
+          "CUSIP": "36159XAB6",
+          "Description": "GECMC_07-C1     A2",
+          "children": [],
+          "Market Value": 444533.5423148354
+        },
+        {
+          "CUSIP": "38378BM71",
+          "Description": "GNMA_12-120     IO",
+          "children": [],
+          "Market Value": 1612594.813155678
+        },
+        {
+          "CUSIP": "36193AAC2",
+          "Description": "GSMS_13-KING    XA 144A",
+          "children": [],
+          "Market Value": 1172164.679981462
+        },
+        {
+          "CUSIP": "36252WAZ1",
+          "Description": "GSMS_14-GC20    XA",
+          "children": [],
+          "Market Value": 533875.6761260837
+        },
+        {
+          "CUSIP": "46631QAH5",
+          "Description": "JPMCC_07-CB20     AM",
+          "children": [],
+          "Market Value": 5299549.721735425
+        },
+        {
+          "CUSIP": "46631BAB1",
+          "Description": "JPMCC_07-LD11     A2",
+          "children": [],
+          "Market Value": 190957.0159349803
+        },
+        {
+          "CUSIP": "46632HAG6",
+          "Description": "JPMCC_07-LD12    A1A",
+          "children": [],
+          "Market Value": 8629576.17956119
+        },
+        {
+          "CUSIP": "46630JAD1",
+          "Description": "JPMCC_07-LDPX    A1A",
+          "children": [],
+          "Market Value": 1672940.293215091
+        },
+        {
+          "CUSIP": "46632MCC2",
+          "Description": "JPMCC_08-C2    ASB",
+          "children": [],
+          "Market Value": 2497082.636081984
+        },
+        {
+          "CUSIP": "46639YAS6",
+          "Description": "JPMCC_13-LC11     XA",
+          "children": [],
+          "Market Value": 2059831.259315537
+        },
+        {
+          "CUSIP": "46639YAT4",
+          "Description": "JPMCC_13-LC11     XB",
+          "children": [],
+          "Market Value": 173012.00616
+        },
+        {
+          "CUSIP": "46642MAA6",
+          "Description": "JPMCC_14-DSTY      A 144A",
+          "children": [],
+          "Market Value": 665408.4313833333
+        },
+        {
+          "CUSIP": "52108H3J1",
+          "Description": "LBUBS_05-C2     AJ",
+          "children": [],
+          "Market Value": 2818823.5948
+        },
+        {
+          "CUSIP": "59022HLK6",
+          "Description": "MLMT_05-CKI1    AJ",
+          "children": [],
+          "Market Value": 3898437.266325
+        },
+        {
+          "CUSIP": "59025KAF9",
+          "Description": "MLMT_07-C1     A1A",
+          "children": [],
+          "Market Value": 2469038.360811194
+        },
+        {
+          "CUSIP": "61690KAF9",
+          "Description": "MSBAM_13-C7     XA",
+          "children": [],
+          "Market Value": 1714493.050798054
+        },
+        {
+          "CUSIP": "61755BBE3",
+          "Description": "MSCI_07-HQ12  A-2FX",
+          "children": [],
+          "Market Value": 1573529.72998325
+        },
+        {
+          "CUSIP": "61753JAF6",
+          "Description": "MSC_07-IQ13     AM",
+          "children": [],
+          "Market Value": 2540800.0485
+        },
+        {
+          "CUSIP": "61753JAB5",
+          "Description": "MSC_07-IQ13    A1A",
+          "children": [],
+          "Market Value": 1563224.592546553
+        },
+        {
+          "CUSIP": "61754KAB1",
+          "Description": "MSC_07-IQ14    A1A",
+          "children": [],
+          "Market Value": 2431790.40656818
+        },
+        {
+          "CUSIP": "61755YAH7",
+          "Description": "MSC_07-IQ15     AM",
+          "children": [],
+          "Market Value": 6944205.52
+        },
+        {
+          "CUSIP": "61759LAB4",
+          "Description": "MSRR_10-GG10   A4B 144A",
+          "children": [],
+          "Market Value": 5465384.249458
+        },
+        {
+          "CUSIP": "61760NAC5",
+          "Description": "MSRR_11-IO       C 144A",
+          "children": [],
+          "Market Value": 1895000
+        },
+        {
+          "CUSIP": "61761LAC8",
+          "Description": "MSRR_12-IO    AXB1 144A",
+          "children": [],
+          "Market Value": 587808.1291494669
+        },
+        {
+          "CUSIP": "61761LAD6",
+          "Description": "MSRR_12-IO    AXB2 144A",
+          "children": [],
+          "Market Value": 2396324.333333333
+        },
+        {
+          "CUSIP": "74928HBF2",
+          "Description": "RBSCF_10-RR3  WBTA 144A",
+          "children": [],
+          "Market Value": 5186475.298930709
+        },
+        {
+          "CUSIP": "92890NAA7",
+          "Description": "WFRBS_12-C10    XA 144A",
+          "children": [],
+          "Market Value": 3307819.556751756
+        },
+        {
+          "CUSIP": "92937FAJ0",
+          "Description": "WFRBS_13-C12    XA 144A",
+          "children": [],
+          "Market Value": 4326603.190350892
+        },
+        {
+          "CUSIP": "92938CAG2",
+          "Description": "WFRBS_13-C15    XA",
+          "children": [],
+          "Market Value": 1229101.016460902
+        },
+        {
+          "CUSIP": "96221TAL1",
+          "Description": "WFRBS_14-LC14      C",
+          "children": [],
+          "Market Value": 151662.9
+        },
+        {
+          "CUSIP": "96221TAH0",
+          "Description": "WFRBS_14-LC14     XA",
+          "children": [],
+          "Market Value": 1474331.09948818
+        },
+        {
+          "CUSIP": "94987YAA3",
+          "Description": "WFRR_12-IO       A 144A",
+          "children": [],
+          "Market Value": 2388703.134716657
+        },
+        {
+          "CUSIP": "93934DBU0",
+          "Description": "WMCMS_05-C1A     X 144A",
+          "children": [],
+          "Market Value": 60104.72526409131
+        }
+      ],
+      "Description": "CMBS",
+      "Market Value": 205694406.78160363
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "07384MY48",
+          "Description": "BSARM_04-7      4A",
+          "children": [],
+          "Market Value": 266078.0001294469
+        },
+        {
+          "CUSIP": "12645GAP5",
+          "Description": "CSMC_11-2R     2A1 144A",
+          "children": [],
+          "Market Value": 5664562.002264351
+        },
+        {
+          "CUSIP": "12645KDN8",
+          "Description": "CSMC_11-4R     5A1 144A",
+          "children": [],
+          "Market Value": 7082660.384714872
+        },
+        {
+          "CUSIP": "12645KEQ0",
+          "Description": "CSMC_11-4R     6A1 144A",
+          "children": [],
+          "Market Value": 835568.8802912756
+        },
+        {
+          "CUSIP": "12669GHY0",
+          "Description": "CWHL_04-29     1A1",
+          "children": [],
+          "Market Value": 750786.947025392
+        },
+        {
+          "CUSIP": "3133T1VW9",
+          "Description": "FHLMC_1591      PK",
+          "children": [],
+          "Market Value": 1323476.847843453
+        },
+        {
+          "CUSIP": "31395UYX3",
+          "Description": "FHLMC_2996      MK",
+          "children": [],
+          "Market Value": 34267.0812605352
+        },
+        {
+          "CUSIP": "31392CYE8",
+          "Description": "FNGT_02-T6      A1",
+          "children": [],
+          "Market Value": 305193.8859173804
+        },
+        {
+          "CUSIP": "31394BPP3",
+          "Description": "FNMA_04-88      HA",
+          "children": [],
+          "Market Value": 226291.5826095078
+        },
+        {
+          "CUSIP": "31394DFD7",
+          "Description": "FNMA_05-29      AT",
+          "children": [],
+          "Market Value": 141526.4313666594
+        },
+        {
+          "CUSIP": "31394DGE4",
+          "Description": "FNMA_05-29      WB",
+          "children": [],
+          "Market Value": 768254.8670510581
+        },
+        {
+          "CUSIP": "31394DA42",
+          "Description": "FNMA_05-48      AR",
+          "children": [],
+          "Market Value": 875703.1128874393
+        },
+        {
+          "CUSIP": "31394ENK0",
+          "Description": "FNMA_05-62      CQ",
+          "children": [],
+          "Market Value": 775288.0678252868
+        },
+        {
+          "CUSIP": "313602PJ7",
+          "Description": "FNMA_89-16       B",
+          "children": [],
+          "Market Value": 14355.58385795968
+        },
+        {
+          "CUSIP": "362341NX3",
+          "Description": "GSAA_05-11     2A1",
+          "children": [],
+          "Market Value": 3042306.500421363
+        },
+        {
+          "CUSIP": "362334GR9",
+          "Description": "GSAA_06-5      2A1",
+          "children": [],
+          "Market Value": 623190.6270943036
+        },
+        {
+          "CUSIP": "43739EBS5",
+          "Description": "HMBT_05-4       A1",
+          "children": [],
+          "Market Value": 5354094.227909076
+        },
+        {
+          "CUSIP": "43739HAA8",
+          "Description": "HMBT_06-2       A1",
+          "children": [],
+          "Market Value": 989199.0172638186
+        },
+        {
+          "CUSIP": "61913PAA0",
+          "Description": "MHL_04-1        A1",
+          "children": [],
+          "Market Value": 1800046.831154891
+        },
+        {
+          "CUSIP": "761118VY1",
+          "Description": "RALI_06-QO2     A1",
+          "children": [],
+          "Market Value": 1771226.605109184
+        },
+        {
+          "CUSIP": "863579EK0",
+          "Description": "SAR_04-16      3A1",
+          "children": [],
+          "Market Value": 5077485.474480119
+        }
+      ],
+      "Description": "CMO",
+      "Market Value": 37721562.95847737
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "173080201",
+          "Description": "CITIGROUP CAPITAL XIII",
+          "children": [],
+          "Market Value": 3146994.45
+        },
+        {
+          "CUSIP": "63946CAE8",
+          "Description": "NBCUNIVERSAL ENTERPRISE INC 144A",
+          "children": [],
+          "Market Value": 3317600
+        }
+      ],
+      "Description": "EQUITY",
+      "Market Value": 6464594.45
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "BRS9MMD53",
+          "Description": "BARCLAYS ABS INDEX",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRS9M4149",
+          "Description": "BARCLAYS AGENCY INDEX",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRS9MMDC8",
+          "Description": "BARCLAYS CMBS INDEX",
+          "children": [],
+          "Market Value": -2.9802322387695312E-8
+        },
+        {
+          "CUSIP": "BRS9Z91M4",
+          "Description": "BARCLAYS IG CREDIT - FINAN",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRS9M3Y78",
+          "Description": "BARCLAYS MBS INDEX",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRS9M46Q5",
+          "Description": "BARCLAYS TREASURY INDEX",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRS9Z91L6",
+          "Description": "BARCLAYS US CORPORATE INDU",
+          "children": [],
+          "Market Value": -5.21540641784668E-8
+        },
+        {
+          "CUSIP": "BRS9Z91B8",
+          "Description": "BARCLAYS US CORPORATE UTIL",
+          "children": [],
+          "Market Value": -7.450580596923828E-9
+        },
+        {
+          "CUSIP": "BRS9Z91N2",
+          "Description": "BARCLAYS US TAXABLE MUNICI",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRSA02953",
+          "Description": "BCAP NON-CORP DEV COUNTRY",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "BRSA028P0",
+          "Description": "BCAP NON-CORP EM COUNTRY",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "09248U619",
+          "Description": "BLACKROCK LIQ FD TEMPFUND-IN",
+          "children": [],
+          "Market Value": 35813238.73999999
+        }
+      ],
+      "Description": "FUND",
+      "Market Value": 35813238.7399999
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "XMZ420149",
+          "Description": "AUST 10YR BOND DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "UBZ420146",
+          "Description": "EURO BUXL 30YR BOND DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "EDZ520154",
+          "Description": "EURO$ 90 DAY DEC 15",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "EDM620164",
+          "Description": "EURO$ 90 DAY JUN 16",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "EDH620160",
+          "Description": "EURO$ 90 DAY MAR 16",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "EDU620165",
+          "Description": "EURO$ 90 DAY SEP 16",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "TYZ420148",
+          "Description": "US 10YR NOTE DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "TUZ420146",
+          "Description": "US 2YR NOTE DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FVZ420149",
+          "Description": "US 5YR NOTE DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "USZ420149",
+          "Description": "US LONG BOND DEC 14",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "WNZ420148",
+          "Description": "US ULTRA T-BOND DEC 14",
+          "children": [],
+          "Market Value": 0
+        }
+      ],
+      "Description": "FUTURE",
+      "Market Value": 0
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "BRS6ZB2K8",
+          "Description": "ITALY (REPUBLIC OF)",
+          "children": [],
+          "Market Value": 28941824.96228864
+        },
+        {
+          "CUSIP": "912810RF7",
+          "Description": "TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": 6025215.40159307
+        },
+        {
+          "CUSIP": "912828UH1",
+          "Description": "TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": 5914595.945869566
+        },
+        {
+          "CUSIP": "912810QV3",
+          "Description": "TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": 10784188.29732337
+        },
+        {
+          "CUSIP": "912828B25",
+          "Description": "TREASURY (CPI) NOTE",
+          "children": [],
+          "Market Value": 38167107.81433833
+        },
+        {
+          "CUSIP": "912828C99",
+          "Description": "TREASURY (CPI) NOTES",
+          "children": [],
+          "Market Value": 12507057.83113525
+        }
+      ],
+      "Description": "IBND",
+      "Market Value": 102339990.25254822
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "FG053215K",
+          "Description": "FGOLD 15YR 1999 PRODUCTION",
+          "children": [],
+          "Market Value": 35.76212540614486
+        },
+        {
+          "CUSIP": "FG060015M",
+          "Description": "FGOLD 15YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 82328.62875201451
+        },
+        {
+          "CUSIP": "FG060015N",
+          "Description": "FGOLD 15YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 511716.8965731343
+        },
+        {
+          "CUSIP": "FG063215N",
+          "Description": "FGOLD 15YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 14908.33416084426
+        },
+        {
+          "CUSIP": "FG053215N",
+          "Description": "FGOLD 15YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 354664.0641987506
+        },
+        {
+          "CUSIP": "FG060015P",
+          "Description": "FGOLD 15YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 13843.18431335284
+        },
+        {
+          "CUSIP": "FG053215P",
+          "Description": "FGOLD 15YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 130143.8781113677
+        },
+        {
+          "CUSIP": "FG053215Q",
+          "Description": "FGOLD 15YR 2004 PRODUCTION",
+          "children": [],
+          "Market Value": 379265.1438435112
+        },
+        {
+          "CUSIP": "BRSPFX0H9",
+          "Description": "FGOLD 15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 8315383.680555556
+        },
+        {
+          "CUSIP": "BRSPKJNT3",
+          "Description": "FGOLD 15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 11794665.625
+        },
+        {
+          "CUSIP": "BRSPSGNH7",
+          "Description": "FGOLD 15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 9801441.145833334
+        },
+        {
+          "CUSIP": "BRSQ1KME3",
+          "Description": "FGOLD 15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 11470087.5
+        },
+        {
+          "CUSIP": "FG060030J",
+          "Description": "FGOLD 30YR 1998 PRODUCTION",
+          "children": [],
+          "Market Value": 1258.841450121358
+        },
+        {
+          "CUSIP": "FG060030K",
+          "Description": "FGOLD 30YR 1999 PRODUCTION",
+          "children": [],
+          "Market Value": 239.6907920747961
+        },
+        {
+          "CUSIP": "FG060030M",
+          "Description": "FGOLD 30YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 9482.305252498116
+        },
+        {
+          "CUSIP": "FG060030N",
+          "Description": "FGOLD 30YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 6901.823730804346
+        },
+        {
+          "CUSIP": "FG050030Q",
+          "Description": "FGOLD 30YR 2004 PRODUCTION",
+          "children": [],
+          "Market Value": 9585012.932205008
+        },
+        {
+          "CUSIP": "FG053230T",
+          "Description": "FGOLD 30YR 2007 PRODUCTION",
+          "children": [],
+          "Market Value": 9511955.806787364
+        },
+        {
+          "CUSIP": "FG050030W",
+          "Description": "FGOLD 30YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 1086474.056919977
+        },
+        {
+          "CUSIP": "FG030030A",
+          "Description": "FGOLD 30YR 2013 PRODUCTION",
+          "children": [],
+          "Market Value": 26198274.81604266
+        },
+        {
+          "CUSIP": "FG043230A",
+          "Description": "FGOLD 30YR 2013 PRODUCTION",
+          "children": [],
+          "Market Value": 15638840.07229454
+        },
+        {
+          "CUSIP": "R3030M5XA",
+          "Description": "FGOLD 30YR 3% M 80-90 LTV 2013",
+          "children": [],
+          "Market Value": 1131390.316048069
+        },
+        {
+          "CUSIP": "R3030M4XA",
+          "Description": "FGOLD 30YR 3% M 90-95 LTV 2013",
+          "children": [],
+          "Market Value": 3327172.624372936
+        },
+        {
+          "CUSIP": "R3030B4XA",
+          "Description": "FGOLD 30YR 3% MLB 125K 2013",
+          "children": [],
+          "Market Value": 10679740.40729805
+        },
+        {
+          "CUSIP": "R3030B6XZ",
+          "Description": "FGOLD 30YR 3% SHLB 175K 2012",
+          "children": [],
+          "Market Value": 1733274.684149719
+        },
+        {
+          "CUSIP": "R3034B5XZ",
+          "Description": "FGOLD 30YR 3.5% HLB 150K 2012",
+          "children": [],
+          "Market Value": 5581214.78531426
+        },
+        {
+          "CUSIP": "R3034B5XA",
+          "Description": "FGOLD 30YR 3.5% HLB 150K 2013",
+          "children": [],
+          "Market Value": 13252727.57257956
+        },
+        {
+          "CUSIP": "R3034B5XB",
+          "Description": "FGOLD 30YR 3.5% HLB 150K 2014",
+          "children": [],
+          "Market Value": 3975793.998677285
+        },
+        {
+          "CUSIP": "R3034B2XZ",
+          "Description": "FGOLD 30YR 3.5% LLB 85K 2012",
+          "children": [],
+          "Market Value": 1365147.965290644
+        },
+        {
+          "CUSIP": "R3034B2XA",
+          "Description": "FGOLD 30YR 3.5% LLB 85K 2013",
+          "children": [],
+          "Market Value": 4775538.083410654
+        },
+        {
+          "CUSIP": "R3034B2XB",
+          "Description": "FGOLD 30YR 3.5% LLB 85K 2014",
+          "children": [],
+          "Market Value": 578104.2960206681
+        },
+        {
+          "CUSIP": "R3034B3XX",
+          "Description": "FGOLD 30YR 3.5% MLB 110K 2011",
+          "children": [],
+          "Market Value": 2104276.510918402
+        },
+        {
+          "CUSIP": "R3034B3XA",
+          "Description": "FGOLD 30YR 3.5% MLB 110K 2013",
+          "children": [],
+          "Market Value": 154646.5073903716
+        },
+        {
+          "CUSIP": "R3034B3XB",
+          "Description": "FGOLD 30YR 3.5% MLB 110K 2014",
+          "children": [],
+          "Market Value": 1688146.104511889
+        },
+        {
+          "CUSIP": "R3034B6XZ",
+          "Description": "FGOLD 30YR 3.5% SHLB 175K 2012",
+          "children": [],
+          "Market Value": 2194366.032093792
+        },
+        {
+          "CUSIP": "R3040B3XA",
+          "Description": "FGOLD 30YR 4% MLB 110K 2013",
+          "children": [],
+          "Market Value": 452209.990559047
+        },
+        {
+          "CUSIP": "R3040B3XB",
+          "Description": "FGOLD 30YR 4% MLB 110K 2014",
+          "children": [],
+          "Market Value": 4663471.522265188
+        },
+        {
+          "CUSIP": "R3040B4XW",
+          "Description": "FGOLD 30YR 4% MLB 125K 2010",
+          "children": [],
+          "Market Value": 1010715.535374256
+        },
+        {
+          "CUSIP": "R3040B4XX",
+          "Description": "FGOLD 30YR 4% MLB 125K 2011",
+          "children": [],
+          "Market Value": 678134.322600251
+        },
+        {
+          "CUSIP": "R3054PRXS",
+          "Description": "FGOLD 30YR 5.5% 100% PR 2006",
+          "children": [],
+          "Market Value": 175837.9635266381
+        },
+        {
+          "CUSIP": "FG080030G",
+          "Description": "FGOLD 30YR PRE-1994 PRODUCTION",
+          "children": [],
+          "Market Value": 2206.970695872646
+        },
+        {
+          "CUSIP": "BRSPDDAV3",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 9945487.5
+        },
+        {
+          "CUSIP": "BRSPFX0L0",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 2575768.2291666716
+        },
+        {
+          "CUSIP": "BRSPQ1GX5",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -9004781.25
+        },
+        {
+          "CUSIP": "BRSPQ1HB2",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 3006590.625
+        },
+        {
+          "CUSIP": "BRSPQ1H48",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 9275000
+        },
+        {
+          "CUSIP": "BRSPFX0N6",
+          "Description": "FGOLD 30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 33779275.52083332
+        },
+        {
+          "CUSIP": "B00126647",
+          "Description": "FHA PROJ POOL 2  FHA",
+          "children": [],
+          "Market Value": 27443.38043656152
+        },
+        {
+          "CUSIP": "FN070015L",
+          "Description": "FNMA  15YR 2000 PRODUCTION",
+          "children": [],
+          "Market Value": 26840.04706729488
+        },
+        {
+          "CUSIP": "FN060015M",
+          "Description": "FNMA  15YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 24587.54488426071
+        },
+        {
+          "CUSIP": "FN053215M",
+          "Description": "FNMA  15YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 13702.65577767527
+        },
+        {
+          "CUSIP": "FN060015N",
+          "Description": "FNMA  15YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 285.5461884736038
+        },
+        {
+          "CUSIP": "BRSPK0Y21",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 11609616.66666667
+        },
+        {
+          "CUSIP": "BRSPQ1HY2",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": -6248100
+        },
+        {
+          "CUSIP": "BRSN7E6A4",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 38331890.625
+        },
+        {
+          "CUSIP": "BRSPDDBL4",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": -6964111.458333333
+        },
+        {
+          "CUSIP": "BRSPQ1HX4",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": -16256462.5
+        },
+        {
+          "CUSIP": "BRSP7EE85",
+          "Description": "FNMA  15YR TBA(REG B)",
+          "children": [],
+          "Market Value": 7997332.29166667
+        },
+        {
+          "CUSIP": "FN060030H",
+          "Description": "FNMA  30YR 1994 - 1996 PRODUCTION",
+          "children": [],
+          "Market Value": 424.2876733365218
+        },
+        {
+          "CUSIP": "FN060030K",
+          "Description": "FNMA  30YR 1999 PRODUCTION",
+          "children": [],
+          "Market Value": 84283.521937716
+        },
+        {
+          "CUSIP": "FN053230M",
+          "Description": "FNMA  30YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 1403.310796506625
+        },
+        {
+          "CUSIP": "FN050030N",
+          "Description": "FNMA  30YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 15682.10083220877
+        },
+        {
+          "CUSIP": "FN060030N",
+          "Description": "FNMA  30YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 50426.22584897702
+        },
+        {
+          "CUSIP": "FN070030N",
+          "Description": "FNMA  30YR 2002 PRODUCTION",
+          "children": [],
+          "Market Value": 28806.83603360611
+        },
+        {
+          "CUSIP": "FN060030P",
+          "Description": "FNMA  30YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 15236962.322169472
+        },
+        {
+          "CUSIP": "FN053230P",
+          "Description": "FNMA  30YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 9026419.314180845
+        },
+        {
+          "CUSIP": "FN050030P",
+          "Description": "FNMA  30YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 12097688.766347965
+        },
+        {
+          "CUSIP": "FN050030Q",
+          "Description": "FNMA  30YR 2004 PRODUCTION",
+          "children": [],
+          "Market Value": 4664191.202322795
+        },
+        {
+          "CUSIP": "FN060030Q",
+          "Description": "FNMA  30YR 2004 PRODUCTION",
+          "children": [],
+          "Market Value": 1.1175870895385742E-8
+        },
+        {
+          "CUSIP": "FN053230Q",
+          "Description": "FNMA  30YR 2004 PRODUCTION",
+          "children": [],
+          "Market Value": 4919065.348876435
+        },
+        {
+          "CUSIP": "FN060030T",
+          "Description": "FNMA  30YR 2007 PRODUCTION",
+          "children": [],
+          "Market Value": 7312950.123480872
+        },
+        {
+          "CUSIP": "FN060030U",
+          "Description": "FNMA  30YR 2008 PRODUCTION",
+          "children": [],
+          "Market Value": 3639991.913217462
+        },
+        {
+          "CUSIP": "BRSPBCGJ8",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -10603293.75
+        },
+        {
+          "CUSIP": "BRSPBCGH2",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 23896828.645833343
+        },
+        {
+          "CUSIP": "BRSPN78F3",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -110619.79166666977
+        },
+        {
+          "CUSIP": "BRSPDDAR2",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": 1339262.5
+        },
+        {
+          "CUSIP": "BRSPDDAT8",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -12225600
+        },
+        {
+          "CUSIP": "BRSN6FBN8",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -31281677.08333333
+        },
+        {
+          "CUSIP": "BRSPBCGG4",
+          "Description": "FNMA  30YR TBA(REG A)",
+          "children": [],
+          "Market Value": -31387243.75
+        },
+        {
+          "CUSIP": "FN060015S",
+          "Description": "FNMA 15YR 2006 PRODUCTION",
+          "children": [],
+          "Market Value": 689954.2968648573
+        },
+        {
+          "CUSIP": "FN053215S",
+          "Description": "FNMA 15YR 2006 PRODUCTION",
+          "children": [],
+          "Market Value": 33351.68126379213
+        },
+        {
+          "CUSIP": "FN043215V",
+          "Description": "FNMA 15YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN040015W",
+          "Description": "FNMA 15YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 13201493.772934323
+        },
+        {
+          "CUSIP": "FN043215W",
+          "Description": "FNMA 15YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 12572017.49627425
+        },
+        {
+          "CUSIP": "FN040015X",
+          "Description": "FNMA 15YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 4240122.002236196
+        },
+        {
+          "CUSIP": "FN030015X",
+          "Description": "FNMA 15YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN033215X",
+          "Description": "FNMA 15YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN023215Z",
+          "Description": "FNMA 15YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 7.450580596923828E-9
+        },
+        {
+          "CUSIP": "F1530B2XB",
+          "Description": "FNMA 15YR 3% LLB 85K 2014",
+          "children": [],
+          "Market Value": 2038420.255025666
+        },
+        {
+          "CUSIP": "F1530B3XB",
+          "Description": "FNMA 15YR 3% MLB 110K 2014",
+          "children": [],
+          "Market Value": 8732069.572623162
+        },
+        {
+          "CUSIP": "F1534B3XA",
+          "Description": "FNMA 15YR 3.5% MLB 110K 2013",
+          "children": [],
+          "Market Value": 18441023.35475516
+        },
+        {
+          "CUSIP": "F1540B5XX",
+          "Description": "FNMA 15YR 4% HLB 150K 2011",
+          "children": [],
+          "Market Value": 621143.3641575502
+        },
+        {
+          "CUSIP": "F1540B3XV",
+          "Description": "FNMA 15YR 4.0% MLB 110K 2009",
+          "children": [],
+          "Market Value": 36134.28164559809
+        },
+        {
+          "CUSIP": "FN053230T",
+          "Description": "FNMA 30YR 2007 PRODUCTION",
+          "children": [],
+          "Market Value": 24.1151500409469
+        },
+        {
+          "CUSIP": "FN063230T",
+          "Description": "FNMA 30YR 2007 PRODUCTION",
+          "children": [],
+          "Market Value": 7948681.061388302
+        },
+        {
+          "CUSIP": "FN050030U",
+          "Description": "FNMA 30YR 2008 PRODUCTION",
+          "children": [],
+          "Market Value": 34101.78558888176
+        },
+        {
+          "CUSIP": "FN043230V",
+          "Description": "FNMA 30YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN050030V",
+          "Description": "FNMA 30YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN040030V",
+          "Description": "FNMA 30YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 1249032.041676088
+        },
+        {
+          "CUSIP": "FN043230W",
+          "Description": "FNMA 30YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 13849293.44809818
+        },
+        {
+          "CUSIP": "FN053230X",
+          "Description": "FNMA 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 581289.1283523784
+        },
+        {
+          "CUSIP": "FN040030X",
+          "Description": "FNMA 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN050030X",
+          "Description": "FNMA 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 2087104.2391136626
+        },
+        {
+          "CUSIP": "FN033230Z",
+          "Description": "FNMA 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN043230Z",
+          "Description": "FNMA 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 1649442.786648415
+        },
+        {
+          "CUSIP": "FN030030Z",
+          "Description": "FNMA 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 0
+        },
+        {
+          "CUSIP": "FN043230A",
+          "Description": "FNMA 30YR 2013 PRODUCTION",
+          "children": [],
+          "Market Value": 17723833.19376094
+        },
+        {
+          "CUSIP": "FN043230B",
+          "Description": "FNMA 30YR 2014 PRODUCTION",
+          "children": [],
+          "Market Value": 1665233.887555368
+        },
+        {
+          "CUSIP": "F3030B2XA",
+          "Description": "FNMA 30YR 3% LLB 85K 2013",
+          "children": [],
+          "Market Value": 3549834.536121597
+        },
+        {
+          "CUSIP": "F3030M2XA",
+          "Description": "FNMA 30YR 3% M 100-105 LTV 2013",
+          "children": [],
+          "Market Value": 7020972.744613497
+        },
+        {
+          "CUSIP": "F3030M4XA",
+          "Description": "FNMA 30YR 3% M 90-95 LTV 2013",
+          "children": [],
+          "Market Value": 1410134.810635421
+        },
+        {
+          "CUSIP": "F3030M3XA",
+          "Description": "FNMA 30YR 3% M 95-100 LTV 2013",
+          "children": [],
+          "Market Value": 16119564.71780455
+        },
+        {
+          "CUSIP": "F3030B3XA",
+          "Description": "FNMA 30YR 3% MLB 110K 2013",
+          "children": [],
+          "Market Value": 43389130.52197022
+        },
+        {
+          "CUSIP": "F3030B4XZ",
+          "Description": "FNMA 30YR 3% MLB 125K 2012",
+          "children": [],
+          "Market Value": 2490498.289140406
+        },
+        {
+          "CUSIP": "F3030B4XA",
+          "Description": "FNMA 30YR 3% MLB 125K 2013",
+          "children": [],
+          "Market Value": 16298136.30851925
+        },
+        {
+          "CUSIP": "F3034B5XZ",
+          "Description": "FNMA 30YR 3.5% HLB 150K 2012",
+          "children": [],
+          "Market Value": 3763061.50102391
+        },
+        {
+          "CUSIP": "F3034B5XA",
+          "Description": "FNMA 30YR 3.5% HLB 150K 2013",
+          "children": [],
+          "Market Value": 1337350.569140205
+        },
+        {
+          "CUSIP": "F3034B5XB",
+          "Description": "FNMA 30YR 3.5% HLB 150K 2014",
+          "children": [],
+          "Market Value": 4768562.834509865
+        },
+        {
+          "CUSIP": "F3034B2XZ",
+          "Description": "FNMA 30YR 3.5% LLB 85K 2012",
+          "children": [],
+          "Market Value": 601830.4024096602
+        },
+        {
+          "CUSIP": "F3034B2XA",
+          "Description": "FNMA 30YR 3.5% LLB 85K 2013",
+          "children": [],
+          "Market Value": 8363093.295169313
+        },
+        {
+          "CUSIP": "F3034B2XB",
+          "Description": "FNMA 30YR 3.5% LLB 85K 2014",
+          "children": [],
+          "Market Value": 1213099.170853871
+        },
+        {
+          "CUSIP": "F3034B3XZ",
+          "Description": "FNMA 30YR 3.5% MLB 110K 2012",
+          "children": [],
+          "Market Value": 243036.9535976308
+        },
+        {
+          "CUSIP": "F3034B3XA",
+          "Description": "FNMA 30YR 3.5% MLB 110K 2013",
+          "children": [],
+          "Market Value": 8525986.608590595
+        },
+        {
+          "CUSIP": "F3034B3XB",
+          "Description": "FNMA 30YR 3.5% MLB 110K 2014",
+          "children": [],
+          "Market Value": 2150736.562286695
+        },
+        {
+          "CUSIP": "F3034B4XX",
+          "Description": "FNMA 30YR 3.5% MLB 125K 2011",
+          "children": [],
+          "Market Value": 102918.3280924976
+        },
+        {
+          "CUSIP": "F3034B4XZ",
+          "Description": "FNMA 30YR 3.5% MLB 125K 2012",
+          "children": [],
+          "Market Value": 427972.9714594759
+        },
+        {
+          "CUSIP": "F3034B4XA",
+          "Description": "FNMA 30YR 3.5% MLB 125K 2013",
+          "children": [],
+          "Market Value": 11448629.62112878
+        },
+        {
+          "CUSIP": "F3034B4XB",
+          "Description": "FNMA 30YR 3.5% MLB 125K 2014",
+          "children": [],
+          "Market Value": 104007.7315321317
+        },
+        {
+          "CUSIP": "F3040B2XX",
+          "Description": "FNMA 30YR 4% LLB 85K 2011",
+          "children": [],
+          "Market Value": 5381824.701133695
+        },
+        {
+          "CUSIP": "F3040B2XA",
+          "Description": "FNMA 30YR 4% LLB 85K 2013",
+          "children": [],
+          "Market Value": 15946239.90358565
+        },
+        {
+          "CUSIP": "F3040B2XB",
+          "Description": "FNMA 30YR 4% LLB 85K 2014",
+          "children": [],
+          "Market Value": 33005777.79181289
+        },
+        {
+          "CUSIP": "F3040B3XX",
+          "Description": "FNMA 30YR 4% MLB 110K 2011",
+          "children": [],
+          "Market Value": 2562484.776107724
+        },
+        {
+          "CUSIP": "F3040B3XZ",
+          "Description": "FNMA 30YR 4% MLB 110K 2012",
+          "children": [],
+          "Market Value": 6720007.476797549
+        },
+        {
+          "CUSIP": "F3040B3XA",
+          "Description": "FNMA 30YR 4% MLB 110K 2013",
+          "children": [],
+          "Market Value": 15082974.768601574
+        },
+        {
+          "CUSIP": "F3040B3XB",
+          "Description": "FNMA 30YR 4% MLB 110K 2014",
+          "children": [],
+          "Market Value": 9963718.607345197
+        },
+        {
+          "CUSIP": "F3044FLXX",
+          "Description": "FNMA 30YR 4.5% 100% FL 2011",
+          "children": [],
+          "Market Value": 1385574.880121103
+        },
+        {
+          "CUSIP": "F3044NYXV",
+          "Description": "FNMA 30YR 4.5% 100% NY 2009",
+          "children": [],
+          "Market Value": 548020.779483166
+        },
+        {
+          "CUSIP": "F3044FIXA",
+          "Description": "FNMA 30YR 4.5% FICO <660 2013",
+          "children": [],
+          "Market Value": 3755292.102867209
+        },
+        {
+          "CUSIP": "F3044FIXB",
+          "Description": "FNMA 30YR 4.5% FICO <660 2014",
+          "children": [],
+          "Market Value": 561524.6326113307
+        },
+        {
+          "CUSIP": "F3044B5XA",
+          "Description": "FNMA 30YR 4.5% HLB 150K 2013",
+          "children": [],
+          "Market Value": 2059781.926812137
+        },
+        {
+          "CUSIP": "F3044INXA",
+          "Description": "FNMA 30YR 4.5% Investor 2013",
+          "children": [],
+          "Market Value": 3080516.476974702
+        },
+        {
+          "CUSIP": "F3044INXB",
+          "Description": "FNMA 30YR 4.5% Investor 2014",
+          "children": [],
+          "Market Value": 1750278.749976005
+        },
+        {
+          "CUSIP": "F3044M2XX",
+          "Description": "FNMA 30YR 4.5% M 100-105 LTV 2011",
+          "children": [],
+          "Market Value": 2337970.22299455
+        },
+        {
+          "CUSIP": "F3050B5XP",
+          "Description": "FNMA 30YR 5.0% HLB 150K 2003",
+          "children": [],
+          "Market Value": 8726.851731497109
+        },
+        {
+          "CUSIP": "F3060B5XT",
+          "Description": "FNMA 30YR 6.0% HLB 150K 2007",
+          "children": [],
+          "Market Value": 1864747.301126526
+        },
+        {
+          "CUSIP": "F3060B6XS",
+          "Description": "FNMA 30YR 6.0% SHLB 175K 2006",
+          "children": [],
+          "Market Value": 423110.0473330992
+        },
+        {
+          "CUSIP": "F3060B6XT",
+          "Description": "FNMA 30YR 6.0% SHLB 175K 2007",
+          "children": [],
+          "Market Value": 1205283.214301258
+        },
+        {
+          "CUSIP": "GN073230K",
+          "Description": "GNMA  30YR 1999 PRODUCTION",
+          "children": [],
+          "Market Value": 506.4604001193433
+        },
+        {
+          "CUSIP": "GN053230M",
+          "Description": "GNMA  30YR 2001 PRODUCTION",
+          "children": [],
+          "Market Value": 8137.715192538156
+        },
+        {
+          "CUSIP": "GN053230P",
+          "Description": "GNMA  30YR 2003 PRODUCTION",
+          "children": [],
+          "Market Value": 7434.586849898028
+        },
+        {
+          "CUSIP": "GN090030G",
+          "Description": "GNMA  30YR PRE-1994 PRODUCTION",
+          "children": [],
+          "Market Value": 461.9933259869424
+        },
+        {
+          "CUSIP": "BRSPFX0G1",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -11328037.5
+        },
+        {
+          "CUSIP": "BRSPMXPW1",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 3712763.541666667
+        },
+        {
+          "CUSIP": "BRSPMXPY7",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 2767013.888888889
+        },
+        {
+          "CUSIP": "BRSPC2WD4",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -10965427.08333333
+        },
+        {
+          "CUSIP": "BRSPC33C6",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 9178921.875
+        },
+        {
+          "CUSIP": "BRSPBRKV3",
+          "Description": "GNMA  30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 9725119.444444444
+        },
+        {
+          "CUSIP": "GN060030S",
+          "Description": "GNMA 30YR 2006 PRODUCTION",
+          "children": [],
+          "Market Value": 345473.5182654122
+        },
+        {
+          "CUSIP": "GN050030S",
+          "Description": "GNMA 30YR 2006 PRODUCTION",
+          "children": [],
+          "Market Value": 735679.088701288
+        },
+        {
+          "CUSIP": "GN050030V",
+          "Description": "GNMA 30YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 4567399.843375502
+        },
+        {
+          "CUSIP": "GN043230W",
+          "Description": "GNMA 30YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 25813831.26349182
+        },
+        {
+          "CUSIP": "GN033230Z",
+          "Description": "GNMA 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 4017494.321939806
+        },
+        {
+          "CUSIP": "GN033230A",
+          "Description": "GNMA 30YR 2013 PRODUCTION",
+          "children": [],
+          "Market Value": 11696917.23004206
+        },
+        {
+          "CUSIP": "G2050030V",
+          "Description": "GNMA2 30YR 2009 PRODUCTION",
+          "children": [],
+          "Market Value": 815060.6558139258
+        },
+        {
+          "CUSIP": "G2040030W",
+          "Description": "GNMA2 30YR 2010 PRODUCTION",
+          "children": [],
+          "Market Value": 7521275.802564763
+        },
+        {
+          "CUSIP": "G2040030X",
+          "Description": "GNMA2 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 52163.60918399423
+        },
+        {
+          "CUSIP": "G2043230X",
+          "Description": "GNMA2 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 27078991.78077609
+        },
+        {
+          "CUSIP": "G2050030X",
+          "Description": "GNMA2 30YR 2011 PRODUCTION",
+          "children": [],
+          "Market Value": 13838711.20956935
+        },
+        {
+          "CUSIP": "G2040030Z",
+          "Description": "GNMA2 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 308587.0114427479
+        },
+        {
+          "CUSIP": "G2033230Z",
+          "Description": "GNMA2 30YR 2012 PRODUCTION",
+          "children": [],
+          "Market Value": 1016186.263352297
+        },
+        {
+          "CUSIP": "G2033230A",
+          "Description": "GNMA2 30YR 2013 PRODUCTION",
+          "children": [],
+          "Market Value": 408793.77518894
+        },
+        {
+          "CUSIP": "G2040030B",
+          "Description": "GNMA2 30YR 2014 PRODUCTION",
+          "children": [],
+          "Market Value": 113035745.33148326
+        },
+        {
+          "CUSIP": "G2033230B",
+          "Description": "GNMA2 30YR 2014 PRODUCTION",
+          "children": [],
+          "Market Value": 109406067.3852098
+        },
+        {
+          "CUSIP": "BRSPFX1F2",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 2175062.5
+        },
+        {
+          "CUSIP": "BRSND5U01",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -85256879.16666666
+        },
+        {
+          "CUSIP": "BRSPFX1A3",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 2131878.472222222
+        },
+        {
+          "CUSIP": "BRSPARP72",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -5338205.4712
+        },
+        {
+          "CUSIP": "BRSPPD132",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -332369.7916666667
+        },
+        {
+          "CUSIP": "BRSPQ1GB3",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 4928351.388888889
+        },
+        {
+          "CUSIP": "BRSPFX139",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": 32933298.71406667
+        },
+        {
+          "CUSIP": "BRSP6FSE5",
+          "Description": "GNMA2 30YR TBA(REG C)",
+          "children": [],
+          "Market Value": -61356990.27777781
+        },
+        {
+          "CUSIP": "362294JJ0",
+          "Description": "USGI",
+          "children": [],
+          "Market Value": 51653.2899360529
+        }
+      ],
+      "Description": "MBS",
+      "Market Value": 801344609.9770135
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "Z91HBFU64",
+          "Description": "DEC14 EDZ5 C @ 99",
+          "children": [],
+          "Market Value": -663468.75
+        },
+        {
+          "CUSIP": "Z91HBG1J6",
+          "Description": "DEC14 EDZ6 P @ 97.5",
+          "children": [],
+          "Market Value": -1087.5
+        },
+        {
+          "CUSIP": "Z91HBG1P2",
+          "Description": "DEC14 EDZ6 P @ 97.875",
+          "children": [],
+          "Market Value": 5075.000000000001
+        },
+        {
+          "CUSIP": "Z918CQMC5",
+          "Description": "MAR15 EDH5 P @ 99.625",
+          "children": [],
+          "Market Value": 61600.00000000001
+        },
+        {
+          "CUSIP": "Z91JE16D0",
+          "Description": "MAR15 EDH6 C @ 99",
+          "children": [],
+          "Market Value": -4987.5
+        },
+        {
+          "CUSIP": "Z91JE15J8",
+          "Description": "MAR15 EDH6 P @ 98.125",
+          "children": [],
+          "Market Value": -1900
+        },
+        {
+          "CUSIP": "Z91JE15Q2",
+          "Description": "MAR15 EDH6 P @ 98.5",
+          "children": [],
+          "Market Value": 412031.25
+        },
+        {
+          "CUSIP": "Z91JE15S8",
+          "Description": "MAR15 EDH6 P @ 98.625",
+          "children": [],
+          "Market Value": 8787.5
+        },
+        {
+          "CUSIP": "Z91LVKS08",
+          "Description": "NOV14 TYZ4 C @ 125.5",
+          "children": [],
+          "Market Value": -11562.5
+        },
+        {
+          "CUSIP": "Z91LVKRZ2",
+          "Description": "NOV14 TYZ4 P @ 124",
+          "children": [],
+          "Market Value": 312.5
+        }
+      ],
+      "Description": "OPTION",
+      "Market Value": -195200
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "BRSJX1Q77",
+          "Description": "CDS: (CMBX.NA.3.AM)",
+          "children": [],
+          "Market Value": -178895.8335
+        },
+        {
+          "CUSIP": "BRSK0L116",
+          "Description": "CDS: (CMBX.NA.3.AM)",
+          "children": [],
+          "Market Value": -14311.66668
+        },
+        {
+          "CUSIP": "BRSK0L0V1",
+          "Description": "CDS: (CMBX.NA.3.AM)",
+          "children": [],
+          "Market Value": -35779.1667
+        },
+        {
+          "CUSIP": "BRSG39FW6",
+          "Description": "CDS: (CMBX.NA.4.AM)",
+          "children": [],
+          "Market Value": -80747.333394
+        },
+        {
+          "CUSIP": "Z91JEQK49",
+          "Description": "CME: (CDX.NA.IG.22.V1)",
+          "children": [],
+          "Market Value": -889914.2252000001
+        },
+        {
+          "CUSIP": "BRSQ3RL15",
+          "Description": "FSWP: MXN 4.400000 06-OCT-2016",
+          "children": [],
+          "Market Value": -1771.686010415011
+        },
+        {
+          "CUSIP": "BRSQ3RJ42",
+          "Description": "FSWP: MXN 4.420000 06-OCT-2016",
+          "children": [],
+          "Market Value": -1201.3638090445
+        },
+        {
+          "CUSIP": "Z91JEDGY7",
+          "Description": "ICE: (ITRAXX.EUR.21.V1)",
+          "children": [],
+          "Market Value": -436145.950475532
+        },
+        {
+          "CUSIP": "BRSQ0M7P2",
+          "Description": "SCDS: (ABXCN)",
+          "children": [],
+          "Market Value": -109870.8753699159
+        },
+        {
+          "CUSIP": "BRSMT6FY7",
+          "Description": "SCDS: (ABXCN)",
+          "children": [],
+          "Market Value": -183998.3719380014
+        },
+        {
+          "CUSIP": "BRSPTND90",
+          "Description": "SCDS: (MEX)",
+          "children": [],
+          "Market Value": -17125.4364470147
+        },
+        {
+          "CUSIP": "BRSMZVTV6",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -23059.51337675202
+        },
+        {
+          "CUSIP": "BRSQ1X0C3",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -310281.1290054887
+        },
+        {
+          "CUSIP": "BRSPWP392",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -57496.54062782718
+        },
+        {
+          "CUSIP": "BRSMZVPD0",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -146658.5050761429
+        },
+        {
+          "CUSIP": "BRSPX0RL3",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -57496.54062782718
+        },
+        {
+          "CUSIP": "BRSPUY6V3",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -133641.684777645
+        },
+        {
+          "CUSIP": "BRSPWQ739",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -57496.54062782718
+        },
+        {
+          "CUSIP": "BRSQ00FF3",
+          "Description": "SCDS: (RIG)",
+          "children": [],
+          "Market Value": -169666.834587271
+        },
+        {
+          "CUSIP": "BRSP1QJS5",
+          "Description": "SCDS: (VLO)",
+          "children": [],
+          "Market Value": -6520.298555782695
+        },
+        {
+          "CUSIP": "BRSPFYC19",
+          "Description": "SCDS: (VLO)",
+          "children": [],
+          "Market Value": -406.7922450131806
+        },
+        {
+          "CUSIP": "BRSP3WB90",
+          "Description": "SCDS: (VLO)",
+          "children": [],
+          "Market Value": -1762.68891081997
+        },
+        {
+          "CUSIP": "BRSPJERL9",
+          "Description": "SCDS: (VLO)",
+          "children": [],
+          "Market Value": -1451.457975478172
+        },
+        {
+          "CUSIP": "BRSP29417",
+          "Description": "SCDS: (VLO)",
+          "children": [],
+          "Market Value": -725.9265725438067
+        },
+        {
+          "CUSIP": "BRSN8S5F2",
+          "Description": "SWP: BRL 11.870000 04-JAN-2016",
+          "children": [],
+          "Market Value": 16008.55729686455
+        },
+        {
+          "CUSIP": "BRSPU8JH7",
+          "Description": "SWP: CZK 0.870000 19-SEP-2021",
+          "children": [],
+          "Market Value": -19875.71221901401
+        },
+        {
+          "CUSIP": "BRSPUTNP8",
+          "Description": "SWP: CZK 0.890000 22-SEP-2021",
+          "children": [],
+          "Market Value": -6524.840469079258
+        },
+        {
+          "CUSIP": "BRSQ48969",
+          "Description": "SWP: MXN 3.930000 07-OCT-2016",
+          "children": [],
+          "Market Value": -3040.069274652853
+        },
+        {
+          "CUSIP": "BRSPPCA00",
+          "Description": "SWP: MXN 5.990000 26-AUG-2024",
+          "children": [],
+          "Market Value": -8970.84626701642
+        },
+        {
+          "CUSIP": "BRSPBTYD4",
+          "Description": "SWP: MXN 6.185000 25-JUL-2024",
+          "children": [],
+          "Market Value": 3239.219242223861
+        },
+        {
+          "CUSIP": "BRSPVBS22",
+          "Description": "SWP: MXN 6.260000 9-SEP-2024",
+          "children": [],
+          "Market Value": 6216.08252297639
+        },
+        {
+          "CUSIP": "BRSQ1XP69",
+          "Description": "SWP: MXN 6.330000 23-SEP-2024",
+          "children": [],
+          "Market Value": 9501.960092338864
+        },
+        {
+          "CUSIP": "BRSQ1XPJ1",
+          "Description": "SWP: MXN 6.340500 23-SEP-2024",
+          "children": [],
+          "Market Value": 13435.93094473382
+        },
+        {
+          "CUSIP": "BRSPZXHK2",
+          "Description": "SWP: MXN 6.365000 18-SEP-2024",
+          "children": [],
+          "Market Value": 8049.874365669336
+        },
+        {
+          "CUSIP": "BRSPY9WH6",
+          "Description": "SWP: MXN 6.410000 16-SEP-2024",
+          "children": [],
+          "Market Value": 20465.45553876694
+        },
+        {
+          "CUSIP": "BRSPYA484",
+          "Description": "SWP: MXN 6.423000 16-SEP-2024",
+          "children": [],
+          "Market Value": 10795.19050219596
+        },
+        {
+          "CUSIP": "BRSPZ36R5",
+          "Description": "SWP: MXN 6.455000 17-SEP-2024",
+          "children": [],
+          "Market Value": 18115.39235528349
+        },
+        {
+          "CUSIP": "BRSP4A511",
+          "Description": "SWP: OIS 10.890000 04-JAN-2016",
+          "children": [],
+          "Market Value": -33536.61921085865
+        },
+        {
+          "CUSIP": "BRSQ3R3L1",
+          "Description": "SWP: OIS 10.960000 02-JAN-2015",
+          "children": [],
+          "Market Value": 1463.583781765861
+        },
+        {
+          "CUSIP": "BRSQ1YTP1",
+          "Description": "SWP: OIS 10.990000 02-JAN-2015",
+          "children": [],
+          "Market Value": -1388.399805682149
+        },
+        {
+          "CUSIP": "BRSQ1YTZ9",
+          "Description": "SWP: OIS 10.990000 02-JAN-2015",
+          "children": [],
+          "Market Value": -1431.58567255169
+        },
+        {
+          "CUSIP": "BRSP9A7J5",
+          "Description": "SWP: OIS 11.115000 04-JAN-2016",
+          "children": [],
+          "Market Value": -31234.20505259593
+        },
+        {
+          "CUSIP": "BRSP8FXR8",
+          "Description": "SWP: OIS 11.120000 04-JAN-2016",
+          "children": [],
+          "Market Value": -6770.755761147207
+        },
+        {
+          "CUSIP": "BRSP6WYF8",
+          "Description": "SWP: OIS 11.170000 02-JAN-2017",
+          "children": [],
+          "Market Value": 23836.87069548911
+        },
+        {
+          "CUSIP": "BRSNRH1N2",
+          "Description": "SWP: OIS 11.220000 04-JAN-2016",
+          "children": [],
+          "Market Value": -20075.65158736802
+        },
+        {
+          "CUSIP": "BRSPNW3R7",
+          "Description": "SWP: OIS 11.255000 04-JAN-2016",
+          "children": [],
+          "Market Value": -61582.64553724958
+        },
+        {
+          "CUSIP": "BRSPDF0L1",
+          "Description": "SWP: OIS 11.360000 04-JAN-2016",
+          "children": [],
+          "Market Value": -16563.42114561874
+        },
+        {
+          "CUSIP": "BRSPBUBZ7",
+          "Description": "SWP: OIS 11.40500 04-JAN-2016",
+          "children": [],
+          "Market Value": -19275.19608479855
+        },
+        {
+          "CUSIP": "BRSNYPKZ8",
+          "Description": "SWP: OIS 11.490000 02-JAN-2017",
+          "children": [],
+          "Market Value": -12459.28194751438
+        },
+        {
+          "CUSIP": "BRSPXT9D8",
+          "Description": "SWP: OIS 11.630000 04-JAN-2016",
+          "children": [],
+          "Market Value": -9579.325745387254
+        },
+        {
+          "CUSIP": "BRSPXNDC8",
+          "Description": "SWP: OIS 11.65 04-JAN-2016",
+          "children": [],
+          "Market Value": -49135.88910258638
+        },
+        {
+          "CUSIP": "BRSPVGE42",
+          "Description": "SWP: OIS 11.680000 04-JAN-2016",
+          "children": [],
+          "Market Value": -6956.027140507173
+        },
+        {
+          "CUSIP": "BRSNA8X62",
+          "Description": "SWP: OIS 11.75500 04-JAN-2016",
+          "children": [],
+          "Market Value": 7529.909192230154
+        },
+        {
+          "CUSIP": "BRSQ2HXS6",
+          "Description": "SWP: OIS 11.760000 04-JAN-2016",
+          "children": [],
+          "Market Value": -9618.969548720655
+        },
+        {
+          "CUSIP": "BRSNXGCE5",
+          "Description": "SWP: OIS 11.800000 04-JAN-2016",
+          "children": [],
+          "Market Value": -5426.024622923612
+        },
+        {
+          "CUSIP": "BRSN24WB0",
+          "Description": "SWP: OIS 11.910000 04-JAN-2016",
+          "children": [],
+          "Market Value": 8482.318314923727
+        },
+        {
+          "CUSIP": "BRSLC8SZ6",
+          "Description": "SWP: USD 0.647500 26-NOV-2016",
+          "children": [],
+          "Market Value": 991.2295516486
+        },
+        {
+          "CUSIP": "BRSPPBXW7",
+          "Description": "SWP: USD 2.540000 09-SEP-2024",
+          "children": [],
+          "Market Value": -6922.142515478651
+        },
+        {
+          "CUSIP": "BRSPBT868",
+          "Description": "SWP: USD 2.611000 08-AUG-2024",
+          "children": [],
+          "Market Value": -33426.380465616
+        },
+        {
+          "CUSIP": "BRSQ1WRK8",
+          "Description": "SWP: USD 2.620000 07-OCT-2024",
+          "children": [],
+          "Market Value": -12390.8828804704
+        },
+        {
+          "CUSIP": "BRSQ1XCN6",
+          "Description": "SWP: USD 2.620500 07-OCT-2024",
+          "children": [],
+          "Market Value": -16571.87501386956
+        },
+        {
+          "CUSIP": "BRSPZXHN6",
+          "Description": "SWP: USD 2.635000 02-OCT-2024",
+          "children": [],
+          "Market Value": -9281.50797706107
+        },
+        {
+          "CUSIP": "BRSPZ36A2",
+          "Description": "SWP: USD 2.635000 1-OCT-2024",
+          "children": [],
+          "Market Value": -13913.84675072876
+        },
+        {
+          "CUSIP": "BRSPY9WB9",
+          "Description": "SWP: USD 2.660000 30-SEP-2024",
+          "children": [],
+          "Market Value": -21048.71098148262
+        },
+        {
+          "CUSIP": "BRSPYA427",
+          "Description": "SWP: USD 2.663000 30-SEPT-2024",
+          "children": [],
+          "Market Value": -10661.82495655764
+        },
+        {
+          "CUSIP": "BRSPVBNY7",
+          "Description": "SWP: USD 2.745000 23-SEP-2024",
+          "children": [],
+          "Market Value": -21750.4817644491
+        },
+        {
+          "CUSIP": "BRSC3PX82",
+          "Description": "SWP: USD 3.267000 16-MAY-2021",
+          "children": [],
+          "Market Value": -774581.8650319858
+        },
+        {
+          "CUSIP": "BRSPXN4Q7",
+          "Description": "SWP: ZAR 6.460000 29-SEP-2015",
+          "children": [],
+          "Market Value": -742.2351709351851
+        },
+        {
+          "CUSIP": "BRSPY9222",
+          "Description": "SWP: ZAR 6.525000 26-SEP-2015",
+          "children": [],
+          "Market Value": 9741.374939935977
+        },
+        {
+          "CUSIP": "BRSPXN8B6",
+          "Description": "SWP: ZAR 6.850000 29-SEP-2016",
+          "children": [],
+          "Market Value": 1976.35295462245
+        },
+        {
+          "CUSIP": "BRSPY9255",
+          "Description": "SWP: ZAR 6.950000 26-SEP-2016",
+          "children": [],
+          "Market Value": -14902.36823694062
+        },
+        {
+          "CUSIP": "BRSQ43ZZ7",
+          "Description": "SWP: ZAR 7.090000 09-OCT-2017",
+          "children": [],
+          "Market Value": -5457.182064668635
+        },
+        {
+          "CUSIP": "BRSQ47NV0",
+          "Description": "SWP: ZAR 7.130000 09-OCT-2017",
+          "children": [],
+          "Market Value": -523.2632112526162
+        }
+      ],
+      "Description": "SWAP",
+      "Market Value": -4022197.0934154433
+    },
+    {
+      "CUSIP": null,
+      
+      "children": [
+        {
+          "CUSIP": "BRSNPY3X3",
+          "Description": "1.5YR RTP 0.750 16-DEC-2014",
+          "children": [],
+          "Market Value": 3627.107482207867
+        },
+        {
+          "CUSIP": "BRSNPFPU6",
+          "Description": "1.5YR RTP 1.100 15-DEC-2014",
+          "children": [],
+          "Market Value": -0.0000094065
+        },
+        {
+          "CUSIP": "BRSNPY4Y0",
+          "Description": "1.5YR RTP 1.100 16-DEC-2014",
+          "children": [],
+          "Market Value": -0.0000018449
+        },
+        {
+          "CUSIP": "BRSPC7253",
+          "Description": "10Y RTP 2.700000 07-NOV-2014 10",
+          "children": [],
+          "Market Value": 64334.12412140627
+        },
+        {
+          "CUSIP": "BRSQ01HY8",
+          "Description": "10Y RTP 3.000000 30-SEP-2015 10",
+          "children": [],
+          "Market Value": -954067.8085832177
+        },
+        {
+          "CUSIP": "BRSQ01E39",
+          "Description": "10Y RTR 3.000000 30-SEP-2015 10",
+          "children": [],
+          "Market Value": -1992283.893647436
+        },
+        {
+          "CUSIP": "BRSP6WKS5",
+          "Description": "1Y RTP 12.250000 01-JUL-2015 1",
+          "children": [],
+          "Market Value": -30133.82132643712
+        },
+        {
+          "CUSIP": "BRSPXQMD9",
+          "Description": "1Y RTP 12.300000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": 27318.39329708327
+        },
+        {
+          "CUSIP": "BRSPS9J21",
+          "Description": "1Y RTP 12.300000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": -16385.28131346006
+        },
+        {
+          "CUSIP": "BRSN246Z6",
+          "Description": "1Y RTP 14.000000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": -715.6037181533615
+        },
+        {
+          "CUSIP": "BRSP6WLV7",
+          "Description": "1Y RTR 10.600000 01-JUL-2015 1",
+          "children": [],
+          "Market Value": -16008.45222765812
+        },
+        {
+          "CUSIP": "BRSP7RS32",
+          "Description": "1Y RTR 10.600000 01-JUL-2015 1",
+          "children": [],
+          "Market Value": -5723.189826488941
+        },
+        {
+          "CUSIP": "BRSPS9H56",
+          "Description": "1Y RTR 10.900000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": -1857.537849457907
+        },
+        {
+          "CUSIP": "BRSQ3JUT2",
+          "Description": "1Y RTR 11.250000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": -9066.403449491074
+        },
+        {
+          "CUSIP": "BRSP6WLG0",
+          "Description": "1Y RTR 11.400000 01-JUL-2015 1",
+          "children": [],
+          "Market Value": 35006.8653993242
+        },
+        {
+          "CUSIP": "BRSP7RRZ2",
+          "Description": "1Y RTR 11.400000 01-JUL-2015 1",
+          "children": [],
+          "Market Value": 12515.38734633803
+        },
+        {
+          "CUSIP": "BRSPS9F17",
+          "Description": "1Y RTR 11.500000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": 5566.815710110077
+        },
+        {
+          "CUSIP": "BRSQ3JUP0",
+          "Description": "1Y RTR 11.750000 02-JAN-2015 1",
+          "children": [],
+          "Market Value": 10633.98474263562
+        },
+        {
+          "CUSIP": "BRSNFQCV5",
+          "Description": "2Y RTP 12.500000 02-JAN-2015 2",
+          "children": [],
+          "Market Value": -6057.526248719916
+        },
+        {
+          "CUSIP": "BRSNM11C6",
+          "Description": "2Y RTR 11.000000 02-JAN-2015 2",
+          "children": [],
+          "Market Value": -2396.454425879475
+        },
+        {
+          "CUSIP": "BRSNFQ519",
+          "Description": "2Y RTR 11.500000 02-JAN-2015 2",
+          "children": [],
+          "Market Value": -7053.249064574306
+        },
+        {
+          "CUSIP": "BRSNG6LG1",
+          "Description": "2Y RTR 11.800000 02-JAN-2015 2",
+          "children": [],
+          "Market Value": 8264.823079085387
+        },
+        {
+          "CUSIP": "BRSNGQR89",
+          "Description": "2Y RTR 11.800000 02-JAN-2015 2",
+          "children": [],
+          "Market Value": 6637.759790460002
+        },
+        {
+          "CUSIP": "BRSNFQ5K7",
+          "Description": "2Y RTR 12 02-JAN-2015 2",
+          "children": [],
+          "Market Value": 17350.9197225896
+        },
+        {
+          "CUSIP": "BRSQ01DZ9",
+          "Description": "5Y RTP 2.525000 30-SEP-2015 5",
+          "children": [],
+          "Market Value": 947066.5739796072
+        },
+        {
+          "CUSIP": "BRSQ01DV8",
+          "Description": "5Y RTR 2.525000 30-SEP-2015 5",
+          "children": [],
+          "Market Value": 2131913.319761969
+        }
+      ],
+      "Description": "SYNTH",
+      "Market Value": 228486.85274059098
+    }
+  ],
+  "Market Value": 2939410783.880495,
+  "Description": "TOTAL"
+}

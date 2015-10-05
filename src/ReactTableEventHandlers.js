@@ -30,7 +30,13 @@ function ReactTableGetInitialState() {
      * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
-    initialState.rootNode = createNewRootNode(this.props, initialState);
+    if( this.props.dataAsTree && this.props.dataAsTreeTitleKey ) {
+        this.props.data = [];
+        initialState.rootNode = createNewNodeFromStrucutre(this.props.dataAsTree, this.props.dataAsTreeTitleKey);
+    }
+    else
+        initialState.rootNode = createNewRootNode(this.props, initialState);
+
     if (initialState.sortBy.length > 0)
         initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
 
