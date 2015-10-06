@@ -3,9 +3,13 @@ $(function () {
     $("#add").on('click', function () {
         table.addColumn({colTag: "country", text: "Country"}, 1);
     });
-    $.get('pre_structured_data.json').success(function (data) {
+    $.get('pre_structured_data2.json').success(function (data) {
         const options = {
             columnDefs: [
+                {
+                    colTag: "title",
+                    "text": "title"
+                },
                 {
                     colTag: "Description",
                     "text": "Description"
@@ -17,11 +21,11 @@ $(function () {
                 {
                     colTag: "Market Value",
                     "text": "Market Value"
-                },
+                }
             ],
             dataAsTree: data,
-            dataAsTreeTitleKey: "Description",
-            subtotalBy: [{colTag: "Description"}]
+            dataAsTreeTitleKey: "title",
+            subtotalBy: [{colTag: "title"}]
         };
         table = React.render(React.createElement(ReactTable, options), document.getElementById("table"));
     });
