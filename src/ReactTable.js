@@ -115,7 +115,7 @@ var ReactTable = React.createClass({
         while (sortBy.length > 0)
             sortBy.pop();
         newState.sortBy = sortBy;
-        newState.rootNode = createNewRootNode(this.props, this.state);
+        newState.rootNode = getRootNodeGivenProps(this.props, this.state);
         this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
