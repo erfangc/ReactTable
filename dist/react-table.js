@@ -1954,7 +1954,7 @@ function adjustHeaders(adjustCount) {
 
             if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
                 currentHeader.css("width", headerTextWidthWithPadding + "px");
-                $("#" + id).find("tr").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+                $("#" + id).find("tr:eq(0)").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
                 if (counter != (grandTotalFooterCells.length - 1)) {
                     $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
                 }
