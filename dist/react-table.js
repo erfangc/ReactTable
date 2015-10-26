@@ -1,4 +1,3 @@
-
 /**
  * Construct Look and Feel object with instructions on how to display cell content
  * @param columnDef
@@ -31,8 +30,10 @@ function buildLAFConfigObject(columnDef) {
  */
 function computeCellAlignment(alignment, row, columnDef) {
     // force right alignment for summary level numbers
-    if (!row.isDetail && !isNaN(row[columnDef.colTag]))
-        return "right";
+    if (row[columnDef.colTag]) {
+        if (!row.isDetail && (!isNaN(row[columnDef.colTag]) || !isNaN((row[columnDef.colTag]).replace(/,/g, ""))))
+            return "right";
+    }
 
     // default alignment
     return alignment;
@@ -48,7 +49,7 @@ function computeCellAlignment(alignment, row, columnDef) {
  */
 function buildCellLookAndFeel(columnDef, row) {
     var results = {classes: {}, styles: {}, value: {}};
-    var value = row[columnDef.colTag]  || ""; // avoid undefined
+    var value = row[columnDef.colTag] || ""; // avoid undefined
 
     columnDef.formatConfig = columnDef.formatConfig != null ? columnDef.formatConfig : buildLAFConfigObject(columnDef);
     var formatConfig = columnDef.formatConfig;
@@ -785,7 +786,7 @@ function _weightedAverage(options) {
 }
 
 function _count(options) {
-    return options.data.length || 0;
+    return applyThousandSeparator(options.data.length) || 0;
 }
 
 /**
@@ -816,13 +817,13 @@ function _countDistinct(options) {
         if (allData[j] !== "" && allData[j] !== null && uniqData.indexOf(allData[j]) == -1)
             uniqData.push(allData[j]);
     }
-    return uniqData.length == 1 ? uniqData[0] : uniqData.length;
+    return uniqData.length == 1 ? uniqData[0] : applyThousandSeparator(uniqData.length);
 }
 
 function _countAndDistinctPureJS(options) {
     var count = _count(options);
     var distinctCount = _countDistinct(options);
-    return count == 1 ? distinctCount : "(" + distinctCount + "/" + count + ")"
+    return count == 1 ? distinctCount : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
 function _countAndDistinctUnderscoreJS(options) {
@@ -833,7 +834,7 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : uniqData.length) + "/" + data.length + ")";
+    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" +  applyThousandSeparator(data.length) + ")";
 }
 
 /**
