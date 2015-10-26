@@ -1938,7 +1938,8 @@ function adjustHeaders(adjustCount) {
     var table = this;
     headerElems.each(function () {
         var currentHeader = $(this);
-        if (counter == headerElems.length - 1 && !table.props.disableAddColumn) {
+        //if (counter == headerElems.length - 1 && !table.props.disableAddColumn) {
+        if (false) {
             // give a space for plus column sign
             var lastColumnWidth = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
             if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {

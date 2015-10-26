@@ -682,40 +682,29 @@ function adjustHeaders(adjustCount) {
     var table = this;
     headerElems.each(function () {
         var currentHeader = $(this);
-        if (counter == headerElems.length - 1 && !table.props.disableAddColumn) {
-            // give a space for plus column sign
-            var lastColumnWidth = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-            if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
-                lastColumnWidth += 1;
-            }
-            $(grandTotalFooterCells[counter]).css("width", (lastColumnWidth + 2) + "px");
-            lastColumnWidth -= 21; // minus plus sign width
-            currentHeader.css("width", lastColumnWidth + "px");
-        } else {
-            var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
-            var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
-            headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
+        var headerTextWidthWithPadding = currentHeader.find(".rt-header-anchor-text").width() + padding;
+        var footerCellContentWidth = $(grandTotalFooterCellContents[counter]).width() + 10; // 10 is padding
+        headerTextWidthWithPadding = footerCellContentWidth > headerTextWidthWithPadding ? footerCellContentWidth : headerTextWidthWithPadding;
 
-            if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
-                currentHeader.css("width", headerTextWidthWithPadding + "px");
-                $("#" + id).find("tr:eq(0)").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
-                if (counter != (grandTotalFooterCells.length - 1)) {
-                    $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
-                }
-                adjustedSomething = true;
+        if (currentHeader.width() > 0 && headerTextWidthWithPadding > currentHeader.width() + 1) {
+            currentHeader.css("width", headerTextWidthWithPadding + "px");
+            $("#" + id).find("tr:eq(0)").find("td:eq(" + counter + ")").css("min-width", (headerTextWidthWithPadding) + "px");
+            if (counter != (grandTotalFooterCells.length - 1)) {
+                $(grandTotalFooterCells[counter]).css("width", (headerTextWidthWithPadding) + "px");
             }
-
-            var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
-            if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
-                width += 1;
-            }
-            if (width !== currentHeader.width()) {
-                currentHeader.width(width);
-                $(grandTotalFooterCells[counter]).width(width);
-                adjustedSomething = true;
-            }
-            counter++;
+            adjustedSomething = true;
         }
+
+        var width = $('#' + id + ' .rt-table tr:first td:eq(' + counter + ')').outerWidth() - 1;
+        if (counter == 0 && parseInt(headerElems.first().css("border-right")) == 1) {
+            width += 1;
+        }
+        if (width !== currentHeader.width()) {
+            currentHeader.width(width);
+            $(grandTotalFooterCells[counter]).width(width);
+            adjustedSomething = true;
+        }
+        counter++;
     });
 
     if (!adjustedSomething)
