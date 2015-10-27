@@ -24,6 +24,7 @@ function ReactTableGetInitialState() {
         extraStyle: {}, // TODO document use
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [] // TODO same as above
+
     };
 
     /**

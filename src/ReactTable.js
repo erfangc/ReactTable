@@ -44,6 +44,8 @@ var ReactTable = React.createClass({
         disableInfiniteScrolling: React.PropTypes.bool,
         disableExporting: React.PropTypes.bool,
         disableGrandTotal: React.PropTypes.bool,
+        enableScrollPage: React.PropTypes.bool,
+        hideSubtotalColumn: React.PropTypes.bool,
         /**
          * misc props
          */
@@ -392,7 +394,7 @@ var ReactTable = React.createClass({
             selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0);
         // maxRows is referenced later during event handling to determine upperVisualBound
-        this.state.maxRows = rasterizedData.length;
+        this.state.maxRows = rasterizedData.length - 1;
 
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
@@ -407,6 +409,7 @@ var ReactTable = React.createClass({
             rowsToDisplay = rasterizedData.slice(this.state.lowerVisualBound, this.state.upperVisualBound + 1).map(rowMapper, this);
 
         var headers = buildHeaders(this);
+        this.state.rowNumToDisplay = rowsToDisplay.length;
 
         var tableBodyContainerStyle = {};
         if (this.props.height && parseInt(this.props.height) > 0) {
@@ -419,8 +422,8 @@ var ReactTable = React.createClass({
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div style={tableBodyContainerStyle} className="rt-scrollable">
-                    <table className="rt-table"  >
+                <div ref="scrollBody" style={tableBodyContainerStyle} className="rt-scrollable" onWheel={this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}>
+                    <table ref="tableBody" className="rt-table"  >
                         <tbody>
                             {rowsToDisplay}
                         </tbody>
@@ -440,16 +443,27 @@ var Row = React.createClass({
     render: function () {
         const cx = React.addons.classSet;
         var cells = [];
+        var table = this.props.table;
         var isGrandTotal = false;
         if (!this.props.data.isDetail && this.props.data.sectorPath.length == 1 && this.props.data.sectorPath[0] == 'Grand Total') {
             isGrandTotal = true;
         }
 
         for (var i = 0; i < this.props.columnDefs.length; i++) {
+            var columnDef = this.props.columnDefs[i];
+
+            if (table.props.hideSubtotalColumn) {
+                var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
+                    return subtotalColumn.colTag === columnDef.colTag;
+                });
+                if (subtotalled) {
+                    continue;
+                }
+            }
+
             if (i === 0 && !this.props.data.isDetail) {
                 cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
             } else {
-                var columnDef = this.props.columnDefs[i];
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
                 var classes = cx(displayInstructions.classes);
                 // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
@@ -643,6 +657,7 @@ function rowMapper(row) {
         filtering={this.props.filtering}
         handleColumnFilter={this.handleColumnFilter.bind}
         cellRightClickMenu={this.props.cellRightClickMenu}
+        table={this}
     />);
 }
 
@@ -659,7 +674,7 @@ function docClick(e) {
 }
 
 function adjustHeaders(adjustCount) {
-    if (this.state.maxRows == 1) {
+    if (this.state.maxRows == 1 || this.state.rowNumToDisplay == 0) {
         //if table has no data, don't change column width
         return;
     }
@@ -917,4 +932,47 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
             {menuItems}
         </div>
     )
+}
+
+/**
+ * in pagination mode, scroll wheel to change page.
+ * @param paginationAttr
+ * @param event
+ */
+function scrollPage(paginationAttr, event) {
+    event.stopPropagation();
+    var $scrollBody = $(this.refs.scrollBody.getDOMNode());
+    var $tableBody = $(this.refs.tableBody.getDOMNode());
+    var scrollTop = $scrollBody.scrollTop();
+    var scrollBodyheight = $scrollBody.height();
+    var tableHeight = $tableBody.height();
+    var scrollDown = event.deltaY > 0;
+
+    if (scrollTop + scrollBodyheight >= tableHeight && scrollDown || scrollTop === 0 && !scrollDown) {
+        // when scroll to bottom or top, prevent scroll whole document.
+        event.preventDefault();
+    }
+
+    if (scrollTop + scrollBodyheight >= tableHeight && this.state.lastScrollTop === scrollTop && scrollDown) {
+        var nextPage = this.state.currentPage + 1;
+    } else if (scrollTop === 0 && this.state.lastScrollTop === 0 && !scrollDown) {
+        nextPage = this.state.currentPage - 1;
+    }
+
+    if (nextPage > 0 && nextPage <= paginationAttr.pageEnd) {
+        this.setState({
+            currentPage: nextPage,
+            lastScrollTop: scrollTop
+        });
+        setTimeout(function () {
+            if (scrollDown) {
+                $scrollBody.scrollTop(0);
+            }
+            else {
+                $scrollBody.scrollTop(tableHeight - scrollBodyheight);
+            }
+        });
+    } else {
+        this.state.lastScrollTop = scrollTop;
+    }
 }

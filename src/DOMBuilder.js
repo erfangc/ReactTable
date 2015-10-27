@@ -342,6 +342,7 @@ function buildFilterList(table,columnDef){
         )
 }
 
+
 /**
  * creates the header row of the table
  * TODO too long needs refactoring big time I am not kidding
@@ -356,8 +357,17 @@ function buildHeaders(table) {
     };
     var headerColumns = [];
     for (var i = 0; i < table.state.columnDefs.length; i++) {
-        var isFirstColumn = (i===0);
         var columnDef = table.state.columnDefs[i];
+        if(table.props.hideSubtotalColumn) {
+            var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
+                return subtotalColumn.colTag === columnDef.colTag;
+            });
+            if (subtotalled) {
+                continue;
+            }
+        }
+
+        var isFirstColumn = (i===0);
         /**
          * sortDef tracks whether the current column is being sorted
          */
