@@ -205,6 +205,11 @@ function buildMenu(options) {
                 subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                     React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                    (columnDef.format == "date" ? React.createElement(SubtotalControlForDates("Daily"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" ? React.createElement(SubtotalControlForDates("Weekly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" ? React.createElement(SubtotalControlForDates("Monthly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" ? React.createElement(SubtotalControlForDates("Quarterly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" ? React.createElement(SubtotalControlForDates("Yearly"), {table: table, columnDef: columnDef}) : null),
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
             }
@@ -725,7 +730,7 @@ function addExtraColumnForSubtotalBy(){
  */
 function classifyRow(row, subtotalBy) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency") {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || subtotalBy.format == "date") {
         var result = resolvePartitionName(subtotalBy, row);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -752,14 +757,28 @@ function resolvePartitionName(subtotalBy, row) {
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-                sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+            	if(subtotalBy.format == "date") {
+            		var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
+            		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
+            		sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") + " - " + dateStr2;
+            	}
+            	else {
+            		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+            	}
                 sortIndex = i;
                 break;
             }
         }
         if (!sectorName) {
+        	if(subtotalBy.format == "date") {
+        		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
+        		var dateStr = date.toLocaleString().split(',')[0];
+        		sectorName = subtotalBy.text + " " + dateStr + "+";
+        	}
+        	else {
             sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-            sortIndex = i + 1;
+        	}
+        	sortIndex = i + 1;
         }
     }
     else
@@ -1874,7 +1893,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
     },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
-        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" || columnDef.format == "date"?
             (
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
@@ -1899,6 +1918,93 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
         );
     }
 });
+
+function SubtotalControlForDates(freq) {
+	return React.createClass({displayName: "SubtotalControlForDates",
+	    getInitialState: function () {
+	        return {
+	            userInputBuckets: ""
+	        }
+	    },
+	    handleChange: function (event) {
+	        this.setState({userInputBuckets: event.target.value});
+	    },
+	    handleKeyPress: function (event) {
+	        if (event.charCode == 13) {
+	            event.preventDefault();
+	            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
+	        }
+	    },
+	    handleClick: function (event) {
+	        event.stopPropagation();
+	        var $node = $(this.getDOMNode());
+	        $node.children(".menu-item-input").children("input").focus();
+	    },
+	    render: function () {
+	        var table = this.props.table, columnDef = this.props.columnDef;
+	        var subMenuAttachment =  null;
+	        
+	        if(freq == "Weekly") {
+	        return React.createElement("div", {
+		                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, "Weekly") : this.handleClick, 
+		                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+		                React.createElement("div", null, 
+		                    React.createElement("span", null, 
+		                    " Weekly")
+		                ), 
+		                subMenuAttachment
+		            );
+	    }
+	        if(freq == "Monthly") {
+		        return      React.createElement("div", {
+			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, "Monthly") : this.handleClick, 
+			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+			                React.createElement("div", null, 
+			                    React.createElement("span", null, 
+			                    " Monthly")
+			                ), 
+			                subMenuAttachment
+		        		);
+		    }
+	        
+	        if(freq == "Daily") {
+		        return      React.createElement("div", {
+			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, "Daily") : this.handleClick, 
+			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+			                React.createElement("div", null, 
+			                    React.createElement("span", null, 
+			                    " Daily")
+			                ), 
+			                subMenuAttachment
+		        		);
+		    }
+	        
+	        if(freq == "Quarterly") {
+		        return      React.createElement("div", {
+			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, "Quarterly") : this.handleClick, 
+			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+			                React.createElement("div", null, 
+			                    React.createElement("span", null, 
+			                    " Quarterly")
+			                ), 
+			                subMenuAttachment
+		        		);
+		    }
+	        
+	        if(freq == "Yearly") {
+		        return      React.createElement("div", {
+			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, "Yearly") : this.handleClick, 
+			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
+			                React.createElement("div", null, 
+			                    React.createElement("span", null, 
+			                    " Yearly")
+			                ), 
+			                subMenuAttachment
+		        		);
+		    }
+	    }
+	})
+}
 
 /*
  * ----------------------------------------------------------------------
@@ -2476,9 +2582,87 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */
-    if (partitions != null && partitions != "" && columnDef)
+    
+    if (partitions != null && partitions != "" && columnDef) {
+    	if(columnDef.format == "date") {
+    		var start = new Date('8/12/2002').getTime();
+    		var last = new Date().getTime();
+    		var data = this.state.rootNode.ultimateChildren;
+    		if(columnDef.colTag == "modifiedTime") {
+    			start = data[0].modifiedTime;
+    			last = data[0].modifiedTime;
+    			for(var i=0; i < data.length; i++) {
+    				if((data[i].modifiedTime > 0) && (start > data[i].modifiedTime)) {
+    					start = data[i].modifiedTime;
+    				}
+    				if((data[i].modifiedTime > 0) && (last < data[i].modifiedTime)) {
+    					last = data[i].modifiedTime;
+    				}
+    			  }	
+    			}
+    		
+    		if(columnDef.colTag == "startTime") {
+    			start = data[0].startTime;
+    			last = data[0].modifiedTime;
+    			for(var i=0; i < data.length; i++) {
+    				if((data[i].startTime > 0) && (start > data[i].startTime)) {
+    					start = data[i].startTime;
+    				}
+    				if((data[i].startTime > 0) && (last < data[i].startTime)) {
+    					last = data[i].startTime;
+    				}
+    			  }	
+    		}
+    		
+    		if(columnDef.colTag == "endTime") {
+    			start = data[0].endTime;
+    			last = data[0].endTime;
+    			for(var i=0; i < data.length; i++) {
+    				if((data[i].endTime > 0) && (start > data[i].endTime)) {
+    					start = data[i].endTime;
+    				}
+    				if((data[i].endTime > 0) && (last < data[i].endTime)) {
+    					last = data[i].endTime;
+    				}
+    			  }	
+    			}
+    		
+    		if(partitions == "Weekly") {
+    			var incrementVal = 604800000;
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    		}
+    		else if (partitions == "Monthly") {
+    			var incrementVal = 2629746000;
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    		}
+    		else if (partitions == "Daily") {
+    			var incrementVal = 86400000;
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    		}
+    		else if (partitions == "Quarterly") {
+    			var incrementVal = 2629746000 * 3;
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    		}
+    		else if (partitions == "Yearly") {
+    			var incrementVal = 2629746000 * 12;
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    		}
+    		
+    		//Use partitions based on user input buckets
+    		else {
+    		var parts = [];
+    		var dates = partitions.split(",");
+    		    for (i = 0; i < dates.length; i++) {
+    		    	startdate=new Date(dates[i]).getTime();
+   		    		parts.push(startdate);
+    		    }
+    		    columnDef.subtotalByRange = partitionNumberLineForDates(parts);
+            }
+    	}
+    	else {
         columnDef.subtotalByRange = partitionNumberLine(partitions);
-
+    	}
+    }
     /**
      * make sure a valid column def is passed in
      */
@@ -2508,6 +2692,18 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     }
 
     this.setState(newState);
+}
+
+function getParts(incrementVal, start, last) {
+	var parts = [];
+	parts.push(start);
+	for(var i=start; i < last; ) {
+		start = start + incrementVal;
+		parts.push(start);
+		i = start;
+	}
+	
+	return parts;
 }
 
 function ReactTableHandleAdd() {
@@ -2561,6 +2757,20 @@ function partitionNumberLine(partitions) {
     }
     return floatBuckets;
 }
+
+function partitionNumberLineForDates(stringBuckets) {
+    var i, floatBuckets = [];
+    for (i = 0; i < stringBuckets.length; i++) {
+        var floatBucket = parseFloat(stringBuckets[i]);
+        if (!isNaN(floatBucket))
+            floatBuckets.push(floatBucket);
+        floatBuckets.sort(function (a, b) {
+            return a - b;
+        });
+    }
+    return floatBuckets;
+}
+
 
 /**
  * create subtotalBy information in header, e.g. [ tradeName -> tranType ]
