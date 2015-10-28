@@ -620,8 +620,15 @@ function buildGrandTotal(grandTotalRow){
 
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    displayContent = new Date(displayContent).toLocaleDateString();
+                if (typeof displayContent === "number") {
+                 if(columnDef.formattingInstructions!=null  && columnDef.formattingInstructions!= ""){
+                	displayContent = moment(new Date(displayContent)).format(columnDef.formattingInstructions);
+                 }
+                 else {
+                     displayContent = new Date(displayContent).toLocaleDateString();
+                 }
+                }
+                
             }
             // determine cell content, based on whether a cell templating callback was provided
             if (columnDef.cellTemplate)
@@ -758,8 +765,14 @@ function resolvePartitionName(subtotalBy, row) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
             	if(subtotalBy.format == "date") {
-            		var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
-            		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
+            		if(subtotalBy.formattingInstructions!= null && subtotalBy.formattingInstructions!=""){
+            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formattingInstructions).split(',')[0];
+                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formattingInstructions).split(',')[0];
+            		}
+            		else{
+            			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
+                		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
+            		}
             		sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") + " - " + dateStr2;
             	}
             	else {
@@ -772,7 +785,12 @@ function resolvePartitionName(subtotalBy, row) {
         if (!sectorName) {
         	if(subtotalBy.format == "date") {
         		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-        		var dateStr = date.toLocaleString().split(',')[0];
+        		if(subtotalBy.formattingInstructions!= null && subtotalBy.formattingInstructions!=""){
+        			var dateStr = moment(date).format(subtotalBy.formattingInstructions).split(',')[0];
+        		}
+        		else {
+        			var dateStr = date.toLocaleString().split(',')[0];
+        		}
         		sectorName = subtotalBy.text + " " + dateStr + "+";
         	}
         	else {
@@ -978,9 +996,14 @@ function _mostDataPoints(options) {
         // TODO Chris the names here as needs to be refactored
         $.each(value, function(j, value2) {
             if(table.state.columnDefs[j] && table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
-                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    value2 = new Date(value2).toLocaleDateString();
-
+                if (typeof value2 === "number") {
+                	 if(table.state.columnDefs[j].formattingInstructions!=null && table.state.columnDefs[j].formattingInstructions!=""){
+                		 value2 = moment(new Date(value2)).format(table.state.columnDefs[j].formattingInstructions);
+                      }
+                      else {
+                    	  value2 = new Date(value2).toLocaleDateString();
+                      }
+                }// if displayContent is a number, we assume displayContent is in milliseconds
             }
             excel += "<td>"+parseString(value2)+"</td>";
             colCount++;
@@ -1144,9 +1167,15 @@ function exportToPDF(data, filename, table){
                 return idx < index ? prev + current : prev;
             }, startColPosition);
             if( table.state.columnDefs[index].format && table.state.columnDefs[index].format.toLowerCase() === "date" ){
-                if (typeof value2 === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                    value2 = new Date(value2).toLocaleDateString();
-
+                if (typeof value2 === "number") {
+                	if(table.state.columnDefs[index].formattingInstructions!=null && table.state.columnDefs[index].formattingInstructions!=""){
+                		value2 = moment(new Date(value2)).format(table.state.columnDefs[index].formattingInstructions);
+                     }
+                     else {
+                    	 value2 = new Date(value2).toLocaleDateString();
+                     }
+                	
+                }
             }
             doc.text(colPosition,rowPosition, parseString(value2, true));
         });
@@ -1774,8 +1803,14 @@ var Row = React.createClass({displayName: "Row",
 
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
-                    if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        displayContent = new Date(displayContent).toLocaleDateString();
+                    if (typeof displayContent === "number"){
+                    	if(columnDef.formattingInstructions!=null  && columnDef.formattingInstructions!= ""){
+                        	displayContent = moment(new Date(displayContent)).format(columnDef.formattingInstructions);
+                         }
+                         else {
+                             displayContent = new Date(displayContent).toLocaleDateString();
+                         }
+                    } // if displayContent is a number, we assume displayContent is in milliseconds
                 }
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
@@ -1893,17 +1928,29 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
     },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
-        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" || columnDef.format == "date"?
-            (
-                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
-                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                        placeholder: "ex: 1,10,15"}), 
-                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                        className: "btn-link"}, "Ok")
-                )
-            ) : null;
+        var subMenuAttachment = null
+        if(columnDef.format == "number" || columnDef.format == "currency") {
+        	 subMenuAttachment = React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+        	                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+        	                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+        	                        placeholder: "ex: 1,10,15"}), 
+        	                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
+        	                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+        	                        className: "btn-link"}, "Ok")
+        	                )
+        }
+        
+        if(columnDef.format == "date") {
+       	 subMenuAttachment = React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+       	                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+       	                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+       	                        placeholder: "ex: 1/8/2013, 5/12/2014, 3/10/2015"}), 
+       	                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
+       	                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+       	                        className: "btn-link"}, "Ok")
+       	                )
+       }
+        
         return (
             React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
@@ -2585,47 +2632,14 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     
     if (partitions != null && partitions != "" && columnDef) {
     	if(columnDef.format == "date") {
-    		var start = new Date('8/12/2002').getTime();
-    		var last = new Date().getTime();
+    		var start = new Date('1/1/3002').getTime();
+    		var last = new Date('1/1/1002').getTime();
     		var data = this.state.rootNode.ultimateChildren;
-    		if(columnDef.colTag == "modifiedTime") {
-    			start = data[0].modifiedTime;
-    			last = data[0].modifiedTime;
-    			for(var i=0; i < data.length; i++) {
-    				if((data[i].modifiedTime > 0) && (start > data[i].modifiedTime)) {
-    					start = data[i].modifiedTime;
-    				}
-    				if((data[i].modifiedTime > 0) && (last < data[i].modifiedTime)) {
-    					last = data[i].modifiedTime;
-    				}
-    			  }	
-    			}
-    		
-    		if(columnDef.colTag == "startTime") {
-    			start = data[0].startTime;
-    			last = data[0].modifiedTime;
-    			for(var i=0; i < data.length; i++) {
-    				if((data[i].startTime > 0) && (start > data[i].startTime)) {
-    					start = data[i].startTime;
-    				}
-    				if((data[i].startTime > 0) && (last < data[i].startTime)) {
-    					last = data[i].startTime;
-    				}
-    			  }	
-    		}
-    		
-    		if(columnDef.colTag == "endTime") {
-    			start = data[0].endTime;
-    			last = data[0].endTime;
-    			for(var i=0; i < data.length; i++) {
-    				if((data[i].endTime > 0) && (start > data[i].endTime)) {
-    					start = data[i].endTime;
-    				}
-    				if((data[i].endTime > 0) && (last < data[i].endTime)) {
-    					last = data[i].endTime;
-    				}
-    			  }	
-    			}
+			for (var i=data.length-1; i>=0; i--) {
+				tmp = data[i][columnDef.colTag];
+				if (tmp < start) start = tmp;
+				if (tmp > last) last = tmp;
+			}
     		
     		if(partitions == "Weekly") {
     			var incrementVal = 604800000;
