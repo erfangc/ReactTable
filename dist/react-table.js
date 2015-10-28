@@ -478,7 +478,7 @@ function buildHeaders(table) {
     var headerColumns = [];
     for (var i = 0; i < table.state.columnDefs.length; i++) {
         var columnDef = table.state.columnDefs[i];
-        if(table.props.hideSubtotalColumn) {
+        if(table.props.hideSubtotaledColumns) {
             var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
                 return subtotalColumn.colTag === columnDef.colTag;
             });
@@ -1311,7 +1311,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         disableExporting: React.PropTypes.bool,
         disableGrandTotal: React.PropTypes.bool,
         enableScrollPage: React.PropTypes.bool,
-        hideSubtotalColumn: React.PropTypes.bool,
+        hideSubtotaledColumns: React.PropTypes.bool,
         /**
          * misc props
          */
@@ -1615,6 +1615,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             $(this.getDOMNode()).find(".rt-scrollable").get(0).removeEventListener('scroll', this.handleScroll);
     },
     componentDidUpdate: function () {
+        if (this.state.scrollToLeft) {
+            this.state.scrollToLeft = false;
+            $(this.refs.scrollBody.getDOMNode()).scrollLeft(0);
+        }
         adjustHeaders.call(this);
         bindHeadersToMenu($(this.getDOMNode()));
     },
@@ -1718,7 +1722,7 @@ var Row = React.createClass({displayName: "Row",
         for (var i = 0; i < this.props.columnDefs.length; i++) {
             var columnDef = this.props.columnDefs[i];
 
-            if (table.props.hideSubtotalColumn) {
+            if (table.props.hideSubtotaledColumns) {
                 var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
                     return subtotalColumn.colTag === columnDef.colTag;
                 });
@@ -2491,6 +2495,7 @@ function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
 function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     event.stopPropagation();
     const subtotalBy = this.state.subtotalBy || [];
+    this.state.scrollToLeft = true;
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */

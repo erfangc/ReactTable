@@ -358,7 +358,7 @@ function buildHeaders(table) {
     var headerColumns = [];
     for (var i = 0; i < table.state.columnDefs.length; i++) {
         var columnDef = table.state.columnDefs[i];
-        if(table.props.hideSubtotalColumn) {
+        if(table.props.hideSubtotaledColumns) {
             var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
                 return subtotalColumn.colTag === columnDef.colTag;
             });

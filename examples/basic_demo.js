@@ -59,7 +59,7 @@ $(function () {
         var testData = data;
         // first table
         var options = {
-            hideSubtotalColumn: true,
+            hideSubtotaledColumns: true,
             enableScrollPage:true,
             disableInfiniteScrolling: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],

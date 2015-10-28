@@ -248,6 +248,7 @@ function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
 function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     event.stopPropagation();
     const subtotalBy = this.state.subtotalBy || [];
+    this.state.scrollToLeft = true;
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */
