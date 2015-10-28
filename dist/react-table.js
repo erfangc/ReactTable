@@ -2219,8 +2219,11 @@ function scrollPage(paginationAttr, event) {
     var scrollDown = event.deltaY > 0;
 
     if (scrollTop + scrollBodyheight >= tableHeight && scrollDown || scrollTop === 0 && !scrollDown) {
-        // when scroll to bottom or top, prevent scroll whole document.
-        event.preventDefault();
+        // when scroll to bottom or top of table, prevent scroll whole document.
+        // when at the first page and scroll up, or at the last page and srocll down, scroll the whole document
+        if (!((this.state.currentPage == 1 && !scrollDown) || (this.state.currentPage == paginationAttr.pageEnd && scrollDown))) {
+            event.preventDefault();
+        }
     }
 
     if (scrollTop + scrollBodyheight >= tableHeight && this.state.lastScrollTop === scrollTop && scrollDown) {
