@@ -209,6 +209,7 @@ function ReactTableHandleClearSubtotal(event) {
      */
     if (this.state.sortBy.length > 0)
         newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
+
     this.setState(newState);
 }
 
@@ -282,6 +283,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     if (this.state.currentFilters.length > 0) {
         hideTreeNodeWhenNoChildrenToShow(this.state.rootNode);
     }
+
 
     this.setState(newState);
 }

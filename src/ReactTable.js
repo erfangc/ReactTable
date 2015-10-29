@@ -392,6 +392,7 @@ var ReactTable = React.createClass({
     render: function () {
         addExtraColumnForSubtotalBy.call(this);
 
+        //TODO: performance issue for infinite scroll. this function should be called only when tree structure is changed.
         const rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
@@ -403,7 +404,6 @@ var ReactTable = React.createClass({
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
 
-        //var grandTotal = buildGrandTotal.call(this, rasterizedData.splice(0, 1));
         var grandTotal = rasterizedData.splice(0, 1).map(rowMapper, this);
 
         var rowsToDisplay = [];
