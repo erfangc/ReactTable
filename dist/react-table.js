@@ -205,11 +205,11 @@ function buildMenu(options) {
                 subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                     React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                    (columnDef.format == "date" && columnDef.formattingInstructions!=null ? React.createElement(SubtotalControlForDates("Daily"), {table: table, columnDef: columnDef}) : null),
-                    (columnDef.format == "date" && columnDef.formattingInstructions!=null? React.createElement(SubtotalControlForDates("Weekly"), {table: table, columnDef: columnDef}) : null),
-                    (columnDef.format == "date" && columnDef.formattingInstructions!=null? React.createElement(SubtotalControlForDates("Monthly"), {table: table, columnDef: columnDef}) : null),
-                    (columnDef.format == "date" && columnDef.formattingInstructions!=null? React.createElement(SubtotalControlForDates("Quarterly"), {table: table, columnDef: columnDef}) : null),
-                    (columnDef.format == "date" && columnDef.formattingInstructions!=null? React.createElement(SubtotalControlForDates("Yearly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" && columnDef.formatInstructions!=null ? React.createElement(SubtotalControlForDates("Daily"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" && columnDef.formatInstructions!=null? React.createElement(SubtotalControlForDates("Weekly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" && columnDef.formatInstructions!=null? React.createElement(SubtotalControlForDates("Monthly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" && columnDef.formatInstructions!=null? React.createElement(SubtotalControlForDates("Quarterly"), {table: table, columnDef: columnDef}) : null),
+                    (columnDef.format == "date" && columnDef.formatInstructions!=null? React.createElement(SubtotalControlForDates("Yearly"), {table: table, columnDef: columnDef}) : null),
                     React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
                 )
             }
@@ -621,8 +621,8 @@ function buildGrandTotal(grandTotalRow){
             // convert and format dates
             if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                 if (typeof displayContent === "number") {
-                 if(columnDef.formattingInstructions!=null  && columnDef.formattingInstructions!= ""){
-                	displayContent = moment(new Date(displayContent)).format(columnDef.formattingInstructions);
+                 if(columnDef.formatInstructions!=null  && columnDef.formatInstructions!= ""){
+                	displayContent = moment(new Date(displayContent)).format(columnDef.formatInstructions);
                  }
                  else {
                      displayContent = new Date(displayContent).toLocaleDateString();
@@ -737,7 +737,7 @@ function addExtraColumnForSubtotalBy(){
  */
 function classifyRow(row, subtotalBy) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formattingInstructions!=null)) {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
         var result = resolvePartitionName(subtotalBy, row);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -764,10 +764,10 @@ function resolvePartitionName(subtotalBy, row) {
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-            	if(subtotalBy.format == "date" && subtotalBy.formattingInstructions!=null) {
-            		if(subtotalBy.formattingInstructions!= null){
-            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formattingInstructions).split(',')[0];
-                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formattingInstructions).split(',')[0];
+            	if(subtotalBy.format == "date" && subtotalBy.formatInstructions!=null) {
+            		if(subtotalBy.formatInstructions!= null){
+            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
+                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
             		}
             		else{
             			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
@@ -783,10 +783,10 @@ function resolvePartitionName(subtotalBy, row) {
             }
         }
         if (!sectorName) {
-        	if(subtotalBy.format == "date" && subtotalBy.formattingInstructions!=null) {
+        	if(subtotalBy.format == "date" && subtotalBy.formatInstructions!=null) {
         		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-        		if(subtotalBy.formattingInstructions!= null ){
-        			var dateStr = moment(date).format(subtotalBy.formattingInstructions).split(',')[0];
+        		if(subtotalBy.formatInstructions!= null ){
+        			var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
         		}
         		else {
         			var dateStr = date.toLocaleString().split(',')[0];
@@ -997,8 +997,8 @@ function _mostDataPoints(options) {
         $.each(value, function(j, value2) {
             if(table.state.columnDefs[j] && table.state.columnDefs[j].format && table.state.columnDefs[j].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") {
-                	 if(table.state.columnDefs[j].formattingInstructions!=null){
-                		 value2 = moment(new Date(value2)).format(table.state.columnDefs[j].formattingInstructions);
+                	 if(table.state.columnDefs[j].formatInstructions!=null){
+                		 value2 = moment(new Date(value2)).format(table.state.columnDefs[j].formatInstructions);
                       }
                       else {
                     	  value2 = new Date(value2).toLocaleDateString();
@@ -1168,8 +1168,8 @@ function exportToPDF(data, filename, table){
             }, startColPosition);
             if( table.state.columnDefs[index].format && table.state.columnDefs[index].format.toLowerCase() === "date" ){
                 if (typeof value2 === "number") {
-                	if(table.state.columnDefs[index].formattingInstructions!=null){
-                		value2 = moment(new Date(value2)).format(table.state.columnDefs[index].formattingInstructions);
+                	if(table.state.columnDefs[index].formatInstructions!=null){
+                		value2 = moment(new Date(value2)).format(table.state.columnDefs[index].formatInstructions);
                      }
                      else {
                     	 value2 = new Date(value2).toLocaleDateString();
@@ -1804,8 +1804,8 @@ var Row = React.createClass({displayName: "Row",
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                     if (typeof displayContent === "number"){
-                    	if(columnDef.formattingInstructions!=null  && columnDef.formattingInstructions!= ""){
-                        	displayContent = moment(new Date(displayContent)).format(columnDef.formattingInstructions);
+                    	if(columnDef.formatInstructions!=null  && columnDef.formatInstructions!= ""){
+                        	displayContent = moment(new Date(displayContent)).format(columnDef.formatInstructions);
                          }
                          else {
                              displayContent = new Date(displayContent).toLocaleDateString();
@@ -1940,7 +1940,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
         	                )
         }
         
-        if(columnDef.format == "date" && columnDef.formattingInstructions!=null) {
+        if(columnDef.format == "date" && columnDef.formatInstructions!=null) {
        	 subMenuAttachment = React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
        	                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
        	                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
@@ -2631,7 +2631,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     
     if (partitions != null && partitions != "" && columnDef) {
-    	if(columnDef.format == "date" && columnDef.formattingInstructions!=null) {
+    	if(columnDef.format == "date" && columnDef.formatInstructions!=null) {
     		var start = new Date('1/1/3002').getTime();
     		var last = new Date('1/1/1002').getTime();
     		var data = this.state.rootNode.ultimateChildren;
