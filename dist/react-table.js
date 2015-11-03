@@ -2854,13 +2854,16 @@ function getInitialSelections(selectedRows, selectedSummaryRows) {
 };
 
 const dateSorter = {
-    asc: function (a, b) {
-        return new Date(a[this.colTag]) - new Date(b[this.colTag]);
-    },
-    desc: function (a, b) {
-        return -1 * dateSorter.asc.call(this, a, b);
-    }
-};
+	    asc: function (a, b) {
+	    	var aDate = !a[this.colTag] ? 0 : a[this.colTag] ;
+	    	var bDate = !b[this.colTag] ? 0 : b[this.colTag] ;
+	    	
+	        return new Date(aDate) - new Date(bDate);
+	    },
+	    desc: function (a, b) {
+	        return -1 * dateSorter.asc.call(this, a, b);
+	    }
+	};
 
 /**
  * resolves t he appropriate sort function for the given `columnDef`
