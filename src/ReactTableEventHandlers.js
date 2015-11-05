@@ -23,8 +23,10 @@ function ReactTableGetInitialState() {
         upperVisualBound: this.props.pageSize,
         extraStyle: {}, // TODO document use
         filterInPlace: {}, // TODO document use, but sounds like a legit state
-        currentFilters: [] // TODO same as above
+        currentFilters: [], // TODO same as above
 
+        rasterizedData: null, // table data for render
+        buildRasterizedData: true // when change table structure such as sort or subtotal, set this to true.
     };
 
     /**
@@ -61,9 +63,9 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
 
     var filterData = e.target ? (e.target.value || e.target.textContent) : e;
     if (!Array.isArray(filterData)) {
-        if(columnDefToFilterBy.format == 'number'){
+        if (columnDefToFilterBy.format == 'number') {
             filterData = [{eq: filterData}];
-        }else{
+        } else {
             filterData = [filterData];
         }
     }
@@ -91,7 +93,11 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     if (!dontSet) {
         buildFilterData.call(this, true);
         this.state.currentFilters.push({colDef: columnDefToFilterBy, filterText: filterData});
-        this.setState({rootNode: this.state.rootNode, currentFilters: this.state.currentFilters});
+        this.setState({
+            rootNode: this.state.rootNode,
+            currentFilters: this.state.currentFilters,
+            buildRasterizedData: true
+        });
     }
 
     this.props.afterFilterCallback && this.props.afterFilterCallback(columnDefToFilterBy, filterData);
@@ -138,7 +144,8 @@ function ReactTableHandleRemoveFilter(colDef, dontSet) {
         this.setState({
             filterInPlace: fip,
             rootNode: this.state.rootNode,
-            currentFilters: this.state.currentFilters
+            currentFilters: this.state.currentFilters,
+            buildRasterizedData: true
         });
     }
 
@@ -163,7 +170,8 @@ function ReactTableHandleRemoveAllFilters() {
     this.state.currentFilters = [];
     this.setState({
         filterInPlace: {},
-        rootNode: this.state.rootNode
+        rootNode: this.state.rootNode,
+        buildRasterizedData: true
     });
 }
 
@@ -191,6 +199,8 @@ function applyAllFilters() {
 function ReactTableHandleClearSubtotal(event) {
     event.stopPropagation();
     const newState = this.state;
+
+    newState.buildRasterizedData = true;
     newState.currentPage = 1;
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
@@ -270,6 +280,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
     newState.subtotalBy = subtotalBy;
+    newState.buildRasterizedData = true;
     buildSubtreeForNewSubtotal(newState);
     //newState.rootNode = createNewRootNode(this.props, newState);
     /**
@@ -301,7 +312,8 @@ function ReactTableHandleRemove(columnDefToRemove) {
             newColumnDefs.push(this.state.columnDefs[i]);
     }
     this.setState({
-        columnDefs: newColumnDefs
+        columnDefs: newColumnDefs,
+        buildRasterizedData: true
     });
     // TODO pass copies of these variables to avoid unintentional perpetual binding
     if (this.props.afterColumnRemove != null)
@@ -311,7 +323,7 @@ function ReactTableHandleRemove(columnDefToRemove) {
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
     summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
-    this.setState({});
+    this.setState({buildRasterizedData:true});
 }
 
 function ReactTableHandlePageClick(page) {
@@ -384,7 +396,9 @@ function buildFirstColumnLabel(table) {
             }
 
             var arrow = index == table.state.subtotalBy.length - 1 ? "" : " -> ";
-            subtotalHierarchy.push(<span className="rt-header-clickable" onClick={expandSubtotalLevel.bind(table, index)}> {column[0].text} <span style={{color:'white'}}>{arrow}</span></span>);
+            subtotalHierarchy.push(<span className="rt-header-clickable" onClick={expandSubtotalLevel.bind(table, index)}> {column[0].text}
+                <span style={{color: 'white'}}>{arrow}</span>
+            </span>);
         });
 
         return (

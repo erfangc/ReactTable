@@ -85,6 +85,7 @@ var ReactTable = React.createClass({
             this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
         }
         newState.rootNode = this.state.rootNode;
+        newState.buildRasterizedData = true;
         this.setState(newState);
 
     },
@@ -106,6 +107,8 @@ var ReactTable = React.createClass({
         };
         this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, sortBy));
         newState.rootNode = this.state.rootNode;
+        newState.buildRasterizedData = true;
+
         this.setState(newState);
     },
     /**
@@ -122,6 +125,7 @@ var ReactTable = React.createClass({
         sortBy.length = 0;
         newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
+        newState.buildRasterizedData = true;
 
         this.setState(newState);
     },
@@ -141,7 +145,8 @@ var ReactTable = React.createClass({
         this.setState({
             currentPage: 1,
             lowerVisualBound: 0,
-            upperVisualBound: this.props.pageSize
+            upperVisualBound: this.props.pageSize,
+            buildRasterizedData: true
         });
     },
     handleExpandAll: function () {
@@ -149,7 +154,8 @@ var ReactTable = React.createClass({
         this.setState({
             currentPage: 1,
             lowerVisualBound: 0,
-            upperVisualBound: this.props.pageSize
+            upperVisualBound: this.props.pageSize,
+            buildRasterizedData: true
         });
     },
     handleDownload: function (type) {
@@ -222,7 +228,7 @@ var ReactTable = React.createClass({
     },
     forceSort: function () {
         this.state.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
-        this.setState({});
+        this.setState({buildRasterizedData: true});
     },
     getDetailToggleState: function (key) {
         return this.state.selectedDetailRows[key] && true;
@@ -261,12 +267,19 @@ var ReactTable = React.createClass({
          */
         recursivelyAggregateNodes(this.state.rootNode, this.state);
         this.setState({
-            columnDefs: columnDefs
+            columnDefs: columnDefs,
+            buildRasterizedData: true
         });
     },
     handleScroll: function (e) {
         const $target = $(e.target);
         const scrollTop = $target.scrollTop();
+
+        if (scrollTop == this.state.lastScrollTop) {
+            // scroll horizentally
+            return;
+        }
+
         const height = $target.height();
         const totalHeight = $target.find("tbody").height();
         const avgRowHeight = totalHeight / $target.find("tbody > tr").length;
@@ -316,6 +329,7 @@ var ReactTable = React.createClass({
     /* ----------------------------------------- */
 
     componentDidMount: function () {
+        //TODO: should listen on onWheel and give some conditions
         if (!this.props.disableInfiniteScrolling)
             $(this.getDOMNode()).find(".rt-scrollable").get(0).addEventListener('scroll', this.handleScroll);
         setTimeout(function () {
@@ -353,9 +367,12 @@ var ReactTable = React.createClass({
             this.state.scrollToLeft = false;
             $(this.refs.scrollBody.getDOMNode()).scrollLeft(0);
         }
+        console.time('adjust headers');
         adjustHeaders.call(this);
+        console.timeEnd('adjust headers');
         bindHeadersToMenu($(this.getDOMNode()));
     },
+
     /*******public API, called outside react table*/
     addFilter: function (columnDefToFilterBy, filterData) {
         this.handleColumnFilter.call(this, columnDefToFilterBy, filterData);
@@ -381,7 +398,7 @@ var ReactTable = React.createClass({
         }, this.state.subtotalBy.length > 0, true, true);
     },
     refresh: function () {
-        this.setState({});
+        this.setState({buildRasterizedData: true});
     },
     getSubtotals: function () {
         return this.state.subtotalBy;
@@ -390,21 +407,16 @@ var ReactTable = React.createClass({
         return this.state.sortBy;
     },
     render: function () {
-        addExtraColumnForSubtotalBy.call(this);
+        console.time('render table');
 
-        //TODO: performance issue for infinite scroll. this function should be called only when tree structure is changed.
-        const rasterizedData = rasterizeTree({
-            node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
-        }, this.state.subtotalBy.length > 0);
-        // maxRows is referenced later during event handling to determine upperVisualBound
-        this.state.maxRows = rasterizedData.length - 1;
+        if (!this.state.rasterizedData || this.state.buildRasterizedData) {
+            rasterizeTreeForRender.call(this);
+        }
 
+        const rasterizedData = this.state.rasterizedData;
         // TODO merge lower&upper visual bound into state, refactor getPaginationAttr
         var paginationAttr = getPaginationAttr(this, rasterizedData);
-
-        var grandTotal = rasterizedData.splice(0, 1).map(rowMapper, this);
+        var grandTotal = this.state.grandTotal;
 
         var rowsToDisplay = [];
         if (this.props.disableInfiniteScrolling)
@@ -422,6 +434,8 @@ var ReactTable = React.createClass({
 
         if (this.props.disableScrolling)
             tableBodyContainerStyle.overflowY = "hidden";
+
+        console.timeEnd('render table');
 
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
@@ -678,7 +692,7 @@ function docClick(e) {
 }
 
 function adjustHeaders(adjustCount) {
-    if (this.state.maxRows == 1 || this.state.rowNumToDisplay == 0) {
+    if (this.state.rowNumToDisplay == 0) {
         //if table has no data, don't change column width
         return;
     }
