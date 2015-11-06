@@ -735,10 +735,10 @@ function addExtraColumnForSubtotalBy(){
  * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
  */
-function classifyRow(row, subtotalBy) {
+function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
     if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
-        var result = resolvePartitionName(subtotalBy, row);
+        var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
     } else
@@ -759,7 +759,7 @@ function aggregateSector(partitionResult, columnDefs, subtotalBy) {
  * ----------------------------------------------------------------------
  */
 
-function resolvePartitionName(subtotalBy, row) {
+function resolvePartitionName(subtotalBy, row, partitions) {
     var sectorName = "", sortIndex = "";
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
@@ -773,7 +773,24 @@ function resolvePartitionName(subtotalBy, row) {
             			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
                 		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
             		}
-            		sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") + " - " + dateStr2;
+            		
+            		if(partitions == "Yearly") {
+            			dateStr1 = new Date(dateStr1).getFullYear();
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
+            		}
+            		
+            		else if(partitions == "Daily") {
+            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
+            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
+            		}
+            		else if(partitions == "Monthly") {
+            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
+            		}
+            		
+            		else {
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") + " - " + dateStr2;
+            		}
             	}
             	else {
             		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
@@ -790,6 +807,15 @@ function resolvePartitionName(subtotalBy, row) {
         		}
         		else {
         			var dateStr = date.toLocaleString().split(',')[0];
+        		}
+        		if(partitions == "Yearly") {
+        			dateStr = new Date(dateStr).getFullYear();
+        		}
+        		else if(partitions == "Monthly") {
+        			dateStr = moment(date).format("MMM YYYY");
+        		}
+        		else if(partitions == "Daily") {
+        			dateStr = moment(date).format("YYYY/MM/DD");
         		}
         		sectorName = subtotalBy.text + " " + dateStr + "+";
         	}
@@ -2642,24 +2668,23 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
 			}
     		
     		if(partitions == "Weekly") {
-    			var incrementVal = 604800000;
-    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(partitions, start, last));
     		}
     		else if (partitions == "Monthly") {
-    			var incrementVal = 2629746000;
-    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(partitions, start, last));
     		}
     		else if (partitions == "Daily") {
-    			var incrementVal = 86400000;
-    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(partitions, start, last));
     		}
     		else if (partitions == "Quarterly") {
-    			var incrementVal = 2629746000 * 3;
-    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(partitions, start, last));
     		}
     		else if (partitions == "Yearly") {
-    			var incrementVal = 2629746000 * 12;
-    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(incrementVal, start, last));
+    			start = new Date("1/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLineForDates(getParts(partitions, start, last));
     		}
     		
     		//Use partitions based on user input buckets
@@ -2691,7 +2716,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.lowerVisualBound = 0;
     newState.upperVisualBound = this.props.pageSize;
     newState.subtotalBy = subtotalBy;
-    buildSubtreeForNewSubtotal(newState);
+    buildSubtreeForNewSubtotal(newState, partitions);
     //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
@@ -2708,11 +2733,28 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     this.setState(newState);
 }
 
-function getParts(incrementVal, start, last) {
+function getParts(frequency, start, last) {
 	var parts = [];
+	var count = 1;
+	var unit = "days";
 	parts.push(start);
+	if(frequency == "Monthly"){
+		 unit = "months";
+		 count = 1;
+	} else if(frequency == "Quarterly"){
+		 unit = "months";
+		count = 3;
+	} else if(frequency == "Yearly"){
+		 unit = "years";
+		 count = 1;
+	}
+	else if(frequency == "Weekly"){
+		 unit = "days";
+		 count = 6;
+	}
+	
 	for(var i=start; i < last; ) {
-		start = start + incrementVal;
+		start = new Date(moment(new Date(start)).add(count, unit).calendar()).getTime();
 		parts.push(start);
 		i = start;
 	}
@@ -2982,12 +3024,12 @@ function setupChildrenMap(node){
  * @param newSubtotal
  * @param state
  */
-function buildSubtree(lrootNode, newSubtotal, state) {
+function buildSubtree(lrootNode, newSubtotal, state, partitions) {
     if (lrootNode.children.length == 0 || (lrootNode.children.children && lrootNode.children.children.length == 0)) {
         //find the leaf node
         for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
             //build subtree
-            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal);
+            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal, partitions);
         }
         for (var key in lrootNode._childrenSectorNameMap) {
             //generate subtree's aggregation info
@@ -2996,7 +3038,7 @@ function buildSubtree(lrootNode, newSubtotal, state) {
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
-            buildSubtree(lrootNode.children[i], newSubtotal, state);
+            buildSubtree(lrootNode.children[i], newSubtotal, state, partitions);
         }
     }
 }
@@ -3006,9 +3048,9 @@ function buildSubtree(lrootNode, newSubtotal, state) {
  * @param state
  * @returns {*}
  */
-function buildSubtreeForNewSubtotal(state) {
+function buildSubtreeForNewSubtotal(state, partitions) {
     var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
-    buildSubtree(state.rootNode, newSubtotal, state);
+    buildSubtree(state.rootNode, newSubtotal, state, partitions);
     state.rootNode.sortRecursivelyBySortIndex();
     state.rootNode.foldSubTree();
 
@@ -3091,12 +3133,12 @@ function recursivelyAggregateNodes(node, state) {
  * @param ultimateChild {object}
  * @param subtotalBy
  */
-function populateChildNodesForRow(currentNode, ultimateChild, subtotalBy) {
+function populateChildNodesForRow(currentNode, ultimateChild, subtotalBy, partitions) {
     var i;
     if (subtotalBy == null || subtotalBy.length == 0)
         return;
     for (i = 0; i < subtotalBy.length; i++) {
-        const sectoringResult = classifyRow(ultimateChild, subtotalBy[i]);
+        const sectoringResult = classifyRow(ultimateChild, subtotalBy[i], partitions);
         currentNode.appendRowToChildren({
             childSectorName: sectoringResult.sectorName,
             childRow: ultimateChild,
