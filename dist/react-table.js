@@ -1633,9 +1633,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             this.state.scrollToLeft = false;
             $(this.refs.scrollBody.getDOMNode()).scrollLeft(0);
         }
-        console.time('adjust headers');
+        //console.time('adjust headers');
         adjustHeaders.call(this);
-        console.timeEnd('adjust headers');
+        //console.timeEnd('adjust headers');
         bindHeadersToMenu($(this.getDOMNode()));
     },
 
@@ -1673,7 +1673,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         return this.state.sortBy;
     },
     render: function () {
-        console.time('render table');
+        //console.time('fresh: ');
 
         if (!this.state.rasterizedData || this.state.buildRasterizedData) {
             rasterizeTreeForRender.call(this);
@@ -1701,7 +1701,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         if (this.props.disableScrolling)
             tableBodyContainerStyle.overflowY = "hidden";
 
-        console.timeEnd('render table');
+        //console.timeEnd('fresh: ');
 
         return (
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
