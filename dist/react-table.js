@@ -1803,6 +1803,11 @@ var Row = React.createClass({displayName: "Row",
         });
 
         if (isGrandTotal) {
+            // add a dummy column to the last to fit the vertical scroll bar
+            cells.push(
+                React.createElement("span", {className: "rt-grand-total-cell"}
+                ));
+
             return (React.createElement("div", {className: "rt-grand-total"}, 
                         cells
             ))

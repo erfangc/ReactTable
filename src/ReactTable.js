@@ -537,6 +537,11 @@ var Row = React.createClass({
         });
 
         if (isGrandTotal) {
+            // add a dummy column to the last to fit the vertical scroll bar
+            cells.push(
+                <span className="rt-grand-total-cell" >
+                </span>);
+
             return (<div className="rt-grand-total">
                         {cells}
             </div>)

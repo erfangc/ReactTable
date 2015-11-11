@@ -114,6 +114,7 @@
 }
 
 .rt-grand-total-cell{
+    min-width: 10px;
     display: inline-block;
     border-right: 1px solid #f9f2f4;
 }
