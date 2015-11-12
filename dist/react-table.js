@@ -2643,7 +2643,7 @@ function expandSubtotalLevelHelper(currentLevel, clickLevel, lTreeNode) {
 function expandSubtotalLevel(levelIndex, event) {
     event.stopPropagation();
     expandSubtotalLevelHelper(0, levelIndex, this.state.rootNode);
-    this.setState({});
+    this.setState({buildRasterizedData:true});
 }
 
 /**
