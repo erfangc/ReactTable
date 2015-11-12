@@ -62,6 +62,12 @@ function buildSubtree(lrootNode, newSubtotal, state) {
             //generate subtree's aggregation info
             var node = lrootNode._childrenSectorNameMap[key];
             node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
+
+            if(node.ultimateChildren.length == 1 && state.hideSingleSubtotalChild){
+                // if the subtotal level only has one child, hide this child. only show subtotal row;
+                node.ultimateChildren[0].hiddenByFilter = true;
+                node.noCollapseIcon = true;
+            }
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
@@ -96,6 +102,8 @@ function destorySubtreesRecursively(lroot) {
     for (var i = 0; i < lroot.children.length; i++) {
         destorySubtreesRecursively(lroot.children[i]);
         lroot.children[i] = null;
+
+
     }
     lroot.children = [];
     lroot._childrenSectorNameMap = {};
@@ -119,6 +127,9 @@ function destoryRootChildren(state) {
  */
 function destorySubtrees(state) {
     destorySubtreesRecursively(state.rootNode);
+    state.rootNode.ultimateChildren.forEach(function(child){
+        child.hiddenByFilter = false;
+    });
 }
 
 /**

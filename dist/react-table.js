@@ -576,6 +576,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
+    var noCollapseIcon = data.treeNode.noCollapseIcon;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -589,7 +590,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
                 React.createElement("td", {key: firstColTag}, 
                     React.createElement("div", null, 
                     React.createElement("a", {style: firstCellStyle, onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
-                        data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
+                         noCollapseIcon ? '' : data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
                     "  ", 
                     React.createElement("strong", null, data[firstColTag]), 
@@ -1312,6 +1313,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         disableGrandTotal: React.PropTypes.bool,
         enableScrollPage: React.PropTypes.bool,
         hideSubtotaledColumns: React.PropTypes.bool,
+        hideSingleSubtotalChild: React.PropTypes.bool,
         /**
          * misc props
          */
@@ -2295,7 +2297,8 @@ function ReactTableGetInitialState() {
         currentFilters: [], // TODO same as above
 
         rasterizedData: null, // table data for render
-        buildRasterizedData: true // when change table structure such as sort or subtotal, set this to true.
+        buildRasterizedData: true, // when change table structure such as sort or subtotal, set this to true.
+        hideSingleSubtotalChild: this.props.hideSingleSubtotalChild // if a subtotal level only has one child, hide the child
     };
 
     /**
@@ -2854,6 +2857,12 @@ function buildSubtree(lrootNode, newSubtotal, state) {
             //generate subtree's aggregation info
             var node = lrootNode._childrenSectorNameMap[key];
             node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
+
+            if(node.ultimateChildren.length == 1 && state.hideSingleSubtotalChild){
+                // if the subtotal level only has one child, hide this child. only show subtotal row;
+                node.ultimateChildren[0].hiddenByFilter = true;
+                node.noCollapseIcon = true;
+            }
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
@@ -2888,6 +2897,8 @@ function destorySubtreesRecursively(lroot) {
     for (var i = 0; i < lroot.children.length; i++) {
         destorySubtreesRecursively(lroot.children[i]);
         lroot.children[i] = null;
+
+
     }
     lroot.children = [];
     lroot._childrenSectorNameMap = {};
@@ -2911,6 +2922,9 @@ function destoryRootChildren(state) {
  */
 function destorySubtrees(state) {
     destorySubtreesRecursively(state.rootNode);
+    state.rootNode.ultimateChildren.forEach(function(child){
+        child.hiddenByFilter = false;
+    });
 }
 
 /**

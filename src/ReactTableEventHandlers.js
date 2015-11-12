@@ -26,7 +26,8 @@ function ReactTableGetInitialState() {
         currentFilters: [], // TODO same as above
 
         rasterizedData: null, // table data for render
-        buildRasterizedData: true // when change table structure such as sort or subtotal, set this to true.
+        buildRasterizedData: true, // when change table structure such as sort or subtotal, set this to true.
+        hideSingleSubtotalChild: this.props.hideSingleSubtotalChild // if a subtotal level only has one child, hide the child
     };
 
     /**

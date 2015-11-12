@@ -59,6 +59,7 @@ $(function () {
         var testData = data;
         // first table
         var options = {
+            hideSingleSubtotalChild:true,
             hideSubtotaledColumns: true,
             enableScrollPage:true,
             disableInfiniteScrolling: true,

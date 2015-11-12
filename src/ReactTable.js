@@ -46,6 +46,7 @@ var ReactTable = React.createClass({
         disableGrandTotal: React.PropTypes.bool,
         enableScrollPage: React.PropTypes.bool,
         hideSubtotaledColumns: React.PropTypes.bool,
+        hideSingleSubtotalChild: React.PropTypes.bool,
         /**
          * misc props
          */
