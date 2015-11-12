@@ -2858,11 +2858,6 @@ function buildSubtree(lrootNode, newSubtotal, state) {
             var node = lrootNode._childrenSectorNameMap[key];
             node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
 
-            if(node.ultimateChildren.length == 1 && state.hideSingleSubtotalChild){
-                // if the subtotal level only has one child, hide this child. only show subtotal row;
-                node.ultimateChildren[0].hiddenByFilter = true;
-                node.noCollapseIcon = true;
-            }
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
@@ -3293,6 +3288,12 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         flatData = node.display == false ? [] : [node.rowData];
     }
 
+    if(node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild){
+        // if the subtotal level only has one child, hide this child. only show subtotal row;
+        node.ultimateChildren[0].hiddenByFilter = true;
+        node.noCollapseIcon = true;
+    }
+
     if (exportOutside) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, skipSubtotalRow);
@@ -3318,7 +3319,8 @@ function rasterizeTreeForRender() {
     const data = rasterizeTree({
         node: this.state.rootNode,
         firstColumn: this.state.columnDefs[0],
-        selectedDetailRows: this.state.selectedDetailRows
+        selectedDetailRows: this.state.selectedDetailRows,
+        hideSingleSubtotalChild : this.props.hideSingleSubtotalChild
     }, this.state.subtotalBy.length > 0);
 
     //those attributes of state is used by render() of ReactTable
@@ -3339,6 +3341,7 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
     var i, j, intermediateResult;
     for (i = 0; i < node.children.length; i++) {
         intermediateResult = rasterizeTree({
+            hideSingleSubtotalChild: options.hideSingleSubtotalChild,
             node: node.children[i],
             firstColumn: firstColumn
         }, hasSubtotalBy, exportOutside, skipSubtotalRow);
