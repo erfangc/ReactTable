@@ -520,7 +520,7 @@ var Row = React.createClass({
                             style={displayInstructions.styles}
                             key={columnDef.colTag}
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i, this.props.data) : this.props.filtering && this.props.filtering.doubleClickCell ?
                                 this.props.handleColumnFilter(null, columnDef) : null }>
                     {displayContent}
                     {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
