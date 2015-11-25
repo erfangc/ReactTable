@@ -105,6 +105,37 @@ function buildCompositeSorter(funcs, isSummaryRow) {
 }
 
 /**
+ * recursively sort the
+ * @param subtotalByArr
+ * @param sortType
+ * @param lrootNode
+ * @param level
+ * @param sortFuncs
+ */
+function sortTreeBySubtotalsHelper(subtotalByArr, sortType, lrootNode, level) {
+    if (level >= subtotalByArr.length) {
+        return;
+    }
+    var columnDef = subtotalByArr[level];
+    var subtotalColumnDef = {colTag: 'subtotalBy', formatConfig: columnDef.formatConfig};
+    var sortFunc = getSortFunction(columnDef, sortType, subtotalColumnDef);
+
+    if (lrootNode.hasChild()) {
+        lrootNode.children.sort(function (a, b) {
+            return sortFunc(a.rowData, b.rowData);
+        });
+
+        lrootNode.children.forEach(function (child) {
+            sortTreeBySubtotalsHelper(subtotalByArr, sortType, child, level + 1);
+        });
+    }
+}
+
+TreeNode.prototype.sortTreeBySubtotals = function (subtotalByArr, sortType) {
+    sortTreeBySubtotalsHelper(subtotalByArr, sortType, this, 0);
+};
+
+/**
  * Sort the child nodes of this node recursively according to the array of sort functions passed into sortFuncs
  * @param sortFuncs
  */
@@ -210,8 +241,8 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
             var row = {};
             row[columnDef.colTag] = uChild[columnDef.colTag];
             var filterOutNode = false;
-            var multiplier = buildLAFConfigObject(columnDef).multiplier;
-            var value = row[columnDef.colTag] * parseFloat(multiplier);
+            var formatConfig = buildLAFConfigObject(columnDef);
+            var value = row[columnDef.colTag] * parseFloat(formatConfig.multiplier);
             for (var j = 0; j < filterData.length; j++) {
                 if (filterData[j].gt !== undefined) {
                     if (!(value > filterData[j].gt))
@@ -222,8 +253,12 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                         filterOutNode = true;
                 }
                 else if (filterData[j].eq !== undefined) {
-                    if (!(value == filterData[j].eq))
+                    // rounding
+                    value = value.toFixed(formatConfig.roundTo);
+                    var filterValue = filterData[j].eq.toString().replace(/,/g,'');
+                    if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
+                    }
                 }
             }
 
