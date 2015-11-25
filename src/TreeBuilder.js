@@ -11,6 +11,10 @@ function createNewRootNode(props, state) {
     rootNode.sortRecursivelyBySortIndex();
     rootNode.foldSubTree();
 
+    if (state.currentFilters.length > 0 && state.subtotalBy.length > 0) {
+        hideSubtotalRow(rootNode);
+    }
+
     return rootNode;
 }
 /*
@@ -57,6 +61,34 @@ function setupChildrenMap(node){
 }
 
 /**
+ * hide subtotal rows which children has been hidden.
+ * @param treeNode
+ */
+function hideSubtotalRow(treeNode) {
+    if (treeNode.hasChild()) {
+        // Filter aggregations
+        var allChildrenHidden = true;
+        for (var i = 0; i < treeNode.children.length; i++) {
+            // Call recursively to filter leaf nodes first
+            hideSubtotalRow(treeNode.children[i]);
+            // Check to see if all children are hidden, then hide parent if so
+            if (treeNode.children[i].hiddenByFilter == false) {
+                allChildrenHidden = false;
+            }
+        }
+        treeNode.hiddenByFilter = allChildrenHidden;
+    } else {
+        // filter ultimateChildren
+        var showAtLeastOneChild = false;
+        for (var j = 0; j < treeNode.ultimateChildren.length; j++) {
+            var uChild = treeNode.ultimateChildren[j];
+            showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
+        }
+        treeNode.hiddenByFilter = !showAtLeastOneChild;
+    }
+}
+
+/**
  * adding new subtotalBy, only create the deepest level subtree
  * @param lrootNode
  * @param newSubtotal
@@ -73,6 +105,7 @@ function buildSubtree(lrootNode, newSubtotal, state) {
             //generate subtree's aggregation info
             var node = lrootNode._childrenSectorNameMap[key];
             node.rowData = aggregateSector(node.ultimateChildren, state.columnDefs, newSubtotal);
+
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
@@ -107,6 +140,8 @@ function destorySubtreesRecursively(lroot) {
     for (var i = 0; i < lroot.children.length; i++) {
         destorySubtreesRecursively(lroot.children[i]);
         lroot.children[i] = null;
+
+
     }
     lroot.children = [];
     lroot._childrenSectorNameMap = {};
@@ -118,6 +153,9 @@ function destorySubtreesRecursively(lroot) {
  */
 function destorySubtrees(state) {
     destorySubtreesRecursively(state.rootNode);
+    state.rootNode.ultimateChildren.forEach(function(child){
+        child.hiddenByFilter = false;
+    });
 }
 
 /**
