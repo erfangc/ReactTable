@@ -1392,13 +1392,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         const sortBy = this.state.sortBy;
         sortBy.length = 0;
         newState.sortBy = sortBy;
-<<<<<<< HEAD
-        newState.rootNode = getRootNodeGivenProps(this.props, this.state);
-=======
         newState.rootNode = createNewRootNode(this.props, this.state);
         newState.buildRasterizedData = true;
-
->>>>>>> 412e816e6e1ebe4e7cb90a21a6a3958b31779f33
         this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
@@ -1791,7 +1786,7 @@ var Row = React.createClass({displayName: "Row",
                             style: displayInstructions.styles, 
                             key: columnDef.colTag, 
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
-                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i) : this.props.filtering && this.props.filtering.doubleClickCell ?
+                            onDoubleClick: columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i, this.props.data) : this.props.filtering && this.props.filtering.doubleClickCell ?
                                 this.props.handleColumnFilter(null, columnDef) : null}, 
                     displayContent, 
                     this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null
@@ -2273,7 +2268,8 @@ function scrollPage(paginationAttr, event) {
     } else {
         this.state.lastScrollTop = scrollTop;
     }
-};/**
+}
+;/**
  * - STOP -
  *
  * please do not add too many states to the table. Per react.js documentation for best practices, any value derivable from props alone should NOT be stored as a state
