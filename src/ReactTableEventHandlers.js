@@ -35,14 +35,43 @@ function ReactTableGetInitialState() {
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
     initialState.rootNode = createNewRootNode(this.props, initialState);
-    if (initialState.sortBy.length > 0)
-        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+    addSubtotalTitleToRowData(initialState.rootNode);
+
+    if (initialState.sortBy.length > 0){
+        var sortSubtotalByColumn = null;
+            initialState.sortBy.forEach(function(sortSetting){
+            if(sortSetting.colTag === 'subtotalBy'){
+                sortSubtotalByColumn = sortSetting;
+            };
+        });
+        if(sortSubtotalByColumn){
+            initialState.sortBy.length = 0;
+            initialState.sortBy.push(sortSubtotalByColumn);
+            this.state.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
+        }else{
+            initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+        }
+    }
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     initialState.selectedDetailRows = selections.selectedDetailRows;
     initialState.selectedSummaryRows = selections.selectedSummaryRows;
 
     return initialState;
+}
+
+/**
+ * add subtotal title for a subtotal row.
+ */
+function addSubtotalTitleToRowData(root) {
+    if (root == null) {
+        return;
+    }
+
+    root.rowData['subtotalBy'] = root.sectorTitle;
+    root.children.forEach(function (child) {
+        addSubtotalTitleToRowData(child);
+    });
 }
 
 function ReactTableHandleSelect(selectedRow) {
@@ -324,7 +353,7 @@ function ReactTableHandleRemove(columnDefToRemove) {
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
     summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 function ReactTableHandlePageClick(page) {
@@ -375,7 +404,7 @@ function expandSubtotalLevelHelper(currentLevel, clickLevel, lTreeNode) {
 function expandSubtotalLevel(levelIndex, event) {
     event.stopPropagation();
     expandSubtotalLevelHelper(0, levelIndex, this.state.rootNode);
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 /**

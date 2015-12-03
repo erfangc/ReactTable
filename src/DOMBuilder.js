@@ -529,6 +529,12 @@ function addExtraColumnForSubtotalBy(){
             colTag: "subtotalBy",
             text: "group"
         });
+        var sortSubtotalByColumn = this.state.sortBy.some(function(sortby){
+            return sortby.colTag === 'subtotalBy';
+        });
+        if(sortSubtotalByColumn){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, 'asc');
+        }
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }

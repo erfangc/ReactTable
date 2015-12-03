@@ -649,6 +649,12 @@ function addExtraColumnForSubtotalBy(){
             colTag: "subtotalBy",
             text: "group"
         });
+        var sortSubtotalByColumn = this.state.sortBy.some(function(sortby){
+            return sortby.colTag === 'subtotalBy';
+        });
+        if(sortSubtotalByColumn){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, 'asc');
+        }
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }
@@ -1340,8 +1346,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
         sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
-        while (sortBy.length > 0)
-            sortBy.pop();
+        if (sortBy.length > 0) {
+            sortBy.length = 0;
+        }
         sortBy.push({colTag: columnDef.colTag, sortType: sortType});
         var newState = {
             sortBy: sortBy
@@ -2306,14 +2313,43 @@ function ReactTableGetInitialState() {
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
     initialState.rootNode = createNewRootNode(this.props, initialState);
-    if (initialState.sortBy.length > 0)
-        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+    addSubtotalTitleToRowData(initialState.rootNode);
+
+    if (initialState.sortBy.length > 0){
+        var sortSubtotalByColumn = null;
+            initialState.sortBy.forEach(function(sortSetting){
+            if(sortSetting.colTag === 'subtotalBy'){
+                sortSubtotalByColumn = sortSetting;
+            };
+        });
+        if(sortSubtotalByColumn){
+            initialState.sortBy.length = 0;
+            initialState.sortBy.push(sortSubtotalByColumn);
+            this.state.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
+        }else{
+            initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+        }
+    }
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     initialState.selectedDetailRows = selections.selectedDetailRows;
     initialState.selectedSummaryRows = selections.selectedSummaryRows;
 
     return initialState;
+}
+
+/**
+ * add subtotal title for a subtotal row.
+ */
+function addSubtotalTitleToRowData(root) {
+    if (root == null) {
+        return;
+    }
+
+    root.rowData['subtotalBy'] = root.sectorTitle;
+    root.children.forEach(function (child) {
+        addSubtotalTitleToRowData(child);
+    });
 }
 
 function ReactTableHandleSelect(selectedRow) {
@@ -2595,7 +2631,7 @@ function ReactTableHandleRemove(columnDefToRemove) {
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
     summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 function ReactTableHandlePageClick(page) {
@@ -2646,7 +2682,7 @@ function expandSubtotalLevelHelper(currentLevel, clickLevel, lTreeNode) {
 function expandSubtotalLevel(levelIndex, event) {
     event.stopPropagation();
     expandSubtotalLevelHelper(0, levelIndex, this.state.rootNode);
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 /**
