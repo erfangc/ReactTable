@@ -41,7 +41,34 @@ $(function () {
                 return classes;
             }
         },
-        {colTag: "fruit_preference", text: "Fruit Preference"},
+        {colTag: "fruit_preference", text: "Fruit Preference",
+            onDoubleClick: function (content, colDef, colNum, row) {
+                row.edit = true;
+                row.editCol = colDef.colTag;
+                table.setState({buildRasterizedData: true});
+            },
+            cellTemplate: function(row, colDef, content){
+                if(row.edit == true && row.editCol == colDef.colTag){
+                    return React.createElement("div", {},
+                        React.createElement("input", {type: 'text', defaultValue: row.fruit_preference,
+                            autoFocus: true,
+                            onKeyPress: function (event) {
+                                if (event.charCode == 13) {
+                                    row.fruit_preference = event.target.value;
+                                    row.edit = false;
+                                    table.setState({buildRasterizedData: true});
+                                }
+                            },
+                            onBlur: function (event) {
+                                row.edit = false;
+                            }
+                        })
+                    )
+                } else {
+                    return React.createElement("div", {}, React.createElement("span", {}, row.fruit_preference))
+                }
+            }
+        },
         {
             colTag: "score_weight_factor",
             format: "number",
