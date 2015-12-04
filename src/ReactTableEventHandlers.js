@@ -47,7 +47,7 @@ function ReactTableGetInitialState() {
         if(sortSubtotalByColumn){
             initialState.sortBy.length = 0;
             initialState.sortBy.push(sortSubtotalByColumn);
-            this.state.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
+            initialState.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
         }else{
             initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
         }
