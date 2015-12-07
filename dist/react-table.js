@@ -3103,7 +3103,7 @@ function createNewNodeFromStrucutre(treeData, titleKey, parent){
         if( !_.isObject(value) ) {
             if( !node.rowData )
                 node.rowData = {};
-            if( node.ultimateChildren.length == 0 )
+            if( node.ultimateChildren.length == 0 && node.children.length == 0)
                 node[key] = value;
             else
                 node.rowData[key] = value;
