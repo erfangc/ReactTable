@@ -37,18 +37,19 @@ function ReactTableGetInitialState() {
     initialState.rootNode = createNewRootNode(this.props, initialState);
     addSubtotalTitleToRowData(initialState.rootNode);
 
-    if (initialState.sortBy.length > 0){
+    if (initialState.sortBy.length > 0) {
         var sortSubtotalByColumn = null;
-            initialState.sortBy.forEach(function(sortSetting){
-            if(sortSetting.colTag === 'subtotalBy'){
+        initialState.sortBy.forEach(function (sortSetting) {
+            if (sortSetting.colTag === 'subtotalBy') {
                 sortSubtotalByColumn = sortSetting;
-            };
+            }
+            ;
         });
-        if(sortSubtotalByColumn){
+        if (sortSubtotalByColumn) {
             initialState.sortBy.length = 0;
             initialState.sortBy.push(sortSubtotalByColumn);
             initialState.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
-        }else{
+        } else {
             initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
         }
     }
@@ -74,15 +75,74 @@ function addSubtotalTitleToRowData(root) {
     });
 }
 
-function ReactTableHandleSelect(selectedRow) {
+/**
+ * to select a row, need to press ctrl and mouse click. this won't confuse double click a cell
+ * if don't press ctrl but do a mouse click, all selected rows will be unselected.
+ * @param selectedRow
+ * @param event
+ * @constructor
+ */
+function ReactTableHandleSelect(selectedRow, event) {
     var rowKey = this.props.rowKey;
     if (rowKey == null)
         return;
-    if (selectedRow.isDetail != null & selectedRow.isDetail == true)
-        this.props.onSelectCallback(selectedRow, this.toggleSelectDetailRow(selectedRow[rowKey]));
-    else if (this.props.onSummarySelectCallback)
-        this.props.onSummarySelectCallback(selectedRow, this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath)));
 
+    if (event.shiftKey) {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this.state.shiftKey) {
+            this.state.shiftKey = {firstRow: selectedRow};
+        } else if (!this.state.shiftKey.firstRow) {
+            this.state.shiftKey.firstRow = selectedRow;
+        } else {
+            //add first click row to current selected row
+            var parent = selectedRow.parent;
+            var start = Math.min(this.state.shiftKey.firstRow.indexInParent, selectedRow.indexInParent);
+            var end = Math.max(this.state.shiftKey.firstRow.indexInParent, selectedRow.indexInParent);
+            this.state.selectedDetailRows = {};
+            for (var i = start; i <= end; i++) {
+                var row = parent.ultimateChildren[i];
+                this.toggleSelectDetailRow(row[rowKey]);
+            }
+        }
+        return;
+    }
+
+    if (!event.ctrlKey) {
+        //don't press ctrl, clean selected rows
+        var clearSelected = false;
+        if (Object.keys(this.state.selectedDetailRows).length > 0) {
+            this.state.selectedDetailRows = {};
+            clearSelected = true;
+        }
+
+        if (Object.keys(this.state.selectedSummaryRows).length > 0) {
+            this.state.selectedSummaryRows = {};
+            clearSelected = true;
+        }
+
+        if (!this.state.shiftKey || this.state.shiftKey.firstRow) {
+            this.state.shiftKey = {firstRow: null};
+        }
+
+        if (clearSelected) {
+            this.setState({});
+        }
+        return;
+    }
+
+    if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+        var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+        if (this.props.onSelectCallback) {
+            this.props.onSelectCallback(selectedRow, state);
+        }
+    }
+    else if (this.props.onSummarySelectCallback) {
+        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+        if (this.props.onSummarySelectCallback) {
+            this.props.onSummarySelectCallback(selectedRow, state);
+        }
+    }
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {

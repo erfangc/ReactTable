@@ -43,7 +43,6 @@ function rasterizeTreeForRender() {
     const data = rasterizeTree({
         node: this.state.rootNode,
         firstColumn: this.state.columnDefs[0],
-        selectedDetailRows: this.state.selectedDetailRows,
         hideSingleSubtotalChild : this.props.hideSingleSubtotalChild
     }, this.state.subtotalBy.length > 0);
 
@@ -82,6 +81,8 @@ function _rasterizeDetailRows(node, flatData) {
         if (!detailRow.hiddenByFilter) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
+            detailRow.parent = node;
+            detailRow.indexInParent = i;
             flatData.push(detailRow);
         }
     }

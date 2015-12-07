@@ -170,7 +170,6 @@ var ReactTable = React.createClass({
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: firstColumn,
-            selectedDetailRows: this.state.selectedDetailRows
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
@@ -206,7 +205,7 @@ var ReactTable = React.createClass({
             state = false;
         }
         else {
-            selectedDetailRows[key] = 1;
+            selectedDetailRows[key] = true;
             state = true;
         }
         this.setState({
@@ -389,14 +388,12 @@ var ReactTable = React.createClass({
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true);
     },
     exportDataWithoutSubtotaling: function () {
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true, true);
     },
     refresh: function () {
@@ -533,7 +530,7 @@ var Row = React.createClass({
 
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
-            //'selected': this.props.isSelected && this.props.data.isDetail,
+            'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail,
             'group-background': !this.props.data.isDetail
         });
