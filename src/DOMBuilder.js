@@ -83,15 +83,25 @@ function buildMenu(options) {
             <SubMenu
                 onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
                 menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}
-                subMenu={
-                <div className="rt-header-menu" style={subMenuStyles}>
-                    <SubtotalControl table={table} columnDef={columnDef}/>
-                    <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
-                </div>}
+                    subMenu={columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null ?
+                            <div className="rt-header-menu" style={subMenuStyles}>
+                                <SubtotalControl table={table} columnDef={columnDef}/>
+                                <SubtotalControlForDates freq= {DAILY} table={table} columnDef={columnDef}/>
+                                <SubtotalControlForDates freq= {WEEKLY} table={table} columnDef={columnDef}/>
+                                <SubtotalControlForDates freq= {MONTHLY} table={table} columnDef={columnDef}/>
+                                <SubtotalControlForDates freq= {QUARTERLY} table={table} columnDef={columnDef}/>
+                                <SubtotalControlForDates freq= {YEARLY} table={table} columnDef={columnDef}/>
+                                <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
+                            </div> :
+                            	 <div className="rt-header-menu" style={subMenuStyles}>
+                            <SubtotalControl table={table} columnDef={columnDef}/>
+                          <div className="menu-item" onClick={table.handleClearSubtotal}><i className="fa fa-ban"></i> Clear All Subtotal</div>
+                        </div>
+                    }
             >
             </SubMenu>
         ],
-
+        
         summarizeClearAll: [
             <SubMenu
                 menuItem={<span><i className="fa fa-list-ul"></i> Subtotal</span>}

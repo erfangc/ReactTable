@@ -1,14 +1,25 @@
+
+
+//Contants used for date subtotalling
+const WEEKLY = "Weekly";
+const MONTHLY = "Monthly";
+const QUARTERLY = "Quarterly";
+const YEARLY = "Yearly";
+const DAILY = "Daily";
+const DATE_FORMAT = "date";
+
 /**
  * find the right sector name for the current row for the given level of row grouping
  * this method can take partition subtotalBy columns that are numeric in nature and partition rows based on where they fall
  * in the partition
  * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
+ * @param partitions the criteria for creating partitions for date columns
  */
-function classifyRow(row, subtotalBy) {
+function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency") {
-        var result = resolvePartitionName(subtotalBy, row);
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
+        var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
     } else
@@ -29,19 +40,71 @@ function aggregateSector(partitionResult, columnDefs, subtotalBy) {
  * ----------------------------------------------------------------------
  */
 
-function resolvePartitionName(subtotalBy, row) {
+function resolvePartitionName(subtotalBy, row, partitions) {
     var sectorName = "", sortIndex = "";
+
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-                sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+            	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
+            		if(subtotalBy.formatInstructions!= null){
+            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
+                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
+            		}
+            		else{
+            			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
+                		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
+            		}
+            		
+            		if(partitions == YEARLY) {
+            			dateStr1 = new Date(dateStr1).getFullYear();
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
+            		}
+            		
+            		else if(partitions == DAILY) {
+            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
+            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
+            		}
+            		else if(partitions == MONTHLY) {
+            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
+            		}
+            		
+            		else {
+            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
+            		}
+            	}
+            	else {
+            		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+            	}
                 sortIndex = i;
                 break;
             }
         }
         if (!sectorName) {
+        	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
+        		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
+        		if(subtotalBy.formatInstructions!= null ){
+        			var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
+        		}
+        		else {
+        			var dateStr = date.toLocaleString().split(',')[0];
+        		}
+        		if(partitions == YEARLY) {
+        			dateStr = new Date(dateStr).getFullYear();
+        		}
+        		else if(partitions == MONTHLY) {
+        			dateStr = moment(date).format("MMM YYYY");
+        		}
+        		else if(partitions == DAILY) {
+        			dateStr = moment(date).format("YYYY/MM/DD");
+        		}
+        		sectorName = subtotalBy.text + " " + dateStr + "+";
+        	}
+        	else {
             sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-            sortIndex = i + 1;
+        	}
+        	sortIndex = i + 1;
         }
     }
     else

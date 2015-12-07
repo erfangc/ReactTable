@@ -93,13 +93,14 @@ function hideSubtotalRow(treeNode) {
  * @param lrootNode
  * @param newSubtotal
  * @param state
+ * @param partitions, partitions for subtotalling of date fields
  */
-function buildSubtree(lrootNode, newSubtotal, state) {
+function buildSubtree(lrootNode, newSubtotal, state, partitions) {
     if (lrootNode.children.length == 0 || (lrootNode.children.children && lrootNode.children.children.length == 0)) {
         //find the leaf node
         for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
             //build subtree
-            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal);
+            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal, partitions);
         }
         for (var key in lrootNode._childrenSectorNameMap) {
             //generate subtree's aggregation info
@@ -109,7 +110,7 @@ function buildSubtree(lrootNode, newSubtotal, state) {
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
-            buildSubtree(lrootNode.children[i], newSubtotal, state);
+            buildSubtree(lrootNode.children[i], newSubtotal, state, partitions);
         }
     }
 }
@@ -117,11 +118,12 @@ function buildSubtree(lrootNode, newSubtotal, state) {
 /**
  * add a new subtotalBy, build subtrees in leaf nodes
  * @param state
+ * @param partitions, partitions for subtotalling of date fields
  * @returns {*}
  */
-function buildSubtreeForNewSubtotal(state) {
+function buildSubtreeForNewSubtotal(state, partitions) {
     var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
-    buildSubtree(state.rootNode, newSubtotal, state);
+    buildSubtree(state.rootNode, newSubtotal, state, partitions);
     state.rootNode.sortRecursivelyBySortIndex();
     state.rootNode.foldSubTree();
 
@@ -208,13 +210,14 @@ function recursivelyAggregateNodes(node, state) {
  * @param currentNode {TreeNode}
  * @param ultimateChild {object}
  * @param subtotalBy
+ * @param partitions, partitions for subtotalling of date fields
  */
-function populateChildNodesForRow(currentNode, ultimateChild, subtotalBy) {
+function populateChildNodesForRow(currentNode, ultimateChild, subtotalBy, partitions) {
     var i;
     if (subtotalBy == null || subtotalBy.length == 0)
         return;
     for (i = 0; i < subtotalBy.length; i++) {
-        const sectoringResult = classifyRow(ultimateChild, subtotalBy[i]);
+        const sectoringResult = classifyRow(ultimateChild, subtotalBy[i], partitions);
         currentNode.appendRowToChildren({
             childSectorName: sectoringResult.sectorName,
             childRow: ultimateChild,

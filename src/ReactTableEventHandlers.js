@@ -272,8 +272,54 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */
-    if (partitions != null && partitions != "" && columnDef)
+    if (partitions != null && partitions != "" && columnDef) {
+
+    	if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
+    		var start = new Date('1/1/3002').getTime();
+    		var last = new Date('1/1/1002').getTime();
+    		var data = this.state.rootNode.ultimateChildren;
+			for (var i=data.length-1; i>=0; i--) {
+				tmp = data[i][columnDef.colTag];
+				if (tmp < start) start = tmp;
+				if (tmp > last) last = tmp;
+			}
+    		
+    		if(partitions == WEEKLY) {
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
+    		}
+    		else if (partitions == MONTHLY) {
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
+    		}
+    		else if (partitions == DAILY) {
+    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
+    		}
+    		else if (partitions == QUARTERLY) {
+    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
+    		}
+    		else if (partitions == YEARLY) {
+    			start = new Date("1/1/"+new Date(start).getFullYear()).getTime();
+    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
+    		}
+    		
+    		//Use partitions based on user input buckets
+    		else {
+    		var parts = [];
+    		var dates = partitions.split(",");
+    		    for (i = 0; i < dates.length; i++) {
+    		    	startdate=new Date(dates[i]).getTime();
+   		    		parts.push(startdate);
+    		    }
+    		    columnDef.subtotalByRange = partitionNumberLine(parts);
+            }
+    	}
+    	else {
         columnDef.subtotalByRange = partitionNumberLine(partitions);
+    	}
+    
+    }
 
     /**
      * make sure a valid column def is passed in
@@ -290,7 +336,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.upperVisualBound = this.props.pageSize;
     newState.subtotalBy = subtotalBy;
     newState.buildRasterizedData = true;
-    buildSubtreeForNewSubtotal(newState);
+    buildSubtreeForNewSubtotal(newState, partitions);
     //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
@@ -306,6 +352,38 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
 
 
     this.setState(newState);
+}
+
+//get parts for subtotalling of dates
+function getParts(frequency, start, last) {
+    var parts = [];
+    var count = 1;
+    var unit = "days";
+
+    parts.push(start);
+
+    if (frequency == MONTHLY) {
+        unit = "months";
+        count = 1;
+    } else if (frequency == QUARTERLY) {
+        unit = "months";
+        count = 3;
+    } else if (frequency == YEARLY) {
+        unit = "years";
+        count = 1;
+    }
+    else if (frequency == WEEKLY) {
+        unit = "days";
+        count = 6;
+    }
+
+    for (var i = start; i < last;) {
+        start = new Date(moment(new Date(start)).add(count, unit).calendar()).getTime();
+        parts.push(start);
+        i = start;
+    }
+
+    return parts.join(",");
 }
 
 function ReactTableHandleAdd() {
