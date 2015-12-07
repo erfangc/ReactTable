@@ -466,7 +466,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
-    var noCollapseIcon = data.treeNode.noCollapseIcon;
+    //var noCollapseIcon = data.treeNode.noCollapseIcon;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -480,7 +480,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
                 <td key={firstColTag} >
                     <div >
                     <a style={firstCellStyle} onClick={toggleHide.bind(null, data)} className="btn-link rt-expansion-link">
-                        { noCollapseIcon ? '' : data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
+                        {data.treeNode.collapsed ? <i className="fa fa-plus"/> : <i className="fa fa-minus"/>}
                     </a>
                     &nbsp;&nbsp;
                     <strong>{data[firstColTag]}</strong>
@@ -539,6 +539,12 @@ function addExtraColumnForSubtotalBy(){
             colTag: "subtotalBy",
             text: "group"
         });
+        var sortSubtotalByColumn = this.state.sortBy.some(function(sortby){
+            return sortby.colTag === 'subtotalBy';
+        });
+        if(sortSubtotalByColumn){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, 'asc');
+        }
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }

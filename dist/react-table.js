@@ -203,25 +203,15 @@ function buildMenu(options) {
             React.createElement(SubMenu, {
                 onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
                 menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
-                    subMenu: columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null ?
-                            React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                                React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: DAILY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: WEEKLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: MONTHLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: QUARTERLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: YEARLY, table: table, columnDef: columnDef}), 
-                                React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
-                            ) :
-                            	 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                            React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                          React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
-                        )
-                    
+                subMenu: 
+                React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                    React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                    React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
+                )
             }
             )
         ],
-        
+
         summarizeClearAll: [
             React.createElement(SubMenu, {
                 menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
@@ -586,7 +576,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
-    var noCollapseIcon = data.treeNode.noCollapseIcon;
+    //var noCollapseIcon = data.treeNode.noCollapseIcon;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -600,7 +590,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
                 React.createElement("td", {key: firstColTag}, 
                     React.createElement("div", null, 
                     React.createElement("a", {style: firstCellStyle, onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
-                         noCollapseIcon ? '' : data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
+                        data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
                     "  ", 
                     React.createElement("strong", null, data[firstColTag]), 
@@ -659,31 +649,26 @@ function addExtraColumnForSubtotalBy(){
             colTag: "subtotalBy",
             text: "group"
         });
+        var sortSubtotalByColumn = this.state.sortBy.some(function(sortby){
+            return sortby.colTag === 'subtotalBy';
+        });
+        if(sortSubtotalByColumn){
+            this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, 'asc');
+        }
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }
-};
-
-//Contants used for date subtotalling
-const WEEKLY = "Weekly";
-const MONTHLY = "Monthly";
-const QUARTERLY = "Quarterly";
-const YEARLY = "Yearly";
-const DAILY = "Daily";
-const DATE_FORMAT = "date";
-
-/**
+};/**
  * find the right sector name for the current row for the given level of row grouping
  * this method can take partition subtotalBy columns that are numeric in nature and partition rows based on where they fall
  * in the partition
  * @param subtotalBy the column to group subtotalBy
  * @param row the data row to determine the sector name for
- * @param partitions the criteria for creating partitions for date columns
  */
-function classifyRow(row, subtotalBy, partitions) {
+function getSectorName(row, subtotalBy) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
-        var result = resolvePartitionName(subtotalBy, row, partitions);
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency") {
+        var result = resolvePartitionName(subtotalBy, row);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
     } else
@@ -704,71 +689,19 @@ function aggregateSector(partitionResult, columnDefs, subtotalBy) {
  * ----------------------------------------------------------------------
  */
 
-function resolvePartitionName(subtotalBy, row, partitions) {
+function resolvePartitionName(subtotalBy, row) {
     var sectorName = "", sortIndex = "";
-
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-            	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-            		if(subtotalBy.formatInstructions!= null){
-            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
-                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
-            		}
-            		else{
-            			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
-                		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
-            		}
-            		
-            		if(partitions == YEARLY) {
-            			dateStr1 = new Date(dateStr1).getFullYear();
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		
-            		else if(partitions == DAILY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
-            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
-            		}
-            		else if(partitions == MONTHLY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		
-            		else {
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
-            		}
-            	}
-            	else {
-            		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
-            	}
+                sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
                 sortIndex = i;
                 break;
             }
         }
         if (!sectorName) {
-        	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-        		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-        		if(subtotalBy.formatInstructions!= null ){
-        			var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
-        		}
-        		else {
-        			var dateStr = date.toLocaleString().split(',')[0];
-        		}
-        		if(partitions == YEARLY) {
-        			dateStr = new Date(dateStr).getFullYear();
-        		}
-        		else if(partitions == MONTHLY) {
-        			dateStr = moment(date).format("MMM YYYY");
-        		}
-        		else if(partitions == DAILY) {
-        			dateStr = moment(date).format("YYYY/MM/DD");
-        		}
-        		sectorName = subtotalBy.text + " " + dateStr + "+";
-        	}
-        	else {
             sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-        	}
-        	sortIndex = i + 1;
+            sortIndex = i + 1;
         }
     }
     else
@@ -1413,8 +1346,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         const sortBy = this.state.sortBy;
         const existing = findDefByColTag(sortBy, columnDef.colTag);
         sortType = sortType || (existing && existing.sortType === 'asc' ? 'desc' : 'asc');
-        while (sortBy.length > 0)
-            sortBy.pop();
+        if (sortBy.length > 0) {
+            sortBy.length = 0;
+        }
         sortBy.push({colTag: columnDef.colTag, sortType: sortType});
         var newState = {
             sortBy: sortBy
@@ -1467,6 +1401,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         newState.sortBy = sortBy;
         newState.rootNode = createNewRootNode(this.props, this.state);
         newState.buildRasterizedData = true;
+
         this.setState(newState);
     },
     handleColumnFilter: ReactTableHandleColumnFilter,
@@ -1828,7 +1763,7 @@ var Row = React.createClass({displayName: "Row",
                 var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
 
                 // convert and format dates
-                if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+                if (columnDef && columnDef.format && columnDef.format.toLowerCase() === "date") {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
                         displayContent = new Date(displayContent).toLocaleDateString();
                 }
@@ -1954,32 +1889,17 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
     },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
-        var subMenuAttachment = null
-        if(columnDef.format == "number" || columnDef.format == "currency") {
-        	 subMenuAttachment = React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-             React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
-             React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                 placeholder: "ex: 1,10,15"}), 
-             React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                 onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                 className: "btn-link"}, "Ok")
-         )
-         
-         
-        }
-        
-        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
-       	 subMenuAttachment = React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
-         React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
-         React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-             placeholder: "ex: 1/8/2013, 5/12/2014, 3/10/2015"}), 
-         React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-             onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-             className: "btn-link"}, "Ok")
-     )
-       	                
-       }
-        
+        var subMenuAttachment = columnDef.format == "number" || columnDef.format == "currency" ?
+            (
+                React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
+                    React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
+                    React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
+                        placeholder: "ex: 1,10,15"}), 
+                    React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
+                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                        className: "btn-link"}, "Ok")
+                )
+            ) : null;
         return (
             React.createElement("div", {
                 onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick, 
@@ -1994,94 +1914,6 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
         );
     }
 });
-
-
-//Subtotal logic for dates
-
-var SubtotalControlForDates = React.createClass({displayName: "SubtotalControlForDates",
-	    getInitialState: function () {
-	        return {
-	            userInputBuckets: ""
-	        }
-	    },
-	    handleChange: function (event) {
-	        this.setState({userInputBuckets: event.target.value});
-	    },
-	    handleKeyPress: function (event) {
-	        if (event.charCode == 13) {
-	            event.preventDefault();
-	            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
-	        }
-	    },
-	    handleClick: function (event) {
-	        event.stopPropagation();
-	        var $node = $(this.getDOMNode());
-	        $node.children(".menu-item-input").children("input").focus();
-	    },
-	    render: function () {
-	        var table = this.props.table, columnDef = this.props.columnDef;
-	        var subMenuAttachment =  null;
-	        var freq = this.props.freq;
-	        if(freq == WEEKLY) {
-	        return React.createElement("div", {
-		                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, WEEKLY) : this.handleClick, 
-		                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-		                React.createElement("div", null, 
-		                    React.createElement("span", null, 
-		                    		WEEKLY)
-		                ), 
-		                subMenuAttachment
-		            );
-	    }
-	        if(freq == MONTHLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, MONTHLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		MONTHLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == DAILY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, DAILY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		DAILY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == QUARTERLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, QUARTERLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		QUARTERLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == YEARLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, YEARLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		YEARLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	    }
-	})
 
 /*
  * ----------------------------------------------------------------------
@@ -2444,8 +2276,7 @@ function scrollPage(paginationAttr, event) {
     } else {
         this.state.lastScrollTop = scrollTop;
     }
-}
-;/**
+};/**
  * - STOP -
  *
  * please do not add too many states to the table. Per react.js documentation for best practices, any value derivable from props alone should NOT be stored as a state
@@ -2481,10 +2312,24 @@ function ReactTableGetInitialState() {
      * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
-    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);
+    initialState.rootNode = createNewRootNode(this.props, initialState);
+    addSubtotalTitleToRowData(initialState.rootNode);
 
-    if (initialState.sortBy.length > 0)
-        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+    if (initialState.sortBy.length > 0){
+        var sortSubtotalByColumn = null;
+            initialState.sortBy.forEach(function(sortSetting){
+            if(sortSetting.colTag === 'subtotalBy'){
+                sortSubtotalByColumn = sortSetting;
+            };
+        });
+        if(sortSubtotalByColumn){
+            initialState.sortBy.length = 0;
+            initialState.sortBy.push(sortSubtotalByColumn);
+            initialState.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
+        }else{
+            initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
+        }
+    }
 
     var selections = getInitialSelections(this.props.selectedRows, this.props.selectedSummaryRows);
     initialState.selectedDetailRows = selections.selectedDetailRows;
@@ -2493,14 +2338,18 @@ function ReactTableGetInitialState() {
     return initialState;
 }
 
-function getRootNodeGivenProps(props, initialState){
-    if( props.dataAsTree && props.dataAsTreeTitleKey ) {
-        props.data = [];
-        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);
+/**
+ * add subtotal title for a subtotal row.
+ */
+function addSubtotalTitleToRowData(root) {
+    if (root == null) {
+        return;
     }
-    else{
-        return createNewRootNode(props, initialState);
-    }
+
+    root.rowData['subtotalBy'] = root.sectorTitle;
+    root.children.forEach(function (child) {
+        addSubtotalTitleToRowData(child);
+    });
 }
 
 function ReactTableHandleSelect(selectedRow) {
@@ -2684,7 +2533,10 @@ function ReactTableHandleClearSubtotal(event) {
 
 /**
  * check if a tree node needs to be hidden. if a tree node has no children to show, hide it.
- * @param lrootNode
+ * @param columnDef
+ * @param textToFilterBy
+ * @param caseSensitive
+ * @param customFilterer
  */
 function hideTreeNodeWhenNoChildrenToShow(lrootNode) {
     if (lrootNode.hasChild()) {
@@ -2719,54 +2571,8 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     /**
      * determine if the subtotal operation require partitioning of the column values first
      */
-    if (partitions != null && partitions != "" && columnDef) {
-
-    	if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
-    		var start = new Date('1/1/3002').getTime();
-    		var last = new Date('1/1/1002').getTime();
-    		var data = this.state.rootNode.ultimateChildren;
-			for (var i=data.length-1; i>=0; i--) {
-				tmp = data[i][columnDef.colTag];
-				if (tmp < start) start = tmp;
-				if (tmp > last) last = tmp;
-			}
-    		
-    		if(partitions == WEEKLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == MONTHLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == DAILY) {
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == QUARTERLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == YEARLY) {
-    			start = new Date("1/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		
-    		//Use partitions based on user input buckets
-    		else {
-    		var parts = [];
-    		var dates = partitions.split(",");
-    		    for (i = 0; i < dates.length; i++) {
-    		    	startdate=new Date(dates[i]).getTime();
-   		    		parts.push(startdate);
-    		    }
-    		    columnDef.subtotalByRange = partitionNumberLine(parts);
-            }
-    	}
-    	else {
+    if (partitions != null && partitions != "" && columnDef)
         columnDef.subtotalByRange = partitionNumberLine(partitions);
-    	}
-    
-    }
 
     /**
      * make sure a valid column def is passed in
@@ -2783,7 +2589,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     newState.upperVisualBound = this.props.pageSize;
     newState.subtotalBy = subtotalBy;
     newState.buildRasterizedData = true;
-    buildSubtreeForNewSubtotal(newState, partitions);
+    buildSubtreeForNewSubtotal(newState);
     //newState.rootNode = createNewRootNode(this.props, newState);
     /**
      * subtotaling destroys sort, so here we re-apply sort
@@ -2799,38 +2605,6 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
 
 
     this.setState(newState);
-}
-
-//get parts for subtotalling of dates
-function getParts(frequency, start, last) {
-    var parts = [];
-    var count = 1;
-    var unit = "days";
-
-    parts.push(start);
-
-    if (frequency == MONTHLY) {
-        unit = "months";
-        count = 1;
-    } else if (frequency == QUARTERLY) {
-        unit = "months";
-        count = 3;
-    } else if (frequency == YEARLY) {
-        unit = "years";
-        count = 1;
-    }
-    else if (frequency == WEEKLY) {
-        unit = "days";
-        count = 6;
-    }
-
-    for (var i = start; i < last;) {
-        start = new Date(moment(new Date(start)).add(count, unit).calendar()).getTime();
-        parts.push(start);
-        i = start;
-    }
-
-    return parts.join(",");
 }
 
 function ReactTableHandleAdd() {
@@ -2857,7 +2631,7 @@ function ReactTableHandleRemove(columnDefToRemove) {
 function ReactTableHandleToggleHide(summaryRow, event) {
     event.stopPropagation();
     summaryRow.treeNode.collapsed = !summaryRow.treeNode.collapsed;
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 function ReactTableHandlePageClick(page) {
@@ -2908,7 +2682,7 @@ function expandSubtotalLevelHelper(currentLevel, clickLevel, lTreeNode) {
 function expandSubtotalLevel(levelIndex, event) {
     event.stopPropagation();
     expandSubtotalLevelHelper(0, levelIndex, this.state.rootNode);
-    this.setState({buildRasterizedData:true});
+    this.setState({buildRasterizedData: true});
 }
 
 /**
@@ -2984,10 +2758,7 @@ function getInitialSelections(selectedRows, selectedSummaryRows) {
 
 const dateSorter = {
     asc: function (a, b) {
-        var aDate = !a[this.colTag] ? 0 : a[this.colTag];
-        var bDate = !b[this.colTag] ? 0 : b[this.colTag];
-
-        return new Date(aDate) - new Date(bDate);
+        return new Date(a[this.colTag]) - new Date(b[this.colTag]);
     },
     desc: function (a, b) {
         return -1 * dateSorter.asc.call(this, a, b);
@@ -3061,7 +2832,6 @@ function findDefByColTag(columnDefs, colTag) {
 ;/**
  * Transform the current props into a tree structure representing the complex state
  * @param props
- * @param state
  * @return {TreeNode}
  */
 function createNewRootNode(props, state) {
@@ -3076,48 +2846,6 @@ function createNewRootNode(props, state) {
     }
 
     return rootNode;
-}
-/*
- this.sectorTitle = sectorTitle;
- this.parent = parent;
- this.subtotalByColumnDef = {};
- this.rowData = null;
- this.display = true;
- this.children = [];
- this.ultimateChildren = [];
- this.collapsed = true
- */
-function createNewNodeFromStrucutre(treeData, titleKey, parent){
-    var node = new TreeNode( parent ? treeData[titleKey] : "Grand Total", parent);
-    _.each(treeData.children, function(child){
-        if( child.children.length > 0 )
-            node.children.push(createNewNodeFromStrucutre(child, titleKey, node));
-        else
-            node.ultimateChildren.push(createNewNodeFromStrucutre(child, titleKey, node));
-    });
-    if( node.ultimateChildren.length == 0 )
-        node.isDetail = true;
-    else
-        setupChildrenMap(node);
-    _.each(treeData, function(value, key){
-        if( !_.isObject(value) ) {
-            if( !node.rowData )
-                node.rowData = {};
-            if( node.ultimateChildren.length == 0 && node.children.length == 0)
-                node[key] = value;
-            else
-                node.rowData[key] = value;
-        }
-    });
-
-    return node;
-}
-
-function setupChildrenMap(node){
-    _.each(node.children, function(child){
-        node.ultimateChildren = node.ultimateChildren.concat(child.ultimateChildren);
-        node._childrenSectorNameMap[child.sectorTitle] = child;
-    });
 }
 
 /**
@@ -3153,14 +2881,13 @@ function hideSubtotalRow(treeNode) {
  * @param lrootNode
  * @param newSubtotal
  * @param state
- * @param partitions, partitions for subtotalling of date fields
  */
-function buildSubtree(lrootNode, newSubtotal, state, partitions) {
+function buildSubtree(lrootNode, newSubtotal, state) {
     if (lrootNode.children.length == 0 || (lrootNode.children.children && lrootNode.children.children.length == 0)) {
         //find the leaf node
         for (var j = 0; j < lrootNode.ultimateChildren.length; j++) {
             //build subtree
-            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal, partitions);
+            populateChildNodesForRow(lrootNode, lrootNode.ultimateChildren[j], newSubtotal);
         }
         for (var key in lrootNode._childrenSectorNameMap) {
             //generate subtree's aggregation info
@@ -3170,7 +2897,7 @@ function buildSubtree(lrootNode, newSubtotal, state, partitions) {
         }
     } else {
         for (var i = 0; i < lrootNode.children.length; i++) {
-            buildSubtree(lrootNode.children[i], newSubtotal, state, partitions);
+            buildSubtree(lrootNode.children[i], newSubtotal, state);
         }
     }
 }
@@ -3178,12 +2905,11 @@ function buildSubtree(lrootNode, newSubtotal, state, partitions) {
 /**
  * add a new subtotalBy, build subtrees in leaf nodes
  * @param state
- * @param partitions, partitions for subtotalling of date fields
  * @returns {*}
  */
-function buildSubtreeForNewSubtotal(state, partitions) {
+function buildSubtreeForNewSubtotal(state) {
     var newSubtotal = [state.subtotalBy[state.subtotalBy.length - 1]];
-    buildSubtree(state.rootNode, newSubtotal, state, partitions);
+    buildSubtree(state.rootNode, newSubtotal, state);
     state.rootNode.sortRecursivelyBySortIndex();
     state.rootNode.foldSubTree();
 
@@ -3207,6 +2933,18 @@ function destorySubtreesRecursively(lroot) {
     }
     lroot.children = [];
     lroot._childrenSectorNameMap = {};
+}
+
+/**
+ * destory root's children
+ * @param state
+ */
+function destoryRootChildren(state) {
+    for (var i = 0; i < state.rootNode.children.length; i++) {
+        state.rootNode.children[i] = null;
+    }
+    state.rootNode.children = [];
+    state.rootNode._childrenSectorNameMap = {};
 }
 
 /**
@@ -3241,7 +2979,7 @@ function buildTreeSkeleton(props, state) {
 /**
  * Populate an existing skeleton (represented by the root node) with summary level data
  * @param node
- * @param state
+ * @param tableProps
  */
 // can postpone generate lower level aggregation information to accelerate initial render
 function recursivelyAggregateNodes(node, state) {
@@ -3261,30 +2999,21 @@ function recursivelyAggregateNodes(node, state) {
  * ----------------------------------------------------------------------
  */
 
-/**
- * Append the proper children TreeNode(s) to the `currentNode`
- * Children nodes are generated by running `subtotalBy` through
- * a sectoring process. The unique set of sector names resulting from this sectoring process
- * determines the children nodes for the `currentNode`
- *
- * @param currentNode {TreeNode}
- * @param ultimateChild {object}
- * @param subtotalBy
- * @param partitions, partitions for subtotalling of date fields
- */
-function populateChildNodesForRow(currentNode, ultimateChild, subtotalBy, partitions) {
-    var i;
+function populateChildNodesForRow(rootNode, row, subtotalBy) {
+    var i, currentNode = rootNode;
     if (subtotalBy == null || subtotalBy.length == 0)
         return;
     for (i = 0; i < subtotalBy.length; i++) {
-        const sectoringResult = classifyRow(ultimateChild, subtotalBy[i], partitions);
-        currentNode.appendRowToChildren({
-            childSectorName: sectoringResult.sectorName,
-            childRow: ultimateChild,
-            sortIndex: sectoringResult.sortIndex,
+        var result = getSectorName(row, subtotalBy[i]);
+        currentNode = currentNode.appendRowToChildren({
+            childSectorName: result.sectorName,
+            childRow: row,
+            sortIndex: result.sortIndex,
             subtotalByColumnDef: subtotalBy[i]
         });
     }
+    // currentNode is the deepest level non leaf children
+    return currentNode;
 }
 ;/**
  * Represents a grouping of table rows with references to children that are also grouping
@@ -3340,15 +3069,12 @@ TreeNode.prototype.expandRecursively = function () {
 
 /**
  * Appends the given row into the ultimateChildren of the specified child node of the current node
+ * @param childSectorName
+ * @param childRow
  * @returns the child TreeNode that the data was appended to
- * @param options
  */
 TreeNode.prototype.appendRowToChildren = function (options) {
-    var childSectorName = options.childSectorName,
-        childRow = options.childRow,
-        sortIndex = options.sortIndex,
-        subtotalByColumnDef = options.subtotalByColumnDef;
-
+    var childSectorName = options.childSectorName, childRow = options.childRow, sortIndex = options.sortIndex, subtotalByColumnDef = options.subtotalByColumnDef;
     // create a new child node if one by the current sector name does not exist
     if (this._childrenSectorNameMap[childSectorName] == null) {
         var child = new TreeNode(childSectorName, this);
