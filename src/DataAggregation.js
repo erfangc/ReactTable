@@ -7,6 +7,7 @@ const QUARTERLY = "Quarterly";
 const YEARLY = "Yearly";
 const DAILY = "Daily";
 const DATE_FORMAT = "date";
+const OLDEST = "Oldest";
 
 /**
  * find the right sector name for the current row for the given level of row grouping
@@ -63,7 +64,7 @@ function resolvePartitionName(subtotalBy, row, partitions) {
             		
             		else if(partitions == DAILY) {
             			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
-            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : "oldest") ;
+            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
             		}
             		else if(partitions == MONTHLY) {
             			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
