@@ -31,8 +31,10 @@ var ReactTable = React.createClass({
          */
         afterColumnRemove: React.PropTypes.func,
         beforeColumnAdd: React.PropTypes.func,
-        onSelectCallback: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
+        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback:React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -546,10 +548,42 @@ var Row = React.createClass({
             </div>)
         } else
         // apply extra CSS if specified
-            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}  onMouseDown={mouseDown.bind(this, this.props.data)}
+                onMouseUp={mouseUp.bind(this, this.props.data)}
+                className={classes} style={this.props.extraStyle}> {cells} </tr>);
     }
 });
+
+function mouseDown(row, event) {
+    this.props.table.state.mouseDown = {row: row};
+}
+
+function mouseMove(row, event) {
+    if (!this.props.table.state.mouseDown)
+        return;
+    console.log('mouse move');
+}
+
+function mouseUp(mouseUpRow, event) {
+    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+        var mouseDownRow = this.props.table.state.mouseDown.row;
+        this.props.table.state.mouseDown = null;
+        var rowKey = this.props.table.props.rowKey;
+        if (!rowKey || !mouseUpRow[rowKey])
+            return;
+
+        var parent = mouseUpRow.parent;
+        var start = Math.min(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        var end = Math.max(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        this.props.table.state.selectedDetailRows = {};
+        for (var i = start; i <= end; i++) {
+            var row = parent.ultimateChildren[i];
+            this.props.table.toggleSelectDetailRow(row[rowKey]);
+        }
+
+        this.props.table.setState({});
+    }
+}
 
 var PageNavigator = React.createClass({
     handleClick: function (index, event) {

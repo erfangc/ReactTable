@@ -1304,8 +1304,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
          */
         afterColumnRemove: React.PropTypes.func,
         beforeColumnAdd: React.PropTypes.func,
-        onSelectCallback: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
+        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback:React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -1819,10 +1821,42 @@ var Row = React.createClass({displayName: "Row",
             ))
         } else
         // apply extra CSS if specified
-            return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-                className: classes, style: this.props.extraStyle}, cells));
+            return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), onMouseDown: mouseDown.bind(this, this.props.data), 
+                onMouseUp: mouseUp.bind(this, this.props.data), 
+                className: classes, style: this.props.extraStyle}, " ", cells, " "));
     }
 });
+
+function mouseDown(row, event) {
+    this.props.table.state.mouseDown = {row: row};
+}
+
+function mouseMove(row, event) {
+    if (!this.props.table.state.mouseDown)
+        return;
+    console.log('mouse move');
+}
+
+function mouseUp(mouseUpRow, event) {
+    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+        var mouseDownRow = this.props.table.state.mouseDown.row;
+        this.props.table.state.mouseDown = null;
+        var rowKey = this.props.table.props.rowKey;
+        if (!rowKey || !mouseUpRow[rowKey])
+            return;
+
+        var parent = mouseUpRow.parent;
+        var start = Math.min(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        var end = Math.max(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        this.props.table.state.selectedDetailRows = {};
+        for (var i = start; i <= end; i++) {
+            var row = parent.ultimateChildren[i];
+            this.props.table.toggleSelectDetailRow(row[rowKey]);
+        }
+
+        this.props.table.setState({});
+    }
+}
 
 var PageNavigator = React.createClass({displayName: "PageNavigator",
     handleClick: function (index, event) {
@@ -2358,11 +2392,12 @@ function addSubtotalTitleToRowData(root) {
  * @constructor
  */
 function ReactTableHandleSelect(selectedRow, event) {
-    var rowKey = this.props.rowKey;
-    if (rowKey == null)
-        return;
-
     if (event.shiftKey) {
+        //press shift key
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
+
         event.stopPropagation();
         event.preventDefault();
         if (!this.state.shiftKey) {
@@ -2400,22 +2435,34 @@ function ReactTableHandleSelect(selectedRow, event) {
             this.state.shiftKey = {firstRow: null};
         }
 
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            if (this.props.onRowClickCallback) {
+                this.props.onRowClickCallback(selectedRow, false);
+            }
+        }
+        else if (this.props.onSummaryRowClickCallback) {
+            this.props.onSummaryRowClickCallback(selectedRow, false);
+        }
+
         if (clearSelected) {
             this.setState({});
         }
-        return;
-    }
+    } else{
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
 
-    if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
-        var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
-        if (this.props.onSelectCallback) {
-            this.props.onSelectCallback(selectedRow, state);
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+            if (this.props.onSelectCallback) {
+                this.props.onSelectCallback(selectedRow, state);
+            }
         }
-    }
-    else if (this.props.onSummarySelectCallback) {
-        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
-        if (this.props.onSummarySelectCallback) {
-            this.props.onSummarySelectCallback(selectedRow, state);
+        else {
+            state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+            if (this.props.onSummarySelectCallback) {
+                this.props.onSummarySelectCallback(selectedRow, state);
+            }
         }
     }
 }

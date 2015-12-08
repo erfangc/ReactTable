@@ -83,11 +83,12 @@ function addSubtotalTitleToRowData(root) {
  * @constructor
  */
 function ReactTableHandleSelect(selectedRow, event) {
-    var rowKey = this.props.rowKey;
-    if (rowKey == null)
-        return;
-
     if (event.shiftKey) {
+        //press shift key
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
+
         event.stopPropagation();
         event.preventDefault();
         if (!this.state.shiftKey) {
@@ -125,22 +126,34 @@ function ReactTableHandleSelect(selectedRow, event) {
             this.state.shiftKey = {firstRow: null};
         }
 
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            if (this.props.onRowClickCallback) {
+                this.props.onRowClickCallback(selectedRow, false);
+            }
+        }
+        else if (this.props.onSummaryRowClickCallback) {
+            this.props.onSummaryRowClickCallback(selectedRow, false);
+        }
+
         if (clearSelected) {
             this.setState({});
         }
-        return;
-    }
+    } else{
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
 
-    if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
-        var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
-        if (this.props.onSelectCallback) {
-            this.props.onSelectCallback(selectedRow, state);
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+            if (this.props.onSelectCallback) {
+                this.props.onSelectCallback(selectedRow, state);
+            }
         }
-    }
-    else if (this.props.onSummarySelectCallback) {
-        state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
-        if (this.props.onSummarySelectCallback) {
-            this.props.onSummarySelectCallback(selectedRow, state);
+        else {
+            state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+            if (this.props.onSummarySelectCallback) {
+                this.props.onSummarySelectCallback(selectedRow, state);
+            }
         }
     }
 }
