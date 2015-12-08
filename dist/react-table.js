@@ -1831,12 +1831,6 @@ function mouseDown(row, event) {
     this.props.table.state.mouseDown = {row: row};
 }
 
-function mouseMove(row, event) {
-    if (!this.props.table.state.mouseDown)
-        return;
-    console.log('mouse move');
-}
-
 function mouseUp(mouseUpRow, event) {
     if(mouseUpRow !== this.props.table.state.mouseDown.row){
         var mouseDownRow = this.props.table.state.mouseDown.row;
