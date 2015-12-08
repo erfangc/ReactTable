@@ -10,4 +10,5 @@ node_js:
   - "iojs"
 
 install: npm install && bower install
+
 script: grunt build
