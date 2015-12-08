@@ -330,7 +330,7 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
     		    	startdate=new Date(dates[i]).getTime();
    		    		parts.push(startdate);
     		    }
-    		    columnDef.subtotalByRange = partitionNumberLine(parts);
+    		    columnDef.subtotalByRange = partitionNumberLine(parts.join(","));
             }
     	}
     	else {
