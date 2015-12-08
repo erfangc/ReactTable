@@ -1,4 +1,4 @@
-# ReactTable
+# ReactTable [![Build Status](https://travis-ci.org/erfangc/ReactTable.svg?branch=master)](https://travis-ci.org/erfangc/ReactTable)
 
 High Performance HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
