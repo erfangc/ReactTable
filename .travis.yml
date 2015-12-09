@@ -9,6 +9,6 @@ install:
   - npm install && bower install
 
 script:
-  - grunt build
   - node node_modules/react-tools/bin/jsx ./src ./build
+  - grunt build
 
