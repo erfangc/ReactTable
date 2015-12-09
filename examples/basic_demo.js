@@ -90,6 +90,7 @@ $(function () {
             hideSubtotaledColumns: true,
             enableScrollPage:true,
             disableInfiniteScrolling: true,
+            disableGrandTotal: true,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
             subtotalBy: [{
                 colTag: "nationality", text: "Nationality"

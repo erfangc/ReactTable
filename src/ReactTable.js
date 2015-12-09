@@ -441,14 +441,15 @@ var ReactTable = React.createClass({
         return (
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
-                <div ref="scrollBody" style={tableBodyContainerStyle} className="rt-scrollable" onWheel={this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}>
-                    <table ref="tableBody" className="rt-table"  >
+                <div ref="scrollBody" style={tableBodyContainerStyle} className="rt-scrollable"
+                     onWheel={this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}>
+                    <table ref="tableBody" className="rt-table">
                         <tbody>
-                            {rowsToDisplay}
+                        {rowsToDisplay}
                         </tbody>
                     </table>
                 </div>
-                {grandTotal}
+                {this.props.disableGrandTotal === true ? null : grandTotal}
                 {buildFooter.call(this, paginationAttr, rasterizedData.length)}
             </div>
         );
@@ -503,9 +504,9 @@ var Row = React.createClass({
                         grandTotalCellStyle.width = displayContent.length / 2 + 2 + "em";
                     }
                     cells.push(
-                        <div className={classes + " rt-grand-total-cell"} key={columnDef.colTag} >
+                        <div className={classes + " rt-grand-total-cell"} key={columnDef.colTag}>
                             <div className="rt-grand-total-cell-content" style={grandTotalCellStyle}>
-                                    {displayContent ? displayContent : <span>&nbsp;</span>}
+                                {displayContent ? displayContent : <span>&nbsp;</span>}
                             </div>
                         </div>
                     );
@@ -522,8 +523,8 @@ var Row = React.createClass({
                             //if define doubleClickCallback, invoke this first, otherwise check doubleClickFilter
                             onDoubleClick={columnDef.onDoubleClick ? columnDef.onDoubleClick.bind(null, this.props.data[columnDef.colTag], columnDef, i, this.props.data) : this.props.filtering && this.props.filtering.doubleClickCell ?
                                 this.props.handleColumnFilter(null, columnDef) : null }>
-                    {displayContent}
-                    {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
+                            {displayContent}
+                            {this.props.cellRightClickMenu && this.props.data.isDetail ? buildCellMenu(this.props.cellRightClickMenu, this.props.data, columnDef, this.props.columnDefs) : null}
                         </td>
                     );
                 }
@@ -540,16 +541,16 @@ var Row = React.createClass({
         if (isGrandTotal) {
             // add a dummy column to the last to fit the vertical scroll bar
             cells.push(
-                <span className="rt-grand-total-cell" >
+                <span className="rt-grand-total-cell">
                 </span>);
 
             return (<div className="rt-grand-total">
-                        {cells}
+                {cells}
             </div>)
         } else
         // apply extra CSS if specified
             return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                className={classes} style={this.props.extraStyle}>{cells}</tr>);
+                        className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -581,12 +582,12 @@ var PageNavigator = React.createClass({
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
                     <a className={prevClass}
-                        onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                       onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
                     <a className={nextClass}
-                        onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                       onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
@@ -616,31 +617,33 @@ var SubtotalControl = React.createClass({
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
         var subMenuAttachment = null
-        if(columnDef.format == "number" || columnDef.format == "currency") {
-        	 subMenuAttachment = <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
-             <label style={{"display": "block"}}>Enter Bucket(s)</label>
-             <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-                 placeholder="ex: 1,10,15"/>
-             <a tabIndex="2" style={{"display": "block"}}
-                 onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-                 className="btn-link">Ok</a>
-         </div>
-         
-         
+        if (columnDef.format == "number" || columnDef.format == "currency") {
+            subMenuAttachment =
+                <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
+                    <label style={{"display": "block"}}>Enter Bucket(s)</label>
+                    <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
+                           placeholder="ex: 1,10,15"/>
+                    <a tabIndex="2" style={{"display": "block"}}
+                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                       className="btn-link">Ok</a>
+                </div>
+
+
         }
-        
-        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
-       	 subMenuAttachment = <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
-         <label style={{"display": "block"}}>Enter Bucket(s)</label>
-         <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-             placeholder="ex: 1/8/2013, 5/12/2014, 3/10/2015"/>
-         <a tabIndex="2" style={{"display": "block"}}
-             onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-             className="btn-link">Ok</a>
-     </div>
-       	                
-       }
-        
+
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+            subMenuAttachment =
+                <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
+                    <label style={{"display": "block"}}>Enter Bucket(s)</label>
+                    <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
+                           placeholder="ex: 1/8/2013, 5/12/2014, 3/10/2015"/>
+                    <a tabIndex="2" style={{"display": "block"}}
+                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                       className="btn-link">Ok</a>
+                </div>
+
+        }
+
         return (
             <div
                 onClick={subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, null) : this.handleClick}
@@ -648,7 +651,7 @@ var SubtotalControl = React.createClass({
                 <div>
                     <span>
                         <i className="fa fa-plus"></i>
-                    &nbsp;Add Subtotal</span>
+                        &nbsp;Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -659,90 +662,96 @@ var SubtotalControl = React.createClass({
 
 //Subtotal logic for dates
 
-var SubtotalControlForDates = React.createClass({displayName: "SubtotalControlForDates",
-	    getInitialState: function () {
-	        return {
-	            userInputBuckets: ""
-	        }
-	    },
-	    handleChange: function (event) {
-	        this.setState({userInputBuckets: event.target.value});
-	    },
-	    handleKeyPress: function (event) {
-	        if (event.charCode == 13) {
-	            event.preventDefault();
-	            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
-	        }
-	    },
-	    handleClick: function (event) {
-	        event.stopPropagation();
-	        var $node = $(this.getDOMNode());
-	        $node.children(".menu-item-input").children("input").focus();
-	    },
-	    render: function () {
-	        var table = this.props.table, columnDef = this.props.columnDef;
-	        var subMenuAttachment =  null;
-	        var freq = this.props.freq;
-	        if(freq == WEEKLY) {
-	        return React.createElement("div", {
-		                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, WEEKLY) : this.handleClick, 
-		                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-		                React.createElement("div", null, 
-		                    React.createElement("span", null, 
-		                    		WEEKLY)
-		                ), 
-		                subMenuAttachment
-		            );
-	    }
-	        if(freq == MONTHLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, MONTHLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		MONTHLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == DAILY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, DAILY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		DAILY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == QUARTERLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, QUARTERLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		QUARTERLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	        
-	        if(freq == YEARLY) {
-		        return      React.createElement("div", {
-			                onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, YEARLY) : this.handleClick, 
-			                style: {"position": "relative"}, className: "menu-item menu-item-hoverable"}, 
-			                React.createElement("div", null, 
-			                    React.createElement("span", null, 
-			                    		YEARLY)
-			                ), 
-			                subMenuAttachment
-		        		);
-		    }
-	    }
-	})
+var SubtotalControlForDates = React.createClass({
+    displayName: "SubtotalControlForDates",
+    getInitialState: function () {
+        return {
+            userInputBuckets: ""
+        }
+    },
+    handleChange: function (event) {
+        this.setState({userInputBuckets: event.target.value});
+    },
+    handleKeyPress: function (event) {
+        if (event.charCode == 13) {
+            event.preventDefault();
+            this.props.table.handleSubtotalBy(this.props.columnDef, this.state.userInputBuckets);
+        }
+    },
+    handleClick: function (event) {
+        event.stopPropagation();
+        var $node = $(this.getDOMNode());
+        $node.children(".menu-item-input").children("input").focus();
+    },
+    render: function () {
+        var table = this.props.table, columnDef = this.props.columnDef;
+        var subMenuAttachment = null;
+        var freq = this.props.freq;
+        if (freq == WEEKLY) {
+            return React.createElement("div", {
+                    onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, WEEKLY) : this.handleClick,
+                    style: {"position": "relative"}, className: "menu-item menu-item-hoverable"
+                },
+                React.createElement("div", null,
+                    React.createElement("span", null,
+                        WEEKLY)
+                ),
+                subMenuAttachment
+            );
+        }
+        if (freq == MONTHLY) {
+            return React.createElement("div", {
+                    onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, MONTHLY) : this.handleClick,
+                    style: {"position": "relative"}, className: "menu-item menu-item-hoverable"
+                },
+                React.createElement("div", null,
+                    React.createElement("span", null,
+                        MONTHLY)
+                ),
+                subMenuAttachment
+            );
+        }
+
+        if (freq == DAILY) {
+            return React.createElement("div", {
+                    onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, DAILY) : this.handleClick,
+                    style: {"position": "relative"}, className: "menu-item menu-item-hoverable"
+                },
+                React.createElement("div", null,
+                    React.createElement("span", null,
+                        DAILY)
+                ),
+                subMenuAttachment
+            );
+        }
+
+        if (freq == QUARTERLY) {
+            return React.createElement("div", {
+                    onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, QUARTERLY) : this.handleClick,
+                    style: {"position": "relative"}, className: "menu-item menu-item-hoverable"
+                },
+                React.createElement("div", null,
+                    React.createElement("span", null,
+                        QUARTERLY)
+                ),
+                subMenuAttachment
+            );
+        }
+
+        if (freq == YEARLY) {
+            return React.createElement("div", {
+                    onClick: subMenuAttachment == null ? table.handleSubtotalBy.bind(null, columnDef, YEARLY) : this.handleClick,
+                    style: {"position": "relative"}, className: "menu-item menu-item-hoverable"
+                },
+                React.createElement("div", null,
+                    React.createElement("span", null,
+                        YEARLY)
+                ),
+                subMenuAttachment
+            );
+        }
+    }
+})
 
 /*
  * ----------------------------------------------------------------------
@@ -1048,7 +1057,8 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
     }
 
     cellMenu.menus.forEach(function (menu) {
-        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
+        menuItems.push(<div className="menu-item"
+                            onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}>{menu.description}</div>);
         if (menu.followingSeparator) {
             menuItems.push(<div className="separator"/>);
         }
