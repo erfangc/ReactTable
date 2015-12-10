@@ -31,8 +31,10 @@ var ReactTable = React.createClass({
          */
         afterColumnRemove: React.PropTypes.func,
         beforeColumnAdd: React.PropTypes.func,
-        onSelectCallback: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
+        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback:React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -169,7 +171,6 @@ var ReactTable = React.createClass({
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: firstColumn,
-            selectedDetailRows: this.state.selectedDetailRows
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
@@ -205,7 +206,7 @@ var ReactTable = React.createClass({
             state = false;
         }
         else {
-            selectedDetailRows[key] = 1;
+            selectedDetailRows[key] = true;
             state = true;
         }
         this.setState({
@@ -388,14 +389,12 @@ var ReactTable = React.createClass({
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true);
     },
     exportDataWithoutSubtotaling: function () {
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true, true);
     },
     refresh: function () {
@@ -533,7 +532,7 @@ var Row = React.createClass({
 
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
-            //'selected': this.props.isSelected && this.props.data.isDetail,
+            'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail,
             'group-background': !this.props.data.isDetail
         });
@@ -549,10 +548,36 @@ var Row = React.createClass({
             </div>)
         } else
         // apply extra CSS if specified
-            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}
-                        className={classes} style={this.props.extraStyle}>{cells}</tr>);
+            return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}  onMouseDown={mouseDown.bind(this, this.props.data)}
+                onMouseUp={mouseUp.bind(this, this.props.data)}
+                className={classes} style={this.props.extraStyle}> {cells} </tr>);
     }
 });
+
+function mouseDown(row, event) {
+    this.props.table.state.mouseDown = {row: row};
+}
+
+function mouseUp(mouseUpRow, event) {
+    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+        var mouseDownRow = this.props.table.state.mouseDown.row;
+        this.props.table.state.mouseDown = null;
+        var rowKey = this.props.table.props.rowKey;
+        if (!rowKey || !mouseUpRow[rowKey])
+            return;
+
+        var parent = mouseUpRow.parent;
+        var start = Math.min(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        var end = Math.max(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        this.props.table.state.selectedDetailRows = {};
+        for (var i = start; i <= end; i++) {
+            var row = parent.ultimateChildren[i];
+            this.props.table.toggleSelectDetailRow(row[rowKey]);
+        }
+
+        this.props.table.setState({});
+    }
+}
 
 var PageNavigator = React.createClass({
     handleClick: function (index, event) {
@@ -616,7 +641,7 @@ var SubtotalControl = React.createClass({
     },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
-        var subMenuAttachment = null
+        var subMenuAttachment = null;
         if (columnDef.format == "number" || columnDef.format == "currency") {
             subMenuAttachment =
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
