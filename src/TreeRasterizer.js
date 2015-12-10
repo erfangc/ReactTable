@@ -12,10 +12,14 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         flatData = node.display == false ? [] : [node.rowData];
     }
 
-    if(node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild){
+    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
         node.ultimateChildren[0].hiddenByFilter = true;
-        node.noCollapseIcon = true;
+        if (node.hasChild()) {
+            node.noCollapseIcon = false;
+        } else {
+            node.noCollapseIcon = true;
+        }
     }
 
     if (exportOutside) {
@@ -43,8 +47,7 @@ function rasterizeTreeForRender() {
     const data = rasterizeTree({
         node: this.state.rootNode,
         firstColumn: this.state.columnDefs[0],
-        selectedDetailRows: this.state.selectedDetailRows,
-        hideSingleSubtotalChild : this.props.hideSingleSubtotalChild
+        hideSingleSubtotalChild: this.props.hideSingleSubtotalChild
     }, this.state.subtotalBy.length > 0);
 
     //those attributes of state is used by render() of ReactTable
@@ -82,6 +85,8 @@ function _rasterizeDetailRows(node, flatData) {
         if (!detailRow.hiddenByFilter) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
+            detailRow.parent = node;
+            detailRow.indexInParent = i;
             flatData.push(detailRow);
         }
     }

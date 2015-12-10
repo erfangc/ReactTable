@@ -586,7 +586,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
-    //var noCollapseIcon = data.treeNode.noCollapseIcon;
+    var noCollapseIcon = data.treeNode.noCollapseIcon;
 
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
@@ -600,7 +600,7 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
                 React.createElement("td", {key: firstColTag}, 
                     React.createElement("div", null, 
                     React.createElement("a", {style: firstCellStyle, onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
-                        data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
+                         noCollapseIcon ? '' : data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
                     "  ", 
                     React.createElement("strong", null, data[firstColTag]), 
@@ -1378,8 +1378,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
          */
         afterColumnRemove: React.PropTypes.func,
         beforeColumnAdd: React.PropTypes.func,
-        onSelectCallback: React.PropTypes.func,
+        onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
+        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback:React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -1516,7 +1518,6 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: firstColumn,
-            selectedDetailRows: this.state.selectedDetailRows
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
@@ -1552,7 +1553,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             state = false;
         }
         else {
-            selectedDetailRows[key] = 1;
+            selectedDetailRows[key] = true;
             state = true;
         }
         this.setState({
@@ -1735,14 +1736,12 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true);
     },
     exportDataWithoutSubtotaling: function () {
         return rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0],
-            selectedDetailRows: this.state.selectedDetailRows
         }, this.state.subtotalBy.length > 0, true, true);
     },
     refresh: function () {
@@ -1880,7 +1879,7 @@ var Row = React.createClass({displayName: "Row",
 
         classes = cx({
             //TODO: to hightlight a selected row, need press ctrl
-            //'selected': this.props.isSelected && this.props.data.isDetail,
+            'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail,
             'group-background': !this.props.data.isDetail
         });
@@ -1896,10 +1895,36 @@ var Row = React.createClass({displayName: "Row",
             ))
         } else
         // apply extra CSS if specified
-            return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), 
-                        className: classes, style: this.props.extraStyle}, cells));
+            return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), onMouseDown: mouseDown.bind(this, this.props.data), 
+                onMouseUp: mouseUp.bind(this, this.props.data), 
+                className: classes, style: this.props.extraStyle}, " ", cells, " "));
     }
 });
+
+function mouseDown(row, event) {
+    this.props.table.state.mouseDown = {row: row};
+}
+
+function mouseUp(mouseUpRow, event) {
+    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+        var mouseDownRow = this.props.table.state.mouseDown.row;
+        this.props.table.state.mouseDown = null;
+        var rowKey = this.props.table.props.rowKey;
+        if (!rowKey || !mouseUpRow[rowKey])
+            return;
+
+        var parent = mouseUpRow.parent;
+        var start = Math.min(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        var end = Math.max(mouseDownRow.indexInParent, mouseUpRow.indexInParent);
+        this.props.table.state.selectedDetailRows = {};
+        for (var i = start; i <= end; i++) {
+            var row = parent.ultimateChildren[i];
+            this.props.table.toggleSelectDetailRow(row[rowKey]);
+        }
+
+        this.props.table.setState({});
+    }
+}
 
 var PageNavigator = React.createClass({displayName: "PageNavigator",
     handleClick: function (index, event) {
@@ -1963,7 +1988,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
     },
     render: function () {
         var table = this.props.table, columnDef = this.props.columnDef;
-        var subMenuAttachment = null
+        var subMenuAttachment = null;
         if (columnDef.format == "number" || columnDef.format == "currency") {
             subMenuAttachment =
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
@@ -2502,18 +2527,19 @@ function ReactTableGetInitialState() {
     initialState.rootNode = createNewRootNode(this.props, initialState);
     addSubtotalTitleToRowData(initialState.rootNode);
 
-    if (initialState.sortBy.length > 0){
+    if (initialState.sortBy.length > 0) {
         var sortSubtotalByColumn = null;
-            initialState.sortBy.forEach(function(sortSetting){
-            if(sortSetting.colTag === 'subtotalBy'){
+        initialState.sortBy.forEach(function (sortSetting) {
+            if (sortSetting.colTag === 'subtotalBy') {
                 sortSubtotalByColumn = sortSetting;
-            };
+            }
+            ;
         });
-        if(sortSubtotalByColumn){
+        if (sortSubtotalByColumn) {
             initialState.sortBy.length = 0;
             initialState.sortBy.push(sortSubtotalByColumn);
             initialState.rootNode.sortTreeBySubtotals(initialState.subtotalBy, sortSubtotalByColumn.sortType);
-        }else{
+        } else {
             initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
         }
     }
@@ -2539,15 +2565,87 @@ function addSubtotalTitleToRowData(root) {
     });
 }
 
-function ReactTableHandleSelect(selectedRow) {
-    var rowKey = this.props.rowKey;
-    if (rowKey == null)
-        return;
-    if (selectedRow.isDetail != null & selectedRow.isDetail == true)
-        this.props.onSelectCallback(selectedRow, this.toggleSelectDetailRow(selectedRow[rowKey]));
-    else if (this.props.onSummarySelectCallback)
-        this.props.onSummarySelectCallback(selectedRow, this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath)));
+/**
+ * to select a row, need to press ctrl and mouse click. this won't confuse double click a cell
+ * if don't press ctrl but do a mouse click, all selected rows will be unselected.
+ * @param selectedRow
+ * @param event
+ * @constructor
+ */
+function ReactTableHandleSelect(selectedRow, event) {
+    if (event.shiftKey) {
+        //press shift key
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
 
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this.state.shiftKey) {
+            this.state.shiftKey = {firstRow: selectedRow};
+        } else if (!this.state.shiftKey.firstRow) {
+            this.state.shiftKey.firstRow = selectedRow;
+        } else {
+            //add first click row to current selected row
+            var parent = selectedRow.parent;
+            var start = Math.min(this.state.shiftKey.firstRow.indexInParent, selectedRow.indexInParent);
+            var end = Math.max(this.state.shiftKey.firstRow.indexInParent, selectedRow.indexInParent);
+            this.state.selectedDetailRows = {};
+            for (var i = start; i <= end; i++) {
+                var row = parent.ultimateChildren[i];
+                this.toggleSelectDetailRow(row[rowKey]);
+            }
+        }
+        return;
+    }
+
+    if (!event.ctrlKey) {
+        //don't press ctrl, clean selected rows
+        var clearSelected = false;
+        if (Object.keys(this.state.selectedDetailRows).length > 0) {
+            this.state.selectedDetailRows = {};
+            clearSelected = true;
+        }
+
+        if (Object.keys(this.state.selectedSummaryRows).length > 0) {
+            this.state.selectedSummaryRows = {};
+            clearSelected = true;
+        }
+
+        if (!this.state.shiftKey || this.state.shiftKey.firstRow) {
+            this.state.shiftKey = {firstRow: null};
+        }
+
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            if (this.props.onRowClickCallback) {
+                this.props.onRowClickCallback(selectedRow, false);
+            }
+        }
+        else if (this.props.onSummaryRowClickCallback) {
+            this.props.onSummaryRowClickCallback(selectedRow, false);
+        }
+
+        if (clearSelected) {
+            this.setState({});
+        }
+    } else{
+        var rowKey = this.props.rowKey;
+        if (!rowKey || !selectedRow[rowKey])
+            return;
+
+        if (selectedRow.isDetail != null && selectedRow.isDetail == true) {
+            var state = this.toggleSelectDetailRow(selectedRow[rowKey]);
+            if (this.props.onSelectCallback) {
+                this.props.onSelectCallback(selectedRow, state);
+            }
+        }
+        else {
+            state = this.toggleSelectSummaryRow(generateSectorKey(selectedRow.sectorPath));
+            if (this.props.onSummarySelectCallback) {
+                this.props.onSummarySelectCallback(selectedRow, state);
+            }
+        }
+    }
 }
 
 function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
@@ -3634,10 +3732,14 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         flatData = node.display == false ? [] : [node.rowData];
     }
 
-    if(node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild){
+    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
         node.ultimateChildren[0].hiddenByFilter = true;
-        node.noCollapseIcon = true;
+        if (node.hasChild()) {
+            node.noCollapseIcon = false;
+        } else {
+            node.noCollapseIcon = true;
+        }
     }
 
     if (exportOutside) {
@@ -3665,8 +3767,7 @@ function rasterizeTreeForRender() {
     const data = rasterizeTree({
         node: this.state.rootNode,
         firstColumn: this.state.columnDefs[0],
-        selectedDetailRows: this.state.selectedDetailRows,
-        hideSingleSubtotalChild : this.props.hideSingleSubtotalChild
+        hideSingleSubtotalChild: this.props.hideSingleSubtotalChild
     }, this.state.subtotalBy.length > 0);
 
     //those attributes of state is used by render() of ReactTable
@@ -3704,6 +3805,8 @@ function _rasterizeDetailRows(node, flatData) {
         if (!detailRow.hiddenByFilter) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
+            detailRow.parent = node;
+            detailRow.indexInParent = i;
             flatData.push(detailRow);
         }
     }
