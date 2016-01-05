@@ -944,12 +944,23 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
         menuStyle.left = "0%";
     }
 
-    cellMenu.menus.forEach(function (menu) {
-        menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
-        if (menu.followingSeparator) {
-            menuItems.push(<div className="separator"/>);
-        }
-    });
+    if(currentColumnDef.rightClickMenuItems){
+        currentColumnDef.rightClickMenuItems.menus.forEach(function (menu) {
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}, menu.description));
+            if (menu.followingSeparator) {
+                menuItems.push(React.createElement("div", {className: "separator"}));
+            }
+        });
+    }
+    else {
+        cellMenu.menus.forEach(function (menu) {
+                menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
+                if (menu.followingSeparator) {
+                    menuItems.push(<div className="separator"/>);
+                 }
+        });
+    }
+
 
     return (
         <div style={menuStyle} className="rt-cell-menu">
