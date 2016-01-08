@@ -946,9 +946,9 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
 
     if(currentColumnDef.rightClickMenuItems){
         currentColumnDef.rightClickMenuItems.menus.forEach(function (menu) {
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}, menu.description));
+            menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
             if (menu.followingSeparator) {
-                menuItems.push(React.createElement("div", {className: "separator"}));
+                menuItems.push(<div className="separator"/>);
             }
         });
     }
