@@ -4,3 +4,4 @@ dist/.module-cache/
 build/
 .idea/
 .bowerrc
+library/
