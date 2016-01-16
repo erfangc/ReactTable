@@ -33,8 +33,8 @@ var ReactTable = React.createClass({
         beforeColumnAdd: React.PropTypes.func,
         onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
-        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
-        onSummaryRowClickCallback:React.PropTypes.func,
+        onRowClickCallback: React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -441,7 +441,7 @@ var ReactTable = React.createClass({
             <div id={this.state.uniqueId} className="rt-table-container">
                 {headers}
                 <div ref="scrollBody" style={tableBodyContainerStyle} className="rt-scrollable"
-                     onWheel={this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}>
+                    onWheel={this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}>
                     <table ref="tableBody" className="rt-table">
                         <tbody>
                         {rowsToDisplay}
@@ -559,7 +559,7 @@ function mouseDown(row, event) {
 }
 
 function mouseUp(mouseUpRow, event) {
-    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+    if (mouseUpRow !== this.props.table.state.mouseDown.row) {
         var mouseDownRow = this.props.table.state.mouseDown.row;
         this.props.table.state.mouseDown = null;
         var rowKey = this.props.table.props.rowKey;
@@ -607,12 +607,12 @@ var PageNavigator = React.createClass({
             <ul className={prevClass} className="pagination pull-right">
                 <li className={nextClass}>
                     <a className={prevClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem - 1)}>&laquo;</a>
                 </li>
                 {items}
                 <li className={nextClass}>
                     <a className={nextClass}
-                       onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
+                        onClick={this.props.handleClick.bind(null, this.props.activeItem + 1)}>&raquo;</a>
                 </li>
             </ul>
         );
@@ -647,10 +647,10 @@ var SubtotalControl = React.createClass({
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
                     <label style={{"display": "block"}}>Enter Bucket(s)</label>
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-                           placeholder="ex: 1,10,15"/>
+                        placeholder="ex: 1,10,15"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-                       className="btn-link">Ok</a>
+                        onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                        className="btn-link">Ok</a>
                 </div>
 
 
@@ -661,10 +661,10 @@ var SubtotalControl = React.createClass({
                 <div className="menu-item-input" style={{"position": "absolute", "top": "-50%", "right": "100%"}}>
                     <label style={{"display": "block"}}>Enter Bucket(s)</label>
                     <input tabIndex="1" onKeyPress={this.handleKeyPress} onChange={this.handleChange}
-                           placeholder="ex: 1/8/2013, 5/12/2014, 3/10/2015"/>
+                        placeholder="ex: 1/8/2013, 5/12/2014, 3/10/2015"/>
                     <a tabIndex="2" style={{"display": "block"}}
-                       onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
-                       className="btn-link">Ok</a>
+                        onClick={table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets)}
+                        className="btn-link">Ok</a>
                 </div>
 
         }
@@ -676,7 +676,7 @@ var SubtotalControl = React.createClass({
                 <div>
                     <span>
                         <i className="fa fa-plus"></i>
-                        &nbsp;Add Subtotal</span>
+                    &nbsp;Add Subtotal</span>
                 </div>
                 {subMenuAttachment}
             </div>
@@ -1081,13 +1081,23 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
         menuStyle.left = "0%";
     }
 
-    cellMenu.menus.forEach(function (menu) {
-        menuItems.push(<div className="menu-item"
-                            onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}>{menu.description}</div>);
-        if (menu.followingSeparator) {
-            menuItems.push(<div className="separator"/>);
-        }
-    });
+    if (currentColumnDef.rightClickMenuItems) {
+        currentColumnDef.rightClickMenuItems.menus.forEach(function (menu) {
+            menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
+            if (menu.followingSeparator) {
+                menuItems.push(<div className="separator"/>);
+            }
+        });
+    }
+    else {
+        cellMenu.menus.forEach(function (menu) {
+            menuItems.push(<div className="menu-item" onClick={menu.callback.bind(null, rowData, currentColumnDef, columnDefs)} >{menu.description}</div>);
+            if (menu.followingSeparator) {
+                menuItems.push(<div className="separator"/>);
+            }
+        });
+    }
+
 
     return (
         <div style={menuStyle} className="rt-cell-menu">

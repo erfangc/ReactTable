@@ -12,7 +12,7 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         flatData = node.display == false ? [] : [node.rowData];
     }
 
-    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild) {
+    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild && node.parent) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
         node.ultimateChildren[0].hiddenByFilter = true;
         if (node.hasChild()) {
