@@ -9,16 +9,32 @@ $(function () {
                 return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
             }
         },
-        {colTag: "email", text: "Email"},
+        {colTag: "email", text: "Email",
+            rightClickMenuItems: {
+                menus: []
+            }
+        },
         {
             colTag: "nationality", text: "Nationality",
             sort: function (a, b) {
                 return a.nationality.localeCompare(b.nationality);
             },
-            aggregationMethod: "count_and_distinct"
+            aggregationMethod: "count_and_distinct",
+            rightClickMenuItems: {
+                menus: [
+                    {
+                        description: 'Open in Google',
+                        callback: function (rowData, curColumnDef, columnDefs, event) {
+                            event.stopPropagation();
+                            console.log(rowData[curColumnDef.colTag]);
+                            window.open("https://www.google.com/#q=" + rowData[curColumnDef.colTag]);
+                        },
+                        followingSeparator: false
+                    }
+                ]
+            }
         },
-        {
-            colTag: "superlong",
+        {colTag: "superlong",
             text: "Some header",
             isLoading: true
         },
@@ -45,7 +61,7 @@ $(function () {
             },
             cellTemplate: function(row, colDef, content){
                 if(row.edit == true && row.editCol == colDef.colTag){
-                    return React.createElement("div", {},
+                     return React.createElement("div", {},
                         React.createElement("input", {type: 'text', defaultValue: row.fruit_preference,
                             autoFocus: true,
                             onKeyPress: function (event) {

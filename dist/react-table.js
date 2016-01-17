@@ -1380,8 +1380,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         beforeColumnAdd: React.PropTypes.func,
         onSelectCallback: React.PropTypes.func, // if a detail row is clicked with ctrl key pressed
         onSummarySelectCallback: React.PropTypes.func,
-        onRowClickCallback:React.PropTypes.func, // if a detail row is clicked
-        onSummaryRowClickCallback:React.PropTypes.func,
+        onRowClickCallback: React.PropTypes.func, // if a detail row is clicked
+        onSummaryRowClickCallback: React.PropTypes.func,
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
@@ -1788,7 +1788,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
             React.createElement("div", {id: this.state.uniqueId, className: "rt-table-container"}, 
                 headers, 
                 React.createElement("div", {ref: "scrollBody", style: tableBodyContainerStyle, className: "rt-scrollable", 
-                     onWheel: this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}, 
+                    onWheel: this.props.enableScrollPage ? scrollPage.bind(this, paginationAttr) : null}, 
                     React.createElement("table", {ref: "tableBody", className: "rt-table"}, 
                         React.createElement("tbody", null, 
                         rowsToDisplay
@@ -1906,7 +1906,7 @@ function mouseDown(row, event) {
 }
 
 function mouseUp(mouseUpRow, event) {
-    if(mouseUpRow !== this.props.table.state.mouseDown.row){
+    if (mouseUpRow !== this.props.table.state.mouseDown.row) {
         var mouseDownRow = this.props.table.state.mouseDown.row;
         this.props.table.state.mouseDown = null;
         var rowKey = this.props.table.props.rowKey;
@@ -1954,12 +1954,12 @@ var PageNavigator = React.createClass({displayName: "PageNavigator",
             React.createElement("ul", {className: prevClass, className: "pagination pull-right"}, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: prevClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem - 1)}, "«")
                 ), 
                 items, 
                 React.createElement("li", {className: nextClass}, 
                     React.createElement("a", {className: nextClass, 
-                       onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
+                        onClick: this.props.handleClick.bind(null, this.props.activeItem + 1)}, "»")
                 )
             )
         );
@@ -1994,10 +1994,10 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
                     React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                           placeholder: "ex: 1,10,15"}), 
+                        placeholder: "ex: 1,10,15"}), 
                     React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                       onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                       className: "btn-link"}, "Ok")
+                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                        className: "btn-link"}, "Ok")
                 )
 
 
@@ -2008,10 +2008,10 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", {className: "menu-item-input", style: {"position": "absolute", "top": "-50%", "right": "100%"}}, 
                     React.createElement("label", {style: {"display": "block"}}, "Enter Bucket(s)"), 
                     React.createElement("input", {tabIndex: "1", onKeyPress: this.handleKeyPress, onChange: this.handleChange, 
-                           placeholder: "ex: 1/8/2013, 5/12/2014, 3/10/2015"}), 
+                        placeholder: "ex: 1/8/2013, 5/12/2014, 3/10/2015"}), 
                     React.createElement("a", {tabIndex: "2", style: {"display": "block"}, 
-                       onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
-                       className: "btn-link"}, "Ok")
+                        onClick: table.handleSubtotalBy.bind(null, columnDef, this.state.userInputBuckets), 
+                        className: "btn-link"}, "Ok")
                 )
 
         }
@@ -2023,7 +2023,7 @@ var SubtotalControl = React.createClass({displayName: "SubtotalControl",
                 React.createElement("div", null, 
                     React.createElement("span", null, 
                         React.createElement("i", {className: "fa fa-plus"}), 
-                        " Add Subtotal")
+                    " Add Subtotal")
                 ), 
                 subMenuAttachment
             )
@@ -2428,13 +2428,23 @@ function buildCellMenu(cellMenu, rowData, currentColumnDef, columnDefs) {
         menuStyle.left = "0%";
     }
 
-    cellMenu.menus.forEach(function (menu) {
-        menuItems.push(React.createElement("div", {className: "menu-item", 
-                            onClick: menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}, menu.description));
-        if (menu.followingSeparator) {
-            menuItems.push(React.createElement("div", {className: "separator"}));
-        }
-    });
+    if (currentColumnDef.rightClickMenuItems) {
+        currentColumnDef.rightClickMenuItems.menus.forEach(function (menu) {
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}, menu.description));
+            if (menu.followingSeparator) {
+                menuItems.push(React.createElement("div", {className: "separator"}));
+            }
+        });
+    }
+    else {
+        cellMenu.menus.forEach(function (menu) {
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: menu.callback.bind(null, rowData, currentColumnDef, columnDefs)}, menu.description));
+            if (menu.followingSeparator) {
+                menuItems.push(React.createElement("div", {className: "separator"}));
+            }
+        });
+    }
+
 
     return (
         React.createElement("div", {style: menuStyle, className: "rt-cell-menu"}, 
@@ -3746,7 +3756,7 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         flatData = node.display == false ? [] : [node.rowData];
     }
 
-    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild) {
+    if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild && node.parent) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
         node.ultimateChildren[0].hiddenByFilter = true;
         if (node.hasChild()) {
