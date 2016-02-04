@@ -4,7 +4,7 @@
 
 .rt-table-container .rt-table { width: 100%; border-collapse: collapse; border-spacing: 0; color: #4a5564; background-color: #fff; }
 
-.rt-table-container .rt-table tr.selected { background-color: #e1e7eb; }
+.rt-table-container .rt-table tr.selected { background-color: #b3c2cc; }
 
 .rt-table-container .rt-table tr.summary-selected { background-color: #d1dbe1; }
 

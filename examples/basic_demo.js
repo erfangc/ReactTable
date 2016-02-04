@@ -102,11 +102,15 @@ $(function () {
         var testData = data;
         // first table
         var options = {
+            hasCheckbox: true,
+            checkboxCallback: function(rows){
+                console.log(rows);
+            },
             hideSingleSubtotalChild: true,
             hideSubtotaledColumns: true,
             enableScrollPage:true,
             disableInfiniteScrolling: true,
-            disableGrandTotal: true,
+            disableGrandTotal: false,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
             subtotalBy: [{
                 colTag: "nationality", text: "Nationality"
