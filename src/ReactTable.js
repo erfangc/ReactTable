@@ -38,6 +38,7 @@ var ReactTable = React.createClass({
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
+        checkboxCallback: React.PropTypes.func, // when click checkbox, invoke this callback
         /**
          * props to selectively disable table features
          */
@@ -49,6 +50,7 @@ var ReactTable = React.createClass({
         enableScrollPage: React.PropTypes.bool,
         hideSubtotaledColumns: React.PropTypes.bool,
         hideSingleSubtotalChild: React.PropTypes.bool,
+        hasCheckbox: React.PropTypes.bool, // has a check box in subtotal column
         /**
          * misc props
          */
@@ -480,9 +482,16 @@ var Row = React.createClass({
                 }
             }
 
-            if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
-            } else {
+            if (i === 0 && table.state.subtotalBy.length > 0) {
+                // generate subtotal column
+                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal, !this.props.data.isDetail));
+            }
+
+            //if (i === 0 && !this.props.data.isDetail) {
+            //
+            //    cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal, isDetail));
+            //}
+            else {
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
                 var classes = cx(displayInstructions.classes);
                 // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
@@ -928,6 +937,9 @@ function uniqueId(prefix) {
  */
 
 function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if(row.isChecked){
+        return true;
+    }
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);
