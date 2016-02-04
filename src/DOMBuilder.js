@@ -309,8 +309,13 @@ function buildFilterList(table,columnDef){
         );
     //}
     for(var i = 0; i< filterData.length; i++){
+        var label = filterData[i];
+        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+            label = moment(parseInt(label)).format(columnDef.formatInstructions)
+        }
+	
         filterList.push(
-            <option value={filterData[i]}>{filterData[i]}</option>
+            <option value={filterData[i]}>{label}</option>
         );
     }
 
@@ -318,6 +323,10 @@ function buildFilterList(table,columnDef){
     table.state.currentFilters.forEach(function(filter){
        if(filter.colDef === columnDef){
            filter.filterText.forEach(function(filter, index){
+               if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+                   filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
+               }
+		   
                selectedFilters.push(
                    <div style={{display: 'block', marginTop:'2px'}}>
                        <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}

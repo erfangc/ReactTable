@@ -429,8 +429,13 @@ function buildFilterList(table,columnDef){
         );
     //}
     for(var i = 0; i< filterData.length; i++){
+        var label = filterData[i];
+        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+            label = moment(parseInt(label)).format(columnDef.formatInstructions)
+        }
+	
         filterList.push(
-            React.createElement("option", {value: filterData[i]}, filterData[i])
+            React.createElement("option", {value: filterData[i]}, label)
         );
     }
 
@@ -438,6 +443,10 @@ function buildFilterList(table,columnDef){
     table.state.currentFilters.forEach(function(filter){
        if(filter.colDef === columnDef){
            filter.filterText.forEach(function(filter, index){
+               if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+                   filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
+               }
+		   
                selectedFilters.push(
                    React.createElement("div", {style: {display: 'block', marginTop:'2px'}}, 
                        React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
@@ -1838,7 +1847,11 @@ var Row = React.createClass({displayName: "Row",
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        displayContent = new Date(displayContent).toLocaleDateString();
+                        if(columnDef.formatInstructions != null) { //If format instruction is specified
+                            displayContent = moment(displayContent).format(columnDef.formatInstructions)
+                        } else {
+                            displayContent = new Date(displayContent).toLocaleDateString();
+                        }
                 }
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
