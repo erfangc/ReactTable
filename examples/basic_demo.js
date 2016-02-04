@@ -36,10 +36,6 @@ $(function () {
         },
         {colTag: "superlong",
             text: "Some header",
-            customMenuItems: [React.createElement(InfoBox, {
-                title: "Info Box!",
-                text: "Hover Me! I am very long winded definition of some column that you can one day be looking at ... "
-            })],
             isLoading: true
         },
         {
@@ -156,11 +152,6 @@ $(function () {
             height: "500px",
             pageSize:50,
             columnDefs: columnDefs,
-            customMenuItems: {
-                Description: {
-                    infoBox: "formatInstructions"
-                }
-            },
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");
                 addMe();
