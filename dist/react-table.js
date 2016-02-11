@@ -813,12 +813,12 @@ function resolvePartitionName(subtotalBy, row, partitions) {
             			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
                 		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
             		}
-            		
+
             		if(partitions == YEARLY) {
             			dateStr1 = new Date(dateStr1).getFullYear();
             			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
             		}
-            		
+
             		else if(partitions == DAILY) {
             			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
             			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
@@ -827,7 +827,7 @@ function resolvePartitionName(subtotalBy, row, partitions) {
             			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
             			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
             		}
-            		
+
             		else {
             			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
             		}
@@ -923,6 +923,9 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "most_data_points":
                 result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
                 break;
+            case "weighted_average":
+                result = _weightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             default :
                 result = "";
         }
@@ -960,7 +963,7 @@ function _weightedAverage(options) {
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
 
     var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
+    return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
 function _count(options) {
@@ -2633,7 +2636,11 @@ function ReactTableGetInitialState() {
      * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
-    initialState.rootNode = createNewRootNode(this.props, initialState);
+    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);  
+  
+    if (initialState.sortBy.length > 0)  
+        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));  
+
     addSubtotalTitleToRowData(initialState.rootNode);
 
     if (initialState.sortBy.length > 0) {
@@ -2658,6 +2665,16 @@ function ReactTableGetInitialState() {
     initialState.selectedSummaryRows = selections.selectedSummaryRows;
 
     return initialState;
+}
+
+function getRootNodeGivenProps(props, initialState) {
+    if( props.dataAsTree && props.dataAsTreeTitleKey ) {
+        props.data = [];
+        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);  
+    }  
+    else {
+        return createNewRootNode(props, initialState); 
+    }
 }
 
 /**
