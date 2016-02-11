@@ -755,9 +755,7 @@ function addExtraColumnForSubtotalBy() {
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }
-};
-
-//Contants used for date subtotalling
+};//Contants used for date subtotalling
 const WEEKLY = "Weekly";
 const MONTHLY = "Monthly";
 const QUARTERLY = "Quarterly";
@@ -776,7 +774,7 @@ const OLDEST = "Oldest";
  */
 function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions != null)) {
         var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -804,65 +802,65 @@ function resolvePartitionName(subtotalBy, row, partitions) {
     if (subtotalBy.subtotalByRange) {
         for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
             if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-            	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-            		if(subtotalBy.formatInstructions!= null){
-            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
-                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
-            		}
-            		else{
-            			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
-                		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
-            		}
+                if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                    if (subtotalBy.formatInstructions != null) {
+                        var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
+                        var dateStr2 = moment(new Date(subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
+                    }
+                    else {
+                        var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
+                        var dateStr2 = new Date(subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
+                    }
 
-            		if(partitions == YEARLY) {
-            			dateStr1 = new Date(dateStr1).getFullYear();
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
+                    if (partitions == YEARLY) {
+                        dateStr1 = new Date(dateStr1).getFullYear();
+                        sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST);
+                    }
 
-            		else if(partitions == DAILY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
-            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		else if(partitions == MONTHLY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
+                    else if (partitions == DAILY) {
+                        dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
+                        sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST);
+                    }
+                    else if (partitions == MONTHLY) {
+                        dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
+                        sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST);
+                    }
 
-            		else {
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
-            		}
-            	}
-            	else {
-            		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
-            	}
+                    else {
+                        sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
+                    }
+                }
+                else {
+                    sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+                }
                 sortIndex = i;
                 break;
             }
         }
         if (!sectorName) {
-        	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-        		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-        		if(subtotalBy.formatInstructions!= null ){
-        			var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
-        		}
-        		else {
-        			var dateStr = date.toLocaleString().split(',')[0];
-        		}
-        		if(partitions == YEARLY) {
-        			dateStr = new Date(dateStr).getFullYear();
-        		}
-        		else if(partitions == MONTHLY) {
-        			dateStr = moment(date).format("MMM YYYY");
-        		}
-        		else if(partitions == DAILY) {
-        			dateStr = moment(date).format("YYYY/MM/DD");
-        		}
-        		sectorName = subtotalBy.text + " " + dateStr + "+";
-        	}
-        	else {
-            sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-        	}
-        	sortIndex = i + 1;
+            if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
+                if (subtotalBy.formatInstructions != null) {
+                    var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
+                }
+                else {
+                    var dateStr = date.toLocaleString().split(',')[0];
+                }
+                if (partitions == YEARLY) {
+                    dateStr = new Date(dateStr).getFullYear();
+                }
+                else if (partitions == MONTHLY) {
+                    dateStr = moment(date).format("MMM YYYY");
+                }
+                else if (partitions == DAILY) {
+                    dateStr = moment(date).format("YYYY/MM/DD");
+                }
+                sectorName = subtotalBy.text + " " + dateStr + "+";
+            }
+            else {
+                sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
+            }
+            sortIndex = i + 1;
         }
     }
     else
@@ -941,10 +939,7 @@ function _straightSumAggregation(options) {
     return result;
 }
 function _average(options) {
-    if (options.columnDef.weightBy)
-        return _weightedAverage(options);
-    else
-        return _simpleAverage(options);
+    return _simpleAverage(options);
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
@@ -1015,7 +1010,7 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" +  applyThousandSeparator(data.length) + ")";
+    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
