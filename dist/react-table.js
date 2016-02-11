@@ -765,9 +765,7 @@ function addExtraColumnForSubtotalBy() {
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }
-};
-
-//Contants used for date subtotalling
+};//Contants used for date subtotalling
 const WEEKLY = "Weekly";
 const MONTHLY = "Monthly";
 const QUARTERLY = "Quarterly";
@@ -786,7 +784,7 @@ const OLDEST = "Oldest";
  */
 function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions != null)) {
         var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -928,6 +926,9 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "most_data_points":
                 result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
                 break;
+            case "weighted_average":
+                result = _weightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             default :
                 result = "";
         }
@@ -943,10 +944,7 @@ function _straightSumAggregation(options) {
     return result;
 }
 function _average(options) {
-    if (options.columnDef.weightBy)
-        return _weightedAverage(options);
-    else
-        return _simpleAverage(options);
+    return _simpleAverage(options);
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
@@ -965,7 +963,7 @@ function _weightedAverage(options) {
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
 
     var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
+    return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
 function _count(options) {
@@ -1017,7 +1015,7 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" +  applyThousandSeparator(data.length) + ")";
+    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
