@@ -485,13 +485,7 @@ var Row = React.createClass({
             if (i === 0 && table.state.subtotalBy.length > 0) {
                 // generate subtotal column
                 cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal, !this.props.data.isDetail));
-            }
-
-            //if (i === 0 && !this.props.data.isDetail) {
-            //
-            //    cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal, isDetail));
-            //}
-            else {
+            } else {
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
                 var classes = cx(displayInstructions.classes);
                 // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
@@ -506,6 +500,7 @@ var Row = React.createClass({
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
                 if (isGrandTotal) {
+                    //generate cells in grand total row
                     var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
                     if (displayContent) {
 
@@ -540,7 +535,6 @@ var Row = React.createClass({
         }
 
         classes = cx({
-            //TODO: to hightlight a selected row, need press ctrl
             'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail,
             'group-background': !this.props.data.isDetail
@@ -559,7 +553,7 @@ var Row = React.createClass({
         // apply extra CSS if specified
             return (<tr onClick={this.props.onSelect.bind(null, this.props.data)}  onMouseDown={mouseDown.bind(this, this.props.data)}
                 onMouseUp={mouseUp.bind(this, this.props.data)}
-                className={classes} style={this.props.extraStyle}> {cells} </tr>);
+                className={classes} style={this.props.extraStyle}>{cells}</tr>);
     }
 });
 
@@ -933,7 +927,7 @@ function uniqueId(prefix) {
  */
 
 function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
-    if(row.isChecked){
+    if (row.isChecked) {
         return true;
     }
     if (rowKey == null)

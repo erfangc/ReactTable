@@ -33,4 +33,5 @@ module.exports = function (grunt) {
         }
     })
     grunt.registerTask('build', ['concat:build', 'uglify:build', 'copy:build']);
+    grunt.registerTask('default', 'build');
 }
