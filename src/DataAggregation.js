@@ -240,9 +240,10 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinctPureJS(options) {
+    var data = options.data, columnDef = options.columnDef;
     var count = _count(options);
     var distinctCount = _countDistinct(options);
-    return count == 1 ? distinctCount : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
+    return count == 1 ? formatNumber(distinctCount,columnDef,columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
 function _countAndDistinctUnderscoreJS(options) {
@@ -253,7 +254,8 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
+    columnDef.formatConfig = buildLAFConfigObject(columnDef);
+    return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0],columnDef,columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
