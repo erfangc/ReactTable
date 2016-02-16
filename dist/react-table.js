@@ -967,7 +967,7 @@ function _weightedAverage(options) {
 function _aggregatedWeightedAverage(options) {
     var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
     var level = options.columnDef.aggregatedLevel;
-    if (!weightBy.colTag || !level.colTag) {
+    if (!weightBy || !weightBy.colTag || !level || !level.colTag) {
         //don't define weightBy or level column
         return ""
     }
