@@ -929,6 +929,9 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "weighted_average":
                 result = _weightedAverage({data: partitionResult, columnDef: columnDef});
                 break;
+            case "aggregated_weighted_average":
+                result = _aggregatedWeightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             default :
                 result = "";
         }
@@ -964,6 +967,32 @@ function _weightedAverage(options) {
 
     var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
     return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+function _aggregatedWeightedAverage(options){
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var level = options.columnDef.aggregatedLevel;
+    var sumProduct = 0;
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
+    var weightSum = _aggregatedLevelSum({data: data, aggregatedLevel: level, weightBy: weightBy});
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+function _aggregatedLevelSum(options){
+    var data = options.data, aggregatedLevel = options.aggregatedLevel, weightBy = options.weightBy;
+    var result = 0, temp = 0;
+    var distinctValues = {};
+    for (var i = 0; i < data.length; i++) {
+        var levelValue = data[i][aggregatedLevel.colTag];
+        distinctValues[levelValue] = data[i][weightBy.colTag];
+    }
+    for(var level in distinctValues){
+        temp = distinctValues[level] || 0;
+        result += temp;
+    }
+    return result;
 }
 
 function _count(options) {
