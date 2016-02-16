@@ -207,9 +207,14 @@ function _weightedAverage(options) {
     return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
-function _aggregatedWeightedAverage(options){
+function _aggregatedWeightedAverage(options) {
     var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
     var level = options.columnDef.aggregatedLevel;
+    if (!weightBy.colTag || !level.colTag) {
+        //don't define weightBy or level column
+        return ""
+    }
+
     var sumProduct = 0;
     for (var i = 0; i < data.length; i++)
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
@@ -218,7 +223,7 @@ function _aggregatedWeightedAverage(options){
     return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
-function _aggregatedLevelSum(options){
+function _aggregatedLevelSum(options) {
     var data = options.data, aggregatedLevel = options.aggregatedLevel, weightBy = options.weightBy;
     var result = 0, temp = 0;
     var distinctValues = {};
@@ -226,7 +231,7 @@ function _aggregatedLevelSum(options){
         var levelValue = data[i][aggregatedLevel.colTag];
         distinctValues[levelValue] = data[i][weightBy.colTag];
     }
-    for(var level in distinctValues){
+    for (var level in distinctValues) {
         temp = distinctValues[level] || 0;
         result += temp;
     }
@@ -272,7 +277,7 @@ function _countAndDistinctPureJS(options) {
     var data = options.data, columnDef = options.columnDef;
     var count = _count(options);
     var distinctCount = _countDistinct(options);
-    return count == 1 ? formatNumber(distinctCount,columnDef,columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
+    return count == 1 ? formatNumber(distinctCount, columnDef, columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
 function _countAndDistinctUnderscoreJS(options) {
@@ -284,7 +289,7 @@ function _countAndDistinctUnderscoreJS(options) {
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
     columnDef.formatConfig = buildLAFConfigObject(columnDef);
-    return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0],columnDef,columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
+    return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0], columnDef, columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
