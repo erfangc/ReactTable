@@ -170,9 +170,21 @@ function buildTreeSkeleton(props, state) {
     var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
     if (props.disableGrandTotal)
         rootNode.display = false;
+    var subtotalByArr;
+    if(state.subtotalBy != null) {
+        subtotalByArr = [];
+        for (i = 0; i < state.subtotalBy.length; i++) {
+            var result = state.columnDefs.filter(function( colDef ) {
+                return colDef.colTag == state.subtotalBy[i].colTag;
+            });
+            if(result[0] != null){
+                subtotalByArr.push(result[0]);
+            }
+        }
+    }
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
+        populateChildNodesForRow(rootNode, rawData[i], subtotalByArr);
     }
 
     return rootNode

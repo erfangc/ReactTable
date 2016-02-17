@@ -724,71 +724,66 @@ function resolvePartitionName(subtotalBy, row, partitions) {
     var sectorName = "", sortIndex = "";
 
     if (subtotalBy.subtotalByRange) {
-        for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
-            if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-            	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-            		if(subtotalBy.formatInstructions!= null){
-            			var dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format(subtotalBy.formatInstructions).split(',')[0];
-                		var dateStr2 =  moment(new Date( subtotalBy.subtotalByRange[i])).format(subtotalBy.formatInstructions).split(',')[0];
-            		}
-            		else{
-            			var dateStr1 = new Date(subtotalBy.subtotalByRange[i - 1]).toLocaleString().split(',')[0];
-                		var dateStr2 = new Date( subtotalBy.subtotalByRange[i]).toLocaleString().split(',')[0];
-            		}
-            		
-            		if(partitions == YEARLY) {
-            			dateStr1 = new Date(dateStr1).getFullYear();
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		
-            		else if(partitions == DAILY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("YYYY/MM/DD");
-            			sectorName = sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		else if(partitions == MONTHLY) {
-            			dateStr1 = moment(new Date(subtotalBy.subtotalByRange[i - 1])).format("MMM YYYY");
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) ;
-            		}
-            		
-            		else {
-            			sectorName = subtotalBy.text + " " + (i != 0 ? dateStr1 : OLDEST) + " - " + dateStr2;
-            		}
-            	}
-            	else {
-            		 sectorName = subtotalBy.text + " " + (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
-            	}
-                sortIndex = i;
-                break;
-            }
+       if(row[subtotalBy.colTag] != null) {
+           for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
+               if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
+                   if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                       var dateStr1 = moment(subtotalBy.subtotalByRange[i - 1]).format(subtotalBy.formatInstructions);
+                       var dateStr2 = moment(subtotalBy.subtotalByRange[i]).add(-1,"days").format(subtotalBy.formatInstructions);
+                       if (partitions == YEARLY) {
+                           //dateStr1 = new Date(row[subtotalBy.colTag]).getFullYear();
+                           //sectorName = subtotalBy.text + " " + dateStr1;
+                           sectorName = new Date(row[subtotalBy.colTag]).getFullYear();
+                       }
+                       else if (partitions == DAILY) {
+                           sectorName = dateStr1;
+                       }
+                       else if (partitions == MONTHLY) {
+                           sectorName = moment(subtotalBy.subtotalByRange[i - 1]).format("MMM YYYY");
+                       }
+                       else {
+                           sectorName = dateStr1 + " - " + dateStr2;
+                       }
+                   }
+                   else {
+                       sectorName = (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+                   }
+                   sortIndex = i;
+                   break;
+               }
+           }
+           if (!sectorName) {
+               if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                   var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
+                   var dateStr = moment(date).format(subtotalBy.formatInstructions);
+                   if (partitions == YEARLY) {
+                       dateStr = new Date(dateStr).getFullYear();
+                   }
+                   else if (partitions == MONTHLY) {
+                       dateStr = moment(date).format("MMM YYYY");
+                   }
+                   else if (partitions == DAILY) {
+                       dateStr = moment(date).format("YYYY/MM/DD");
+                   }
+                   sectorName = dateStr + "+";
+               }
+               else {
+                   sectorName = subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
+               }
+               sortIndex = i + 1;
+           }
+       }
+    }
+    else {
+        if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null){
+            sectorName = moment(row[subtotalBy.colTag]).format(subtotalBy.formatInstructions);
+        }else {
+            sectorName = row[subtotalBy.colTag];
         }
-        if (!sectorName) {
-        	if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions!=null) {
-        		var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-        		if(subtotalBy.formatInstructions!= null ){
-        			var dateStr = moment(date).format(subtotalBy.formatInstructions).split(',')[0];
-        		}
-        		else {
-        			var dateStr = date.toLocaleString().split(',')[0];
-        		}
-        		if(partitions == YEARLY) {
-        			dateStr = new Date(dateStr).getFullYear();
-        		}
-        		else if(partitions == MONTHLY) {
-        			dateStr = moment(date).format("MMM YYYY");
-        		}
-        		else if(partitions == DAILY) {
-        			dateStr = moment(date).format("YYYY/MM/DD");
-        		}
-        		sectorName = subtotalBy.text + " " + dateStr + "+";
-        	}
-        	else {
-            sectorName = subtotalBy.text + " " + subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-        	}
-        	sortIndex = i + 1;
+        if(subtotalBy.format == DATE_FORMAT && subtotalBy.format == "number" ) {
+            sortIndex = row[subtotalBy.colTag];
         }
     }
-    else
-        sectorName = subtotalBy.text;
     return {sectorName: sectorName, sortIndex: sortIndex};
 }
 
@@ -2902,39 +2897,20 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
 				if (tmp > last) last = tmp;
 			}
 
-    		if(partitions == WEEKLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == MONTHLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == DAILY) {
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == QUARTERLY) {
-    			start = new Date(new Date(start).getMonth()+"/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-    		else if (partitions == YEARLY) {
-    			start = new Date("1/1/"+new Date(start).getFullYear()).getTime();
-    			columnDef.subtotalByRange = partitionNumberLine(getParts(partitions, start, last));
-    		}
-
-    		//Use partitions based on user input buckets
-    		else {
-    		var parts = [];
-    		var dates = partitions.split(",");
-    		    for (i = 0; i < dates.length; i++) {
-    		    	startdate=new Date(dates[i]).getTime();
-   		    		parts.push(startdate);
-    		    }
-    		    columnDef.subtotalByRange = partitionNumberLine(parts.join(","));
+            if (partitions == WEEKLY || partitions == MONTHLY || partitions == DAILY || partitions == QUARTERLY || partitions == YEARLY) {
+                columnDef.subtotalByRange = getParts(partitions, start, last);
             }
-    	}
+            else {     //Use partitions based on user input buckets
+                var parts = [];
+                var dates = partitions.split(",");
+                for (i = 0; i < dates.length; i++) {
+                    parts.push(new Date(dates[i]).getTime());
+                }
+                columnDef.subtotalByRange = parts;
+            }
+        }
     	else {
-        columnDef.subtotalByRange = partitionNumberLine(partitions);
+            columnDef.subtotalByRange = partitionNumberLine(partitions);
     	}
 
     }
@@ -2978,30 +2954,31 @@ function getParts(frequency, start, last) {
     var count = 1;
     var unit = "days";
 
-    parts.push(start);
-
+    start = moment(start).startOf('day');
     if (frequency == MONTHLY) {
         unit = "months";
         count = 1;
+        start = moment(start).startOf('month');
     } else if (frequency == QUARTERLY) {
         unit = "months";
         count = 3;
+        start = moment(start).startOf('quarter');
     } else if (frequency == YEARLY) {
         unit = "years";
         count = 1;
-    }
-    else if (frequency == WEEKLY) {
+        start = moment(start).startOf('year');
+    } else if (frequency == WEEKLY) {
         unit = "days";
-        count = 6;
+        count = 7;
+        start = moment(start).startOf('isoWeek');
     }
+    parts.push(start.unix()*1000);
 
-    for (var i = start; i < last;) {
-        start = new Date(moment(new Date(start)).add(count, unit).calendar()).getTime();
+    while (start <= last) {
+        start = moment(start).add(count, unit).unix()*1000;
         parts.push(start);
-        i = start;
     }
-
-    return parts.join(",");
+    return parts;
 }
 
 function ReactTableHandleAdd() {
@@ -3401,9 +3378,21 @@ function buildTreeSkeleton(props, state) {
     var rootNode = new TreeNode("Grand Total", null), rawData = props.data, i;
     if (props.disableGrandTotal)
         rootNode.display = false;
+    var subtotalByArr;
+    if(state.subtotalBy != null) {
+        subtotalByArr = [];
+        for (i = 0; i < state.subtotalBy.length; i++) {
+            var result = state.columnDefs.filter(function( colDef ) {
+                return colDef.colTag == state.subtotalBy[i].colTag;
+            });
+            if(result[0] != null){
+                subtotalByArr.push(result[0]);
+            }
+        }
+    }
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        populateChildNodesForRow(rootNode, rawData[i], state.subtotalBy);
+        populateChildNodesForRow(rootNode, rawData[i], subtotalByArr);
     }
 
     return rootNode
