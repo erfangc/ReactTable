@@ -457,7 +457,6 @@ function buildFilterList(table, columnDef) {
         React.createElement("option", {value: "default", style: {display: 'none'}})
     );
     //}
-
     for(var i = 0; i< filterData.length; i++){
         var label = filterData[i];
         if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){

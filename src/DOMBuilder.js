@@ -337,7 +337,6 @@ function buildFilterList(table, columnDef) {
         <option value="default" style={{display: 'none'}}></option>
     );
     //}
-
     for(var i = 0; i< filterData.length; i++){
         var label = filterData[i];
         if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
