@@ -172,7 +172,7 @@ var ReactTable = React.createClass({
 
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: firstColumn,
+            firstColumn: firstColumn
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
