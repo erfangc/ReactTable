@@ -136,8 +136,8 @@ function buildCustomMenuItems(table, columnDef) {
         return columnDef.customMenuItems;
 }
 
-function clickFilterMenu(table,columnDef){
-    if(!(table.props.filtering && table.props.filtering.disable)){
+function clickFilterMenu(table, columnDef) {
+    if (!(table.props.filtering && table.props.filtering.disable)) {
         toggleFilterBox.call(table, table, columnDef);
         table.setState({});
     }
@@ -164,76 +164,101 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null,columnDef,null), 
-                     menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-sort"}), " Sort"), subMenu: 
+            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), 
+                menuItem: React.createElement("span", null, 
+                    React.createElement("i", {className: "fa fa-sort"}), 
+                "Sort"), subMenu: 
                 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                     React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'asc')}, 
-                        React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Asc"
+                        React.createElement("i", {className: "fa fa-sort-alpha-asc"}), 
+                    "Asc"
                     ), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleSetSort.bind(null, columnDef, 'desc')}, 
-                        React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Desc"
+                        React.createElement("i", {className: "fa fa-sort-alpha-desc"}), 
+                    "Desc"
                     ), 
                     React.createElement("div", {className: "separator"}), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'asc')}, 
-                        React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-asc"}), " Add Asc"
+                        React.createElement("i", {className: "fa fa-plus"}), 
+                        React.createElement("i", {className: "fa fa-sort-alpha-asc"}), 
+                    "Add Asc"
                     ), 
                     React.createElement("div", {className: "menu-item", onClick: table.handleAddSort.bind(null, columnDef, 'desc')}, 
-                        React.createElement("i", {className: "fa fa-plus"}), React.createElement("i", {className: "fa fa-sort-alpha-desc"}), " Add Desc"
+                        React.createElement("i", {className: "fa fa-plus"}), 
+                        React.createElement("i", {className: "fa fa-sort-alpha-desc"}), 
+                    "Add Desc"
                     ), 
                     React.createElement("div", {className: "separator"}), 
-                    React.createElement("div", {className: "menu-item", onClick: table.clearSort}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Sort")
+                    React.createElement("div", {className: "menu-item", onClick: table.clearSort}, 
+                        React.createElement("i", {className: "fa fa-ban"}), 
+                    "Clear All Sort")
                 )}
             )
         ],
         filter: [
             React.createElement(SubMenu, {
-                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                menuItem: React.createElement("span", null, 
+                    React.createElement("i", {className: "fa fa-filter"}), 
+                "Filter"), 
                 subMenu: 
                     React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                        React.createElement("div", {className: "menu-item", onClick: clickFilterMenu.bind(null,table,columnDef)}, 
-                            React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                        React.createElement("div", {className: "menu-item", onClick: clickFilterMenu.bind(null, table, columnDef)}, 
+                            React.createElement("i", {className: "fa fa-filter"}), 
+                        "Filter"), 
                         React.createElement("div", {className: "separator"}), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
                     )
-                }
+                    }
             )
         ],
         summarize: [
             React.createElement(SubMenu, {
                 onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
-                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
-                    subMenu: columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null ?
-                            React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                                React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: DAILY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: WEEKLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: MONTHLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: QUARTERLY, table: table, columnDef: columnDef}), 
-                                React.createElement(SubtotalControlForDates, {freq: YEARLY, table: table, columnDef: columnDef}), 
-                                React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
-                            ) :
-                            	 React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                            React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
-                          React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
-                        )
+                menuItem: React.createElement("span", null, 
+                    React.createElement("i", {className: "fa fa-list-ul"}), 
+                "Subtotal"), 
+                subMenu: columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null ?
+                    React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                        React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                        React.createElement(SubtotalControlForDates, {freq: DAILY, table: table, columnDef: columnDef}), 
+                        React.createElement(SubtotalControlForDates, {freq: WEEKLY, table: table, columnDef: columnDef}), 
+                        React.createElement(SubtotalControlForDates, {freq: MONTHLY, table: table, columnDef: columnDef}), 
+                        React.createElement(SubtotalControlForDates, {freq: QUARTERLY, table: table, columnDef: columnDef}), 
+                        React.createElement(SubtotalControlForDates, {freq: YEARLY, table: table, columnDef: columnDef}), 
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, 
+                            React.createElement("i", {className: "fa fa-ban"}), 
+                        "Clear All Subtotal")
+                    ) :
+                    React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
+                        React.createElement(SubtotalControl, {table: table, columnDef: columnDef}), 
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, 
+                            React.createElement("i", {className: "fa fa-ban"}), 
+                        "Clear All Subtotal")
+                    )
                     
             }
             )
         ],
-        
+
         summarizeClearAll: [
             React.createElement(SubMenu, {
-                menuItem: React.createElement("span", null, React.createElement("i", {className: "fa fa-list-ul"}), " Subtotal"), 
+                menuItem: React.createElement("span", null, 
+                    React.createElement("i", {className: "fa fa-list-ul"}), 
+                "Subtotal"), 
                 subMenu: 
                     React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
-                        React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, React.createElement("i", {className: "fa fa-ban"}), " Clear All Subtotal")
+                        React.createElement("div", {className: "menu-item", onClick: table.handleClearSubtotal}, 
+                            React.createElement("i", {className: "fa fa-ban"}), 
+                        "Clear All Subtotal")
                     )
                     })
         ],
         remove: [
-            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, React.createElement("i", {
-                className: "fa fa-remove"}), " Remove Column")
+            React.createElement("div", {className: "menu-item", onClick: table.handleRemove.bind(null, columnDef)}, 
+                React.createElement("i", {
+                    className: "fa fa-remove"}), 
+            "Remove Column")
         ]
     };
     if (table.props.defaultMenuItems) {
@@ -245,13 +270,13 @@ function buildMenu(options) {
         addMenuItems(menuItems, availableDefaultMenuItems.sort);
         if (!(table.props.filtering && table.props.filtering.disable))
             addMenuItems(menuItems, availableDefaultMenuItems.filter);
-        if(!isFirstColumn || table.state.subtotalBy.length == 0) {
+        if (!isFirstColumn || table.state.subtotalBy.length == 0) {
             addMenuItems(menuItems, availableDefaultMenuItems.summarize);
-        }else{
+        } else {
             //if first column is the subtotal column, don't add 'addSubtotal'
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
-        if (!isFirstColumn){
+        if (!isFirstColumn) {
             menuItems.push(React.createElement("div", {className: "separator"}));
             addMenuItems(menuItems, availableDefaultMenuItems.remove);
         }
@@ -264,19 +289,23 @@ function buildMenu(options) {
     if (isFirstColumn) {
         menuItems.push(React.createElement("div", {className: "separator"}));
         if (!table.props.disableExporting) {
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, React.createElement("i", {
-                className: "fa fa-file-excel-o"}), " Download as XLS"));
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, React.createElement("i", {
-                className: "fa fa-file-pdf-o"}), " Download as PDF"));
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "excel")}, 
+                React.createElement("i", {
+                    className: "fa fa-file-excel-o"}), 
+            "Download as XLS"));
+            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, 
+                React.createElement("i", {
+                    className: "fa fa-file-pdf-o"}), 
+            "Download as PDF"));
         }
 
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll}, "Collapse" + ' ' +
-            "All"));
+        "All"));
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleExpandAll}, "Expand All"));
     }
 
     return (
-        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag]? " rt-hide":"")}, 
+        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "")}, 
             menuItems
         )
     );
@@ -291,8 +320,8 @@ function toggleFilterBox(table, columnDef) {
     var fip = table.state.filterInPlace;
     //open current filter drop down, close others
     fip[columnDef.colTag] = !fip[columnDef.colTag];
-    for(var key in fip){
-        if(key !== columnDef.colTag) {
+    for (var key in fip) {
+        if (key !== columnDef.colTag) {
             fip[key] = false;
         }
     }
@@ -301,19 +330,19 @@ function toggleFilterBox(table, columnDef) {
         filterInPlace: fip
     });
 
-    setTimeout(function(fip){
-        if(!fip[columnDef.colTag]){
+    setTimeout(function (fip) {
+        if (!fip[columnDef.colTag]) {
             return;
         }
 
         //move filter panel to right position
-        var $header = $(this.refs["header-"+ columnDef.colTag].getDOMNode());
+        var $header = $(this.refs["header-" + columnDef.colTag].getDOMNode());
         var headerPosition = $header.position();
         var $filterDropDown = null;
 
-        if(columnDef.format == 'number'){
-            $filterDropDown = $(this.refs["numericFilterPanel-"+ columnDef.colTag].getDOMNode());
-        }else{
+        if (columnDef.format == 'number') {
+            $filterDropDown = $(this.refs["numericFilterPanel-" + columnDef.colTag].getDOMNode());
+        } else {
             $filterDropDown = $(this.refs['select-filter-' + columnDef.colTag].getDOMNode())
         }
 
@@ -323,7 +352,7 @@ function toggleFilterBox(table, columnDef) {
         if (headerPosition.right !== 0) {
             $filterDropDown.css("right", headerPosition.right + "px");
         }
-    }.bind(this,fip));
+    }.bind(this, fip));
 }
 
 function pressedKey(table, colTag, e) {
@@ -336,37 +365,37 @@ function pressedKey(table, colTag, e) {
     }
 }
 
-function selectFilters (table, columnDefToFilterBy, e){
+function selectFilters(table, columnDefToFilterBy, e) {
     table.state.selectedFilters = $(e.target).val();
     table.setState({});
     table.handleColumnFilter.call(null, columnDefToFilterBy);
 }
 
-function addFilter(table,columnDef,event){
+function addFilter(table, columnDef, event) {
     var filterValue = event.target.value;
 
     var filterData = null;
     var isAdded = false;
-    table.state.currentFilters.forEach(function(filter){
-        if(filter.colDef === columnDef){
-            isAdded = filter.filterText.some(function(addedFilter){
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            isAdded = filter.filterText.some(function (addedFilter) {
                 return addedFilter === filterValue;
             });
 
-            if(!isAdded){
+            if (!isAdded) {
                 filter.filterText.push(filterValue);
                 filterData = filter.filterText;
             }
         }
     });
 
-    if(isAdded){
+    if (isAdded) {
         return;
     }
 
-    if(!filterData){
+    if (!filterData) {
         table.state.currentFilters.push({
-            colDef : columnDef,
+            colDef: columnDef,
             filterText: [filterValue]
         });
         filterData = [filterValue];
@@ -375,10 +404,10 @@ function addFilter(table,columnDef,event){
     table.setState({});
 }
 
-function filter(table,columnDef){
+function filter(table, columnDef) {
     var filterData = null;
-    table.state.currentFilters.forEach(function(filter){
-        if(filter.colDef === columnDef){
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
             filterData = filter.filterText;
         }
     });
@@ -391,13 +420,13 @@ function filter(table,columnDef){
     $(this.refs['select-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
 }
 
-function removeFilter(table, columnDef,index,event){
+function removeFilter(table, columnDef, index, event) {
     event.preventDefault();
 
-    table.state.currentFilters.forEach(function(filter){
-        if(filter.colDef === columnDef){
-            filter.filterText.splice(index,1);
-            if(filter.filterText.length == 0){
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filter.filterText.splice(index, 1);
+            if (filter.filterText.length == 0) {
                 table.handleClearFilter(columnDef);
             }
         }
@@ -412,28 +441,28 @@ function removeFilter(table, columnDef,index,event){
  * @param columnDef
  * @returns {XML}
  */
-function buildFilterList(table,columnDef){
-    if(!table.state.filterData){
+function buildFilterList(table, columnDef) {
+    if (!table.state.filterData) {
         return;
     }
 
     var filterData = table.state.filterData[columnDef.colTag];
-    if(!filterData || (filterData.length == 1 && filterData[0] == 'undefined')){
+    if (!filterData || (filterData.length == 1 && filterData[0] == 'undefined')) {
         return;
     }
     filterData.sort();
     var filterList = [];
     //if(filterData.length > 1){
-        filterList.push(
-            React.createElement("option", {value: "default", style: {display:'none'}})
-        );
+    filterList.push(
+        React.createElement("option", {value: "default", style: {display: 'none'}})
+    );
     //}
     for(var i = 0; i< filterData.length; i++){
         var label = filterData[i];
         if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
             label = moment(parseInt(label)).format(columnDef.formatInstructions)
         }
-	
+
         filterList.push(
             React.createElement("option", {value: filterData[i]}, label)
         );
@@ -460,25 +489,25 @@ function buildFilterList(table,columnDef){
        }
     });
     return (
-            React.createElement("div", {className: ("rt-select-filter-container ") +  (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
-                 ref: 'select-filter-' + columnDef.colTag}, 
-                React.createElement("div", {style: {display: 'block', marginBottom:'2px'}}, 
+        React.createElement("div", {className: ("rt-select-filter-container ") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+            ref: 'select-filter-' + columnDef.colTag}, 
+            React.createElement("div", {style: {display: 'block', marginBottom: '2px'}}, 
                 React.createElement("select", {
                     className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
-                    onChange: addFilter.bind(null,table , columnDef), 
+                    onChange: addFilter.bind(null, table, columnDef), 
                     onKeyDown: pressedKey.bind(null, table, columnDef.colTag), 
                     value: filterData.length > 1 ? "default" : filterData[0]}, 
                     filterList
                 ), 
-                React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, 
-                    className: "fa fa-filter", onClick: filter.bind(table, table,columnDef)})
+                React.createElement("i", {style: {float: 'right', 'marginTop': '5px', 'marginRight': '4%'}, 
+                    className: "fa fa-filter", onClick: filter.bind(table, table, columnDef)})
             ), 
-            React.createElement("div", {className: ("separator") + ( selectedFilters.length == 0 ? " rt-hide": "")}), 
+            React.createElement("div", {className: ("separator") + ( selectedFilters.length == 0 ? " rt-hide" : "")}), 
             React.createElement("div", {style: {display: 'block'}}, 
                 selectedFilters
             )
         )
-        )
+    )
 }
 
 
@@ -497,7 +526,7 @@ function buildHeaders(table) {
     var headerColumns = [];
     for (var i = 0; i < table.state.columnDefs.length; i++) {
         var columnDef = table.state.columnDefs[i];
-        if(table.props.hideSubtotaledColumns) {
+        if (table.props.hideSubtotaledColumns) {
             var subtotalled = table.state.subtotalBy.some(function (subtotalColumn) {
                 return subtotalColumn.colTag === columnDef.colTag;
             });
@@ -506,7 +535,7 @@ function buildHeaders(table) {
             }
         }
 
-        var isFirstColumn = (i===0);
+        var isFirstColumn = (i === 0);
         /**
          * sortDef tracks whether the current column is being sorted
          */
@@ -515,40 +544,43 @@ function buildHeaders(table) {
         if (sortDef) {
             var type = sortDef.sortType === 'asc' ? 'up' : 'down';
             var idx = 0;
-            table.state.sortBy.forEach(function(sort, index){
-                if(sort.colTag == columnDef.colTag){
+            table.state.sortBy.forEach(function (sort, index) {
+                if (sort.colTag == columnDef.colTag) {
                     idx = index + 1;
                 }
             });
-            sortIcon = (React.createElement("span", {style: {marginLeft:'3px'}}, React.createElement("i", {style: {marginTop:'2px'}, className: "fa fa-long-arrow-" + type}), React.createElement("sup", {style: {marginLeft: '2px'}}, idx)));
+            sortIcon = (React.createElement("span", {style: {marginLeft: '3px'}}, 
+                React.createElement("i", {style: {marginTop: '2px'}, className: "fa fa-long-arrow-" + type}), 
+                React.createElement("sup", {style: {marginLeft: '2px'}}, idx)
+            ));
         }
         var style = {textAlign: "center"};
         var numericPanelClasses = "rt-numeric-filter-container" + (columnDef.format === "number" && table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide");
         var textClasses = "btn-link rt-header-anchor-text";
 
         // to determine if a column has been filtered. need update accordingly.
-        var isFiltered = columnDef.isFiltered ? true: false;
+        var isFiltered = columnDef.isFiltered ? true : false;
 
         headerColumns.push(
-            React.createElement("div", {className: "rt-headers-container", ref: "header-"+ columnDef.colTag}, 
-                React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null,columnDef, null), style: style, 
-                     className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
+            React.createElement("div", {className: "rt-headers-container", ref: "header-" + columnDef.colTag}, 
+                React.createElement("div", {onDoubleClick: table.handleSetSort.bind(null, columnDef, null), style: style, 
+                    className: "rt-header-element rt-info-header", key: columnDef.colTag}, 
                     React.createElement("a", {className: textClasses, 
-                       onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(table, table, columnDef)}, 
+                        onClick: table.props.filtering && table.props.filtering.disable ? null : toggleFilterBox.bind(table, table, columnDef)}, 
                         buildHeaderLabel(table, columnDef, isFirstColumn), 
                         sortIcon, 
-                        React.createElement("i", {style: {marginLeft:'4px'}, className: ("fa fa-filter fa-inverse") + (isFiltered ? "": " rt-hide")})
+                        React.createElement("i", {style: {marginLeft: '4px'}, className: ("fa fa-filter fa-inverse") + (isFiltered ? "" : " rt-hide")})
                     )
                 ), 
                  table.state.filterInPlace[columnDef.colTag] && columnDef.format === "number" ?
                     (React.createElement("div", {className: numericPanelClasses, ref: "numericFilterPanel-" + columnDef.colTag}, 
                         React.createElement(NumericFilterPanel, {clearFilter: table.handleClearFilter, 
-                                        addFilter: table.handleColumnFilter, 
-                                        colDef: columnDef, 
-                                        currentFilters: table.state.currentFilters}
+                            addFilter: table.handleColumnFilter, 
+                            colDef: columnDef, 
+                            currentFilters: table.state.currentFilters}
                         )
                     )) : null, 
-                table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table,columnDef) : null, 
+                table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table, columnDef) : null, 
                 buildMenu({
                     table: table,
                     columnDef: columnDef,
@@ -567,12 +599,12 @@ function buildHeaders(table) {
     }
 
     // the plus sign at the end to add columns
-        headerColumns.push(
-            React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
-                React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
-                    React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : React.createElement("i", {className: "fa fa-plus"})))
-                )
-            ));
+    headerColumns.push(
+        React.createElement("span", {className: "rt-header-element rt-add-column", style: {"textAlign": "center"}}, 
+            React.createElement("a", {className: classString, onClick: table.props.disableAddColumn ? null : table.handleAdd}, 
+                React.createElement("strong", null, corner ? corner : (table.props.disableAddColumn ? '' : React.createElement("i", {className: "fa fa-plus"})))
+            )
+        ));
 
     return (
         React.createElement("div", {className: "rt-headers-grand-container"}, 
@@ -583,20 +615,59 @@ function buildHeaders(table) {
     );
 }
 
-function buildHeaderLabel(table, columnDef, isFirstColumn){
+function buildHeaderLabel(table, columnDef, isFirstColumn) {
     return isFirstColumn ? buildFirstColumnLabel(table) : (React.createElement("span", null, columnDef.text, " ", columnDef.isLoading ? React.createElement("i", {className: "fa fa-spinner fa-spin"}) : null));
+}
+
+function clickCheckbox(props, isSubtotalRow) {
+    var checkboxCallback = props.table.props.checkboxCallback;
+    if (isSubtotalRow) {
+        props.data.treeNode.isChecked = !props.data.treeNode.isChecked;
+        //check all children rows
+        checkAllChildren(props.data.treeNode, props.data.treeNode.isChecked);
+    } else {
+        props.data.isChecked = !props.data.isChecked;
+    }
+    props.table.setState({});
+
+    if (checkboxCallback) {
+        var root = props.table.state.rootNode;
+        var checkedRows = [];
+
+        root.ultimateChildren.forEach(function (uchild) {
+            if (uchild.isChecked) {
+                var row = {};
+                for (var key in uchild) {
+                    if (key !== 'parent' && key !== 'isDetail' && key !== 'isChecked' && key !== 'sectorPath') {
+                        row[key] = uchild[key];
+                    }
+                }
+                checkedRows.push(row);
+            }
+        });
+        checkboxCallback(checkedRows);
+    }
+}
+
+function checkAllChildren(treeNode, check) {
+    treeNode.ultimateChildren.forEach(function (uchild) {
+        uchild.isChecked = check;
+    });
+    treeNode.children.forEach(function (child) {
+        child.isChecked = check;
+        checkAllChildren(child, check);
+    });
 }
 
 /**
  * create the first cell for each row, append the proper ident level based on the cell's depth in the subtotaling tree
  * @returns {*}
  */
-function buildFirstCellForSubtotalRow(isGrandTotal) {
+function buildFirstCellForSubtotalRow(isGrandTotal, isSubtotalRow) {
     var props = this.props;
     var data = props.data, columnDef = props.columnDefs[0], toggleHide = props.toggleHide;
     var firstColTag = columnDef.colTag, userDefinedElement, result;
-    var noCollapseIcon = data.treeNode.noCollapseIcon;
-
+    var hasCheckbox = props.table.props.hasCheckbox;
     // styling & ident
     var identLevel = !data.isDetail ? data.sectorPath.length - 1 : data.sectorPath.length;
     var firstCellStyle = {
@@ -605,30 +676,46 @@ function buildFirstCellForSubtotalRow(isGrandTotal) {
 
     userDefinedElement = (!data.isDetail && columnDef.summaryTemplate) ? columnDef.summaryTemplate.call(null, data) : null;
 
-    result =(
-                React.createElement("td", {key: firstColTag}, 
-                    React.createElement("div", null, 
+    if (isGrandTotal) {
+        if (data[firstColTag]) {
+            firstCellStyle.width = data[firstColTag].length + "em";
+        }
+        result = (
+            React.createElement("div", {key: firstColTag, className: "rt-grand-total-cell"}, 
+                React.createElement("div", {style: firstCellStyle, className: "rt-grand-total-cell-content"}, 
+                        data[firstColTag] ? data[firstColTag] : React.createElement("span", null, " ")
+                )
+            )
+        );
+    } else if (isSubtotalRow) {
+        var noCollapseIcon = data.treeNode.noCollapseIcon;
+
+        result = (
+            React.createElement("td", {key: firstColTag}, 
+                React.createElement("div", null, 
+                 hasCheckbox ? React.createElement("span", {style: {'paddingLeft': '10px'}}, 
+                    React.createElement("input", {checked: props.data.treeNode.isChecked, type: "checkbox", onClick: clickCheckbox.bind(null, props, true)})
+                ) : '', 
                     React.createElement("a", {style: firstCellStyle, onClick: toggleHide.bind(null, data), className: "btn-link rt-expansion-link"}, 
                          noCollapseIcon ? '' : data.treeNode.collapsed ? React.createElement("i", {className: "fa fa-plus"}) : React.createElement("i", {className: "fa fa-minus"})
                     ), 
-                    "  ", 
+                "  ", 
                     React.createElement("strong", null, data[firstColTag]), 
                     userDefinedElement
-                        )
                 )
-            );
-    if(isGrandTotal){
-        if(data[firstColTag]) {
-            firstCellStyle.width = data[firstColTag].length + "em";
-        }
-        result =(
-                React.createElement("div", {key: firstColTag, className: "rt-grand-total-cell"}, 
-                    React.createElement("div", {style: firstCellStyle, className: "rt-grand-total-cell-content"}, 
-                        data[firstColTag] ? data[firstColTag] : React.createElement("span", null, " ")
-                    )
-                )
+            )
         );
+    } else if (!isSubtotalRow) {
+        result = (
+            React.createElement("td", {key: firstColTag}, 
+                 hasCheckbox ? React.createElement("span", {style: {'paddingLeft': '10px'}}, 
+                    React.createElement("input", {checked: props.data.isChecked, type: "checkbox", onClick: clickCheckbox.bind(null, props, false)})
+                ) : ''
+            )
+        );
+        return result;
     }
+
     return result;
 }
 
@@ -645,14 +732,14 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function buildFooter(paginationAttr, rowNum){
+function buildFooter(paginationAttr, rowNum) {
     var start = paginationAttr.lowerVisualBound + 1;
-    var end = Math.min(paginationAttr.upperVisualBound+1,rowNum);
+    var end = Math.min(paginationAttr.upperVisualBound + 1, rowNum);
 
     return (
         React.createElement("div", null, 
             React.createElement("p", {className: "rt-display-inline rt-footer-count"}, 
-                "Showing " + start + " to " + end + " rows out of "+ numberWithCommas(rowNum) + " rows"
+                "Showing " + start + " to " + end + " rows out of " + numberWithCommas(rowNum) + " rows"
             ), 
             this.props.disableInfiniteScrolling ? buildPageNavigator(this, paginationAttr) : null
         )
@@ -662,24 +749,22 @@ function buildFooter(paginationAttr, rowNum){
 /**
  *  if has subtotal, add an additional column as the first column, otherwise remove subtotal column
  */
-function addExtraColumnForSubtotalBy(){
+function addExtraColumnForSubtotalBy() {
     if (this.state.subtotalBy.length > 0 && this.state.columnDefs[0].colTag !== 'subtotalBy') {
         this.state.columnDefs.unshift({
             colTag: "subtotalBy",
             text: "group"
         });
-        var sortSubtotalByColumn = this.state.sortBy.some(function(sortby){
+        var sortSubtotalByColumn = this.state.sortBy.some(function (sortby) {
             return sortby.colTag === 'subtotalBy';
         });
-        if(sortSubtotalByColumn){
+        if (sortSubtotalByColumn) {
             this.state.rootNode.sortTreeBySubtotals(this.state.subtotalBy, 'asc');
         }
     } else if (this.state.subtotalBy.length == 0 && this.state.columnDefs[0].colTag === 'subtotalBy') {
         this.state.columnDefs.shift();
     }
-};
-
-//Contants used for date subtotalling
+};//Contants used for date subtotalling
 const WEEKLY = "Weekly";
 const MONTHLY = "Monthly";
 const QUARTERLY = "Quarterly";
@@ -698,7 +783,7 @@ const OLDEST = "Oldest";
  */
 function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions != null)) {
         var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -840,6 +925,12 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "most_data_points":
                 result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
                 break;
+            case "weighted_average":
+                result = _weightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
+            case "aggregated_weighted_average":
+                result = _aggregatedWeightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             default :
                 result = "";
         }
@@ -855,10 +946,7 @@ function _straightSumAggregation(options) {
     return result;
 }
 function _average(options) {
-    if (options.columnDef.weightBy)
-        return _weightedAverage(options);
-    else
-        return _simpleAverage(options);
+    return _simpleAverage(options);
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
@@ -877,7 +965,44 @@ function _weightedAverage(options) {
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
 
     var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+function _aggregatedWeightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var level = options.columnDef.aggregationLevel;
+    if (!weightBy || !weightBy.colTag || !level || !level.colTag) {
+        //don't define weightBy or level column
+        return ""
+    }
+
+    var sumProduct = 0;
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
+    var weightSum = _aggregatedLevelSum({data: data, aggregationLevel: level, weightBy: weightBy});
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+/**
+ *
+ * @param options
+ * @returns {number}
+ * @private
+ */
+function _aggregatedLevelSum(options) {
+    var data = options.data, aggregationLevel = options.aggregationLevel, weightBy = options.weightBy;
+    var result = 0, temp = 0;
+    var distinctValues = {};
+    for (var i = 0; i < data.length; i++) {
+        var levelValue = data[i][aggregationLevel.colTag];
+        distinctValues[levelValue] = data[i][weightBy.colTag];
+    }
+    for (var level in distinctValues) {
+        temp = distinctValues[level] || 0;
+        result += temp;
+    }
+    return result;
 }
 
 function _count(options) {
@@ -916,9 +1041,10 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinctPureJS(options) {
+    var data = options.data, columnDef = options.columnDef;
     var count = _count(options);
     var distinctCount = _countDistinct(options);
-    return count == 1 ? distinctCount : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
+    return count == 1 ? formatNumber(distinctCount, columnDef, columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
 function _countAndDistinctUnderscoreJS(options) {
@@ -929,7 +1055,8 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" +  applyThousandSeparator(data.length) + ")";
+    columnDef.formatConfig = buildLAFConfigObject(columnDef);
+    return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0], columnDef, columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
@@ -1389,6 +1516,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         onRightClick: React.PropTypes.func,
         afterFilterCallback: React.PropTypes.func,
         buildFiltersCallback: React.PropTypes.func,
+        checkboxCallback: React.PropTypes.func, // when click checkbox, invoke this callback
         /**
          * props to selectively disable table features
          */
@@ -1400,6 +1528,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         enableScrollPage: React.PropTypes.bool,
         hideSubtotaledColumns: React.PropTypes.bool,
         hideSingleSubtotalChild: React.PropTypes.bool,
+        hasCheckbox: React.PropTypes.bool, // has a check box in subtotal column
         /**
          * misc props
          */
@@ -1831,8 +1960,9 @@ var Row = React.createClass({displayName: "Row",
                 }
             }
 
-            if (i === 0 && !this.props.data.isDetail) {
-                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal));
+            if (i === 0 && table.state.subtotalBy.length > 0) {
+                // generate subtotal column
+                cells.push(buildFirstCellForSubtotalRow.call(this, isGrandTotal, !this.props.data.isDetail));
             } else {
                 var displayInstructions = buildCellLookAndFeel(columnDef, this.props.data);
                 var classes = cx(displayInstructions.classes);
@@ -1852,6 +1982,7 @@ var Row = React.createClass({displayName: "Row",
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
                 if (isGrandTotal) {
+                    //generate cells in grand total row
                     var grandTotalCellStyle = {textAlign: displayInstructions.styles.textAlign};
                     if (displayContent) {
 
@@ -1886,7 +2017,6 @@ var Row = React.createClass({displayName: "Row",
         }
 
         classes = cx({
-            //TODO: to hightlight a selected row, need press ctrl
             'selected': this.props.isSelected && this.props.data.isDetail,
             'summary-selected': this.props.isSelected && !this.props.data.isDetail,
             'group-background': !this.props.data.isDetail
@@ -1905,7 +2035,7 @@ var Row = React.createClass({displayName: "Row",
         // apply extra CSS if specified
             return (React.createElement("tr", {onClick: this.props.onSelect.bind(null, this.props.data), onMouseDown: mouseDown.bind(this, this.props.data), 
                 onMouseUp: mouseUp.bind(this, this.props.data), 
-                className: classes, style: this.props.extraStyle}, " ", cells, " "));
+                className: classes, style: this.props.extraStyle}, cells));
     }
 });
 
@@ -2279,6 +2409,9 @@ function uniqueId(prefix) {
  */
 
 function isRowSelected(row, rowKey, selectedDetailRows, selectedSummaryRows) {
+    if (row.isChecked) {
+        return true;
+    }
     if (rowKey == null)
         return;
     return selectedDetailRows[row[rowKey]] != null || (!row.isDetail && selectedSummaryRows[generateSectorKey(row.sectorPath)] != null);

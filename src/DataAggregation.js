@@ -1,5 +1,3 @@
-
-
 //Contants used for date subtotalling
 const WEEKLY = "Weekly";
 const MONTHLY = "Monthly";
@@ -19,7 +17,7 @@ const OLDEST = "Oldest";
  */
 function classifyRow(row, subtotalBy, partitions) {
     var sectorName = "", sortIndex = null;
-    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions!=null)) {
+    if (subtotalBy.format == "number" || subtotalBy.format == "currency" || (subtotalBy.format == "date" && subtotalBy.formatInstructions != null)) {
         var result = resolvePartitionName(subtotalBy, row, partitions);
         sectorName = result.sectorName;
         sortIndex = result.sortIndex;
@@ -161,6 +159,12 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "most_data_points":
                 result = _mostDataPoints({data: partitionResult, columnDef: columnDef});
                 break;
+            case "weighted_average":
+                result = _weightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
+            case "aggregated_weighted_average":
+                result = _aggregatedWeightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             default :
                 result = "";
         }
@@ -176,10 +180,7 @@ function _straightSumAggregation(options) {
     return result;
 }
 function _average(options) {
-    if (options.columnDef.weightBy)
-        return _weightedAverage(options);
-    else
-        return _simpleAverage(options);
+    return _simpleAverage(options);
 }
 function _simpleAverage(options) {
     var sum = _straightSumAggregation(options);
@@ -198,7 +199,44 @@ function _weightedAverage(options) {
         sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
 
     var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
-    return weightSum == 0 ? 0 : sumProduct / weightSum;
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+function _aggregatedWeightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var level = options.columnDef.aggregationLevel;
+    if (!weightBy || !weightBy.colTag || !level || !level.colTag) {
+        //don't define weightBy or level column
+        return ""
+    }
+
+    var sumProduct = 0;
+    for (var i = 0; i < data.length; i++)
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+
+    var weightSum = _aggregatedLevelSum({data: data, aggregationLevel: level, weightBy: weightBy});
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
+/**
+ *
+ * @param options
+ * @returns {number}
+ * @private
+ */
+function _aggregatedLevelSum(options) {
+    var data = options.data, aggregationLevel = options.aggregationLevel, weightBy = options.weightBy;
+    var result = 0, temp = 0;
+    var distinctValues = {};
+    for (var i = 0; i < data.length; i++) {
+        var levelValue = data[i][aggregationLevel.colTag];
+        distinctValues[levelValue] = data[i][weightBy.colTag];
+    }
+    for (var level in distinctValues) {
+        temp = distinctValues[level] || 0;
+        result += temp;
+    }
+    return result;
 }
 
 function _count(options) {
@@ -237,9 +275,10 @@ function _countDistinct(options) {
 }
 
 function _countAndDistinctPureJS(options) {
+    var data = options.data, columnDef = options.columnDef;
     var count = _count(options);
     var distinctCount = _countDistinct(options);
-    return count == 1 ? distinctCount : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
+    return count == 1 ? formatNumber(distinctCount, columnDef, columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
 function _countAndDistinctUnderscoreJS(options) {
@@ -250,7 +289,8 @@ function _countAndDistinctUnderscoreJS(options) {
         return a > b ? 1 : -1;
     });
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
-    return "(" + (uniqData.length === 1 ? uniqData[0] : applyThousandSeparator(uniqData.length)) + "/" +  applyThousandSeparator(data.length) + ")";
+    columnDef.formatConfig = buildLAFConfigObject(columnDef);
+    return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0], columnDef, columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
 }
 
 /**
