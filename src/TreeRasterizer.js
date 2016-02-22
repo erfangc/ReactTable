@@ -51,8 +51,12 @@ function rasterizeTreeForRender() {
     }, this.state.subtotalBy.length > 0);
 
     //those attributes of state is used by render() of ReactTable
-    this.state.maxRows = data.length - 1;// maxRows is referenced later during event handling to determine upperVisualBound
-    this.state.grandTotal = data.splice(0, 1).map(rowMapper, this);
+	if(this.props.disableGrandTotal == true) {
+		this.state.maxRows = data.length;
+	}else{ 
+		this.state.maxRows = data.length - 1;// maxRows is referenced later during event handling to determine upperVisualBound
+		this.state.grandTotal = data.splice(0, 1).map(rowMapper, this);
+	}
     this.state.rasterizedData = data;
     this.state.buildRasterizedData = false;
 }
