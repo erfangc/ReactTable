@@ -108,9 +108,10 @@ $(function () {
             disableInfiniteScrolling: true,
             disableGrandTotal: false,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
-            subtotalBy: [{
-                colTag: "nationality", text: "Nationality"
-            }],
+            subtotalBy: [
+                {colTag: "fruit_preference", text: "Fruit Preference"},
+                {colTag: "nationality", text: "Nationality"}
+            ],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, columnDef, event) {

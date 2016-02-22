@@ -184,8 +184,12 @@ function buildTreeSkeleton(props, state) {
     }
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        populateChildNodesForRow(rootNode, rawData[i], subtotalByArr);
     }
+
+    state.subtotalBy.forEach(function (subtotalColumn) {
+        //TODO: add partitions
+        buildSubtree(rootNode, [subtotalColumn], state, null);
+    });
 
     return rootNode
 }
