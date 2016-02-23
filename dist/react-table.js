@@ -795,7 +795,7 @@ function classifyRow(row, subtotalBy, partitions) {
 function aggregateSector(partitionResult, columnDefs, subtotalBy) {
     var result = {};
     for (var i = 0; i < columnDefs.length; i++)
-        result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy);
+        result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy, columnDefs);
     return result;
 }
 
@@ -908,7 +908,7 @@ function removeFilteredRow(rows) {
     return ret;
 }
 
-function aggregateColumn(partitionResult, columnDef, subtotalBy) {
+function aggregateColumn(partitionResult, columnDef, subtotalBy, columnDefs) {
     var result;
     var aggregationMethod = resolveAggregationMethod(columnDef, subtotalBy);
 
@@ -939,14 +939,18 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "weighted_average":
                 result = _weightedAverage({data: partitionResult, columnDef: columnDef});
                 break;
-            case "avg_weighted_contribution":
-                result = _aggregatedWeightedContribution({data: partitionResult, columnDef: columnDef});
+            case "distinct_sum":
+                result = _distinctSum({data: partitionResult, columnDef: columnDef});
+                break;
+            case "percentage_contribution":
+                result = _percentageContribution({data: partitionResult, columnDef: columnDef, columnDefs: columnDefs});
                 break;
             default :
                 result = "";
         }
     return result;
 }
+
 
 function _straightSumAggregation(options) {
     var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
@@ -979,32 +983,15 @@ function _weightedAverage(options) {
     return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
-function _aggregatedWeightedContribution(options) {
-    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
-    var level = options.columnDef.aggregationLevel;
-    if (!weightBy || !weightBy.colTag || !level || !level.colTag) {
-        //don't define weightBy or level column
-        return ""
-    }
-
-    var sum = _straightSumAggregation(options) || 0;
-    var weightSum = _aggregatedLevelSum({data: data, aggregationLevel: level, weightBy: weightBy});
-    return weightSum == 0 ? "" : sum / weightSum;
-}
-
-/**
- *
- * @param options
- * @returns {number}
- * @private
- */
-function _aggregatedLevelSum(options) {
-    var data = options.data, aggregationLevel = options.aggregationLevel, weightBy = options.weightBy;
+function _distinctSum(options) {
+    var data = options.data;
+    var columnDef = options.columnDef;
+    var aggregationLevel = columnDef.aggregationLevel;
     var result = 0, temp = 0;
     var distinctValues = {};
     for (var i = 0; i < data.length; i++) {
         var levelValue = data[i][aggregationLevel.colTag];
-        distinctValues[levelValue] = data[i][weightBy.colTag];
+        distinctValues[levelValue] = data[i][columnDef.colTag];
     }
     for (var level in distinctValues) {
         temp = distinctValues[level] || 0;
@@ -1013,8 +1000,28 @@ function _aggregatedLevelSum(options) {
     return result;
 }
 
-function _count(options) {
-    return applyThousandSeparator(options.data.length) || 0;
+function _percentageContribution(options) {
+    var data = options.data;
+    var columnDef = options.columnDef;
+    var numerator = columnDef.numerator;
+    var denominator = columnDef.denominator;
+    if (!denominator || !denominator.colTag || !numerator || !numerator.colTag) {
+        //don't define columns
+        return ""
+    }
+
+    var numeratorValue = _straightSumAggregation({data: data, columnDef: numerator}) || 0;
+
+    var denominatorColumn = null;
+    options.columnDefs.forEach(function (column) {
+        if (column.colTag == denominator.colTag) {
+            denominatorColumn = column;
+        }
+    });
+
+    var denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+
+    return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
 }
 
 /**
