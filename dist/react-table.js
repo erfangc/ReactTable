@@ -2395,8 +2395,12 @@ function adjustHeaders(adjustCount) {
         counter++;
     });
 
-    if (!adjustedSomething)
+    if (!adjustedSomething) {
+        grandTotalFooterCellContents.each(function (index, cell) {
+            $(cell).css('width', 'inherit');
+        });
         return;
+    }
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
