@@ -258,6 +258,10 @@ function _percentageContribution(options) {
     return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
 }
 
+function _count(options) {
+    return options.data.length || 0;
+}
+
 /**
  * count the distinct values in an array of column values
  * @param options

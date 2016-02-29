@@ -390,7 +390,7 @@ var ReactTable = React.createClass({
     exportDataWithSubtotaling: function () {
         return rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true);
     },
     exportDataWithoutSubtotaling: function () {
@@ -407,6 +407,9 @@ var ReactTable = React.createClass({
     },
     getSorts: function () {
         return this.state.sortBy;
+    },
+    checkAllRows: function () {
+        checkAllChildren(this.state.rootNode, true);
     },
     render: function () {
         //console.time('fresh: ');
@@ -494,7 +497,7 @@ var Row = React.createClass({
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        if(columnDef.formatInstructions != null) { //If format instruction is specified
+                        if (columnDef.formatInstructions != null) { //If format instruction is specified
                             displayContent = moment(displayContent).format(columnDef.formatInstructions)
                         } else {
                             displayContent = new Date(displayContent).toLocaleDateString();

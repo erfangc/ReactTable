@@ -529,13 +529,18 @@ function clickCheckbox(props, isSubtotalRow) {
     }
 }
 
-function checkAllChildren(treeNode, check) {
+/**
+ * check or unchecked all rows under a treenode
+ * @param treeNode
+ * @param checked
+ */
+function checkAllChildren(treeNode, checked) {
     treeNode.ultimateChildren.forEach(function (uchild) {
-        uchild.isChecked = check;
+        uchild.isChecked = checked;
     });
     treeNode.children.forEach(function (child) {
-        child.isChecked = check;
-        checkAllChildren(child, check);
+        child.isChecked = checked;
+        checkAllChildren(child, checked);
     });
 }
 

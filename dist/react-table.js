@@ -649,13 +649,18 @@ function clickCheckbox(props, isSubtotalRow) {
     }
 }
 
-function checkAllChildren(treeNode, check) {
+/**
+ * check or unchecked all rows under a treenode
+ * @param treeNode
+ * @param checked
+ */
+function checkAllChildren(treeNode, checked) {
     treeNode.ultimateChildren.forEach(function (uchild) {
-        uchild.isChecked = check;
+        uchild.isChecked = checked;
     });
     treeNode.children.forEach(function (child) {
-        child.isChecked = check;
-        checkAllChildren(child, check);
+        child.isChecked = checked;
+        checkAllChildren(child, checked);
     });
 }
 
@@ -1022,6 +1027,10 @@ function _percentageContribution(options) {
     var denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
 
     return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
+}
+
+function _count(options) {
+    return options.data.length || 0;
 }
 
 /**
@@ -1883,7 +1892,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     exportDataWithSubtotaling: function () {
         return rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true);
     },
     exportDataWithoutSubtotaling: function () {
@@ -1900,6 +1909,9 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     getSorts: function () {
         return this.state.sortBy;
+    },
+    checkAllRows: function () {
+        checkAllChildren(this.state.rootNode, true);
     },
     render: function () {
         //console.time('fresh: ');
@@ -1987,7 +1999,7 @@ var Row = React.createClass({displayName: "Row",
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        if(columnDef.formatInstructions != null) { //If format instruction is specified
+                        if (columnDef.formatInstructions != null) { //If format instruction is specified
                             displayContent = moment(displayContent).format(columnDef.formatInstructions)
                         } else {
                             displayContent = new Date(displayContent).toLocaleDateString();
