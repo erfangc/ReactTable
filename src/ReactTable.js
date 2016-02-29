@@ -410,6 +410,7 @@ var ReactTable = React.createClass({
     },
     checkAllRows: function () {
         checkAllChildren(this.state.rootNode, true);
+        this.setState({});
     },
     render: function () {
         //console.time('fresh: ');
