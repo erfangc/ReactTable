@@ -1890,16 +1890,44 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         this.handleClearAllFilters.call(this);
     },
     exportDataWithSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
             firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = $.extend({}, dataCopy[i]);
+            if(row.treeNode){
+                delete row.treeNode
+            }
+            if(row.parent){
+                delete row.parent;
+            }
+            data.push(row)
+        }
+        return data;
     },
     exportDataWithoutSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = $.extend({}, dataCopy[i]);
+            if(row.treeNode){
+                delete row.treeNode
+            }
+            if(row.parent){
+                delete row.parent;
+            }
+            data.push(row)
+        }
+        return data;
     },
     refresh: function () {
         this.setState({buildRasterizedData: true});
