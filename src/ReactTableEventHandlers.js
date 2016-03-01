@@ -34,10 +34,10 @@ function ReactTableGetInitialState() {
      * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
-    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);  
-  
-    if (initialState.sortBy.length > 0)  
-        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));  
+    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);
+
+    if (initialState.sortBy.length > 0)
+        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
 
     addSubtotalTitleToRowData(initialState.rootNode);
 
@@ -66,12 +66,12 @@ function ReactTableGetInitialState() {
 }
 
 function getRootNodeGivenProps(props, initialState) {
-    if( props.dataAsTree && props.dataAsTreeTitleKey ) {
+    if (props.dataAsTree && props.dataAsTreeTitleKey) {
         props.data = [];
-        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);  
-    }  
+        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);
+    }
     else {
-        return createNewRootNode(props, initialState); 
+        return createNewRootNode(props, initialState);
     }
 }
 
@@ -152,7 +152,7 @@ function ReactTableHandleSelect(selectedRow, event) {
         if (clearSelected) {
             this.setState({});
         }
-    } else{
+    } else {
         var rowKey = this.props.rowKey;
         if (!rowKey || !selectedRow[rowKey])
             return;
@@ -337,6 +337,7 @@ function ReactTableHandleClearSubtotal(event) {
     if (this.state.sortBy.length > 0)
         newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
 
+    applyAllFilters.call(this);
     this.setState(newState);
 }
 
@@ -379,15 +380,15 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (partitions != null && partitions != "" && columnDef) {
 
-    	if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
-    		var start = new Date('1/1/3002').getTime();
-    		var last = new Date('1/1/1002').getTime();
-    		var data = this.state.rootNode.ultimateChildren;
-			for (var i=data.length-1; i>=0; i--) {
-				tmp = data[i][columnDef.colTag];
-				if (tmp < start) start = tmp;
-				if (tmp > last) last = tmp;
-			}
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+            var start = new Date('1/1/3002').getTime();
+            var last = new Date('1/1/1002').getTime();
+            var data = this.state.rootNode.ultimateChildren;
+            for (var i = data.length - 1; i >= 0; i--) {
+                tmp = data[i][columnDef.colTag];
+                if (tmp < start) start = tmp;
+                if (tmp > last) last = tmp;
+            }
 
             if (partitions == WEEKLY || partitions == MONTHLY || partitions == DAILY || partitions == QUARTERLY || partitions == YEARLY) {
                 columnDef.subtotalByRange = getParts(partitions, start, last);
@@ -401,9 +402,9 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
                 columnDef.subtotalByRange = parts;
             }
         }
-    	else {
+        else {
             columnDef.subtotalByRange = partitionNumberLine(partitions);
-    	}
+        }
 
     }
 
@@ -464,10 +465,10 @@ function getParts(frequency, start, last) {
         count = 7;
         start = moment(start).startOf('isoWeek');
     }
-    parts.push(start.unix()*1000);
+    parts.push(start.unix() * 1000);
 
     while (start <= last) {
-        start = moment(start).add(count, unit).unix()*1000;
+        start = moment(start).add(count, unit).unix() * 1000;
         parts.push(start);
     }
     return parts;
