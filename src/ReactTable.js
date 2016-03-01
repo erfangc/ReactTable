@@ -397,10 +397,10 @@ var ReactTable = React.createClass({
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
             var row = $.extend({}, dataCopy[i]);
-            if(row.treeNode){
+            if (row.treeNode) {
                 delete row.treeNode
             }
-            if(row.parent){
+            if (row.parent) {
                 delete row.parent;
             }
             data.push(row)
@@ -417,10 +417,10 @@ var ReactTable = React.createClass({
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
             var row = $.extend({}, dataCopy[i]);
-            if(row.treeNode){
+            if (row.treeNode) {
                 delete row.treeNode
             }
-            if(row.parent){
+            if (row.parent) {
                 delete row.parent;
             }
             data.push(row)
@@ -436,8 +436,8 @@ var ReactTable = React.createClass({
     getSorts: function () {
         return this.state.sortBy;
     },
-    checkAllRows: function () {
-        checkAllChildren(this.state.rootNode, true);
+    checkAllRows: function (checked) {
+        checkAllChildren(this.state.rootNode, checked);
         this.setState({});
     },
     render: function () {

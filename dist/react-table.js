@@ -1899,10 +1899,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
             var row = $.extend({}, dataCopy[i]);
-            if(row.treeNode){
+            if (row.treeNode) {
                 delete row.treeNode
             }
-            if(row.parent){
+            if (row.parent) {
                 delete row.parent;
             }
             data.push(row)
@@ -1919,10 +1919,10 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
             var row = $.extend({}, dataCopy[i]);
-            if(row.treeNode){
+            if (row.treeNode) {
                 delete row.treeNode
             }
-            if(row.parent){
+            if (row.parent) {
                 delete row.parent;
             }
             data.push(row)
@@ -1938,8 +1938,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     getSorts: function () {
         return this.state.sortBy;
     },
-    checkAllRows: function () {
-        checkAllChildren(this.state.rootNode, true);
+    checkAllRows: function (checked) {
+        checkAllChildren(this.state.rootNode, checked);
         this.setState({});
     },
     render: function () {
@@ -4027,7 +4027,7 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if (!detailRow.hiddenByFilter || !detailRow.hiddenBySingleSubtotalRow) {
+        if (!(detailRow.hiddenByFilter || detailRow.hiddenBySingleSubtotalRow)) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             detailRow.parent = node;

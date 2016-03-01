@@ -84,7 +84,7 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if (!detailRow.hiddenByFilter || !detailRow.hiddenBySingleSubtotalRow) {
+        if (!(detailRow.hiddenByFilter || detailRow.hiddenBySingleSubtotalRow)) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             detailRow.parent = node;
