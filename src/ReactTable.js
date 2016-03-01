@@ -440,6 +440,10 @@ var ReactTable = React.createClass({
         checkAllChildren(this.state.rootNode, checked);
         this.setState({});
     },
+    refreshSubtotalRow: function () {
+        recursivelyAggregateNodes(this.state.rootNode, this.state);
+        this.setState({buildRasterizedData: true});
+    },
     render: function () {
         //console.time('fresh: ');
 
