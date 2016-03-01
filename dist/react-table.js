@@ -3957,7 +3957,8 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
 
     if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild && node.parent) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
-        node.ultimateChildren[0].hiddenByFilter = true;
+        node.ultimateChildren[0].hiddenBySingleSubtotalRow = true;
+        //node.ultimateChildren[0].hiddenByFilter = true;
         if (node.hasChild()) {
             node.noCollapseIcon = false;
         } else {
@@ -4016,6 +4017,7 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
             firstColumn: firstColumn
         }, hasSubtotalBy, exportOutside, skipSubtotalRow);
         for (j = 0; j < intermediateResult.length; j++) {
+            //
             if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
         }
@@ -4025,7 +4027,7 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
 function _rasterizeDetailRows(node, flatData) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if (!detailRow.hiddenByFilter) {
+        if (!detailRow.hiddenByFilter || !detailRow.hiddenBySingleSubtotalRow) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             detailRow.parent = node;
