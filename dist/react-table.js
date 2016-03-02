@@ -3975,13 +3975,13 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, skipSubtotalRow);
         else
-            _rasterizeDetailRows(node, flatData);
+            _rasterizeDetailRows(node, flatData,hasSubtotalBy);
     }
     else if (!node.collapsed) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, skipSubtotalRow);
         else
-            _rasterizeDetailRows(node, flatData);
+            _rasterizeDetailRows(node, flatData,hasSubtotalBy);
     }
 
     return flatData;
@@ -4029,10 +4029,12 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
     }
 }
 
-function _rasterizeDetailRows(node, flatData) {
+function _rasterizeDetailRows(node, flatData,hasSubtotalBy) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if (!(detailRow.hiddenByFilter || detailRow.hiddenBySingleSubtotalRow)) {
+        //set to true only when has subtotaling
+        var hiddenBySingleSubtotalRow = hasSubtotalBy &&detailRow.hiddenBySingleSubtotalRow;
+        if (!(detailRow.hiddenByFilter || hiddenBySingleSubtotalRow)) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             detailRow.parent = node;
