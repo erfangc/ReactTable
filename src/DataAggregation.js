@@ -263,7 +263,7 @@ function _percentageContribution(options) {
 }
 
 function _count(options) {
-    return options.data.length || 0;
+    return (options.data.length || 0) + "";
 }
 
 /**
@@ -281,10 +281,17 @@ function _countDistinct(options) {
     /**
      * collect all rows of the given column in data as an array
      */
-    const allData =
+    var allData =
         options.data.map(function (row) {
             return row[columnDef.colTag];
         });
+
+    //convert date number to date string
+    if (columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        allData = allData.map(function (item) {
+            return convertDateNumberToString(columnDef, item);
+        })
+    }
 
     /**
      * iterate through allData - keeping only unique members
@@ -294,6 +301,7 @@ function _countDistinct(options) {
         if (allData[j] !== "" && allData[j] !== null && uniqData.indexOf(allData[j]) == -1)
             uniqData.push(allData[j]);
     }
+
     return uniqData.length == 1 ? uniqData[0] : applyThousandSeparator(uniqData.length);
 }
 
@@ -304,13 +312,35 @@ function _countAndDistinctPureJS(options) {
     return count == 1 ? formatNumber(distinctCount, columnDef, columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
+// convert and format dates
+function convertDateNumberToString(columnDef, value) {
+    var displayContent;
+    if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        if (typeof value === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+            if (columnDef.formatInstructions != null) { //If format instruction is specified
+                displayContent = moment(value).format(columnDef.formatInstructions)
+            } else {
+                displayContent = new Date(value).toLocaleDateString();
+            }
+    }
+    return displayContent;
+}
+
 function _countAndDistinctUnderscoreJS(options) {
     var data = options.data, columnDef = options.columnDef;
-    const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
+    var sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
         if (a === b)
             return 0;
         return a > b ? 1 : -1;
     });
+
+    //convert date number to date string
+    if (columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        sortedData = sortedData.map(function (item) {
+            return convertDateNumberToString(columnDef, item);
+        })
+    }
+
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
     columnDef.formatConfig = buildLAFConfigObject(columnDef);
     return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0], columnDef, columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
