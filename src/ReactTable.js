@@ -396,16 +396,18 @@ var ReactTable = React.createClass({
         var data = [];
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
-            var row = $.extend({}, dataCopy[i]);
+            var row = dataCopy[i];
             if (row.treeNode) {
                 delete row.treeNode
             }
             if (row.parent) {
                 delete row.parent;
             }
-            data.push(row)
         }
-        return data;
+        return dataCopy;
+    },
+    recreateTable: function(){
+        this.state.rootNode = createNewRootNode(this.props, this.state);
     },
     exportDataWithoutSubtotaling: function () {
         var dataCopy = rasterizeTree({

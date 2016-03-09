@@ -151,7 +151,6 @@ function buildMenu(options) {
 
     const subMenuStyles = {
         "top": "-20%",
-        "left": "100%",
         "padding": "5px"
     };
 
@@ -164,7 +163,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), 
+            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-sort"}), 
                 "Sort"), subMenu: 
@@ -196,7 +195,7 @@ function buildMenu(options) {
             )
         ],
         filter: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-filter"}), 
                 "Filter"), 
@@ -213,7 +212,7 @@ function buildMenu(options) {
             )
         ],
         summarize: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-list-ul"}), 
@@ -242,7 +241,7 @@ function buildMenu(options) {
         ],
 
         summarizeClearAll: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-list-ul"}), 
                 "Subtotal"), 
@@ -277,8 +276,10 @@ function buildMenu(options) {
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
         if (!isFirstColumn) {
-            menuItems.push(React.createElement("div", {className: "separator"}));
-            addMenuItems(menuItems, availableDefaultMenuItems.remove);
+
+            //menuItems.push(<div className="separator"/>);
+            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            //
         }
 
     }
@@ -293,10 +294,11 @@ function buildMenu(options) {
                 React.createElement("i", {
                     className: "fa fa-file-excel-o"}), 
             "Download as XLS"));
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, 
-                React.createElement("i", {
-                    className: "fa fa-file-pdf-o"}), 
-            "Download as PDF"));
+
+            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
+            //    <i
+            //        className="fa fa-file-pdf-o"></i>
+            //Download as PDF</div>);
         }
 
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll}, "Collapse" + ' ' +
@@ -1024,7 +1026,11 @@ function _percentageContribution(options) {
         }
     });
 
-    var denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+    if (!denominatorColumn) {
+        var denominatorValue = 0;
+    } else {
+        denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+    }
 
     return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
 }
@@ -1392,7 +1398,9 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     propTypes: {
         subMenu: React.PropTypes.object,
         menuItem: React.PropTypes.object,
-        onMenuClick: React.PropTypes.func
+        onMenuClick: React.PropTypes.func,
+        table : React.PropTypes.object
+
     },
     getDefaultProps: function () {
         return {
@@ -1406,6 +1414,14 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     },
     showSubMenu: function () {
         // determine whether we should show the info box left or right facing, depending on its position in the headers
+        var width = $(this.props.table.getDOMNode()).width();
+        var position = $(this.getDOMNode()).parent().position();
+        this.state.subMenu = this.props.subMenu;
+        if (width - position.left > 50) {
+            this.state.subMenu.props.style.right = '100%';
+        } else {
+            this.state.subMenu.props.style.left = '100%';
+        }
         this.setState({showSubMenu: true});
     },
     hideSubMenu: function () {
@@ -1413,7 +1429,7 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     },
     render: function () {
         const subMenu = this.state.showSubMenu ?
-            this.props.subMenu : null;
+            this.state.subMenu : null;
 
         return (
             React.createElement("div", {onClick: this.props.onMenuClick, className: "menu-item", style: {position:"relative"}, 
@@ -1898,16 +1914,18 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         var data = [];
         for (var i = 0; i < dataCopy.length; i++) {
             //shallow copy each row
-            var row = $.extend({}, dataCopy[i]);
+            var row = dataCopy[i];
             if (row.treeNode) {
                 delete row.treeNode
             }
             if (row.parent) {
                 delete row.parent;
             }
-            data.push(row)
         }
-        return data;
+        return dataCopy;
+    },
+    recreateTable: function(){
+        this.state.rootNode = createNewRootNode(this.props, this.state);
     },
     exportDataWithoutSubtotaling: function () {
         var dataCopy = rasterizeTree({

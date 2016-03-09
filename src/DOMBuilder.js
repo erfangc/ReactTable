@@ -31,7 +31,6 @@ function buildMenu(options) {
 
     const subMenuStyles = {
         "top": "-20%",
-        "left": "100%",
         "padding": "5px"
     };
 
@@ -44,7 +43,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)}
+            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)} table={table}
                 menuItem={<span>
                     <i className="fa fa-sort"></i>
                 Sort</span>} subMenu={
@@ -76,7 +75,7 @@ function buildMenu(options) {
             </SubMenu>
         ],
         filter: [
-            <SubMenu
+            <SubMenu  table={table}
                 menuItem={<span>
                     <i className="fa fa-filter"></i>
                 Filter</span>}
@@ -93,7 +92,7 @@ function buildMenu(options) {
             </SubMenu>
         ],
         summarize: [
-            <SubMenu
+            <SubMenu  table={table}
                 onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
                 menuItem={<span>
                     <i className="fa fa-list-ul"></i>
@@ -122,7 +121,7 @@ function buildMenu(options) {
         ],
 
         summarizeClearAll: [
-            <SubMenu
+            <SubMenu  table={table}
                 menuItem={<span>
                     <i className="fa fa-list-ul"></i>
                 Subtotal</span>}
@@ -157,8 +156,10 @@ function buildMenu(options) {
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
         if (!isFirstColumn) {
-            menuItems.push(<div className="separator"/>);
-            addMenuItems(menuItems, availableDefaultMenuItems.remove);
+
+            //menuItems.push(<div className="separator"/>);
+            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            //
         }
 
     }
@@ -173,10 +174,11 @@ function buildMenu(options) {
                 <i
                     className="fa fa-file-excel-o"></i>
             Download as XLS</div>);
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
-                <i
-                    className="fa fa-file-pdf-o"></i>
-            Download as PDF</div>);
+
+            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
+            //    <i
+            //        className="fa fa-file-pdf-o"></i>
+            //Download as PDF</div>);
         }
 
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll}>Collapse

@@ -253,7 +253,11 @@ function _percentageContribution(options) {
         }
     });
 
-    var denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+    if (!denominatorColumn) {
+        var denominatorValue = 0;
+    } else {
+        denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+    }
 
     return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
 }
