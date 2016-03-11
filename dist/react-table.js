@@ -1087,14 +1087,16 @@ function _countAndDistinctPureJS(options) {
 
 // convert and format dates
 function convertDateNumberToString(columnDef, value) {
-    var displayContent;
+    var displayContent = value;
     if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
-        if (typeof value === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+        // if displayContent is a number, we assume displayContent is in milliseconds
+        if (typeof value === "number") {
             if (columnDef.formatInstructions != null) { //If format instruction is specified
                 displayContent = moment(value).format(columnDef.formatInstructions)
             } else {
                 displayContent = new Date(value).toLocaleDateString();
             }
+        }
     }
     return displayContent;
 }
@@ -3913,6 +3915,19 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
+                if (columnDef.format === 'date') {
+                    row[columnDef.colTag] = convertDateNumberToString(columnDef, row[columnDef.colTag]);
+                    textToFilterBy = textToFilterBy.map(function (filter) {
+                        var filterTmp = filter;
+                        if(typeof filter === 'string'){
+                            filterTmp = parseInt(filter);
+                            if(filterTmp<100000){
+                                filterTmp = filter;
+                            }
+                        }
+                        return convertDateNumberToString(columnDef, filterTmp);
+                    })
+                }
                 uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || filterInArray(textToFilterBy, columnDef, row, caseSensitive);
             }
             showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
@@ -3957,7 +3972,7 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                 else if (filterData[j].eq !== undefined) {
                     // rounding
                     value = value.toFixed(formatConfig.roundTo);
-                    var filterValue = filterData[j].eq.toString().replace(/,/g,'');
+                    var filterValue = filterData[j].eq.toString().replace(/,/g, '');
                     if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
                     }

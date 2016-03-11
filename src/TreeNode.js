@@ -211,6 +211,19 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
+                if (columnDef.format === 'date') {
+                    row[columnDef.colTag] = convertDateNumberToString(columnDef, row[columnDef.colTag]);
+                    textToFilterBy = textToFilterBy.map(function (filter) {
+                        var filterTmp = filter;
+                        if(typeof filter === 'string'){
+                            filterTmp = parseInt(filter);
+                            if(filterTmp<100000){
+                                filterTmp = filter;
+                            }
+                        }
+                        return convertDateNumberToString(columnDef, filterTmp);
+                    })
+                }
                 uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || filterInArray(textToFilterBy, columnDef, row, caseSensitive);
             }
             showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
@@ -255,7 +268,7 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                 else if (filterData[j].eq !== undefined) {
                     // rounding
                     value = value.toFixed(formatConfig.roundTo);
-                    var filterValue = filterData[j].eq.toString().replace(/,/g,'');
+                    var filterValue = filterData[j].eq.toString().replace(/,/g, '');
                     if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
                     }

@@ -314,14 +314,16 @@ function _countAndDistinctPureJS(options) {
 
 // convert and format dates
 function convertDateNumberToString(columnDef, value) {
-    var displayContent;
+    var displayContent = value;
     if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
-        if (typeof value === "number") // if displayContent is a number, we assume displayContent is in milliseconds
+        // if displayContent is a number, we assume displayContent is in milliseconds
+        if (typeof value === "number") {
             if (columnDef.formatInstructions != null) { //If format instruction is specified
                 displayContent = moment(value).format(columnDef.formatInstructions)
             } else {
                 displayContent = new Date(value).toLocaleDateString();
             }
+        }
     }
     return displayContent;
 }
