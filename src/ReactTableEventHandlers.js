@@ -178,7 +178,17 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     if (typeof dontSet !== "boolean")
         dontSet = undefined;
 
-    var filterData = e.target ? (e.target.value || e.target.textContent) : e;
+    if (Array.isArray(e)) {
+        var filterData = e;
+    } else {
+        var target = $(e.target);
+        if (target.is("span")) {
+            filterData = target.text();
+        } else {
+            filterData =  target.children('span').text();
+        }
+    }
+
     if (!Array.isArray(filterData)) {
         if (columnDefToFilterBy.format == 'number') {
             filterData = [{eq: filterData}];
