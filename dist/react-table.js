@@ -946,6 +946,9 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy, columnDefs) {
             case "weighted_average":
                 result = _weightedAverage({data: partitionResult, columnDef: columnDef});
                 break;
+            case "non_zero_weighted_average":
+                result = _nonZeroweightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
             case "distinct_sum":
                 result = _distinctSum({data: partitionResult, columnDef: columnDef});
                 break;
@@ -978,6 +981,23 @@ function _simpleAverage(options) {
             count++;
     }
     return count == 0 ? "" : sum / count;
+}
+
+function _nonZeroweightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var sumProduct = 0;
+    var zeroWeightSum = 0;
+    for (var i = 0; i < data.length; i++) {
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+        //find the zero values
+        if (!data[i][columnDef.colTag] || data[i][columnDef.colTag] === 0) {
+            zeroWeightSum += (data[i][weightBy.colTag] || 0);
+        }
+    }
+    var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
+    weightSum -= zeroWeightSum;
+
+    return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
 function _weightedAverage(options) {
