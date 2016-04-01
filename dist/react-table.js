@@ -68,6 +68,9 @@ function buildCellLookAndFeel(columnDef, row) {
     if (columnDef.format == "currency")
         value = "$" + value;
 
+    if (columnDef.format === 'date')
+        value = convertDateNumberToString(columnDef, value);
+
     // determine alignment
     results.styles.textAlign = computeCellAlignment(formatConfig.alignment, row, columnDef);
     results.styles.width = columnDef.text.length + "em";
@@ -143,6 +146,46 @@ function clickFilterMenu(table, columnDef) {
     }
 }
 
+function clickFilterSearch(table, columnDef) {
+    if (!(table.props.filtering && table.props.filtering.disable)) {
+        toggleSearchBox.call(table, table, columnDef);
+        table.setState({});
+    }
+}
+
+function toggleSearchBox(table, columnDef) {
+    var sip = table.state.searchInPlace;
+    //open current filter drop down, close others
+    sip[columnDef.colTag] = !sip[columnDef.colTag];
+    for (var key in sip) {
+        if (key !== columnDef.colTag) {
+            sip[key] = false;
+        }
+    }
+
+    table.setState({
+        searchInPlace: sip
+    });
+
+    setTimeout(function (sip) {
+        if (!sip[columnDef.colTag]) {
+            return;
+        }
+        //move filter panel to right position
+        var $header = $(this.refs["header-" + columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+
+        var $filterDropDown = $(this.refs['search-filter-' + columnDef.colTag].getDOMNode());
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this, sip));
+}
+
 function buildMenu(options) {
     var table = options.table,
         columnDef = options.columnDef,
@@ -202,8 +245,9 @@ function buildMenu(options) {
                 subMenu: 
                     React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                         React.createElement("div", {className: "menu-item", onClick: clickFilterMenu.bind(null, table, columnDef)}, 
-                            React.createElement("i", {className: "fa fa-filter"}), 
-                        "Filter"), 
+                            React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                        columnDef.format == 'number' ?'': React.createElement("div", {className: "menu-item", onClick: clickFilterSearch.bind(null, table, columnDef)}, 
+                            React.createElement("i", {className: "fa fa-search"}), " Search"), 
                         React.createElement("div", {className: "separator"}), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
@@ -307,7 +351,7 @@ function buildMenu(options) {
     }
 
     return (
-        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "")}, 
+        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] || table.state.searchInPlace[columnDef.colTag] ? " rt-hide" : "")}, 
             menuItems
         )
     );
@@ -367,6 +411,16 @@ function pressedKey(table, colTag, e) {
     }
 }
 
+function pressedKeyInSearch(table, colTag, e) {
+    const ESCAPE = 27;
+    if (table.state.searchInPlace[colTag] && e.keyCode == ESCAPE) {
+        table.state.searchInPlace[colTag] = false;
+        table.setState({
+            searchInPlace: table.state.searchInPlace
+        });
+    }
+}
+
 function selectFilters(table, columnDefToFilterBy, e) {
     table.state.selectedFilters = $(e.target).val();
     table.setState({});
@@ -406,6 +460,24 @@ function addFilter(table, columnDef, event) {
     table.setState({});
 }
 
+function search(table, columnDef) {
+    var filterData = null;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filterData = filter.filterText;
+        }
+    });
+
+    columnDef.isFiltered = true;
+    columnDef.isSearchText = true;
+    table.state.searchInPlace[columnDef.colTag] = false;
+    table.handleColumnFilter.call(null, columnDef, filterData);
+    columnDef.isSearchText = false;
+
+    //hide filter dropdown
+    $(this.refs['search-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
+}
+
 function filter(table, columnDef) {
     var filterData = null;
     table.state.currentFilters.forEach(function (filter) {
@@ -436,6 +508,52 @@ function removeFilter(table, columnDef, index, event) {
 
     table.setState({});
 }
+/**
+ * set the search text for filter a column
+ * @param table
+ * @param columnDef
+ * @param event
+ */
+function changeSearchText(table, columnDef, event) {
+    var filterValue = event.target.value;
+
+    if (!filterValue) {
+        return;
+    }
+
+    var isAdded = false;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            isAdded = true;
+            filter.filterText = [filterValue];
+        }
+    });
+
+    if (!isAdded) {
+        table.state.currentFilters.push({
+            colDef: columnDef,
+            filterText: [filterValue]
+        });
+    }
+
+    table.setState({});
+}
+
+function buildSearchBox(table, columnDef) {
+
+    return (
+        React.createElement("div", {className: ("rt-select-filter-container ") + (table.state.searchInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+            ref: 'search-filter-' + columnDef.colTag}, 
+            React.createElement("div", {style: {display: 'block', marginBottom: '2px'}}, 
+                React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
+                    onKeyDown: pressedKeyInSearch.bind(null, table, columnDef.colTag), 
+                    onChange: changeSearchText.bind(null, table, columnDef)}), 
+                React.createElement("i", {style: {float: 'right', 'marginTop': '5px', 'marginRight': '4%'}, 
+                    className: "fa fa-search", onClick: search.bind(table, table, columnDef)})
+            )
+        )
+    )
+}
 
 /**
  * build filter drop down list
@@ -459,9 +577,9 @@ function buildFilterList(table, columnDef) {
         React.createElement("option", {value: "default", style: {display: 'none'}})
     );
     //}
-    for(var i = 0; i< filterData.length; i++){
+    for (var i = 0; i < filterData.length; i++) {
         var label = filterData[i];
-        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
             label = moment(parseInt(label)).format(columnDef.formatInstructions)
         }
 
@@ -471,24 +589,24 @@ function buildFilterList(table, columnDef) {
     }
 
     var selectedFilters = [];
-    table.state.currentFilters.forEach(function(filter){
-       if(filter.colDef === columnDef){
-           filter.filterText.forEach(function(filter, index){
-               if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
-                   filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
-               }
-		   
-               selectedFilters.push(
-                   React.createElement("div", {style: {display: 'block', marginTop:'2px'}}, 
-                       React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
-                           type: "text", value: filter, readOnly: true}), 
-                       React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, className: "fa fa-minus", 
-                           onClick: removeFilter.bind(null,table , columnDef,index)}
-                       )
-                   )
-               )
-           });
-       }
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filter.filterText.forEach(function (filter, index) {
+                if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+                    filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
+                }
+
+                selectedFilters.push(
+                    React.createElement("div", {style: {display: 'block', marginTop: '2px'}}, 
+                        React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
+                            type: "text", value: filter, readOnly: true}), 
+                        React.createElement("i", {style: {float: 'right', 'marginTop': '5px', 'marginRight': '4%'}, className: "fa fa-minus", 
+                            onClick: removeFilter.bind(null, table, columnDef, index)}
+                        )
+                    )
+                )
+            });
+        }
     });
     return (
         React.createElement("div", {className: ("rt-select-filter-container ") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
@@ -583,6 +701,7 @@ function buildHeaders(table) {
                         )
                     )) : null, 
                 table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table, columnDef) : null, 
+                table.state.searchInPlace[columnDef.colTag] ? buildSearchBox(table, columnDef) : null, 
                 buildMenu({
                     table: table,
                     columnDef: columnDef,
@@ -2803,6 +2922,7 @@ function ReactTableGetInitialState() {
         extraStyle: {}, // TODO document use
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [], // TODO same as above
+        searchInPlace: {}, // use a search box to filter a column
 
         rasterizedData: null, // table data for render
         buildRasterizedData: true, // when change table structure such as sort or subtotal, set this to true.
@@ -3891,6 +4011,15 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+function containsWildcart(filterArr) {
+    var searchText = filterArr[0];
+    if (filterArr.length == 1 && (searchText.indexOf('?')> -1 || searchText.indexOf('*')>-1)) {
+        return true;
+    }else{
+        return false;
+    }
+}
+
 /**
  *
  * @param filterArr
@@ -3900,17 +4029,33 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
  * @returns {boolean} to indicate hide this row or not
  */
 function filterInArray(filterArr, columnDef, row, caseSensitive) {
-    var found = null;
-    if (caseSensitive) {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
-        });
+
+    if (columnDef.isSearchText || containsWildcart(filterArr)) {
+        var searchText = filterArr[0];
+        searchText = searchText.toLowerCase();
+        searchText = searchText.replace(/\?/g, '.?');
+        searchText = searchText.replace(/\*/g, '.*');
+        var re = new RegExp('^' + searchText);
+        var displayValue = buildCellLookAndFeel(columnDef, row).value.toString().toLowerCase();
+        var found = displayValue.match(re);
+        if (found) {
+            return false;
+        } else {
+            return true;
+        }
     } else {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
-        });
+        found = null;
+        if (caseSensitive) {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
+            });
+        } else {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
+            });
+        }
+        return !found;
     }
-    return !found;
 }
 
 /**
@@ -3945,13 +4090,13 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
-                if (columnDef.format === 'date') {
+                if (columnDef.format === 'date' && !columnDef.isSearchText) {
                     row[columnDef.colTag] = convertDateNumberToString(columnDef, row[columnDef.colTag]);
                     textToFilterBy = textToFilterBy.map(function (filter) {
                         var filterTmp = filter;
-                        if(typeof filter === 'string'){
+                        if (typeof filter === 'string') {
                             filterTmp = parseInt(filter);
-                            if(filterTmp<100000){
+                            if (filterTmp < 100000) {
                                 filterTmp = filter;
                             }
                         }

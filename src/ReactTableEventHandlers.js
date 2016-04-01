@@ -24,6 +24,7 @@ function ReactTableGetInitialState() {
         extraStyle: {}, // TODO document use
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [], // TODO same as above
+        searchInPlace: {}, // use a search box to filter a column
 
         rasterizedData: null, // table data for render
         buildRasterizedData: true, // when change table structure such as sort or subtotal, set this to true.

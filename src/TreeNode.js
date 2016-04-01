@@ -157,6 +157,15 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+function containsWildcart(filterArr) {
+    var searchText = filterArr[0];
+    if (filterArr.length == 1 && (searchText.indexOf('?')> -1 || searchText.indexOf('*')>-1)) {
+        return true;
+    }else{
+        return false;
+    }
+}
+
 /**
  *
  * @param filterArr
@@ -166,17 +175,33 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
  * @returns {boolean} to indicate hide this row or not
  */
 function filterInArray(filterArr, columnDef, row, caseSensitive) {
-    var found = null;
-    if (caseSensitive) {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
-        });
+
+    if (columnDef.isSearchText || containsWildcart(filterArr)) {
+        var searchText = filterArr[0];
+        searchText = searchText.toLowerCase();
+        searchText = searchText.replace(/\?/g, '.?');
+        searchText = searchText.replace(/\*/g, '.*');
+        var re = new RegExp('^' + searchText);
+        var displayValue = buildCellLookAndFeel(columnDef, row).value.toString().toLowerCase();
+        var found = displayValue.match(re);
+        if (found) {
+            return false;
+        } else {
+            return true;
+        }
     } else {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
-        });
+        found = null;
+        if (caseSensitive) {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
+            });
+        } else {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
+            });
+        }
+        return !found;
     }
-    return !found;
 }
 
 /**
@@ -211,13 +236,13 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
-                if (columnDef.format === 'date') {
+                if (columnDef.format === 'date' && !columnDef.isSearchText) {
                     row[columnDef.colTag] = convertDateNumberToString(columnDef, row[columnDef.colTag]);
                     textToFilterBy = textToFilterBy.map(function (filter) {
                         var filterTmp = filter;
-                        if(typeof filter === 'string'){
+                        if (typeof filter === 'string') {
                             filterTmp = parseInt(filter);
-                            if(filterTmp<100000){
+                            if (filterTmp < 100000) {
                                 filterTmp = filter;
                             }
                         }
