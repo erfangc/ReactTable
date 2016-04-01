@@ -172,7 +172,7 @@ var ReactTable = React.createClass({
 
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: firstColumn,
+            firstColumn: firstColumn
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
@@ -388,16 +388,46 @@ var ReactTable = React.createClass({
         this.handleClearAllFilters.call(this);
     },
     exportDataWithSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = dataCopy[i];
+            if (row.treeNode) {
+                delete row.treeNode
+            }
+            if (row.parent) {
+                delete row.parent;
+            }
+        }
+        return dataCopy;
+    },
+    recreateTable: function(){
+        this.state.rootNode = createNewRootNode(this.props, this.state);
     },
     exportDataWithoutSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = $.extend({}, dataCopy[i]);
+            if (row.treeNode) {
+                delete row.treeNode
+            }
+            if (row.parent) {
+                delete row.parent;
+            }
+            data.push(row)
+        }
+        return data;
     },
     refresh: function () {
         this.setState({buildRasterizedData: true});
@@ -407,6 +437,14 @@ var ReactTable = React.createClass({
     },
     getSorts: function () {
         return this.state.sortBy;
+    },
+    checkAllRows: function (checked) {
+        checkAllChildren(this.state.rootNode, checked);
+        this.setState({});
+    },
+    refreshSubtotalRow: function () {
+        recursivelyAggregateNodes(this.state.rootNode, this.state);
+        this.setState({buildRasterizedData: true});
     },
     render: function () {
         //console.time('fresh: ');
@@ -494,7 +532,7 @@ var Row = React.createClass({
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        if(columnDef.formatInstructions != null) { //If format instruction is specified
+                        if (columnDef.formatInstructions != null) { //If format instruction is specified
                             displayContent = moment(displayContent).format(columnDef.formatInstructions)
                         } else {
                             displayContent = new Date(displayContent).toLocaleDateString();
@@ -890,8 +928,12 @@ function adjustHeaders(adjustCount) {
         counter++;
     });
 
-    if (!adjustedSomething)
+    if (!adjustedSomething) {
+        grandTotalFooterCellContents.each(function (index, cell) {
+            $(cell).css('width', 'inherit');
+        });
         return;
+    }
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");

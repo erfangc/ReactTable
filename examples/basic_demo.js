@@ -9,7 +9,8 @@ $(function () {
                 return [React.createElement(SummarizeControl, {table: table, columnDef: columnDef})];
             }
         },
-        {colTag: "email", text: "Email",
+        {
+            colTag: "email", text: "Email",
             rightClickMenuItems: {
                 menus: []
             }
@@ -34,7 +35,8 @@ $(function () {
                 ]
             }
         },
-        {colTag: "superlong",
+        {
+            colTag: "superlong",
             text: "Some header",
             isLoading: true
         },
@@ -53,16 +55,18 @@ $(function () {
                 return classes;
             }
         },
-        {colTag: "fruit_preference", text: "Fruit Preference",
+        {
+            colTag: "fruit_preference", text: "Fruit Preference",
             onDoubleClick: function (content, colDef, colNum, row) {
                 row.edit = true;
                 row.editCol = colDef.colTag;
                 table.setState({buildRasterizedData: true});
             },
-            cellTemplate: function(row, colDef, content){
-                if(row.edit == true && row.editCol == colDef.colTag){
-                     return React.createElement("div", {},
-                        React.createElement("input", {type: 'text', defaultValue: row.fruit_preference,
+            cellTemplate: function (row, colDef, content) {
+                if (row.edit == true && row.editCol == colDef.colTag) {
+                    return React.createElement("div", {},
+                        React.createElement("input", {
+                            type: 'text', defaultValue: row.fruit_preference,
                             autoFocus: true,
                             onKeyPress: function (event) {
                                 if (event.charCode == 13) {
@@ -99,18 +103,19 @@ $(function () {
         // first table
         var options = {
             hasCheckbox: true,
-            checkboxCallback: function(rows){
+            checkboxCallback: function (rows) {
                 console.log(rows);
             },
             hideSingleSubtotalChild: true,
             hideSubtotaledColumns: true,
-            enableScrollPage:true,
+            enableScrollPage: true,
             disableInfiniteScrolling: true,
             disableGrandTotal: false,
             sortBy: [{colTag: "test_score", sortType: "asc"}],
-            subtotalBy: [{
-                colTag: "nationality", text: "Nationality"
-            }],
+            subtotalBy: [
+                {colTag: "fruit_preference", text: "Fruit Preference"},
+                {colTag: "nationality", text: "Nationality"}
+            ],
             rowKey: 'id',
             data: testData,
             onRightClick: function (row, columnDef, event) {
@@ -118,7 +123,7 @@ $(function () {
                 event.preventDefault();
             },
             cellRightClickMenu: {
-                style: {textAlign:'left'},
+                style: {textAlign: 'left'},
                 menus: [
                     {
                         description: 'Open in Google',
@@ -131,7 +136,7 @@ $(function () {
                     },
                     {
                         description: 'Open in Bing',
-                        callback: function (rowData, curColumnDef,columnDefs, event) {
+                        callback: function (rowData, curColumnDef, columnDefs, event) {
                             event.stopPropagation();
                             console.log(rowData[curColumnDef.colTag]);
                             window.open("https://www.bing.com/search?q=" + rowData[curColumnDef.colTag]);
@@ -140,7 +145,7 @@ $(function () {
                     },
                     {
                         description: 'Open in Yahoo!',
-                        callback: function (rowData, curColumnDef,columnDefs, event) {
+                        callback: function (rowData, curColumnDef, columnDefs, event) {
                             event.stopPropagation();
                             console.log(rowData[curColumnDef.colTag]);
                             alert("don't know how to open in yahoo.");
@@ -150,7 +155,7 @@ $(function () {
                 ]
             },
             height: "500px",
-            pageSize:50,
+            pageSize: 50,
             columnDefs: columnDefs,
             beforeColumnAdd: function () {
                 console.log("beforeColumnAdd callback called!");

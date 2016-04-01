@@ -68,6 +68,9 @@ function buildCellLookAndFeel(columnDef, row) {
     if (columnDef.format == "currency")
         value = "$" + value;
 
+    if (columnDef.format === 'date')
+        value = convertDateNumberToString(columnDef, value);
+
     // determine alignment
     results.styles.textAlign = computeCellAlignment(formatConfig.alignment, row, columnDef);
     results.styles.width = columnDef.text.length + "em";
@@ -143,6 +146,46 @@ function clickFilterMenu(table, columnDef) {
     }
 }
 
+function clickFilterSearch(table, columnDef) {
+    if (!(table.props.filtering && table.props.filtering.disable)) {
+        toggleSearchBox.call(table, table, columnDef);
+        table.setState({});
+    }
+}
+
+function toggleSearchBox(table, columnDef) {
+    var sip = table.state.searchInPlace;
+    //open current filter drop down, close others
+    sip[columnDef.colTag] = !sip[columnDef.colTag];
+    for (var key in sip) {
+        if (key !== columnDef.colTag) {
+            sip[key] = false;
+        }
+    }
+
+    table.setState({
+        searchInPlace: sip
+    });
+
+    setTimeout(function (sip) {
+        if (!sip[columnDef.colTag]) {
+            return;
+        }
+        //move filter panel to right position
+        var $header = $(this.refs["header-" + columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+
+        var $filterDropDown = $(this.refs['search-filter-' + columnDef.colTag].getDOMNode());
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this, sip));
+}
+
 function buildMenu(options) {
     var table = options.table,
         columnDef = options.columnDef,
@@ -151,7 +194,6 @@ function buildMenu(options) {
 
     const subMenuStyles = {
         "top": "-20%",
-        "left": "100%",
         "padding": "5px"
     };
 
@@ -164,7 +206,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), 
+            React.createElement(SubMenu, {onMenuClick: table.handleSetSort.bind(null, columnDef, null), table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-sort"}), 
                 "Sort"), subMenu: 
@@ -196,15 +238,16 @@ function buildMenu(options) {
             )
         ],
         filter: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-filter"}), 
                 "Filter"), 
                 subMenu: 
                     React.createElement("div", {className: "rt-header-menu", style: subMenuStyles}, 
                         React.createElement("div", {className: "menu-item", onClick: clickFilterMenu.bind(null, table, columnDef)}, 
-                            React.createElement("i", {className: "fa fa-filter"}), 
-                        "Filter"), 
+                            React.createElement("i", {className: "fa fa-filter"}), " Filter"), 
+                        columnDef.format == 'number' ?'': React.createElement("div", {className: "menu-item", onClick: clickFilterSearch.bind(null, table, columnDef)}, 
+                            React.createElement("i", {className: "fa fa-search"}), " Search"), 
                         React.createElement("div", {className: "separator"}), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearFilter.bind(null, columnDef)}, "Clear Filter"), 
                         React.createElement("div", {className: "menu-item", onClick: table.handleClearAllFilters}, "Clear All Filters")
@@ -213,7 +256,7 @@ function buildMenu(options) {
             )
         ],
         summarize: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 onMenuClick: columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null), 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-list-ul"}), 
@@ -242,7 +285,7 @@ function buildMenu(options) {
         ],
 
         summarizeClearAll: [
-            React.createElement(SubMenu, {
+            React.createElement(SubMenu, {table: table, 
                 menuItem: React.createElement("span", null, 
                     React.createElement("i", {className: "fa fa-list-ul"}), 
                 "Subtotal"), 
@@ -277,8 +320,10 @@ function buildMenu(options) {
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
         if (!isFirstColumn) {
-            menuItems.push(React.createElement("div", {className: "separator"}));
-            addMenuItems(menuItems, availableDefaultMenuItems.remove);
+
+            //menuItems.push(<div className="separator"/>);
+            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            //
         }
 
     }
@@ -293,10 +338,11 @@ function buildMenu(options) {
                 React.createElement("i", {
                     className: "fa fa-file-excel-o"}), 
             "Download as XLS"));
-            menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, 
-                React.createElement("i", {
-                    className: "fa fa-file-pdf-o"}), 
-            "Download as PDF"));
+
+            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
+            //    <i
+            //        className="fa fa-file-pdf-o"></i>
+            //Download as PDF</div>);
         }
 
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll}, "Collapse" + ' ' +
@@ -305,7 +351,7 @@ function buildMenu(options) {
     }
 
     return (
-        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "")}, 
+        React.createElement("div", {style: menuStyle, className: ("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] || table.state.searchInPlace[columnDef.colTag] ? " rt-hide" : "")}, 
             menuItems
         )
     );
@@ -365,6 +411,16 @@ function pressedKey(table, colTag, e) {
     }
 }
 
+function pressedKeyInSearch(table, colTag, e) {
+    const ESCAPE = 27;
+    if (table.state.searchInPlace[colTag] && e.keyCode == ESCAPE) {
+        table.state.searchInPlace[colTag] = false;
+        table.setState({
+            searchInPlace: table.state.searchInPlace
+        });
+    }
+}
+
 function selectFilters(table, columnDefToFilterBy, e) {
     table.state.selectedFilters = $(e.target).val();
     table.setState({});
@@ -404,6 +460,24 @@ function addFilter(table, columnDef, event) {
     table.setState({});
 }
 
+function search(table, columnDef) {
+    var filterData = null;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filterData = filter.filterText;
+        }
+    });
+
+    columnDef.isFiltered = true;
+    columnDef.isSearchText = true;
+    table.state.searchInPlace[columnDef.colTag] = false;
+    table.handleColumnFilter.call(null, columnDef, filterData);
+    columnDef.isSearchText = false;
+
+    //hide filter dropdown
+    $(this.refs['search-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
+}
+
 function filter(table, columnDef) {
     var filterData = null;
     table.state.currentFilters.forEach(function (filter) {
@@ -434,6 +508,52 @@ function removeFilter(table, columnDef, index, event) {
 
     table.setState({});
 }
+/**
+ * set the search text for filter a column
+ * @param table
+ * @param columnDef
+ * @param event
+ */
+function changeSearchText(table, columnDef, event) {
+    var filterValue = event.target.value;
+
+    if (!filterValue) {
+        return;
+    }
+
+    var isAdded = false;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            isAdded = true;
+            filter.filterText = [filterValue];
+        }
+    });
+
+    if (!isAdded) {
+        table.state.currentFilters.push({
+            colDef: columnDef,
+            filterText: [filterValue]
+        });
+    }
+
+    table.setState({});
+}
+
+function buildSearchBox(table, columnDef) {
+
+    return (
+        React.createElement("div", {className: ("rt-select-filter-container ") + (table.state.searchInPlace[columnDef.colTag] ? "" : " rt-hide"), 
+            ref: 'search-filter-' + columnDef.colTag}, 
+            React.createElement("div", {style: {display: 'block', marginBottom: '2px'}}, 
+                React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-select rt-filter-select", 
+                    onKeyDown: pressedKeyInSearch.bind(null, table, columnDef.colTag), 
+                    onChange: changeSearchText.bind(null, table, columnDef)}), 
+                React.createElement("i", {style: {float: 'right', 'marginTop': '5px', 'marginRight': '4%'}, 
+                    className: "fa fa-search", onClick: search.bind(table, table, columnDef)})
+            )
+        )
+    )
+}
 
 /**
  * build filter drop down list
@@ -457,9 +577,9 @@ function buildFilterList(table, columnDef) {
         React.createElement("option", {value: "default", style: {display: 'none'}})
     );
     //}
-    for(var i = 0; i< filterData.length; i++){
+    for (var i = 0; i < filterData.length; i++) {
         var label = filterData[i];
-        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
             label = moment(parseInt(label)).format(columnDef.formatInstructions)
         }
 
@@ -469,24 +589,24 @@ function buildFilterList(table, columnDef) {
     }
 
     var selectedFilters = [];
-    table.state.currentFilters.forEach(function(filter){
-       if(filter.colDef === columnDef){
-           filter.filterText.forEach(function(filter, index){
-               if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
-                   filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
-               }
-		   
-               selectedFilters.push(
-                   React.createElement("div", {style: {display: 'block', marginTop:'2px'}}, 
-                       React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
-                           type: "text", value: filter, readOnly: true}), 
-                       React.createElement("i", {style: {float: 'right', 'marginTop':'5px', 'marginRight':'4%'}, className: "fa fa-minus", 
-                           onClick: removeFilter.bind(null,table , columnDef,index)}
-                       )
-                   )
-               )
-           });
-       }
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filter.filterText.forEach(function (filter, index) {
+                if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+                    filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
+                }
+
+                selectedFilters.push(
+                    React.createElement("div", {style: {display: 'block', marginTop: '2px'}}, 
+                        React.createElement("input", {className: "rt-" + columnDef.colTag + "-filter-input rt-filter-input", 
+                            type: "text", value: filter, readOnly: true}), 
+                        React.createElement("i", {style: {float: 'right', 'marginTop': '5px', 'marginRight': '4%'}, className: "fa fa-minus", 
+                            onClick: removeFilter.bind(null, table, columnDef, index)}
+                        )
+                    )
+                )
+            });
+        }
     });
     return (
         React.createElement("div", {className: ("rt-select-filter-container ") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide"), 
@@ -581,6 +701,7 @@ function buildHeaders(table) {
                         )
                     )) : null, 
                 table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table, columnDef) : null, 
+                table.state.searchInPlace[columnDef.colTag] ? buildSearchBox(table, columnDef) : null, 
                 buildMenu({
                     table: table,
                     columnDef: columnDef,
@@ -649,13 +770,18 @@ function clickCheckbox(props, isSubtotalRow) {
     }
 }
 
-function checkAllChildren(treeNode, check) {
+/**
+ * check or unchecked all rows under a treenode
+ * @param treeNode
+ * @param checked
+ */
+function checkAllChildren(treeNode, checked) {
     treeNode.ultimateChildren.forEach(function (uchild) {
-        uchild.isChecked = check;
+        uchild.isChecked = checked;
     });
     treeNode.children.forEach(function (child) {
-        child.isChecked = check;
-        checkAllChildren(child, check);
+        child.isChecked = checked;
+        checkAllChildren(child, checked);
     });
 }
 
@@ -795,7 +921,7 @@ function classifyRow(row, subtotalBy, partitions) {
 function aggregateSector(partitionResult, columnDefs, subtotalBy) {
     var result = {};
     for (var i = 0; i < columnDefs.length; i++)
-        result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy);
+        result[columnDefs[i].colTag] = aggregateColumn(partitionResult, columnDefs[i], subtotalBy, columnDefs);
     return result;
 }
 
@@ -809,63 +935,63 @@ function resolvePartitionName(subtotalBy, row, partitions) {
     var sectorName = "", sortIndex = "";
 
     if (subtotalBy.subtotalByRange) {
-       if(row[subtotalBy.colTag] != null) {
-           for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
-               if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
-                   if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
-                       var dateStr1 = moment(subtotalBy.subtotalByRange[i - 1]).format(subtotalBy.formatInstructions);
-                       var dateStr2 = moment(subtotalBy.subtotalByRange[i]).add(-1,"days").format(subtotalBy.formatInstructions);
-                       if (partitions == YEARLY) {
-                           //dateStr1 = new Date(row[subtotalBy.colTag]).getFullYear();
-                           //sectorName = subtotalBy.text + " " + dateStr1;
-                           sectorName = new Date(row[subtotalBy.colTag]).getFullYear();
-                       }
-                       else if (partitions == DAILY) {
-                           sectorName = dateStr1;
-                       }
-                       else if (partitions == MONTHLY) {
-                           sectorName = moment(subtotalBy.subtotalByRange[i - 1]).format("MMM YYYY");
-                       }
-                       else {
-                           sectorName = dateStr1 + " - " + dateStr2;
-                       }
-                   }
-                   else {
-                       sectorName = (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
-                   }
-                   sortIndex = i;
-                   break;
-               }
-           }
-           if (!sectorName) {
-               if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
-                   var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
-                   var dateStr = moment(date).format(subtotalBy.formatInstructions);
-                   if (partitions == YEARLY) {
-                       dateStr = new Date(dateStr).getFullYear();
-                   }
-                   else if (partitions == MONTHLY) {
-                       dateStr = moment(date).format("MMM YYYY");
-                   }
-                   else if (partitions == DAILY) {
-                       dateStr = moment(date).format("YYYY/MM/DD");
-                   }
-                   sectorName = dateStr + "+";
-               }
-               else {
-                   sectorName = subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
-               }
-               sortIndex = i + 1;
-           }
-       }
+        if (row[subtotalBy.colTag] != null) {
+            for (var i = 0; i < subtotalBy.subtotalByRange.length; i++) {
+                if (row[subtotalBy.colTag] < subtotalBy.subtotalByRange[i]) {
+                    if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                        var dateStr1 = moment(subtotalBy.subtotalByRange[i - 1]).format(subtotalBy.formatInstructions);
+                        var dateStr2 = moment(subtotalBy.subtotalByRange[i]).add(-1, "days").format(subtotalBy.formatInstructions);
+                        if (partitions == YEARLY) {
+                            //dateStr1 = new Date(row[subtotalBy.colTag]).getFullYear();
+                            //sectorName = subtotalBy.text + " " + dateStr1;
+                            sectorName = new Date(row[subtotalBy.colTag]).getFullYear();
+                        }
+                        else if (partitions == DAILY) {
+                            sectorName = dateStr1;
+                        }
+                        else if (partitions == MONTHLY) {
+                            sectorName = moment(subtotalBy.subtotalByRange[i - 1]).format("MMM YYYY");
+                        }
+                        else {
+                            sectorName = dateStr1 + " - " + dateStr2;
+                        }
+                    }
+                    else {
+                        sectorName = (i != 0 ? subtotalBy.subtotalByRange[i - 1] : 0) + " - " + subtotalBy.subtotalByRange[i];
+                    }
+                    sortIndex = i;
+                    break;
+                }
+            }
+            if (!sectorName) {
+                if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
+                    var date = new Date(subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1]);
+                    var dateStr = moment(date).format(subtotalBy.formatInstructions);
+                    if (partitions == YEARLY) {
+                        dateStr = new Date(dateStr).getFullYear();
+                    }
+                    else if (partitions == MONTHLY) {
+                        dateStr = moment(date).format("MMM YYYY");
+                    }
+                    else if (partitions == DAILY) {
+                        dateStr = moment(date).format("YYYY/MM/DD");
+                    }
+                    sectorName = dateStr + "+";
+                }
+                else {
+                    sectorName = subtotalBy.subtotalByRange[subtotalBy.subtotalByRange.length - 1] + "+";
+                }
+                sortIndex = i + 1;
+            }
+        }
     }
     else {
-        if(subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null){
+        if (subtotalBy.format == DATE_FORMAT && subtotalBy.formatInstructions != null) {
             sectorName = moment(row[subtotalBy.colTag]).format(subtotalBy.formatInstructions);
-        }else {
+        } else {
             sectorName = row[subtotalBy.colTag];
         }
-        if(subtotalBy.format == DATE_FORMAT && subtotalBy.format == "number" ) {
+        if (subtotalBy.format == DATE_FORMAT && subtotalBy.format == "number") {
             sortIndex = row[subtotalBy.colTag];
         }
     }
@@ -898,10 +1024,21 @@ function resolveAggregationMethod(columnDef, subtotalBy) {
     return result;
 }
 
-function aggregateColumn(partitionResult, columnDef, subtotalBy) {
+function removeFilteredRow(rows) {
+    var ret = [];
+    rows.forEach(function (row) {
+        if (!row.hiddenByFilter) {
+            ret.push(row);
+        }
+    });
+    return ret;
+}
+
+function aggregateColumn(partitionResult, columnDef, subtotalBy, columnDefs) {
     var result;
     var aggregationMethod = resolveAggregationMethod(columnDef, subtotalBy);
 
+    partitionResult = removeFilteredRow(partitionResult);
     // call custom aggregation function or use one of the stock aggregation functions
     if (typeof aggregationMethod === 'function')
         result = aggregationMethod({data: partitionResult, columnDef: columnDef});
@@ -928,14 +1065,21 @@ function aggregateColumn(partitionResult, columnDef, subtotalBy) {
             case "weighted_average":
                 result = _weightedAverage({data: partitionResult, columnDef: columnDef});
                 break;
-            case "aggregated_weighted_average":
-                result = _aggregatedWeightedAverage({data: partitionResult, columnDef: columnDef});
+            case "non_zero_weighted_average":
+                result = _nonZeroweightedAverage({data: partitionResult, columnDef: columnDef});
+                break;
+            case "distinct_sum":
+                result = _distinctSum({data: partitionResult, columnDef: columnDef});
+                break;
+            case "percentage_contribution":
+                result = _percentageContribution({data: partitionResult, columnDef: columnDef, columnDefs: columnDefs});
                 break;
             default :
                 result = "";
         }
     return result;
 }
+
 
 function _straightSumAggregation(options) {
     var data = options.data, columnDef = options.columnDef, result = 0, temp = 0;
@@ -958,6 +1102,23 @@ function _simpleAverage(options) {
     return count == 0 ? "" : sum / count;
 }
 
+function _nonZeroweightedAverage(options) {
+    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
+    var sumProduct = 0;
+    var zeroWeightSum = 0;
+    for (var i = 0; i < data.length; i++) {
+        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
+        //find the zero values
+        if (!data[i][columnDef.colTag] || data[i][columnDef.colTag] === 0) {
+            zeroWeightSum += (data[i][weightBy.colTag] || 0);
+        }
+    }
+    var weightSum = _straightSumAggregation({data: data, columnDef: weightBy});
+    weightSum -= zeroWeightSum;
+
+    return weightSum == 0 ? "" : sumProduct / weightSum;
+}
+
 function _weightedAverage(options) {
     var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
     var sumProduct = 0;
@@ -968,35 +1129,15 @@ function _weightedAverage(options) {
     return weightSum == 0 ? "" : sumProduct / weightSum;
 }
 
-function _aggregatedWeightedAverage(options) {
-    var data = options.data, columnDef = options.columnDef, weightBy = options.columnDef.weightBy;
-    var level = options.columnDef.aggregationLevel;
-    if (!weightBy || !weightBy.colTag || !level || !level.colTag) {
-        //don't define weightBy or level column
-        return ""
-    }
-
-    var sumProduct = 0;
-    for (var i = 0; i < data.length; i++)
-        sumProduct += (data[i][columnDef.colTag] || 0 ) * (data[i][weightBy.colTag] || 0);
-
-    var weightSum = _aggregatedLevelSum({data: data, aggregationLevel: level, weightBy: weightBy});
-    return weightSum == 0 ? "" : sumProduct / weightSum;
-}
-
-/**
- *
- * @param options
- * @returns {number}
- * @private
- */
-function _aggregatedLevelSum(options) {
-    var data = options.data, aggregationLevel = options.aggregationLevel, weightBy = options.weightBy;
+function _distinctSum(options) {
+    var data = options.data;
+    var columnDef = options.columnDef;
+    var aggregationLevel = columnDef.aggregationLevel;
     var result = 0, temp = 0;
     var distinctValues = {};
     for (var i = 0; i < data.length; i++) {
         var levelValue = data[i][aggregationLevel.colTag];
-        distinctValues[levelValue] = data[i][weightBy.colTag];
+        distinctValues[levelValue] = data[i][columnDef.colTag];
     }
     for (var level in distinctValues) {
         temp = distinctValues[level] || 0;
@@ -1005,8 +1146,36 @@ function _aggregatedLevelSum(options) {
     return result;
 }
 
+function _percentageContribution(options) {
+    var data = options.data;
+    var columnDef = options.columnDef;
+    var numerator = columnDef.numerator;
+    var denominator = columnDef.denominator;
+    if (!denominator || !denominator.colTag || !numerator || !numerator.colTag) {
+        //don't define columns
+        return ""
+    }
+
+    var numeratorValue = _straightSumAggregation({data: data, columnDef: numerator}) || 0;
+
+    var denominatorColumn = null;
+    options.columnDefs.forEach(function (column) {
+        if (column.colTag == denominator.colTag) {
+            denominatorColumn = column;
+        }
+    });
+
+    if (!denominatorColumn) {
+        var denominatorValue = 0;
+    } else {
+        denominatorValue = _distinctSum({data: data, columnDef: denominatorColumn});
+    }
+
+    return denominatorValue == 0 ? "" : ((numeratorValue / denominatorValue) * 100);
+}
+
 function _count(options) {
-    return applyThousandSeparator(options.data.length) || 0;
+    return (options.data.length || 0) + "";
 }
 
 /**
@@ -1024,10 +1193,17 @@ function _countDistinct(options) {
     /**
      * collect all rows of the given column in data as an array
      */
-    const allData =
+    var allData =
         options.data.map(function (row) {
             return row[columnDef.colTag];
         });
+
+    //convert date number to date string
+    if (columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        allData = allData.map(function (item) {
+            return convertDateNumberToString(columnDef, item);
+        })
+    }
 
     /**
      * iterate through allData - keeping only unique members
@@ -1037,6 +1213,7 @@ function _countDistinct(options) {
         if (allData[j] !== "" && allData[j] !== null && uniqData.indexOf(allData[j]) == -1)
             uniqData.push(allData[j]);
     }
+
     return uniqData.length == 1 ? uniqData[0] : applyThousandSeparator(uniqData.length);
 }
 
@@ -1047,13 +1224,37 @@ function _countAndDistinctPureJS(options) {
     return count == 1 ? formatNumber(distinctCount, columnDef, columnDef.formatConfig) : "(" + applyThousandSeparator(distinctCount) + "/" + applyThousandSeparator(count) + ")"
 }
 
+// convert and format dates
+function convertDateNumberToString(columnDef, value) {
+    var displayContent = value;
+    if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        // if displayContent is a number, we assume displayContent is in milliseconds
+        if (typeof value === "number") {
+            if (columnDef.formatInstructions != null) { //If format instruction is specified
+                displayContent = moment(value).format(columnDef.formatInstructions)
+            } else {
+                displayContent = new Date(value).toLocaleDateString();
+            }
+        }
+    }
+    return displayContent;
+}
+
 function _countAndDistinctUnderscoreJS(options) {
     var data = options.data, columnDef = options.columnDef;
-    const sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
+    var sortedData = _.pluck(data, columnDef.colTag).sort(function (a, b) {
         if (a === b)
             return 0;
         return a > b ? 1 : -1;
     });
+
+    //convert date number to date string
+    if (columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
+        sortedData = sortedData.map(function (item) {
+            return convertDateNumberToString(columnDef, item);
+        })
+    }
+
     const uniqData = _.chain(sortedData).uniq(true).compact().value();
     columnDef.formatConfig = buildLAFConfigObject(columnDef);
     return "(" + (uniqData.length === 1 ? formatNumber(uniqData[0], columnDef, columnDef.formatConfig) : applyThousandSeparator(uniqData.length)) + "/" + applyThousandSeparator(data.length) + ")";
@@ -1368,7 +1569,9 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     propTypes: {
         subMenu: React.PropTypes.object,
         menuItem: React.PropTypes.object,
-        onMenuClick: React.PropTypes.func
+        onMenuClick: React.PropTypes.func,
+        table : React.PropTypes.object
+
     },
     getDefaultProps: function () {
         return {
@@ -1382,6 +1585,18 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     },
     showSubMenu: function () {
         // determine whether we should show the info box left or right facing, depending on its position in the headers
+        var width = $(this.props.table.getDOMNode()).width();
+        var position = $(this.getDOMNode()).parent().position();
+        this.state.subMenu = this.props.subMenu;
+
+        if (width - position.left < 200) {
+            delete this.state.subMenu.props.style.left;
+            this.state.subMenu.props.style.right = '100%';
+        } else {
+            delete this.state.subMenu.props.style.right;
+            this.state.subMenu.props.style.left = '100%';
+        }
+
         this.setState({showSubMenu: true});
     },
     hideSubMenu: function () {
@@ -1389,7 +1604,7 @@ const SubMenu = React.createClass({displayName: "SubMenu",
     },
     render: function () {
         const subMenu = this.state.showSubMenu ?
-            this.props.subMenu : null;
+            this.state.subMenu : null;
 
         return (
             React.createElement("div", {onClick: this.props.onMenuClick, className: "menu-item", style: {position:"relative"}, 
@@ -1650,7 +1865,7 @@ var ReactTable = React.createClass({displayName: "ReactTable",
 
         var rasterizedData = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: firstColumn,
+            firstColumn: firstColumn
         });
 
         var firstColumnLabel = buildFirstColumnLabel(this);
@@ -1866,16 +2081,46 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         this.handleClearAllFilters.call(this);
     },
     exportDataWithSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = dataCopy[i];
+            if (row.treeNode) {
+                delete row.treeNode
+            }
+            if (row.parent) {
+                delete row.parent;
+            }
+        }
+        return dataCopy;
+    },
+    recreateTable: function(){
+        this.state.rootNode = createNewRootNode(this.props, this.state);
     },
     exportDataWithoutSubtotaling: function () {
-        return rasterizeTree({
+        var dataCopy = rasterizeTree({
             node: this.state.rootNode,
-            firstColumn: this.state.columnDefs[0],
+            firstColumn: this.state.columnDefs[0]
         }, this.state.subtotalBy.length > 0, true, true);
+
+        var data = [];
+        for (var i = 0; i < dataCopy.length; i++) {
+            //shallow copy each row
+            var row = $.extend({}, dataCopy[i]);
+            if (row.treeNode) {
+                delete row.treeNode
+            }
+            if (row.parent) {
+                delete row.parent;
+            }
+            data.push(row)
+        }
+        return data;
     },
     refresh: function () {
         this.setState({buildRasterizedData: true});
@@ -1885,6 +2130,14 @@ var ReactTable = React.createClass({displayName: "ReactTable",
     },
     getSorts: function () {
         return this.state.sortBy;
+    },
+    checkAllRows: function (checked) {
+        checkAllChildren(this.state.rootNode, checked);
+        this.setState({});
+    },
+    refreshSubtotalRow: function () {
+        recursivelyAggregateNodes(this.state.rootNode, this.state);
+        this.setState({buildRasterizedData: true});
     },
     render: function () {
         //console.time('fresh: ');
@@ -1972,7 +2225,7 @@ var Row = React.createClass({displayName: "Row",
                 // convert and format dates
                 if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
                     if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        if(columnDef.formatInstructions != null) { //If format instruction is specified
+                        if (columnDef.formatInstructions != null) { //If format instruction is specified
                             displayContent = moment(displayContent).format(columnDef.formatInstructions)
                         } else {
                             displayContent = new Date(displayContent).toLocaleDateString();
@@ -2368,8 +2621,12 @@ function adjustHeaders(adjustCount) {
         counter++;
     });
 
-    if (!adjustedSomething)
+    if (!adjustedSomething) {
+        grandTotalFooterCellContents.each(function (index, cell) {
+            $(cell).css('width', 'inherit');
+        });
         return;
+    }
 
     // Realign sorting carets
     var downs = headerElems.find(".rt-downward-caret").removeClass("rt-downward-caret");
@@ -2665,6 +2922,7 @@ function ReactTableGetInitialState() {
         extraStyle: {}, // TODO document use
         filterInPlace: {}, // TODO document use, but sounds like a legit state
         currentFilters: [], // TODO same as above
+        searchInPlace: {}, // use a search box to filter a column
 
         rasterizedData: null, // table data for render
         buildRasterizedData: true, // when change table structure such as sort or subtotal, set this to true.
@@ -2675,10 +2933,10 @@ function ReactTableGetInitialState() {
      * justifiable as a state because its children contain sub-states like collapse/expanded or hide/un-hide
      * these states/sub-states arise from user interaction with this component, and not derivable from props or other states
      */
-    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);  
-  
-    if (initialState.sortBy.length > 0)  
-        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));  
+    initialState.rootNode = getRootNodeGivenProps(this.props, initialState);
+
+    if (initialState.sortBy.length > 0)
+        initialState.rootNode.sortNodes(convertSortByToFuncs(initialState.columnDefs, initialState.sortBy));
 
     addSubtotalTitleToRowData(initialState.rootNode);
 
@@ -2707,12 +2965,12 @@ function ReactTableGetInitialState() {
 }
 
 function getRootNodeGivenProps(props, initialState) {
-    if( props.dataAsTree && props.dataAsTreeTitleKey ) {
+    if (props.dataAsTree && props.dataAsTreeTitleKey) {
         props.data = [];
-        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);  
-    }  
+        return createNewNodeFromStrucutre(props.dataAsTree, props.dataAsTreeTitleKey);
+    }
     else {
-        return createNewRootNode(props, initialState); 
+        return createNewRootNode(props, initialState);
     }
 }
 
@@ -2793,7 +3051,7 @@ function ReactTableHandleSelect(selectedRow, event) {
         if (clearSelected) {
             this.setState({});
         }
-    } else{
+    } else {
         var rowKey = this.props.rowKey;
         if (!rowKey || !selectedRow[rowKey])
             return;
@@ -2819,7 +3077,17 @@ function ReactTableHandleColumnFilter(columnDefToFilterBy, e, dontSet) {
     if (typeof dontSet !== "boolean")
         dontSet = undefined;
 
-    var filterData = e.target ? (e.target.value || e.target.textContent) : e;
+    if (Array.isArray(e)) {
+        var filterData = e;
+    } else {
+        var target = $(e.target);
+        if (target.is("span")) {
+            filterData = target.text();
+        } else {
+            filterData =  target.children('span').text();
+        }
+    }
+
     if (!Array.isArray(filterData)) {
         if (columnDefToFilterBy.format == 'number') {
             filterData = [{eq: filterData}];
@@ -2978,6 +3246,7 @@ function ReactTableHandleClearSubtotal(event) {
     if (this.state.sortBy.length > 0)
         newState.rootNode.sortNodes(convertSortByToFuncs(this.state.columnDefs, this.state.sortBy));
 
+    applyAllFilters.call(this);
     this.setState(newState);
 }
 
@@ -3020,15 +3289,15 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
      */
     if (partitions != null && partitions != "" && columnDef) {
 
-    	if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null) {
-    		var start = new Date('1/1/3002').getTime();
-    		var last = new Date('1/1/1002').getTime();
-    		var data = this.state.rootNode.ultimateChildren;
-			for (var i=data.length-1; i>=0; i--) {
-				tmp = data[i][columnDef.colTag];
-				if (tmp < start) start = tmp;
-				if (tmp > last) last = tmp;
-			}
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+            var start = new Date('1/1/3002').getTime();
+            var last = new Date('1/1/1002').getTime();
+            var data = this.state.rootNode.ultimateChildren;
+            for (var i = data.length - 1; i >= 0; i--) {
+                tmp = data[i][columnDef.colTag];
+                if (tmp < start) start = tmp;
+                if (tmp > last) last = tmp;
+            }
 
             if (partitions == WEEKLY || partitions == MONTHLY || partitions == DAILY || partitions == QUARTERLY || partitions == YEARLY) {
                 columnDef.subtotalByRange = getParts(partitions, start, last);
@@ -3042,9 +3311,9 @@ function ReactTableHandleSubtotalBy(columnDef, partitions, event) {
                 columnDef.subtotalByRange = parts;
             }
         }
-    	else {
+        else {
             columnDef.subtotalByRange = partitionNumberLine(partitions);
-    	}
+        }
 
     }
 
@@ -3105,10 +3374,10 @@ function getParts(frequency, start, last) {
         count = 7;
         start = moment(start).startOf('isoWeek');
     }
-    parts.push(start.unix()*1000);
+    parts.push(start.unix() * 1000);
 
     while (start <= last) {
-        start = moment(start).add(count, unit).unix()*1000;
+        start = moment(start).add(count, unit).unix() * 1000;
         parts.push(start);
     }
     return parts;
@@ -3525,8 +3794,12 @@ function buildTreeSkeleton(props, state) {
     }
     for (i = 0; i < rawData.length; i++) {
         rootNode.appendUltimateChild(rawData[i]);
-        populateChildNodesForRow(rootNode, rawData[i], subtotalByArr);
     }
+
+    state.subtotalBy.forEach(function (subtotalColumn) {
+        //TODO: add partitions
+        buildSubtree(rootNode, [subtotalColumn], state, null);
+    });
 
     return rootNode
 }
@@ -3738,6 +4011,15 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
         this.filterByTextColumn(columnDef, textToFilterBy, caseSensitive, customFilterer);
 };
 
+function containsWildcart(filterArr) {
+    var searchText = filterArr[0];
+    if (filterArr.length == 1 && (searchText.indexOf('?')> -1 || searchText.indexOf('*')>-1)) {
+        return true;
+    }else{
+        return false;
+    }
+}
+
 /**
  *
  * @param filterArr
@@ -3747,17 +4029,33 @@ TreeNode.prototype.filterByColumn = function (columnDef, textToFilterBy, caseSen
  * @returns {boolean} to indicate hide this row or not
  */
 function filterInArray(filterArr, columnDef, row, caseSensitive) {
-    var found = null;
-    if (caseSensitive) {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
-        });
+
+    if (columnDef.isSearchText || containsWildcart(filterArr)) {
+        var searchText = filterArr[0];
+        searchText = searchText.toLowerCase();
+        searchText = searchText.replace(/\?/g, '.?');
+        searchText = searchText.replace(/\*/g, '.*');
+        var re = new RegExp('^' + searchText);
+        var displayValue = buildCellLookAndFeel(columnDef, row).value.toString().toLowerCase();
+        var found = displayValue.match(re);
+        if (found) {
+            return false;
+        } else {
+            return true;
+        }
     } else {
-        found = filterArr.some(function (filterText) {
-            return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
-        });
+        found = null;
+        if (caseSensitive) {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString() === filterText;
+            });
+        } else {
+            found = filterArr.some(function (filterText) {
+                return buildCellLookAndFeel(columnDef, row).value.toString().toUpperCase() === filterText.toUpperCase();
+            });
+        }
+        return !found;
     }
-    return !found;
 }
 
 /**
@@ -3792,6 +4090,19 @@ TreeNode.prototype.filterByTextColumn = function (columnDef, textToFilterBy, cas
             else {
                 var row = {};
                 row[columnDef.colTag] = uChild[columnDef.colTag];
+                if (columnDef.format === 'date' && !columnDef.isSearchText) {
+                    row[columnDef.colTag] = convertDateNumberToString(columnDef, row[columnDef.colTag]);
+                    textToFilterBy = textToFilterBy.map(function (filter) {
+                        var filterTmp = filter;
+                        if (typeof filter === 'string') {
+                            filterTmp = parseInt(filter);
+                            if (filterTmp < 100000) {
+                                filterTmp = filter;
+                            }
+                        }
+                        return convertDateNumberToString(columnDef, filterTmp);
+                    })
+                }
                 uChild.hiddenByFilter = typeof row[columnDef.colTag] === 'undefined' || uChild.hiddenByFilter || filterInArray(textToFilterBy, columnDef, row, caseSensitive);
             }
             showAtLeastOneChild = showAtLeastOneChild || !uChild.hiddenByFilter;
@@ -3836,7 +4147,7 @@ TreeNode.prototype.filterByNumericColumn = function (columnDef, filterData) {
                 else if (filterData[j].eq !== undefined) {
                     // rounding
                     value = value.toFixed(formatConfig.roundTo);
-                    var filterValue = filterData[j].eq.toString().replace(/,/g,'');
+                    var filterValue = filterData[j].eq.toString().replace(/,/g, '');
                     if (!(parseFloat(value) == parseFloat(filterValue))) {
                         filterOutNode = true;
                     }
@@ -3893,7 +4204,8 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
 
     if (node.ultimateChildren.length == 1 && options.hideSingleSubtotalChild && node.parent) {
         // if the subtotal level only has one child, hide this child. only show subtotal row;
-        node.ultimateChildren[0].hiddenByFilter = true;
+        node.ultimateChildren[0].hiddenBySingleSubtotalRow = true;
+        //node.ultimateChildren[0].hiddenByFilter = true;
         if (node.hasChild()) {
             node.noCollapseIcon = false;
         } else {
@@ -3905,13 +4217,13 @@ function rasterizeTree(options, hasSubtotalBy, exportOutside, skipSubtotalRow) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, skipSubtotalRow);
         else
-            _rasterizeDetailRows(node, flatData);
+            _rasterizeDetailRows(node, flatData,hasSubtotalBy);
     }
     else if (!node.collapsed) {
         if (node.children.length > 0)
             _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, skipSubtotalRow);
         else
-            _rasterizeDetailRows(node, flatData);
+            _rasterizeDetailRows(node, flatData,hasSubtotalBy);
     }
 
     return flatData;
@@ -3956,16 +4268,19 @@ function _rasterizeChildren(flatData, options, hasSubtotalBy, exportOutside, ski
             firstColumn: firstColumn
         }, hasSubtotalBy, exportOutside, skipSubtotalRow);
         for (j = 0; j < intermediateResult.length; j++) {
+            //
             if (!(intermediateResult[j].treeNode && intermediateResult[j].treeNode.hiddenByFilter))
                 flatData.push(intermediateResult[j]);
         }
     }
 }
 
-function _rasterizeDetailRows(node, flatData) {
+function _rasterizeDetailRows(node, flatData,hasSubtotalBy) {
     for (var i = 0; i < node.ultimateChildren.length; i++) {
         var detailRow = node.ultimateChildren[i];
-        if (!detailRow.hiddenByFilter) {
+        //set to true only when has subtotaling
+        var hiddenBySingleSubtotalRow = hasSubtotalBy &&detailRow.hiddenBySingleSubtotalRow;
+        if (!(detailRow.hiddenByFilter || hiddenBySingleSubtotalRow)) {
             detailRow.sectorPath = node.rowData.sectorPath;
             detailRow.isDetail = true;
             detailRow.parent = node;

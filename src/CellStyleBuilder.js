@@ -68,6 +68,9 @@ function buildCellLookAndFeel(columnDef, row) {
     if (columnDef.format == "currency")
         value = "$" + value;
 
+    if (columnDef.format === 'date')
+        value = convertDateNumberToString(columnDef, value);
+
     // determine alignment
     results.styles.textAlign = computeCellAlignment(formatConfig.alignment, row, columnDef);
     results.styles.width = columnDef.text.length + "em";

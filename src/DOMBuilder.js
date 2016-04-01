@@ -23,6 +23,46 @@ function clickFilterMenu(table, columnDef) {
     }
 }
 
+function clickFilterSearch(table, columnDef) {
+    if (!(table.props.filtering && table.props.filtering.disable)) {
+        toggleSearchBox.call(table, table, columnDef);
+        table.setState({});
+    }
+}
+
+function toggleSearchBox(table, columnDef) {
+    var sip = table.state.searchInPlace;
+    //open current filter drop down, close others
+    sip[columnDef.colTag] = !sip[columnDef.colTag];
+    for (var key in sip) {
+        if (key !== columnDef.colTag) {
+            sip[key] = false;
+        }
+    }
+
+    table.setState({
+        searchInPlace: sip
+    });
+
+    setTimeout(function (sip) {
+        if (!sip[columnDef.colTag]) {
+            return;
+        }
+        //move filter panel to right position
+        var $header = $(this.refs["header-" + columnDef.colTag].getDOMNode());
+        var headerPosition = $header.position();
+
+        var $filterDropDown = $(this.refs['search-filter-' + columnDef.colTag].getDOMNode());
+
+        if (headerPosition.left !== 0) {
+            $filterDropDown.css("left", headerPosition.left + "px");
+        }
+        if (headerPosition.right !== 0) {
+            $filterDropDown.css("right", headerPosition.right + "px");
+        }
+    }.bind(this, sip));
+}
+
 function buildMenu(options) {
     var table = options.table,
         columnDef = options.columnDef,
@@ -31,7 +71,6 @@ function buildMenu(options) {
 
     const subMenuStyles = {
         "top": "-20%",
-        "left": "100%",
         "padding": "5px"
     };
 
@@ -44,7 +83,7 @@ function buildMenu(options) {
     var menuItems = [];
     var availableDefaultMenuItems = {
         sort: [
-            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)}
+            <SubMenu onMenuClick={table.handleSetSort.bind(null, columnDef, null)} table={table}
                 menuItem={<span>
                     <i className="fa fa-sort"></i>
                 Sort</span>} subMenu={
@@ -76,15 +115,16 @@ function buildMenu(options) {
             </SubMenu>
         ],
         filter: [
-            <SubMenu
+            <SubMenu  table={table}
                 menuItem={<span>
                     <i className="fa fa-filter"></i>
                 Filter</span>}
                 subMenu={
                     <div className="rt-header-menu" style={subMenuStyles}>
                         <div className="menu-item" onClick={clickFilterMenu.bind(null, table, columnDef)}>
-                            <i className="fa fa-filter"></i>
-                        Filter</div>
+                            <i className="fa fa-filter"></i> Filter</div>
+                        {columnDef.format == 'number' ?'': <div className="menu-item" onClick={clickFilterSearch.bind(null, table, columnDef)}>
+                            <i className="fa fa-search"></i> Search</div>}
                         <div className="separator"/>
                         <div className="menu-item" onClick={table.handleClearFilter.bind(null, columnDef)}>Clear Filter</div>
                         <div className="menu-item" onClick={table.handleClearAllFilters}>Clear All Filters</div>
@@ -93,7 +133,7 @@ function buildMenu(options) {
             </SubMenu>
         ],
         summarize: [
-            <SubMenu
+            <SubMenu  table={table}
                 onMenuClick={columnDef.format == 'number' || columnDef == 'currency' ? null : table.handleSubtotalBy.bind(null, columnDef, null)}
                 menuItem={<span>
                     <i className="fa fa-list-ul"></i>
@@ -122,7 +162,7 @@ function buildMenu(options) {
         ],
 
         summarizeClearAll: [
-            <SubMenu
+            <SubMenu  table={table}
                 menuItem={<span>
                     <i className="fa fa-list-ul"></i>
                 Subtotal</span>}
@@ -157,8 +197,10 @@ function buildMenu(options) {
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
         if (!isFirstColumn) {
-            menuItems.push(<div className="separator"/>);
-            addMenuItems(menuItems, availableDefaultMenuItems.remove);
+
+            //menuItems.push(<div className="separator"/>);
+            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
+            //
         }
 
     }
@@ -173,10 +215,11 @@ function buildMenu(options) {
                 <i
                     className="fa fa-file-excel-o"></i>
             Download as XLS</div>);
-            menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
-                <i
-                    className="fa fa-file-pdf-o"></i>
-            Download as PDF</div>);
+
+            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
+            //    <i
+            //        className="fa fa-file-pdf-o"></i>
+            //Download as PDF</div>);
         }
 
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll}>Collapse
@@ -185,7 +228,7 @@ function buildMenu(options) {
     }
 
     return (
-        <div style={menuStyle} className={("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] ? " rt-hide" : "")}>
+        <div style={menuStyle} className={("rt-header-menu") + (table.state.filterInPlace[columnDef.colTag] || table.state.searchInPlace[columnDef.colTag] ? " rt-hide" : "")}>
             {menuItems}
         </div>
     );
@@ -245,6 +288,16 @@ function pressedKey(table, colTag, e) {
     }
 }
 
+function pressedKeyInSearch(table, colTag, e) {
+    const ESCAPE = 27;
+    if (table.state.searchInPlace[colTag] && e.keyCode == ESCAPE) {
+        table.state.searchInPlace[colTag] = false;
+        table.setState({
+            searchInPlace: table.state.searchInPlace
+        });
+    }
+}
+
 function selectFilters(table, columnDefToFilterBy, e) {
     table.state.selectedFilters = $(e.target).val();
     table.setState({});
@@ -284,6 +337,24 @@ function addFilter(table, columnDef, event) {
     table.setState({});
 }
 
+function search(table, columnDef) {
+    var filterData = null;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filterData = filter.filterText;
+        }
+    });
+
+    columnDef.isFiltered = true;
+    columnDef.isSearchText = true;
+    table.state.searchInPlace[columnDef.colTag] = false;
+    table.handleColumnFilter.call(null, columnDef, filterData);
+    columnDef.isSearchText = false;
+
+    //hide filter dropdown
+    $(this.refs['search-filter-' + columnDef.colTag].getDOMNode()).addClass('rt-hide');
+}
+
 function filter(table, columnDef) {
     var filterData = null;
     table.state.currentFilters.forEach(function (filter) {
@@ -314,6 +385,52 @@ function removeFilter(table, columnDef, index, event) {
 
     table.setState({});
 }
+/**
+ * set the search text for filter a column
+ * @param table
+ * @param columnDef
+ * @param event
+ */
+function changeSearchText(table, columnDef, event) {
+    var filterValue = event.target.value;
+
+    if (!filterValue) {
+        return;
+    }
+
+    var isAdded = false;
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            isAdded = true;
+            filter.filterText = [filterValue];
+        }
+    });
+
+    if (!isAdded) {
+        table.state.currentFilters.push({
+            colDef: columnDef,
+            filterText: [filterValue]
+        });
+    }
+
+    table.setState({});
+}
+
+function buildSearchBox(table, columnDef) {
+
+    return (
+        <div className={("rt-select-filter-container ") + (table.state.searchInPlace[columnDef.colTag] ? "" : " rt-hide")}
+            ref={'search-filter-' + columnDef.colTag}>
+            <div style={{display: 'block', marginBottom: '2px'}}>
+                <input className={"rt-" + columnDef.colTag + "-filter-select rt-filter-select"}
+                    onKeyDown={pressedKeyInSearch.bind(null, table, columnDef.colTag)}
+                    onChange={changeSearchText.bind(null, table, columnDef)} />
+                <i style={{float: 'right', 'marginTop': '5px', 'marginRight': '4%'}}
+                    className="fa fa-search" onClick={search.bind(table, table, columnDef)}></i>
+            </div>
+        </div>
+    )
+}
 
 /**
  * build filter drop down list
@@ -337,9 +454,9 @@ function buildFilterList(table, columnDef) {
         <option value="default" style={{display: 'none'}}></option>
     );
     //}
-    for(var i = 0; i< filterData.length; i++){
+    for (var i = 0; i < filterData.length; i++) {
         var label = filterData[i];
-        if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
+        if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
             label = moment(parseInt(label)).format(columnDef.formatInstructions)
         }
 
@@ -349,24 +466,24 @@ function buildFilterList(table, columnDef) {
     }
 
     var selectedFilters = [];
-    table.state.currentFilters.forEach(function(filter){
-       if(filter.colDef === columnDef){
-           filter.filterText.forEach(function(filter, index){
-               if(columnDef.format == DATE_FORMAT && columnDef.formatInstructions!=null){
-                   filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
-               }
-		   
-               selectedFilters.push(
-                   <div style={{display: 'block', marginTop:'2px'}}>
-                       <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
-                           type="text" value={filter} readOnly />
-                       <i  style={{float: 'right', 'marginTop':'5px', 'marginRight':'4%'}} className={"fa fa-minus"}
-                           onClick={removeFilter.bind(null,table , columnDef,index)}>
-                       </i>
-                   </div>
-               )
-           });
-       }
+    table.state.currentFilters.forEach(function (filter) {
+        if (filter.colDef === columnDef) {
+            filter.filterText.forEach(function (filter, index) {
+                if (columnDef.format == DATE_FORMAT && columnDef.formatInstructions != null) {
+                    filter = moment(parseInt(filter)).format(columnDef.formatInstructions)
+                }
+
+                selectedFilters.push(
+                    <div style={{display: 'block', marginTop: '2px'}}>
+                        <input className={"rt-" + columnDef.colTag + "-filter-input rt-filter-input"}
+                            type="text" value={filter} readOnly />
+                        <i  style={{float: 'right', 'marginTop': '5px', 'marginRight': '4%'}} className={"fa fa-minus"}
+                            onClick={removeFilter.bind(null, table, columnDef, index)}>
+                        </i>
+                    </div>
+                )
+            });
+        }
     });
     return (
         <div className={("rt-select-filter-container ") + (table.state.filterInPlace[columnDef.colTag] ? "" : " rt-hide")}
@@ -461,6 +578,7 @@ function buildHeaders(table) {
                         </NumericFilterPanel>
                     </div>) : null }
                 {table.state.filterInPlace[columnDef.colTag] ? buildFilterList(table, columnDef) : null}
+                {table.state.searchInPlace[columnDef.colTag] ? buildSearchBox(table, columnDef) : null}
                 {buildMenu({
                     table: table,
                     columnDef: columnDef,
@@ -529,13 +647,18 @@ function clickCheckbox(props, isSubtotalRow) {
     }
 }
 
-function checkAllChildren(treeNode, check) {
+/**
+ * check or unchecked all rows under a treenode
+ * @param treeNode
+ * @param checked
+ */
+function checkAllChildren(treeNode, checked) {
     treeNode.ultimateChildren.forEach(function (uchild) {
-        uchild.isChecked = check;
+        uchild.isChecked = checked;
     });
     treeNode.children.forEach(function (child) {
-        child.isChecked = check;
-        checkAllChildren(child, check);
+        child.isChecked = checked;
+        checkAllChildren(child, checked);
     });
 }
 
