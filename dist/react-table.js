@@ -2222,16 +2222,6 @@ var Row = React.createClass({displayName: "Row",
                 var classes = cx(displayInstructions.classes);
                 // easter egg - if isLoading is set to true on columnDef - spinners will show up instead of blanks or content
                 var displayContent = columnDef.isLoading ? "Loading ... " : displayInstructions.value;
-
-                // convert and format dates
-                if (columnDef && columnDef.format && columnDef.format.toLowerCase() === DATE_FORMAT) {
-                    if (typeof displayContent === "number") // if displayContent is a number, we assume displayContent is in milliseconds
-                        if (columnDef.formatInstructions != null) { //If format instruction is specified
-                            displayContent = moment(displayContent).format(columnDef.formatInstructions)
-                        } else {
-                            displayContent = new Date(displayContent).toLocaleDateString();
-                        }
-                }
                 // determine cell content, based on whether a cell templating callback was provided
                 if (columnDef.cellTemplate)
                     displayContent = columnDef.cellTemplate.call(this, this.props.data, columnDef, displayContent);
