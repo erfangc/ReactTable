@@ -51,6 +51,8 @@ var ReactTable = React.createClass({
         hideSubtotaledColumns: React.PropTypes.bool,
         hideSingleSubtotalChild: React.PropTypes.bool,
         hasCheckbox: React.PropTypes.bool, // has a check box in subtotal column
+        disableRemoveColumn: React.PropTypes.bool, // disable 'remove column' in subMenu
+        disableDownloadPDF: React.PropTypes.bool, // disable 'Download PDF' in subMenu
         /**
          * misc props
          */

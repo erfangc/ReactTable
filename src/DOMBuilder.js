@@ -196,11 +196,9 @@ function buildMenu(options) {
             //if first column is the subtotal column, don't add 'addSubtotal'
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
-        if (!isFirstColumn) {
-
-            //menuItems.push(<div className="separator"/>);
-            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
-            //
+        if (!isFirstColumn && !table.props.disableRemoveColumn) {
+            menuItems.push(<div className="separator"/>);
+            addMenuItems(menuItems, availableDefaultMenuItems.remove);
         }
 
     }
@@ -216,10 +214,11 @@ function buildMenu(options) {
                     className="fa fa-file-excel-o"></i>
             Download as XLS</div>);
 
-            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
-            //    <i
-            //        className="fa fa-file-pdf-o"></i>
-            //Download as PDF</div>);
+            if (!table.props.disableDownloadPDF) {
+                menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
+                    <i className="fa fa-file-pdf-o"></i>
+                Download as PDF</div>);
+            }
         }
 
         menuItems.push(<div className="menu-item" onClick={table.handleCollapseAll}>Collapse

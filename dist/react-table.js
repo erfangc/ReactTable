@@ -319,11 +319,9 @@ function buildMenu(options) {
             //if first column is the subtotal column, don't add 'addSubtotal'
             addMenuItems(menuItems, availableDefaultMenuItems.summarizeClearAll);
         }
-        if (!isFirstColumn) {
-
-            //menuItems.push(<div className="separator"/>);
-            //addMenuItems(menuItems, availableDefaultMenuItems.remove);
-            //
+        if (!isFirstColumn && !table.props.disableRemoveColumn) {
+            menuItems.push(React.createElement("div", {className: "separator"}));
+            addMenuItems(menuItems, availableDefaultMenuItems.remove);
         }
 
     }
@@ -339,10 +337,11 @@ function buildMenu(options) {
                     className: "fa fa-file-excel-o"}), 
             "Download as XLS"));
 
-            //menuItems.push(<div className="menu-item" onClick={table.handleDownload.bind(null, "pdf")}>
-            //    <i
-            //        className="fa fa-file-pdf-o"></i>
-            //Download as PDF</div>);
+            if (!table.props.disableDownloadPDF) {
+                menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleDownload.bind(null, "pdf")}, 
+                    React.createElement("i", {className: "fa fa-file-pdf-o"}), 
+                "Download as PDF"));
+            }
         }
 
         menuItems.push(React.createElement("div", {className: "menu-item", onClick: table.handleCollapseAll}, "Collapse" + ' ' +
@@ -1744,6 +1743,8 @@ var ReactTable = React.createClass({displayName: "ReactTable",
         hideSubtotaledColumns: React.PropTypes.bool,
         hideSingleSubtotalChild: React.PropTypes.bool,
         hasCheckbox: React.PropTypes.bool, // has a check box in subtotal column
+        disableRemoveColumn: React.PropTypes.bool, // disable 'remove column' in subMenu
+        disableDownloadPDF: React.PropTypes.bool, // disable 'Download PDF' in subMenu
         /**
          * misc props
          */
@@ -3796,7 +3797,7 @@ function buildTreeSkeleton(props, state) {
         rootNode.appendUltimateChild(rawData[i]);
     }
 
-    state.subtotalBy.forEach(function (subtotalColumn) {
+    subtotalByArr.forEach(function (subtotalColumn) {
         //TODO: add partitions
         buildSubtree(rootNode, [subtotalColumn], state, null);
     });
