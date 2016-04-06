@@ -3226,7 +3226,7 @@ function ReactTableHandleClearSubtotal(event) {
      * do not set subtotalBy or sortBy to blank array - simply pop all elements off, so it won't disrupt external reference
      */
     const subtotalBy = this.state.subtotalBy;
-    while (subtotalBy.length > 0)
+    for (var i=subtotalBy.length,r=0;i>r;r++)
         subtotalBy.pop();
     newState.subtotalBy = subtotalBy;
     destorySubtrees(newState);
