@@ -1363,13 +1363,30 @@ function _mostDataPoints(options) {
         tempFrame.remove();
     }
     else{          //other browsers
-        var base64data = $.base64.encode(excelFile);
-        var blob = b64toBlob(base64data, "application/vnd.ms-excel");
-        var blobUrl = URL.createObjectURL(blob);
-        $("<a></a>").attr("download", filename)
-                    .attr("href", blobUrl)
-                    .append("<div id='download-me-now'></div>")
-                    .appendTo("body");
+        var uri = 'data:application/vnd.ms-excel;base64,',
+            template = excelFile,
+            base64 = function(s) {
+                return window.btoa(unescape(encodeURIComponent(s)));
+            },
+            format = function(s, c) {
+                return s.replace(/{(\w+)}/g, function(m, p) {
+                    return c[p];
+                });
+            };
+        // get the table data
+        var table = excel;
+        var ctx = {
+            worksheet: filename,
+            table: table
+        };
+        var blobUrl = uri + base64(format(template, ctx));
+        // var base64data = $.base64.encode(excelFile);
+        // var blob = b64toBlob(base64data, "application/vnd.ms-excel");
+        // var blobUrl = URL.createObjectURL(blob);
+        $("<a></a>").attr("download", filename+'.xls')
+            .attr("href", blobUrl)
+            .append("<div id='download-me-now'></div>")
+            .appendTo("body");
         $("#download-me-now").click().remove();
     }
 }
