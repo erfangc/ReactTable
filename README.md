@@ -1,5 +1,7 @@
 # ReactTable [![Build Status](https://travis-ci.org/erfangc/ReactTable.svg?branch=master)](https://travis-ci.org/erfangc/ReactTable)
 
+[![Join the chat at https://gitter.im/erfangc/ReactTable](https://badges.gitter.im/erfangc/ReactTable.svg)](https://gitter.im/erfangc/ReactTable?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 High Performance HTML Table with Group By functionality Implemented using Facebook [react.js](https://github.com/facebook/react)
 
 *requires [react.js](https://github.com/facebook/react)*
